@@ -7,9 +7,10 @@ class Object {
 protected:
 	int x, y;
 	int width, height;
+	int layer;
 
 public:
-	
+	int getLayer() { return layer; }
 	virtual bool draw() const = 0;
 };
 
@@ -34,6 +35,12 @@ public:
 		}
 		if (key[KEY_INPUT_LEFT]) {
 			x -= 5;
+		}
+		if (key[KEY_INPUT_UP]) {
+			y -= 5;
+		}
+		if (key[KEY_INPUT_DOWN]) {
+			y += 5;
 		}
 	}
 };

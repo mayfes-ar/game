@@ -6,17 +6,17 @@ class Fps {
 	int baseTime;
 	int count;
 	float fps;
-	static const int N = 30;
+	const int standard;
 
 public:
-	Fps() : baseTime(0), count(0), fps(0) {}
+	Fps() : baseTime(0), count(0), fps(0), standard(30) {}
 
 	void update() {
 		if (count == 0) {
 			baseTime = GetNowCount();
-		} else if (count == N) {
+		} else if (count == standard) {
 			int nowTime = GetNowCount();
-			fps = float(N) * 1000.f / (nowTime - baseTime);
+			fps = float(standard) * 1000.f / (nowTime - baseTime);
 			count = 0;
 			baseTime = nowTime;
 		}
@@ -26,5 +26,13 @@ public:
 
 	void draw() {
 		DrawFormatString(0, 0, GetColor(255, 255, 255), _T("%.1f"), fps);
+	}
+
+	void wait() {
+		const int tookTime = GetNowCount() - baseTime;
+		const int waitTime = count * 1000 / standard - tookTime;
+		if (waitTime > 0) {
+			Sleep(waitTime);
+		}
 	}
 };

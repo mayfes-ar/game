@@ -2,17 +2,12 @@
 
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
-	using namespace std;
-
-	cv::Mat image;
-	BASEIMAGE baseImage;
-	int handle = -1;
-
-	Fps fps;
 	
 	cv::VideoCapture cap(0);
 	if (!cap.isOpened()) {
 		return -1;
+	} else {
+		cap.release();
 	}
 	//cap.set(cv::CAP_PROP_FPS, 15);
 	//cap.set(cv::CAP_PROP_FRAME_WIDTH, 1000);
@@ -23,55 +18,39 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	//SetWindowInitPosition(0, 0);
 
 	if (DxLib_Init() == -1) {
-		cout << "dxlib init" << endl;
 		return -1;
 	}
-
 	SetDrawScreen(DX_SCREEN_BACK);
 
-	memset(&baseImage, 0, sizeof(BASEIMAGE));
-	CreateFullColorData(&baseImage.ColorData);
-	baseImage.MipMapCount = 0;
-	
-	int wid, hei;
-	char key[256];
-	Player player(400, 400, 30, 30);
+	Fps fps;
+	while (true) {
 
-	while (ProcessMessage() == 0) {
-		if (!cap.read(image)) {
+		const auto game = menu();
+		if (game == nullptr) {
 			break;
 		}
-		
-		ClearDrawScreen();
-		GetHitKeyStateAll(key);
 
-		baseImage.GraphData = image.data;
-		if (handle == -1) {
-			baseImage.Width = image.cols;
-			baseImage.Height = image.rows;
-			baseImage.Pitch = image.step;
-			handle = CreateGraphFromBaseImage(&baseImage);
-			GetGraphSize(handle, &wid, &hei);
-		} else {
-			ReCreateGraphFromGraphImage(&baseImage, handle);
-		}
-
-		fps.update();
-		player.action(key);
-		if (key[KEY_INPUT_ESCAPE]) {
+		if (!game->onStart()) {
 			break;
 		}
-		
-		DrawExtendGraph(0, 0, 960, 720, handle, false);
-		//DrawGraph(0, 0, handle, false);
-		player.draw();
-		fps.draw();
-		//DrawFormatString(0, 100, GetColor(255, 255, 255), _T( "%d, %d"), wid, hei);
 
-		ScreenFlip();
+		while (game->onUpdate()) {
+			if (ProcessMessage() == -1) {
+				DxLib_End();
+				return -1;
+			}
+
+			fps.update();
+			fps.wait();
+		}
+
+		if (!game->onFinish()) {
+			break;
+		}
+
 	}
 
-	cap.release();
-	DxLib::DxLib_End();
+
+	DxLib_End();
 	return 0;
 }
