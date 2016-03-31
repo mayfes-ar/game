@@ -9,13 +9,15 @@ class Fps {
 	const int standard;
 
 public:
+	bool isShow = false;
+
 	Fps() : baseTime(0), count(0), fps(0), standard(30) {}
 
 	void update() {
 		if (count == 0) {
 			baseTime = GetNowCount();
 		} else if (count == standard) {
-			int nowTime = GetNowCount();
+			const int nowTime = GetNowCount();
 			fps = float(standard) * 1000.f / (nowTime - baseTime);
 			count = 0;
 			baseTime = nowTime;
@@ -25,7 +27,9 @@ public:
 	}
 
 	void draw() {
-		DrawFormatString(0, 0, GetColor(255, 255, 255), _T("%.1f"), fps);
+		if (isShow) {
+			DrawFormatString(0, 0, GetColor(255, 255, 255), _T("%.1f"), fps);
+		}
 	}
 
 	void wait() {

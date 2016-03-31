@@ -1,18 +1,45 @@
 #pragma once
 
 #include "DxLib.h"
+#include <string>
+#include <map>
+#include <memory>
+#include <list>
 
 
+// abstract class
 class Object {
 protected:
 	int x, y;
 	int width, height;
 	int layer;
 
+	static std::map<std::string, int> imgHandles;
+
+	virtual ~Object(){}
+
 public:
-	int getLayer() { return layer; }
+	int getLayer() const { return layer; }
 	virtual bool draw() const = 0;
+
+	static bool load();
 };
+
+
+class Background : public Object {
+	int& handle;
+
+public:
+	Background(int& handle_): handle(handle_) {
+		layer = 0;
+	}
+
+	bool draw() const {
+		DrawExtendGraph(160, 0, 1120, 720, handle, FALSE);
+		return true;
+	}
+};
+
 
 class Player : public Object {
 
@@ -22,10 +49,11 @@ public:
 		y = y_;
 		width = width_;
 		height = height_;
+		layer = 100;
 	}
 
 	bool draw() const {
-		DrawBox(x, y, x + width, y + height, GetColor(255, 0, 0), true);
+		DrawGraph(x, y, imgHandles["mario"], true);
 		return true;
 	}
 

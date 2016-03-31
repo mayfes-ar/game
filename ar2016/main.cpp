@@ -22,7 +22,11 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	}
 	SetDrawScreen(DX_SCREEN_BACK);
 
-	Fps fps;
+	if (!Object::load()) {
+		DxLib_End();
+		return -1;
+	}
+
 	while (true) {
 
 		const auto game = menu();
@@ -39,9 +43,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 				DxLib_End();
 				return -1;
 			}
-
-			fps.update();
-			fps.wait();
 		}
 
 		if (!game->onFinish()) {

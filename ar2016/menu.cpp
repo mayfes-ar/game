@@ -3,6 +3,7 @@
 std::shared_ptr<Game> menu() {
 	char key[256];
 	Fps fps;
+	fps.isShow = true;
 
 	while (true) {
 		if (ProcessMessage() == -1) {
@@ -21,7 +22,7 @@ std::shared_ptr<Game> menu() {
 		fps.wait();
 
 		SetFontSize(64);
-		DrawString(400, 200, _T("MENU"), GetColor(255, 255, 255));
+		DrawString(400, 200, "MENU", GetColor(255, 255, 255));
 		fps.draw();
 		ScreenFlip();
 
