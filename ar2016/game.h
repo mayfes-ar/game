@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "object.h"
 #include "fps.h"
@@ -12,6 +12,9 @@
 void capture(std::mutex& mutex, int& handle, bool& isFinish);
 
 // abstract class
+// 個々のゲームはこれを継承して作る
+// 子クラスの onStart, onUpdate は親の同名のものを return すること
+// drawList に Object の std::shared_ptr を入れれば描画してくれる
 class Game {
 protected:
 	std::mutex drawMutex;
@@ -20,6 +23,7 @@ protected:
 	char key[256];
 	Fps fps;
 
+	// trueにすればonFinishに移行
 	bool isFinish = false;
 
 	virtual ~Game() {
@@ -32,6 +36,7 @@ public:
 		return true;
 	}
 
+	// 子クラスのonUpdate内で return Game::onUpdate();
 	virtual bool onUpdate() {
 		fps.update();
 		drawList.sort([](const std::shared_ptr<Object>& a, const std::shared_ptr<Object>& b) -> bool { return a->getLayer() < b->getLayer(); });

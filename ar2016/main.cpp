@@ -1,8 +1,9 @@
 #include "main.h"
 
-
+// ここからスタート
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
 	
+	// カメラの起動確認
 	cv::VideoCapture cap(0);
 	if (!cap.isOpened()) {
 		return -1;
@@ -13,9 +14,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	//cap.set(cv::CAP_PROP_FRAME_WIDTH, 1000);
 	//cap.set(cv::CAP_PROP_FRAME_HEIGHT, 320);
 
-	//ChangeWindowMode(true);
+	// 画面サイズは 1280x720
 	SetGraphMode(1280, 720, 32);
-	//SetWindowInitPosition(0, 0);
 
 	if (DxLib_Init() == -1) {
 		return -1;
@@ -29,6 +29,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 	while (true) {
 
+		// メニューからゲームを選択
 		const auto game = startMenu();
 		if (game == nullptr) {
 			break;
@@ -38,6 +39,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 			break;
 		}
 
+		// ゲームのループ部分
 		while (game->onUpdate()) {
 			if (ProcessMessage() == -1) {
 				DxLib_End();

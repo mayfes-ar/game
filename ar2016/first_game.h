@@ -12,7 +12,7 @@ class FirstGame : public Game {
 			layer = 0;
 		}
 
-		bool draw() const {
+		bool draw() {
 			DrawExtendGraph(160, 0, 1120, 720, handle, FALSE);
 			return true;
 		}
@@ -26,20 +26,17 @@ class FirstGame : public Game {
 			layer = 20;
 		}
 
-		bool draw() const {
-			DrawBox(left(), top(), right(), bottom(), GetColor(27, 195, 69), true);
+		bool draw() {
+			DrawBox(left(), top(), right(), bottom(), GetColor(27, 195, 69), false);
 			return true;
 		}
 
-		bool isHit() {
-
-		}
 	};
 
 	class Player : public Object {
 		double prevX;
 		double prevY;
-		bool isJumping = false;
+		bool isJumping = true;
 
 	public:
 		Player(int x_, int y_, int width_, int height_) {
@@ -50,48 +47,70 @@ class FirstGame : public Game {
 			layer = 100;
 		}
 
-		bool draw() const {
-			DrawExtendGraph(x, y, x+ width, y + height, imgHandles["player"], true);
+		bool draw() {
+			DrawExtendGraph(left(), top(), right(), bottom(), imgHandles["player"], true);
 			return true;
 		}
 
-		void update(const char key[]) {
-			double acX = -0.5 * (1 - (x - prevX <= 0) - (x - prevX < 0));
+		void update(const char key[], const std::vector<std::shared_ptr<Block>> blockList) {
+			const double vx = x - prevX;
+			const double vy = y - prevY;
+
+			double acX = -0.5 * (1 - (vx <= 0) - (vx < 0));
 			double acY = 4;
 
-
-			if (!isJumping && key[KEY_INPUT_RIGHT]) {
-				acX = 1.5;
-			}
-			if (!isJumping && key[KEY_INPUT_LEFT]) {
-				acX = -1.5;
-			}
-
-			
 			if (key[KEY_INPUT_UP] && !isJumping) {
-				isJumping = true;
-				acY = -40;
+				acY = -50;
+			}
+			isJumping = true;
+
+			if (key[KEY_INPUT_RIGHT]) {
+				acX = 1.5 * (vx < 15);
+			}
+			if (key[KEY_INPUT_LEFT]) {
+				acX = -1.5 * (vx > -15);
 			}
 
 			const double tempX = x;
-			x += (x - prevX) + acX;
+			x += vx + acX;
 			prevX = tempX;
-
 			const double tempY = y;
-			y += (y - prevY) + acY;
+			y += vy + acY;
 			prevY = tempY;
 
-			if (y >= 600) {
-				isJumping = false;
-				y = 600;
+			for (auto block : blockList) {
+				if (left() < block->right() && top() < block->bottom() &&
+					right() > block->left() && bottom() > block->top()) {
+
+					if (prevY < block->bottom() && prevY + height > block->top()) {
+						if (prevX >= block->right()) {
+							x = prevX = block->right();
+						} else if (prevX + width <= block->left()) {
+							x = prevX = block->left() - width;
+						} else {
+							// TODO
+							//Sleep(2000);
+						}
+					} else {
+						if (prevY >= block->bottom()) {
+							y = prevY = block->bottom();
+						} else if (prevY + height <= block->top()) {
+							y = prevY = block->top() - height;
+							isJumping = false;
+						} else {
+							// TODO
+							//Sleep(2000);
+						}
+					}
+				}
 			}
-			
 			
 		}
 	};
 
 	std::thread thread;
 	std::shared_ptr<Player> player;
+	std::vector<std::shared_ptr<Block>> blockList;
 
 	int timer = 500;
 	int handle = -1;
@@ -99,17 +118,25 @@ class FirstGame : public Game {
 public:
 	FirstGame() {
 		thread = std::thread::thread(capture, std::ref(drawMutex), std::ref(handle), std::ref(isFinish));
-		player = std::make_shared<Player>(200, 200, 150, 150);
+		player = std::make_shared<Player>(200, 0, 100, 150);
 	}
-
+	
 	bool onStart() {
 		using namespace std;
 		fps.isShow = true;
-
+		
+		auto makeBlock = [this](int x, int y, int width, int height) {
+			auto block = make_shared<Block>(x, y, width, height);
+			blockList.push_back(block);
+			drawList.push_back(block);
+		};
+		
 		drawList.push_back(player);
 		drawList.push_back(make_shared<Background>(handle));
+		makeBlock(0, 600, 1280, 300);
+		makeBlock(-100, 0, 150, 720);
+		makeBlock(300, 300, 200, 50);
 
-		Sleep(1000);
 		return Game::onStart();
 	}
 
@@ -123,7 +150,7 @@ public:
 			isFinish = true;
 		}
 
-		player->update(key);
+		player->update(key, blockList);
 
 		return Game::onUpdate();
 	}
