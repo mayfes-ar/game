@@ -136,7 +136,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>c:\DxLib_VC\プロジェクトに追加すべきファイル_VC用;C:\lib\opencv-3.1.0\build\install\x86\vc14\lib</AdditionalLibraryDirectories>
-      <AdditionalDependencies>opencv_core310.lib;opencv_highgui310.lib;opencv_imgproc310.lib;opencv_objdetect310.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opencv_core310.lib;opencv_highgui310.lib;opencv_imgproc310.lib;opencv_objdetect310.lib;opencv_video310.lib;opencv_videoio310.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -164,6 +164,7 @@
     <ClCompile Include="object.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="first_game.h" />
     <ClInclude Include="fps.h" />
     <ClInclude Include="game.h" />
     <ClInclude Include="main.h" />

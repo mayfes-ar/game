@@ -29,7 +29,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 	while (true) {
 
-		const auto game = menu();
+		const auto game = startMenu();
 		if (game == nullptr) {
 			break;
 		}

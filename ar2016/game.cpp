@@ -33,4 +33,5 @@ void capture(std::mutex& mutex, int& handle, bool& isFinish) {
 			}
 	}
 
+	cap.release();
 }

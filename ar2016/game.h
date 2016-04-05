@@ -61,43 +61,4 @@ public:
 };
 
 	
-class FirstGame : public Game {
-	std::thread thread;
-	std::shared_ptr<Player> player;
 
-	int timer = 500;
-	int handle = -1;
-	
-public:
-	FirstGame() {
-		thread = std::thread::thread(capture, std::ref(drawMutex),std::ref(handle), std::ref(isFinish));
-		player = std::make_shared<Player>(200, 200, 200, 200);
-	}
-
-	bool onStart() {
-		using namespace std;
-		fps.isShow = true;
-
-		drawList.push_back(player);
-		drawList.push_back(make_shared<Background>(handle));
-
-		Sleep(400);
-		return Game::onStart();
-	}
-
-	bool onUpdate() {
-		timer -= 1;
-		if (timer <= 0) {
-			isFinish = true;
-		}
-
-		player->action(key);
-
-		return Game::onUpdate();
-	}
-	
-	bool onFinish() {
-		thread.join();
-		return true;
-	}
-};
