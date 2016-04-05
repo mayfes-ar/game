@@ -51,7 +51,7 @@ class FirstGame : public Game {
 		}
 
 		bool draw() const {
-			DrawExtendGraph(x, y, x+ width, y + height, imgHandles["mario"], true);
+			DrawExtendGraph(x, y, x+ width, y + height, imgHandles["player"], true);
 			return true;
 		}
 

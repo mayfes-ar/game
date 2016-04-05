@@ -6,20 +6,20 @@ map<string, int> Object::imgHandles;
 
 bool Object::load() {
 
-	auto loadImage = [](string name) -> bool {
+	auto loadImage = [](string key, string name) -> bool {
 		const string path = "img/" + name + ".png";
 		const int handle = LoadGraph(path.c_str());
 		if (handle == -1) {
 			return false;
 		} else {
-			Object::imgHandles[name] = handle;
+			Object::imgHandles[key] = handle;
 			return true;
 		}
 	};
 
 	bool isSuccess = true;
 
-	isSuccess &= loadImage("mario");
+	isSuccess &= loadImage("player", "mario");
 
 
 	return isSuccess;
