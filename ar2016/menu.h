@@ -12,11 +12,11 @@ class Menu : Game {
 
 	class BackEffect : public Object {
 		int counter = 0;
-		const int countMax = effectHandles["effect1"].size();
+		const int countMax = 2 * effectHandles["effect1"].size();
 
 	public:
 		bool draw() {
-			DrawExtendGraph(0, 0, 1280, 720, effectHandles["effect1"][counter], true);
+			DrawExtendGraph(0, 0, 1280, 720, effectHandles["effect1"][counter/2], true);
 			counter++;
 			if (counter == countMax) { counter = 0; }
 			return true;
@@ -52,10 +52,10 @@ public:
 
 		if (key[KEY_INPUT_RETURN]) {
 			gameType = std::make_shared<FirstGame>();
-			isFinish = true;
+			share.isFinish = true;
 		}
 		if (key[KEY_INPUT_ESCAPE]) {
-			isFinish = true;
+			share.isFinish = true;
 		}
 
 		return Game::onUpdate();

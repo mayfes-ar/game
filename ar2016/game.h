@@ -1,15 +1,8 @@
 ﻿#pragma once
 
-#include "object.h"
+#include "image_process.h"
 #include "fps.h"
-#include <opencv2/core/core.hpp>
-#include <opencv2/highgui/highgui.hpp>
-#include <opencv2/opencv.hpp>
-#include <mutex>
-#include <thread>
 
-
-void capture(std::mutex& mutex, int& handle, bool& isFinish);
 
 // abstract class
 // 個々のゲームはこれを継承して作る
@@ -17,14 +10,12 @@ void capture(std::mutex& mutex, int& handle, bool& isFinish);
 // drawList に Object の std::shared_ptr を入れれば描画してくれる
 class Game {
 protected:
-	std::mutex drawMutex;
+	ShareData share;
+
 	std::list<std::shared_ptr<Object>> drawList;
 
 	char key[256];
 	Fps fps;
-
-	// trueにすればonFinishに移行
-	bool isFinish = false;
 
 	virtual ~Game() {
 		drawList.clear();
@@ -41,7 +32,7 @@ public:
 		fps.update();
 		drawList.sort([](const std::shared_ptr<Object>& a, const std::shared_ptr<Object>& b) -> bool { return a->getLayer() < b->getLayer(); });
 
-		drawMutex.lock();
+		share.drawMutex.lock();
 		ClearDrawScreen();
 
 		for ( auto& itr = drawList.begin(); itr != drawList.end();) {
@@ -54,11 +45,11 @@ public:
 
 		fps.draw();
 		ScreenFlip();
-		drawMutex.unlock();
+		share.drawMutex.unlock();
 
 		fps.wait();
 		GetHitKeyStateAll(key);
-		return !isFinish;
+		return !share.isFinish;
 	}
 
 	virtual bool onFinish() = 0;

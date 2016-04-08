@@ -10,12 +10,18 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	} else {
 		cap.release();
 	}
+
+
 	//cap.set(cv::CAP_PROP_FPS, 15);
 	//cap.set(cv::CAP_PROP_FRAME_WIDTH, 1000);
 	//cap.set(cv::CAP_PROP_FRAME_HEIGHT, 320);
 
 	// 画面サイズは 1280x720
 	SetGraphMode(1280, 720, 32);
+#ifdef _DEBUG
+	ChangeWindowMode(true);
+	SetMainWindowText("DEBUG MODE");
+#endif 
 
 	if (DxLib_Init() == -1) {
 		return -1;
@@ -30,7 +36,12 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	while (true) {
 
 		// メニューからゲームを選択
+#ifdef _DEBUG
+		const auto game = std::make_shared<FirstGame>();
+#else
 		const auto game = startMenu();
+#endif // DEBUG
+
 		if (game == nullptr) {
 			break;
 		}
@@ -47,7 +58,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 			}
 		}
 
-		if (!game->onFinish()) {
+		if (!game->onFinish() || true) {
 			break;
 		}
 

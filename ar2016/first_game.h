@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "game.h"
 
@@ -53,10 +53,10 @@ class FirstGame : public Game {
 		}
 
 		void update(const char key[], const std::vector<std::shared_ptr<Block>> blockList) {
-			const double vx = x - prevX;
-			const double vy = y - prevY;
+			const double diffX = x - prevX;
+			const double diffY = y - prevY;
 
-			double acX = -0.5 * (1 - (vx <= 0) - (vx < 0));
+			double acX = -0.5 * (1 - (diffX <= 0) - (diffX < 0));
 			double acY = 4;
 
 			if (key[KEY_INPUT_UP] && !isJumping) {
@@ -65,17 +65,18 @@ class FirstGame : public Game {
 			isJumping = true;
 
 			if (key[KEY_INPUT_RIGHT]) {
-				acX = 1.5 * (vx < 15);
+				acX = 1.5 * (diffX < 15);
 			}
 			if (key[KEY_INPUT_LEFT]) {
-				acX = -1.5 * (vx > -15);
+				acX = -1.5 * (diffX > -15);
 			}
 
+			// verlet法
 			const double tempX = x;
-			x += vx + acX;
+			x += diffX + acX;
 			prevX = tempX;
 			const double tempY = y;
-			y += vy + acY;
+			y += diffY + acY;
 			prevY = tempY;
 
 			for (auto block : blockList) {
@@ -113,11 +114,10 @@ class FirstGame : public Game {
 	std::vector<std::shared_ptr<Block>> blockList;
 
 	int timer = 500;
-	int handle = -1;
 
 public:
 	FirstGame() {
-		thread = std::thread::thread(capture, std::ref(drawMutex), std::ref(handle), std::ref(isFinish));
+		thread = std::thread::thread(capture, std::ref(share));
 		player = std::make_shared<Player>(200, 0, 100, 150);
 	}
 	
@@ -132,7 +132,7 @@ public:
 		};
 		
 		drawList.push_back(player);
-		drawList.push_back(make_shared<Background>(handle));
+		drawList.push_back(make_shared<Background>(share.handle));
 		makeBlock(0, 600, 1280, 300);
 		makeBlock(-100, 0, 150, 720);
 		makeBlock(300, 300, 200, 50);
@@ -143,11 +143,11 @@ public:
 	bool onUpdate() {
 		timer -= 1;
 		if (timer <= 0) {
-			isFinish = true;
+			share.isFinish = true;
 		}
 
 		if (key[KEY_INPUT_ESCAPE]) {
-			isFinish = true;
+			share.isFinish = true;
 		}
 
 		player->update(key, blockList);
