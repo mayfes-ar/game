@@ -43,6 +43,7 @@ bool Object::load() {
 	bool isSuccess = true;
 
 	isSuccess &= loadImage("player", "mario");
+	isSuccess &= loadImage("block", "block");
 
 	isSuccess &= loadEffect("effect1", "warp", 1, 6, 640, 2880);
 

@@ -164,6 +164,7 @@
     <ClCompile Include="object.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="block_object.h" />
     <ClInclude Include="first_game.h" />
     <ClInclude Include="fps.h" />
     <ClInclude Include="game.h" />

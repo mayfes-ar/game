@@ -10,7 +10,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	} else {
 		cap.release();
 	}
-
+	
 
 	//cap.set(cv::CAP_PROP_FPS, 15);
 	//cap.set(cv::CAP_PROP_FRAME_WIDTH, 1000);

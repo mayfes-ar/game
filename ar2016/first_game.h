@@ -18,21 +18,6 @@ class FirstGame : public Game {
 		}
 	};
 
-	class Block : public Object {
-
-	public:
-		Block(int x_, int y_, int width_, int height_) {
-			x = x_, y = y_, width = width_, height = height_;
-			layer = 20;
-		}
-
-		bool draw() {
-			DrawBox(left(), top(), right(), bottom(), GetColor(27, 195, 69), false);
-			return true;
-		}
-
-	};
-
 	class Player : public Object {
 		double prevX;
 		double prevY;
@@ -40,10 +25,10 @@ class FirstGame : public Game {
 
 	public:
 		Player(int x_, int y_, int width_, int height_) {
-			x = prevX = x_;
-			y = prevY = y_; 
-			width = width_;
-			height = height_;
+			rect.x = prevX = x_;
+			rect.y = prevY = y_; 
+			rect.width = width_;
+			rect.height = height_;
 			layer = 100;
 		}
 
@@ -52,7 +37,12 @@ class FirstGame : public Game {
 			return true;
 		}
 
-		void update(const char key[], const std::vector<std::shared_ptr<Block>> blockList) {
+		void update(const char key[], const std::vector<std::shared_ptr<BlockObject>> blockList) {
+			double& x = rect.x;
+			double& y = rect.y;
+			const int& width = rect.width;
+			const int& height = rect.height;
+
 			const double diffX = x - prevX;
 			const double diffY = y - prevY;
 
@@ -83,19 +73,19 @@ class FirstGame : public Game {
 				if (left() < block->right() && top() < block->bottom() &&
 					right() > block->left() && bottom() > block->top()) {
 
-					if (prevY < block->bottom() && prevY + height > block->top()) {
-						if (prevX >= block->right()) {
+					if (prevY < block->bottomHit() && prevY + height > block->topHit()) {
+						if (prevX >= block->rightHit()) {
 							x = prevX = block->right();
-						} else if (prevX + width <= block->left()) {
+						} else if (prevX + width <= block->leftHit()) {
 							x = prevX = block->left() - width;
 						} else {
 							// TODO
 							//Sleep(2000);
 						}
 					} else {
-						if (prevY >= block->bottom()) {
+						if (prevY >= block->bottomHit()) {
 							y = prevY = block->bottom();
-						} else if (prevY + height <= block->top()) {
+						} else if (prevY + height <= block->topHit()) {
 							y = prevY = block->top() - height;
 							isJumping = false;
 						} else {
@@ -111,9 +101,9 @@ class FirstGame : public Game {
 
 	std::thread thread;
 	std::shared_ptr<Player> player;
-	std::vector<std::shared_ptr<Block>> blockList;
+	std::vector<std::shared_ptr<BlockObject>> blockList;
 
-	int timer = 500;
+	int timer = 3500;
 
 public:
 	FirstGame() {
@@ -126,7 +116,7 @@ public:
 		fps.isShow = true;
 		
 		auto makeBlock = [this](int x, int y, int width, int height) {
-			auto block = make_shared<Block>(x, y, width, height);
+			auto block = make_shared<BlockObject>(x, y, width, height, true);
 			blockList.push_back(block);
 			drawList.push_back(block);
 		};
@@ -150,7 +140,18 @@ public:
 			share.isFinish = true;
 		}
 
-		player->update(key, blockList);
+		std::vector<std::shared_ptr<BlockObject>> allBlockList = blockList;
+		share.rectMutex.lock();
+		for (auto rect : share.rects) {
+			auto block = std::make_shared<BlockObject>(rect, false);
+			allBlockList.push_back(block);
+			drawList.push_back(block);
+		}
+
+		share.rectMutex.unlock();
+
+
+		player->update(key, allBlockList);
 
 		return Game::onUpdate();
 	}

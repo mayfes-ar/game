@@ -6,9 +6,11 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/opencv.hpp>
+
 #include <mutex>
 #include <thread>
 
+// スレッド間で共有するデータ
 class ShareData {
 public:
 	// trueにすればonFinishに移行
@@ -16,7 +18,9 @@ public:
 
 	std::mutex drawMutex;
 	int handle = -1;
+
+	std::mutex rectMutex;
+	std::vector<Rectan> rects;
 };
 
 void capture(ShareData& share);
-void detect(cv::Mat& src);
