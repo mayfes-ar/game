@@ -10,6 +10,7 @@
 // drawList に Object の std::shared_ptr を入れれば描画してくれる
 class Game {
 protected:
+	// 自状態の param を全部管理している。定義はimage_process.h
 	ShareData share;
 
 	std::list<std::shared_ptr<Object>> drawList;
@@ -23,14 +24,14 @@ protected:
 
 public:
 	virtual bool onStart() {
-		GetHitKeyStateAll(key);
+		GetHitKeyStateAll(key); //（不必要かもしれないが）キー入力を初期化している。
 		return true;
 	}
 
 	// 子クラスのonUpdate内で return Game::onUpdate();
 	virtual bool onUpdate() {
-		fps.update();
-		drawList.sort([](const std::shared_ptr<Object>& a, const std::shared_ptr<Object>& b) -> bool { return a->getLayer() < b->getLayer(); });
+		fps.update(); //フレームレート計測
+		drawList.sort([](const std::shared_ptr<Object>& a, const std::shared_ptr<Object>& b) -> bool { return a->getLayer() < b->getLayer(); }); // Layerが下のものから描画
 
 		share.drawMutex.lock();
 		ClearDrawScreen();
@@ -48,13 +49,10 @@ public:
 		share.drawMutex.unlock();
 
 		fps.wait();
-		GetHitKeyStateAll(key);
+		GetHitKeyStateAll(key); // キー入力状態を取得
 		return !share.isFinish;
 	}
 
-	virtual bool onFinish() = 0;
+	virtual bool onFinish() = 0; // 純粋仮想関数を調べよう
 
 };
-
-	
-
