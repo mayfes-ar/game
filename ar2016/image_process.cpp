@@ -20,6 +20,7 @@ void capture(ShareData & share) {
 			break;
 		}
 
+		flip(capImage, capImage, 1);
 		detect(capImage, share);
 
 		baseImage.GraphData = capImage.data;

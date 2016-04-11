@@ -36,11 +36,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	while (true) {
 
 		// メニューからゲームを選択
-#ifdef _DEBUG
-		const auto game = std::make_shared<FirstGame>();
-#else
 		const auto game = startMenu(); //game には選択されたゲームが入る（例: std::shared_ptr<FirstGame>()）
-#endif // DEBUG
 
 		if (game == nullptr) {
 			break;

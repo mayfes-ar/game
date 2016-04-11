@@ -10,7 +10,33 @@
 // drawList に Object の std::shared_ptr を入れれば描画してくれる
 class Game {
 protected:
-	// 自状態の param を全部管理している。定義はimage_process.h
+	class Mode {
+		int currentMode = -1;
+		bool isGoNext = true;
+		std::vector<std::function<void()>> funcs;
+		std::vector<int> timers;
+	public:
+		void setMode(std::function<void()> func, int timer) {
+			funcs.push_back(func);
+			timers.push_back(timer);
+		}
+
+		void goNext() {
+			isGoNext = true;
+		}
+
+		bool update() {
+			if (isGoNext) {
+				currentMode++;
+				if (currentMode + 1 >= funcs.size()) {
+
+				}
+			}
+		}
+
+	} mode;
+
+	// 自状態の param 管理もしている。定義はimage_process.h
 	ShareData share;
 
 	std::list<std::shared_ptr<Object>> drawList;
