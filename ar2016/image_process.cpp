@@ -2,8 +2,7 @@
 
 using namespace cv;
 
-void detect(cv::Mat& src, ShareData& share);
-double angle(Point pt1, Point pt2, Point pt0);
+void detectFromMarkers(cv::Mat& src, ShareData& share);
 
 void capture(ShareData & share) {
 	cv::Mat capImage;
@@ -20,7 +19,7 @@ void capture(ShareData & share) {
 			break;
 		}
 
-		detect(capImage, share);
+		detectFromMarkers(capImage, share);
 
 		baseImage.GraphData = capImage.data;
 		if (share.handle == -1) {
@@ -31,7 +30,8 @@ void capture(ShareData & share) {
 			share.drawMutex.lock();
 			share.handle = CreateGraphFromBaseImage(&baseImage);
 			share.drawMutex.unlock();
-		} else {
+		}
+		else {
 			share.drawMutex.lock();
 			ReCreateGraphFromGraphImage(&baseImage, share.handle);
 			share.drawMutex.unlock();
@@ -41,92 +41,64 @@ void capture(ShareData & share) {
 	cap.release();
 }
 
-void detect(cv::Mat& src, ShareData& share) {
+void detectFromMarkers(cv::Mat& src, ShareData& share) {
+	using namespace cv;
 	using namespace std;
 
-	vector<Rectan> rect;
-	Mat gray, edges;
+	double rate = 1.5;
 
-	cvtColor(src, gray, COLOR_BGR2GRAY);
-	blur(gray, gray, Size(3, 3));
+	static aruco::Dictionary dictionary =
+		aruco::getPredefinedDictionary(aruco::PREDEFINED_DICTIONARY_NAME(0));
+	static aruco::DetectorParameters detectorParams;
+	detectorParams.doCornerRefinement = true; // do corner refinement in markers
 
-	const int thresh = 100;
-	Canny(gray, edges, thresh, 2 * thresh);
-	dilate(edges, edges, Mat());
+	static vector<int> ids;
+	// vector<vector<Point2f>> corners;
+	//auto* corners = new vector<vector<Point2f>>;
+	static vector<vector<Point2f>> corners;
+	//auto *rejected = new vector<vector<Point2f>>;
 
-	auto *contours = new vector<vector<Point>>;
-	Mat hierarchy;
-	findContours(edges, *contours, hierarchy, RETR_EXTERNAL, CHAIN_APPROX_SIMPLE);
+	// detect markers and estimate pose
+	aruco::detectMarkers(src, dictionary, corners, ids, detectorParams/*, *rejected*/);
+	 
+	// make Rectans
+	vector<Rectan> rectans;
 
-	static vector<Point> approx;
-	auto *squares = new vector<vector<Point>>;
-
-	for (auto contour : *contours) {
-		approxPolyDP(Mat(contour), approx, arcLength(Mat(contour), true) * 0.02, true);
-
-		// 4頂点　面積一定以上　凸状
-		const int areaThresh = 500;
-		if ((approx).size() == 4
-			&& fabs(contourArea(Mat(approx))) > areaThresh
-			&& isContourConvex(Mat(approx))) {
+	// draw results
+	if (ids.size() > 0) {
+		for (int i = 0; i < ids.size(); i++) {
+			Rectan rectan;
 			
-			double maxCos = 0;
-			for (int i = 2; i < 5; i++) {
-				const double cos = fabs(angle((approx)[i % 4], (approx)[i - 2], (approx)[i - 1]));
-				maxCos = MAX(maxCos, cos);
+			rectan.id = ids[i];
+			Point2f arrow = (corners)[i][1] - (corners)[i][0];
+			int size = (int)sqrt(arrow.x*arrow.x + arrow.y*arrow.y);
+			rectan.width = size;
+			rectan.height = size;
+
+			Point2f center(0,0);
+			for (auto point : (corners)[i]) {
+				center += point;
 			}
-			
-			if (maxCos < 0.3) {
-				(*squares).push_back(approx);
-			}
+			center /= 4.0;
+			rectan.x = center.x - size*0.5;
+			rectan.y = center.y - size*0.5;
+
+			float theta = atan2f(arrow.y, arrow.x) * 180.0 / M_PI;
+			if (-5 < theta && theta < 5) rectan.direction = 0;
+			else if (85 < theta && theta < 95) rectan.direction = 1;
+			else if (175 < theta || theta < -175) rectan.direction = 2;
+			else if (-95 < theta && theta < -85) rectan.direction = 3;
+
+			rectan.scale(rate);
+			rectan.translate(160, 0);
+
+			if(rectan.direction != -1) rectans.push_back(rectan);
 		}
 	}
-
-	// squares >>> rects
-	vector<Rectan> rects;
-	const double allowedSlope = 0.1;
-	const double rate = 1.5;
-	for (auto square : *squares) {
-		/*const Point* p = &(square)[0];
-		const int n = (int)(square).size();
-		polylines(src, &p, &n, 1, true, Scalar(240, 117, 28), 3, 4);*/
-		
-		Rectan rect;
-
-		const double xDiff = fabs(square[0].x - square[1].x);
-		const double yDiff = fabs(square[0].y - square[1].y);
-
-		if (xDiff > yDiff) {
-			if (yDiff / xDiff > allowedSlope) { continue; }
-			rect.width = xDiff;
-			rect.height = fabs(square[2].y - square[1].y);
-			rect.x = MIN(square[0].x, square[1].x);
-			rect.y = MIN(square[1].y, square[2].y);
-		} else {
-			if (xDiff / yDiff > allowedSlope) { continue; }
-			rect.height = yDiff;
-			rect.width = fabs(square[2].x - square[1].x);
-			rect.x = MIN(square[2].x, square[1].x);
-			rect.y = MIN(square[0].y, square[1].y);
-		}
-		rect.scale(rate);
-		rect.translate(160, 0);
-		rects.push_back(rect);
-	}
-
 	share.rectMutex.lock();
-	share.rects = rects;
+	share.rects = rectans;
 	share.rectMutex.unlock();
 
-	delete contours;
-	delete squares;
-}
-
-double angle(Point pt1, Point pt2, Point pt0)
-{
-	const double dx1 = pt1.x - pt0.x;
-	const double dy1 = pt1.y - pt0.y;
-	const double dx2 = pt2.x - pt0.x;
-	const double dy2 = pt2.y - pt0.y;
-	return (dx1*dx2 + dy1*dy2) / sqrt((dx1*dx1 + dy1*dy1)*(dx2*dx2 + dy2*dy2) + 1e-10);
+	//delete corners;
+	//delete rejected;
 }
