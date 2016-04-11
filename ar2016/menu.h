@@ -5,6 +5,7 @@
 
 
 std::shared_ptr<Game> startMenu();
+//std::shared_ptr<GameList> setGames();
 
 // メニュー画面
 // gameType = std::make_shared<起動するGameの子クラス>();
@@ -30,11 +31,12 @@ class Menu : Game {
 		}
 
 		bool draw() {
-			DrawString(300, 300, "TITLE", GetColor(255, 255, 255));
+			DrawString(300, 300, "タイトル", GetColor(255, 255, 255));
 			return true;
 		}
 	};
 
+	//std::shared_ptr<GameList>& gamesList = setGames();
 	std::shared_ptr<Game>&  gameType;
 
 public:
@@ -65,4 +67,17 @@ public:
 		return true;
 	}
 
+};
+
+class GameDescription {
+	std::string title;
+	std::string description;
+	std::string imageHandleKey;
+
+	std::shared_ptr<Game> game_ptr;
+};
+
+class GameList {
+	int numOfGames;
+	std::vector<GameDescription> gameList;
 };

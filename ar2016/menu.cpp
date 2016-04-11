@@ -18,3 +18,12 @@ std::shared_ptr<Game> startMenu() {
 	return gameType;
 	
 }
+/*
+std::shared_ptr<GameList> setGames() {
+	
+	std::shared_ptr<GameList> gameList;
+
+	
+
+	return gameList;
+}*/
