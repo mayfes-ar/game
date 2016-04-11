@@ -29,9 +29,11 @@ protected:
 			if (isGoNext) {
 				currentMode++;
 				if (currentMode + 1 >= funcs.size()) {
-
+					return false;
 				}
 			}
+
+			return true;
 		}
 
 	} mode;
