@@ -5,12 +5,12 @@
 
 
 std::shared_ptr<Game> startMenu();
-//std::shared_ptr<GameList> setGames();
 
 // メニュー画面
 // gameType = std::make_shared<起動するGameの子クラス>();
 class Menu : Game {
 
+	// 背景処理
 	class BackEffect : public Object {
 		int counter = 0;
 		const int countMax = 2 * effectHandles["effect1"].size();
@@ -24,6 +24,7 @@ class Menu : Game {
 		}
 	};
 
+	// タイトルなど静的オブジェクトの処理
 	class Title : public Object {
 	public:
 		Title() {
@@ -31,16 +32,46 @@ class Menu : Game {
 		}
 
 		bool draw() {
-			DrawString(300, 300, "タイトル", GetColor(20, 200, 250));
+			DrawString(300, 300, "TITLE", GetColor(250, 250, 250));
 			return true;
 		}
 	};
 
-	//std::shared_ptr<GameList>& gamesList = setGames();
+	// ゲーム選択の仕組み
+	class GameDescription {
+	public :
+		std::string title;
+		std::string description;
+		std::string imageHandleKey;
+		std::function<std::shared_ptr<Game>()> gameFunc;
+
+		GameDescription(std::string title_,
+						std::string description_,
+						std::string imageHandleKey_,
+						std::function<std::shared_ptr<Game>()> gameFunc_) :
+			title(title_),
+			description(description_),
+			imageHandleKey(imageHandleKey_),
+			gameFunc(gameFunc_){}
+	};
+	class GameList {
+	public :
+		int numOfGames;
+		std::vector<GameDescription> gameList;
+		GameList();
+	};
+
+	std::shared_ptr<GameList> gameList;
+	int selectedGameIndex;
+
 	std::shared_ptr<Game>&  gameType;
 
+	// Menu クラスのループ処理
 public:
-	Menu(std::shared_ptr<Game>& gameType_) : gameType(gameType_) {}
+	Menu(std::shared_ptr<Game>& gameType_) : gameType(gameType_) {
+		gameList = std::make_shared<GameList>();
+		selectedGameIndex = 0;
+	}
 
 	bool onStart() {
 		using namespace std;
@@ -53,7 +84,8 @@ public:
 	bool onUpdate() {
 
 		if (key[KEY_INPUT_RETURN]) {
-			gameType = std::make_shared<FirstGame>();
+			// gameType = std::make_shared<FirstGame>();
+			gameType = gameList->gameList[selectedGameIndex].gameFunc();
 			share.isFinish = true;
 		}
 		if (key[KEY_INPUT_ESCAPE]) {
@@ -67,17 +99,4 @@ public:
 		return true;
 	}
 
-};
-
-class GameDescription {
-	std::string title;
-	std::string description;
-	std::string imageHandleKey;
-
-	std::shared_ptr<Game> game_ptr;
-};
-
-class GameList {
-	int numOfGames;
-	std::vector<GameDescription> gameList;
 };
