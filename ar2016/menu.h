@@ -31,7 +31,7 @@ class Menu : Game {
 		}
 
 		bool draw() {
-			DrawString(300, 300, "タイトル", GetColor(255, 255, 255));
+			DrawString(300, 300, "タイトル", GetColor(100, 255, 255));
 			return true;
 		}
 	};
