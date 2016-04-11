@@ -22,6 +22,7 @@ public:
 	std::mutex drawMutex;
 	int handle = -1;
 
+	//rects が認識結果（座標と大きさ）
 	std::mutex rectMutex;
 	std::vector<Rectan> rects;
 };

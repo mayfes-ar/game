@@ -39,14 +39,14 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 #ifdef _DEBUG
 		const auto game = std::make_shared<FirstGame>();
 #else
-		const auto game = startMenu();
+		const auto game = startMenu(); //game には選択されたゲームが入る（例: std::shared_ptr<FirstGame>()）
 #endif // DEBUG
 
 		if (game == nullptr) {
 			break;
 		}
 
-		if (!game->onStart()) {
+		if (!game->onStart()) { //onStart の返り値はただのエラーチェック
 			break;
 		}
 
@@ -58,7 +58,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 			}
 		}
 
-		if (!game->onFinish() || true) {
+		if (!game->onFinish() || true) { //onFinish の返り値でMenuに戻る(true)orゲームが終了する(false)
 			break;
 		}
 
