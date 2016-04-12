@@ -16,10 +16,26 @@ class Menu : Game {
 		const int countMax = 2 * effectHandles["effect1"].size();
 
 	public:
+		BackEffect(){
+			layer = 0;
+		}
 		bool draw() {
 			DrawExtendGraph(0, 0, 1280, 720, effectHandles["effect1"][counter/2], true);
 			counter++;
 			if (counter == countMax) { counter = 0; }
+			return true;
+		}
+	};
+
+	class BackGround : public Object {
+	public:
+		BackGround(){
+			layer = 0;
+		}
+		bool draw() {
+			SetDrawBright(100, 100, 100);
+			DrawExtendGraph(0, 0, 1280, 720, imgHandles["menu"], true);
+			SetDrawBright(255, 255, 255);
 			return true;
 		}
 	};
@@ -32,55 +48,75 @@ class Menu : Game {
 		}
 
 		bool draw() {
-			DrawString(300, 300, "TITLE", GetColor(250, 250, 250));
+			// SetFontSize(80);
+			// ChangeFont("メイリオ");
+			// SetFontThickness(9);
+			// DrawString(100, 50, "TITLE", GetColor(255, 255, 255));
+			DrawExtendGraph(640-192, 0, 640+192, 0+180, imgHandles["menu_title"], true);
 			return true;
 		}
 	};
 
 	// ゲーム選択の仕組み
 	class SelectGame : public Object {
-		class GameDescription {
+		// 個々のゲーム情報を持つクラス
+		class GameDescription :public Object {
 		public :
 			std::string title;
 			std::string description;
 			int imageHandle;
+			int imageWidth;
+			int imageHeight;
 			std::function<std::shared_ptr<Game>()> gameFunc;
 
-			GameDescription(std::string title_, std::string description_, int imageHandle_,  std::function<std::shared_ptr<Game>()> gameFunc_) :
+			GameDescription(std::string title_, std::string description_, int imageHandle_, int imageWidth_, int imageHeight_,  std::function<std::shared_ptr<Game>()> gameFunc_) :
 				title(title_),
 				description(description_),
 				imageHandle(imageHandle_),
+				imageWidth(imageWidth_),
+				imageHeight(imageHeight_),
 				gameFunc(gameFunc_){}
+
+			bool draw(){
+				ChangeFont("メイリオ");
+				SetFontSize(40);
+				SetFontThickness(9);
+				DrawString(400, 220, title.c_str(), GetColor(250, 250, 250));
+				SetFontSize(24);
+				SetFontThickness(6);
+				DrawString(400, 300, description.c_str(), GetColor(250, 250, 250));
+				DrawExtendGraph(350-imageWidth, 500-imageHeight, 350, 500, imageHandle, true);
+				return true;
+			}
 		};
-	public :
 		int numOfGames;
 		int selectedGameIndex;
 		std::vector<GameDescription> gameList;
+
+		public :
 		SelectGame();
 
-		std::shared_ptr<Game>& startSelectedGame() {
-			return gameList[0].gameFunc();
+		std::shared_ptr<Game> startSelectedGame() {
+			return gameList[selectedGameIndex].gameFunc();
 		}
 
-		void setNextGame(){
-			selectedGameIndex++;
-			if (selectedGameIndex < numOfGames) {
+		void setNextGame(int step){
+			selectedGameIndex += step;
+			if (-1 < selectedGameIndex && selectedGameIndex < numOfGames) {
 				// pass
 			} else {
-				selectedGameIndex -= numOfGames;
+				selectedGameIndex = (selectedGameIndex + numOfGames) % numOfGames;
 			}
 		}
 
+		// ゲーム選択の描画
 		bool draw() {
-			DrawString(500, 300, gameList[selectedGameIndex].title.c_str(), GetColor(250, 250, 250));
-			DrawString(500, 350, gameList[selectedGameIndex].description.c_str(), GetColor(250, 250, 250));
-			DrawExtendGraph(500, 400, 600, 550, gameList[selectedGameIndex].imageHandle, true);
+			gameList[selectedGameIndex].draw();
 			return true;
 		}
 	};
 
 	std::shared_ptr<SelectGame> games;
-
 	std::shared_ptr<Game>&  gameType;
 
 	// Menu クラスのループ処理
@@ -93,7 +129,8 @@ public:
 		using namespace std;
 		fps.isShow = true;
 		drawList.push_back(make_shared<Title>());
-		drawList.push_back(make_shared<BackEffect>());
+		// drawList.push_back(make_shared<BackEffect>());
+		drawList.push_back(make_shared<BackGround>());
 		drawList.push_back(games);
 		return Game::onStart();
 	}
@@ -102,16 +139,26 @@ public:
 
 		if (key[KEY_INPUT_RETURN]) {
 			// gameType = std::make_shared<FirstGame>();
-			// gameType = games->startSelectedGame();
-			gameType = games->gameList[games->selectedGameIndex].gameFunc(); // :HELP 冗長な自覚はあるけど上のコードが動かないのでこう書いています。
+			gameType = games->startSelectedGame();
 			share.isFinish = true;
 		}
 		if (key[KEY_INPUT_ESCAPE]) {
 			share.isFinish = true;
 		}
-		if (key[KEY_INPUT_RIGHT]) {
-			games->setNextGame();
+
+		static int counterForWaiting = 0;
+		if (counterForWaiting > 0){
+			counterForWaiting--;
 		}
+		if (counterForWaiting == 0 && key[KEY_INPUT_RIGHT]) {
+			games->setNextGame(1);
+			counterForWaiting = 5;
+		}
+		if (counterForWaiting == 0 && key[KEY_INPUT_LEFT]) {
+			games->setNextGame(-1);
+			counterForWaiting = 5;
+		}
+
 
 		return Game::onUpdate();
 	}
