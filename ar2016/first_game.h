@@ -115,43 +115,64 @@ public:
 		using namespace std;
 		fps.isShow = true;
 		
-		auto makeBlock = [this](int x, int y, int width, int height) {
-			auto block = make_shared<BlockObject>(x, y, width, height, true);
-			blockList.push_back(block);
-			drawList.push_back(block);
-		};
-		
-		drawList.push_back(player);
-		drawList.push_back(make_shared<Background>(share.handle));
-		makeBlock(0, 600, 1280, 300);
-		makeBlock(-100, 0, 150, 720);
-		makeBlock(300, 300, 200, 50);
+		// mode 0
+		mode.setMode([this]() {
+			auto makeBlock = [this](int x, int y, int width, int height) {
+				auto block = make_shared<BlockObject>(x, y, width, height, true);
+				blockList.push_back(block);
+				drawList.push_back(block);
+			};
+
+			drawList.push_back(player);
+			drawList.push_back(make_shared<Background>(share.handle));
+			makeBlock(0, 600, 1280, 300);
+			makeBlock(-100, 0, 150, 720);
+			makeBlock(300, 300, 200, 50);
+		}, -1);
+
+		// mode 1
+		mode.setMode([this]() {
+			drawList.clear();
+			drawList.push_back(make_shared<BlockObject>(300, 300, 200, 200, true));
+		}, -1);
 
 		return Game::onStart();
 	}
 
 	bool onUpdate() {
-		timer -= 1;
-		if (timer <= 0) {
-			share.isFinish = true;
+		switch (mode.getMode())	{
+		case 0: { // playing
+			timer -= 1;
+			if (timer <= 0) {
+				share.isFinish = true;
+			}
+
+			std::vector<std::shared_ptr<BlockObject>> allBlockList = blockList;
+			share.rectMutex.lock();
+			for (auto rect : share.rects) {
+				auto block = std::make_shared<BlockObject>(rect, false);
+				allBlockList.push_back(block);
+				drawList.push_back(block);
+			}
+
+			share.rectMutex.unlock();
+
+			player->update(key, allBlockList);
+			break;
 		}
+
+		default:
+			break;
+		}
+
+		
 
 		if (key[KEY_INPUT_ESCAPE]) {
 			share.isFinish = true;
 		}
-
-		std::vector<std::shared_ptr<BlockObject>> allBlockList = blockList;
-		share.rectMutex.lock();
-		for (auto rect : share.rects) {
-			auto block = std::make_shared<BlockObject>(rect, false);
-			allBlockList.push_back(block);
-			drawList.push_back(block);
+		if (key[KEY_INPUT_N]) {
+			mode.goNext();
 		}
-
-		share.rectMutex.unlock();
-
-
-		player->update(key, allBlockList);
 
 		return Game::onUpdate();
 	}

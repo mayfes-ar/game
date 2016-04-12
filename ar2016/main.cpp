@@ -43,6 +43,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		}
 
 		if (!game->onStart()) { //onStart の返り値はただのエラーチェック
+			game->onFinish();
 			break;
 		}
 
@@ -54,7 +55,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 			}
 		}
 
-		if (!game->onFinish() || true) { //onFinish の返り値でMenuに戻る(true)orゲームが終了する(false)
+		if (!game->onFinish()) { //onFinish の返り値でMenuに戻る(true)orゲームが終了する(false)
 			break;
 		}
 

@@ -43,8 +43,11 @@ public:
 	bool onStart() {
 		using namespace std;
 		fps.isShow = true;
-		drawList.push_back(make_shared<Title>());
-		drawList.push_back(make_shared<BackEffect>());
+		mode.setMode([this]() {
+			drawList.push_back(make_shared<Title>());
+			drawList.push_back(make_shared<BackEffect>());
+		}, -1);
+		
 		return Game::onStart();
 	}
 

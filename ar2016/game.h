@@ -10,28 +10,45 @@
 // drawList に Object の std::shared_ptr を入れれば描画してくれる
 class Game {
 protected:
+	// ゲーム内の段階（プレイ中、リザルトなど）を管理
 	class Mode {
 		int currentMode = -1;
 		bool isGoNext = true;
 		std::vector<std::function<void()>> funcs;
 		std::vector<int> timers;
 	public:
+		int getMode() const {
+			return currentMode;
+		}
+
 		void setMode(std::function<void()> func, int timer) {
 			funcs.push_back(func);
 			timers.push_back(timer);
 		}
 
+		// 強制的に次のモードへ
 		void goNext() {
 			isGoNext = true;
 		}
 
+		// モード移行を判定し、タイマーを進める
 		bool update() {
 			if (isGoNext) {
+				isGoNext = false;
 				currentMode++;
-				if (currentMode + 1 >= funcs.size()) {
+				if (currentMode < funcs.size()) {
+					funcs[currentMode]();
+				} else {
 					return false;
 				}
 			}
+			
+			if (currentMode < funcs.size() && timers[currentMode] > 0) {
+				if (--timers[currentMode] == 0) {
+					isGoNext = true;
+				}
+			}
+			
 
 			return true;
 		}
@@ -53,7 +70,13 @@ protected:
 public:
 	virtual bool onStart() {
 		GetHitKeyStateAll(key); //（不必要かもしれないが）キー入力を初期化している。
-		return true;
+		if (mode.update()) {
+			return true;
+		} else {
+			share.isFinish = true;
+			return false;
+		}
+		
 	}
 
 	// 子クラスのonUpdate内で return Game::onUpdate();
@@ -77,6 +100,10 @@ public:
 		share.drawMutex.unlock();
 
 		fps.wait();
+
+		if (!mode.update()) {
+			share.isFinish = true;
+		}
 		GetHitKeyStateAll(key); // キー入力状態を取得
 		return !share.isFinish;
 	}
