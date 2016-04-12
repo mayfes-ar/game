@@ -10,11 +10,15 @@ std::shared_ptr<Game> startMenu();
 // gameType = std::make_shared<起動するGameの子クラス>();
 class Menu : Game {
 
+	// 背景処理
 	class BackEffect : public Object {
 		int counter = 0;
 		const int countMax = 2 * effectHandles["effect1"].size();
 
 	public:
+		BackEffect(){
+			layer = 0;
+		}
 		bool draw() {
 			DrawExtendGraph(0, 0, 1280, 720, effectHandles["effect1"][counter/2], true);
 			counter++;
@@ -23,6 +27,20 @@ class Menu : Game {
 		}
 	};
 
+	class BackGround : public Object {
+	public:
+		BackGround(){
+			layer = 0;
+		}
+		bool draw() {
+			SetDrawBright(40, 40, 40);
+			DrawExtendGraph(0, 0, 1280, 720, imgHandles["menu"], true);
+			SetDrawBright(255, 255, 255);
+			return true;
+		}
+	};
+
+	// タイトルなど静的オブジェクトの処理
 	class Title : public Object {
 	public:
 		Title() {
@@ -30,22 +48,93 @@ class Menu : Game {
 		}
 
 		bool draw() {
-			DrawString(300, 300, "TITLE", GetColor(255, 255, 255));
+			// SetFontSize(80);
+			// ChangeFont("メイリオ");
+			// SetFontThickness(9);
+			// DrawString(100, 50, "TITLE", GetColor(255, 255, 255));
+			DrawExtendGraph(640-192, 0, 640+192, 0+180, imgHandles["menu_title"], true);
 			return true;
 		}
 	};
 
+	// ゲーム選択の仕組み
+	class SelectGame : public Object {
+		// 個々のゲーム情報を持つクラス
+		class GameDescription :public Object {
+		public :
+			std::string title;
+			std::string description;
+			int imageHandle;
+			int imageWidth;
+			int imageHeight;
+			std::function<std::shared_ptr<Game>()> gameFunc;
+
+			GameDescription(std::string title_, std::string description_, int imageHandle_, int imageWidth_, int imageHeight_,  std::function<std::shared_ptr<Game>()> gameFunc_) :
+				title(title_),
+				description(description_),
+				imageHandle(imageHandle_),
+				imageWidth(imageWidth_),
+				imageHeight(imageHeight_),
+				gameFunc(gameFunc_){}
+
+			bool draw(){
+				ChangeFont("メイリオ");
+				SetFontSize(40);
+				SetFontThickness(9);
+				DrawString(400, 220, title.c_str(), GetColor(250, 250, 250));
+				SetFontSize(24);
+				SetFontThickness(6);
+				DrawString(400, 300, description.c_str(), GetColor(250, 250, 250));
+				DrawExtendGraph(350-imageWidth, 500-imageHeight, 350, 500, imageHandle, true);
+				return true;
+			}
+		};
+		int numOfGames;
+		int selectedGameIndex;
+		std::vector<GameDescription> gameList;
+
+		public :
+		SelectGame();
+
+		std::shared_ptr<Game> startSelectedGame() {
+			return gameList[selectedGameIndex].gameFunc();
+		}
+
+		void setNextGame(int step){
+			selectedGameIndex += step;
+			if (-1 < selectedGameIndex && selectedGameIndex < numOfGames) {
+				// pass
+			} else {
+				selectedGameIndex = (selectedGameIndex + numOfGames) % numOfGames;
+			}
+		}
+
+		// ゲーム選択の描画
+		bool draw() {
+			gameList[selectedGameIndex].draw();
+			return true;
+		}
+	};
+
+	std::shared_ptr<SelectGame> games;
 	std::shared_ptr<Game>&  gameType;
 
+	// Menu クラスのループ処理
 public:
-	Menu(std::shared_ptr<Game>& gameType_) : gameType(gameType_) {}
+	Menu(std::shared_ptr<Game>& gameType_) : gameType(gameType_) {
+		games = std::make_shared<SelectGame>();
+	}
 
 	bool onStart() {
 		using namespace std;
 		fps.isShow = true;
+
+
 		mode.setMode([this]() {
 			drawList.push_back(make_shared<Title>());
-			drawList.push_back(make_shared<BackEffect>());
+			// drawList.push_back(make_shared<BackEffect>());
+			drawList.push_back(make_shared<BackGround>());
+			drawList.push_back(games);
 		}, -1);
 		
 		return Game::onStart();
@@ -54,12 +143,27 @@ public:
 	bool onUpdate() {
 
 		if (key[KEY_INPUT_RETURN]) {
-			gameType = std::make_shared<FirstGame>();
+			// gameType = std::make_shared<FirstGame>();
+			gameType = games->startSelectedGame();
 			share.isFinish = true;
 		}
 		if (key[KEY_INPUT_ESCAPE]) {
 			share.isFinish = true;
 		}
+
+		static int counterForWaiting = 0;
+		if (counterForWaiting > 0){
+			counterForWaiting--;
+		}
+		if (counterForWaiting == 0 && key[KEY_INPUT_RIGHT]) {
+			games->setNextGame(1);
+			counterForWaiting = 5;
+		}
+		if (counterForWaiting == 0 && key[KEY_INPUT_LEFT]) {
+			games->setNextGame(-1);
+			counterForWaiting = 5;
+		}
+
 
 		return Game::onUpdate();
 	}

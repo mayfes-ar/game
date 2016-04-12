@@ -45,6 +45,11 @@ bool Object::load() {
 	isSuccess &= loadImage("player", "mario");
 	isSuccess &= loadImage("block", "block");
 
+	//メニューで使う
+	isSuccess &= loadImage("monhan", "monhan");
+	isSuccess &= loadImage("rockman", "rockman");
+	isSuccess &= loadImage("menu", "wallpaper");
+	isSuccess &= loadImage("menu_title", "menu_title");
 	isSuccess &= loadEffect("effect1", "warp", 1, 6, 640, 2880);
 
 	return isSuccess;
