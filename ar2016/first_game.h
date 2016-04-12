@@ -80,7 +80,6 @@ class FirstGame : public Game {
 							x = prevX = block->left() - width;
 						} else {
 							// TODO
-							//Sleep(2000);
 						}
 					} else {
 						if (prevY >= block->bottomHit()) {
@@ -90,7 +89,6 @@ class FirstGame : public Game {
 							isJumping = false;
 						} else {
 							// TODO
-							//Sleep(2000);
 						}
 					}
 				}

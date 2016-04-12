@@ -11,6 +11,7 @@
 class Game {
 protected:
 	// ゲーム内の段階（プレイ中、リザルトなど）を管理
+	// GameのonStart内でそれぞれのモードに移行したときに呼ばれる関数と制限時間をsetModeで登録する
 	class Mode {
 		int currentMode = -1;
 		bool isGoNext = true;
@@ -21,6 +22,7 @@ protected:
 			return currentMode;
 		}
 
+		// 例）setMode([this](){ drawList.clean(); }, -1);
 		void setMode(std::function<void()> func, int timer) {
 			funcs.push_back(func);
 			timers.push_back(timer);
@@ -32,6 +34,7 @@ protected:
 		}
 
 		// モード移行を判定し、タイマーを進める
+		// 次に移るモードが存在しなかった時 return false;
 		bool update() {
 			if (isGoNext) {
 				isGoNext = false;
@@ -49,17 +52,18 @@ protected:
 				}
 			}
 			
-
 			return true;
 		}
-
 	} mode;
 
 	// 自状態の param 管理もしている。定義はimage_process.h
 	ShareData share;
 
+	// Objectを継承したクラスのオブジェクトへのstd::shared_ptrを突っ込めば毎ループ（Game::onUpdateで）描画してくれる
+	// 例）drawList.push_back(std::make_shared<HogeObject>(arg...));
 	std::list<std::shared_ptr<Object>> drawList;
 
+	// key[KEY_INPUT_*] でそのキーが押されているかわかる
 	char key[256];
 	Fps fps;
 
@@ -68,6 +72,7 @@ protected:
 	}
 
 public:
+	// 子クラスのonStart内で return Game::onStart();
 	virtual bool onStart() {
 		GetHitKeyStateAll(key); //（不必要かもしれないが）キー入力を初期化している。
 		if (mode.update()) {

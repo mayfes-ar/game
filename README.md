@@ -7,10 +7,13 @@
 - OpenCV 3.1.0
 
 
-### 参考サイト
+### 環境構築
 - [DxLibまわり](http://dxlib.o.oo7.jp/use/dxuse_vscom2015.html)
 - [OpenCVまわり](http://freesofutotravel.blog94.fc2.com/blog-entry-30.html)
 
 **パスを上記サイトにあわせること！**
 - c:\DxLib_VC
 - c:\lib\opencv-3.1.0\build
+
+### 参考サイト
+- [DxLib Reference](http://dxlib.o.oo7.jp/dxfunc.html)

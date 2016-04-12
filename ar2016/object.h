@@ -1,5 +1,6 @@
 #pragma once
 
+#include "const.h"
 #include "DxLib.h"
 #include <string>
 #include <map>
@@ -8,7 +9,7 @@
 #include <vector>
 
 
-// double x, y;
+// double x, y　左上の座標;
 // int width, height;
 class Rectan {
 public:

@@ -17,7 +17,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	//cap.set(cv::CAP_PROP_FRAME_HEIGHT, 320);
 
 	// 画面サイズは 1280x720
-	SetGraphMode(1280, 720, 32);
+	SetGraphMode(WIDTH, HEIGHT, 32);
 #ifdef _DEBUG
 	ChangeWindowMode(true);
 	SetMainWindowText("DEBUG MODE");

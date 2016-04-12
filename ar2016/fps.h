@@ -1,24 +1,25 @@
 #pragma once
 
+#include "const.h"
 #include "DxLib.h"
 
 class Fps {
 	int baseTime;
 	int count;
 	float fps;
-	const int standard;
+	static const int sampleNum = 30;
 
 public:
 	bool isShow = false;
 
-	Fps() : baseTime(0), count(0), fps(0), standard(30) {}
+	Fps() : baseTime(0), count(0), fps(0) {}
 
 	void update() {
 		if (count == 0) {
 			baseTime = GetNowCount();
-		} else if (count == standard) {
+		} else if (count == sampleNum) {
 			const int nowTime = GetNowCount();
-			fps = float(standard) * 1000.f / (nowTime - baseTime);
+			fps = float(sampleNum) * 1000.f / (nowTime - baseTime);
 			count = 0;
 			baseTime = nowTime;
 		}
@@ -34,7 +35,7 @@ public:
 
 	void wait() {
 		const int tookTime = GetNowCount() - baseTime;
-		const int waitTime = count * 1000 / standard - tookTime;
+		const int waitTime = count * 1000 / FPS - tookTime;
 		if (waitTime > 0) {
 			Sleep(waitTime);
 		}

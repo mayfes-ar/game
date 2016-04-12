@@ -158,6 +158,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="const.cpp" />
     <ClCompile Include="image_process.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="menu.cpp" />
@@ -165,6 +166,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="block_object.h" />
+    <ClInclude Include="const.h" />
     <ClInclude Include="first_game.h" />
     <ClInclude Include="fps.h" />
     <ClInclude Include="game.h" />
