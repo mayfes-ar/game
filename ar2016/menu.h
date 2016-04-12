@@ -33,7 +33,7 @@ class Menu : Game {
 			layer = 0;
 		}
 		bool draw() {
-			SetDrawBright(100, 100, 100);
+			SetDrawBright(40, 40, 40);
 			DrawExtendGraph(0, 0, 1280, 720, imgHandles["menu"], true);
 			SetDrawBright(255, 255, 255);
 			return true;
