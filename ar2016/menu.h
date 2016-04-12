@@ -38,39 +38,55 @@ class Menu : Game {
 	};
 
 	// ゲーム選択の仕組み
-	class GameDescription {
-	public :
-		std::string title;
-		std::string description;
-		std::string imageHandleKey;
-		std::function<std::shared_ptr<Game>()> gameFunc;
+	class SelectGame : public Object {
+		class GameDescription {
+		public :
+			std::string title;
+			std::string description;
+			int imageHandle;
+			std::function<std::shared_ptr<Game>()> gameFunc;
 
-		GameDescription(std::string title_,
-						std::string description_,
-						std::string imageHandleKey_,
-						std::function<std::shared_ptr<Game>()> gameFunc_) :
-			title(title_),
-			description(description_),
-			imageHandleKey(imageHandleKey_),
-			gameFunc(gameFunc_){}
-	};
-	class GameList {
+			GameDescription(std::string title_, std::string description_, int imageHandle_,  std::function<std::shared_ptr<Game>()> gameFunc_) :
+				title(title_),
+				description(description_),
+				imageHandle(imageHandle_),
+				gameFunc(gameFunc_){}
+		};
 	public :
 		int numOfGames;
+		int selectedGameIndex;
 		std::vector<GameDescription> gameList;
-		GameList();
+		SelectGame();
+
+		std::shared_ptr<Game>& startSelectedGame() {
+			return gameList[0].gameFunc();
+		}
+
+		void setNextGame(){
+			selectedGameIndex++;
+			if (selectedGameIndex < numOfGames) {
+				// pass
+			} else {
+				selectedGameIndex -= numOfGames;
+			}
+		}
+
+		bool draw() {
+			DrawString(500, 300, gameList[selectedGameIndex].title.c_str(), GetColor(250, 250, 250));
+			DrawString(500, 350, gameList[selectedGameIndex].description.c_str(), GetColor(250, 250, 250));
+			DrawExtendGraph(500, 400, 600, 550, gameList[selectedGameIndex].imageHandle, true);
+			return true;
+		}
 	};
 
-	std::shared_ptr<GameList> gameList;
-	int selectedGameIndex;
+	std::shared_ptr<SelectGame> games;
 
 	std::shared_ptr<Game>&  gameType;
 
 	// Menu クラスのループ処理
 public:
 	Menu(std::shared_ptr<Game>& gameType_) : gameType(gameType_) {
-		gameList = std::make_shared<GameList>();
-		selectedGameIndex = 0;
+		games = std::make_shared<SelectGame>();
 	}
 
 	bool onStart() {
@@ -78,6 +94,7 @@ public:
 		fps.isShow = true;
 		drawList.push_back(make_shared<Title>());
 		drawList.push_back(make_shared<BackEffect>());
+		drawList.push_back(games);
 		return Game::onStart();
 	}
 
@@ -85,11 +102,15 @@ public:
 
 		if (key[KEY_INPUT_RETURN]) {
 			// gameType = std::make_shared<FirstGame>();
-			gameType = gameList->gameList[selectedGameIndex].gameFunc();
+			// gameType = games->startSelectedGame();
+			gameType = games->gameList[games->selectedGameIndex].gameFunc(); // :HELP 冗長な自覚はあるけど上のコードが動かないのでこう書いています。
 			share.isFinish = true;
 		}
 		if (key[KEY_INPUT_ESCAPE]) {
 			share.isFinish = true;
+		}
+		if (key[KEY_INPUT_RIGHT]) {
+			games->setNextGame();
 		}
 
 		return Game::onUpdate();

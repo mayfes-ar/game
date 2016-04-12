@@ -22,17 +22,19 @@ std::shared_ptr<Game> startMenu() {
 }
 
 // メニュー画面に表示するゲーム情報の登録
-Menu::GameList::GameList() {
+Menu::SelectGame::SelectGame() {
 	gameList = std::vector<GameDescription>{
 		GameDescription("First Game", // ゲームタイトル
-						"fuga fuga", // 説明文
-						"nyan nyan", // サムネイルのハンドル
+						"めざせ！ポケモンマスター！", // 説明文
+						imgHandles["player"], // サムネイルのハンドル
 						[]() -> std::shared_ptr<Game> {return std::make_shared<FirstGame>(); }), // 起動するゲーム
 		GameDescription("Second Game",
-						"hoge hoge",
-						"wan wan",
-						[]() -> std::shared_ptr<Game> {return nullptr; })
+						"俺が、ガンダムだ！",
+						imgHandles["block"],
+						[]() -> std::shared_ptr<Game> {return std::make_shared<FirstGame>(); })
 	};
 
+	selectedGameIndex = 0;
 	numOfGames = gameList.size();
+	layer = 50;
 }
