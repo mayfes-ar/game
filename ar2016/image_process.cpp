@@ -45,8 +45,84 @@ void detect(cv::Mat& src, ShareData& share) {
 	using namespace cv;
 	using namespace std;
 
-	static aruco::Dictionary dictionary =
-		aruco::getPredefinedDictionary(aruco::PREDEFINED_DICTIONARY_NAME(0));
+	static aruco::Dictionary dictionary;
+	// markers of 6x6 bits
+	dictionary.markerSize = 7;
+	// maximum number of bit corrections
+	dictionary.maxCorrectionBits = 1;
+	// lets create a dictionary of 100 markers
+
+	unsigned char markers[6][49] = {
+		{
+			0,0,0,1,0,0,0,
+			0,0,1,0,0,0,0,
+			0,1,0,0,0,0,0,
+			1,0,1,1,1,1,1,
+			0,1,0,0,0,0,0,
+			0,0,1,0,0,0,0,
+			0,0,0,1,0,0,0
+		},
+		{
+			0,0,1,1,1,0,0,
+			0,1,0,0,0,1,0,
+			0,1,0,0,0,1,0,
+			0,0,1,1,0,0,0,
+			0,0,0,1,0,0,0,
+			0,0,0,0,0,0,0,
+			0,0,0,1,0,0,0
+		},
+		{
+			0,0,0,0,0,0,0,
+			0,1,1,1,1,1,0,
+			0,1,0,0,0,1,0,
+			0,1,0,0,0,1,0,
+			0,1,0,0,0,1,0,
+			0,1,1,1,1,1,0,
+			0,0,0,0,0,0,0
+		},
+		{
+			0,0,0,0,0,0,0,
+			0,1,1,1,1,1,0,
+			0,1,0,0,0,1,0,
+			1,1,0,0,0,1,0,
+			0,1,0,0,0,1,0,
+			0,1,1,1,1,1,0,
+			0,0,0,0,0,0,0
+		},
+		{
+			1,1,1,1,1,1,1,
+			0,1,1,1,1,1,0,
+			0,0,0,0,0,0,0,
+			0,1,1,1,1,1,0,
+			0,0,0,0,0,0,0,
+			1,1,1,1,1,1,1,
+			1,1,1,1,1,1,1
+		},
+		{
+			0,0,0,0,0,0,0,
+			1,1,1,1,1,0,0,
+			1,1,1,1,0,1,0,
+			1,1,1,1,1,1,1,
+			1,1,1,1,1,1,0,
+			1,1,1,1,1,0,0,
+			0,0,0,0,0,0,0
+		}
+	};
+
+	for (int i = 0; i<sizeof(markers) / sizeof(markers[0]); i++) {
+		// assume generateMarkerBits() generate a new marker in binary format, so that
+		// markerBits is a 5x5 matrix of CV_8UC1 type, only containing 0s and 1s
+
+		cv::Mat markerBits(7, 7, CV_8UC1, markers[i]);//generateMarkerBits();
+
+		cv::Mat markerCompressed = aruco::Dictionary::getByteListFromBits(markerBits);
+		// add the marker as a new row
+		dictionary.bytesList.push_back(markerCompressed);
+	}
+
+	//static aruco::Dictionary dictionary =
+	//	aruco::getPredefinedDictionary(aruco::PREDEFINED_DICTIONARY_NAME(0));
+
 	static aruco::DetectorParameters detectorParams;
 	detectorParams.doCornerRefinement = true; // do corner refinement in markers
 
@@ -95,7 +171,4 @@ void detect(cv::Mat& src, ShareData& share) {
 	share.rectMutex.lock();
 	share.rects = rects;
 	share.rectMutex.unlock();
-
-	//delete corners;
-	//delete rejected;
 }
