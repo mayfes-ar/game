@@ -7,3 +7,6 @@ extern const int HEIGHT;
 
 // 最大フレームレート
 extern const int FPS;
+
+// cap画像から描画イメージへの拡大率
+extern const double CAP2IMG_RATE;

@@ -15,9 +15,11 @@ class Rectan {
 public:
 	double x, y;
 	int width, height;
+	int direction = -1;
+	int id;
 
 	Rectan(){}
-	Rectan(int x_, int y_, int width_, int height_) : x(x_), y(y_), width(width_), height(height_) {}
+	Rectan(int x_, int y_, int width_, int height_, int direction_, int id_) : x(x_), y(y_), width(width_), height(height_), direction(direction_), id(id_) {}
 
 	void scale(double rate) {
 		x *= rate; y *= rate; width *= rate; height *= rate;
