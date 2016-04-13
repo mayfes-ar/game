@@ -13,8 +13,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	
 
 	//cap.set(cv::CAP_PROP_FPS, 15);
-	//cap.set(cv::CAP_PROP_FRAME_WIDTH, 1000);
-	//cap.set(cv::CAP_PROP_FRAME_HEIGHT, 320);
+	//cap.set(cv::CAP_PROP_FRAME_WIDTH, CAP_WIDTH);
+	//cap.set(cv::CAP_PROP_FRAME_HEIGHT, CAP_HEIGHT);
 
 	// 画面サイズは 1280x720
 	SetGraphMode(WIDTH, HEIGHT, 32);

@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "game.h"
+//  #include "***_game.h"
 #include "first_game.h"
 
 
@@ -20,7 +20,7 @@ class Menu : Game {
 			layer = 0;
 		}
 		bool draw() {
-			DrawExtendGraph(0, 0, 1280, 720, effectHandles["effect1"][counter/2], true);
+			DrawExtendGraph(0, 0, WIDTH, HEIGHT, effectHandles["effect1"][counter/2], true);
 			counter++;
 			if (counter == countMax) { counter = 0; }
 			return true;
@@ -34,7 +34,7 @@ class Menu : Game {
 		}
 		bool draw() {
 			SetDrawBright(40, 40, 40);
-			DrawExtendGraph(0, 0, 1280, 720, imgHandles["menu"], true);
+			DrawExtendGraph(0, 0, WIDTH, HEIGHT, imgHandles["menu"], true);
 			SetDrawBright(255, 255, 255);
 			return true;
 		}
@@ -145,10 +145,10 @@ public:
 		if (key[KEY_INPUT_RETURN]) {
 			// gameType = std::make_shared<FirstGame>();
 			gameType = games->startSelectedGame();
-			share.isFinish = true;
+			share.willFinish = true;
 		}
 		if (key[KEY_INPUT_ESCAPE]) {
-			share.isFinish = true;
+			share.willFinish = true;
 		}
 
 		static int counterForWaiting = 0;

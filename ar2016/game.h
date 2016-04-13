@@ -78,7 +78,7 @@ public:
 		if (mode.update()) {
 			return true;
 		} else {
-			share.isFinish = true;
+			share.willFinish = true;
 			return false;
 		}
 		
@@ -107,10 +107,10 @@ public:
 		fps.wait();
 
 		if (!mode.update()) {
-			share.isFinish = true;
+			share.willFinish = true;
 		}
 		GetHitKeyStateAll(key); // キー入力状態を取得
-		return !share.isFinish;
+		return !share.willFinish;
 	}
 
 	virtual bool onFinish() = 0; // 純粋仮想関数を調べよう

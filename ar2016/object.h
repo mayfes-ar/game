@@ -9,17 +9,20 @@
 #include <vector>
 
 
-// double x, y　左上の座標;
+// double x, y;　左上の座標
 // int width, height;
+// double  rotate; 回転角（ラジアン）
+// int id; マーカーの種類
 class Rectan {
 public:
 	double x, y;
 	int width, height;
-	int direction = -1;
+	// rad
+	double rotate;
 	int id;
 
 	Rectan(){}
-	Rectan(int x_, int y_, int width_, int height_, int direction_, int id_) : x(x_), y(y_), width(width_), height(height_), direction(direction_), id(id_) {}
+	Rectan(int x_, int y_, int width_, int height_, int rotate_, int id_) : x(x_), y(y_), width(width_), height(height_), rotate(rotate_), id(id_) {}
 
 	void scale(double rate) {
 		x *= rate; y *= rate; width *= rate; height *= rate;
