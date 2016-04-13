@@ -79,7 +79,7 @@ void detect(cv::Mat& src, ShareData& share) {
 		rect.x = center.x - size*0.5;
 		rect.y = center.y - size*0.5;
 
-		const double theta = atan2f(arrow.y, arrow.x);
+		rect.rotate = atan2f(arrow.y, arrow.x);
 
 		rect.scale(CAP2IMG_RATE);
 		rect.translate(CAP2IMG_SHIFT_X, CAP2IMG_SHIFT_Y);
