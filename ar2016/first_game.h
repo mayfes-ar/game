@@ -13,7 +13,7 @@ class FirstGame : public Game {
 		}
 
 		bool draw() {
-			DrawExtendGraph(160, 0, 1120, 720, handle, FALSE);
+			DrawExtendGraph(CAP2IMG_SHIFT_X, CAP2IMG_SHIFT_Y, CAP2IMG_SHIFT_X + CAP2IMG_RATE*CAP_WIDTH, CAP2IMG_SHIFT_Y + CAP2IMG_RATE*CAP_HEIGHT, handle, FALSE);
 			return true;
 		}
 	};
@@ -75,17 +75,17 @@ class FirstGame : public Game {
 
 					if (prevY < block->bottomHit() && prevY + height > block->topHit()) {
 						if (prevX >= block->rightHit()) {
-							x = prevX = block->right();
+							x = block->right();
 						} else if (prevX + width <= block->leftHit()) {
-							x = prevX = block->left() - width;
+							x = block->left() - width;
 						} else {
 							// TODO
 						}
 					} else {
 						if (prevY >= block->bottomHit()) {
-							y = prevY = block->bottom();
+							y = block->bottom();
 						} else if (prevY + height <= block->topHit()) {
-							y = prevY = block->top() - height;
+							y = block->top() - height;
 							isJumping = false;
 						} else {
 							// TODO
@@ -142,7 +142,7 @@ public:
 		case 0: { // playing
 			timer -= 1;
 			if (timer <= 0) {
-				share.isFinish = true;
+				share.willFinish = true;
 			}
 
 			std::vector<std::shared_ptr<BlockObject>> allBlockList = blockList;
@@ -166,7 +166,7 @@ public:
 		
 
 		if (key[KEY_INPUT_ESCAPE]) {
-			share.isFinish = true;
+			share.willFinish = true;
 		}
 		if (key[KEY_INPUT_N]) {
 			mode.goNext();

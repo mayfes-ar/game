@@ -18,7 +18,7 @@
 class ShareData {
 public:
 	// trueにすればonFinishに移行
-	bool isFinish = false;
+	bool willFinish = false;
 
 	std::mutex drawMutex;
 	int handle = -1;

@@ -15,7 +15,7 @@ void capture(ShareData & share) {
 	baseImage.MipMapCount = 0;
 
 	while (ProcessMessage() == 0) {
-		if (!cap.read(capImage) || share.isFinish) {
+		if (!cap.read(capImage) || share.willFinish) {
 			break;
 		}
 
@@ -79,17 +79,12 @@ void detect(cv::Mat& src, ShareData& share) {
 		rect.x = center.x - size*0.5;
 		rect.y = center.y - size*0.5;
 
-		const float theta = atan2f(arrow.y, arrow.x) * 180.0 / M_PI;
-		if (-5 < theta && theta < 5) rect.direction = 0;
-		else if (85 < theta && theta < 95) rect.direction = 1;
-		else if (175 < theta || theta < -175) rect.direction = 2;
-		else if (-95 < theta && theta < -85) rect.direction = 3;
+		const double theta = atan2f(arrow.y, arrow.x);
 
-		const Point capImageShift(160, 0);
 		rect.scale(CAP2IMG_RATE);
-		rect.translate(capImageShift.x, capImageShift.y);
+		rect.translate(CAP2IMG_SHIFT_X, CAP2IMG_SHIFT_Y);
 
-		if (rect.direction != -1) rects.push_back(rect);
+		rects.push_back(rect);
 	}
 	
 	share.rectMutex.lock();
