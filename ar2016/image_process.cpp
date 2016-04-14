@@ -52,7 +52,7 @@ void detect(cv::Mat& src, ShareData& share) {
 	dictionary.maxCorrectionBits = 1;
 	// lets create a dictionary of 100 markers
 
-	unsigned char markers[6][49] = {
+	unsigned char markers[7][49] = {
 		{
 			0,0,0,1,0,0,0,
 			0,0,1,0,0,0,0,
@@ -106,6 +106,15 @@ void detect(cv::Mat& src, ShareData& share) {
 			1,1,1,1,1,1,0,
 			1,1,1,1,1,0,0,
 			0,0,0,0,0,0,0
+		},
+		{
+			0,0,0,0,0,0,0,
+			0,1,1,0,1,1,0,
+			1,0,0,1,0,0,1,
+			1,0,0,1,0,0,1,
+			0,1,0,0,0,1,0,
+			0,0,1,0,1,0,0,
+			0,0,0,1,0,0,0
 		}
 	};
 
@@ -120,6 +129,7 @@ void detect(cv::Mat& src, ShareData& share) {
 		dictionary.bytesList.push_back(markerCompressed);
 	}
 
+	// if use predefined dictionaries, use below
 	//static aruco::Dictionary dictionary =
 	//	aruco::getPredefinedDictionary(aruco::PREDEFINED_DICTIONARY_NAME(0));
 
@@ -127,8 +137,6 @@ void detect(cv::Mat& src, ShareData& share) {
 	detectorParams.doCornerRefinement = true; // do corner refinement in markers
 
 	static vector<int> ids;
-	// vector<vector<Point2f>> corners;
-	//auto* corners = new vector<vector<Point2f>>;
 	static vector<vector<Point2f>> corners;
 	//auto *rejected = new vector<vector<Point2f>>;
 
