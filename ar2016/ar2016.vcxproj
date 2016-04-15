@@ -89,7 +89,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>..\external;c:\DxLib_VC\プロジェクトに追加すべきファイル_VC用;C:\lib\opencv-3.1.0\build\install\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\include;..\external;c:\DxLib_VC\プロジェクトに追加すべきファイル_VC用;C:\lib\opencv-3.1.0\build\install\include</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <ExceptionHandling>Async</ExceptionHandling>
       <FloatingPointModel>Fast</FloatingPointModel>
@@ -158,23 +158,23 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="const.cpp" />
-    <ClCompile Include="image_process.cpp" />
-    <ClCompile Include="main.cpp" />
-    <ClCompile Include="menu.cpp" />
-    <ClCompile Include="object.cpp" />
+    <ClCompile Include="src\const.cpp" />
+    <ClCompile Include="src\image_process.cpp" />
+    <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\menu.cpp" />
+    <ClCompile Include="src\object.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="block_object.h" />
-    <ClInclude Include="const.h" />
-    <ClInclude Include="first_game.h" />
-    <ClInclude Include="fps.h" />
-    <ClInclude Include="game.h" />
-    <ClInclude Include="image_process.h" />
-    <ClInclude Include="main.h" />
-    <ClInclude Include="menu.h" />
-    <ClInclude Include="object.h" />
-    <ClInclude Include="units.h" />
+    <ClInclude Include="include\block_object.h" />
+    <ClInclude Include="include\const.h" />
+    <ClInclude Include="include\first_game.h" />
+    <ClInclude Include="include\fps.h" />
+    <ClInclude Include="include\game.h" />
+    <ClInclude Include="include\image_process.h" />
+    <ClInclude Include="include\main.h" />
+    <ClInclude Include="include\menu.h" />
+    <ClInclude Include="include\object.h" />
+    <ClInclude Include="include\units.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
