@@ -1,7 +1,7 @@
 ﻿#pragma once
 
-#include "image_process.h"
-#include "fps.h"
+#include "game/image_process.h"
+#include "game/fps.h"
 
 
 // abstract class

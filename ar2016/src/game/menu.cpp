@@ -1,4 +1,4 @@
-﻿#include "menu.h"
+﻿#include "game/menu.h"
 
 std::shared_ptr<Game> startMenu() {
 

@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 //  #include "***_game.h"
-#include "first_game.h"
+#include "game/first_game.h"
 
 
 std::shared_ptr<Game> startMenu();

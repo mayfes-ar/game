@@ -1,6 +1,6 @@
 #pragma once
 
-#include "object.h"
+#include "object/object.h"
 
 class BlockObject : public Object {
 	bool willStay;
