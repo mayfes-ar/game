@@ -56,6 +56,7 @@ bool Object::load() {
 	isSuccess &= loadImage("s_game_bg", "wallpaper_alpha");
 	isSuccess &= loadImage("s_game_result", "s_game_result");
 	isSuccess &= loadImage("s_game_dead", "dead_sample");
+	isSuccess &= loadImage("wanwan", "wanwan");
 
 	return isSuccess;
 }
