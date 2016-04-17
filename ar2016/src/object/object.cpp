@@ -74,6 +74,8 @@ bool Object::load() {
 	isSuccess &= loadSound("dead", "dead.wav");
 	isSuccess &= loadSound("game_over", "game_over.wav");
 	isSuccess &= loadSound("s_game_bgm", "妄想凸守旋律～補完～.mp3");
+	isSuccess &= loadSound("attack", "bomb.mp3");
+	isSuccess &= loadSound("jump", "jump.mp3");
 
 	return isSuccess;
 }

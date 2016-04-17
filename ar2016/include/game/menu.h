@@ -32,7 +32,6 @@ class Menu : Game {
 	public:
 		BackGround(){
 			layer = 1;
-			PlaySoundMem(soundHandles["menu_bgm"] , DX_PLAYTYPE_BACK, true);
 		}
 		bool draw() {
 			SetDrawBright(40, 40, 40);
@@ -57,6 +56,23 @@ class Menu : Game {
 			// DrawString(100, 50, "TITLE", GetColor(255, 255, 255));
 			DrawExtendGraph(640-192, 0, 640+192, 0+180, imgHandles["menu_title"], true);
 			return true;
+		}
+	};
+
+	// BGM の処理
+	class BGM : public Object {
+	public:
+		bool draw() {
+			// 曲名でも画面のどこかに表示する？
+			return true;
+		}
+
+		void start() {
+			PlaySoundMem(soundHandles["menu_bgm"] , DX_PLAYTYPE_LOOP, true);
+		}
+
+		void stop() {
+			StopSoundMem(soundHandles["menu_bgm"]);
 		}
 	};
 
@@ -122,6 +138,8 @@ class Menu : Game {
 	std::shared_ptr<SelectGame> games;
 	std::shared_ptr<Game>&  gameType;
 
+	std::shared_ptr<BGM> bgm;
+
 	// Menu クラスのループ処理
 public:
 	Menu(std::shared_ptr<Game>& gameType_) : gameType(gameType_) {
@@ -132,13 +150,15 @@ public:
 		using namespace std;
 		fps.isShow = true;
 
-
 		mode.setMode([this]() {
 			drawList.push_back(make_shared<Title>());
 			drawList.push_back(make_shared<BackEffect>());
 			drawList.push_back(make_shared<BackGround>());
 			drawList.push_back(games);
 		}, -1);
+
+		bgm = make_shared<BGM>();
+		bgm->start();
 
 		return Game::onStart();
 	}
@@ -172,7 +192,7 @@ public:
 	}
 
 	bool onFinish(){
-		// StopSoundMem(soundHandles["menu_bgm"]);
+		bgm->stop();
 		return true;
 	}
 

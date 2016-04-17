@@ -10,8 +10,6 @@ class SinglePlayerGame : public Game {
 	public:
 		Background(int& handle_) : handle(handle_) {
 			layer = 0;
-			StopSoundMem(soundHandles["menu_bgm"]);
-			PlaySoundMem(soundHandles["s_game_bgm"] , DX_PLAYTYPE_BACK, true);
 		}
 
 		bool draw() {
@@ -20,6 +18,57 @@ class SinglePlayerGame : public Game {
 			DrawExtendGraph(0, 0, WIDTH, HEIGHT, imgHandles["ar2016_logo"], true);
 			SetDrawBright(255, 255, 255);
 			return true;
+		}
+	};
+
+	// BGM の処理
+	class BGM : public Object {
+		int mode;
+	public:
+		BGM(int mode_) {
+			mode = mode_;
+		}
+
+		bool draw() {
+			// 曲名でも画面のどこかに表示する？
+			return true;
+		}
+
+		void start() {
+			switch (mode) {
+				case 0: {
+					PlaySoundMem(soundHandles["s_game_bgm"] , DX_PLAYTYPE_LOOP, true);
+					break;
+				}
+				case 1: {
+					PlaySoundMem(soundHandles["game_over"] , DX_PLAYTYPE_BACK, true);
+					break;
+				}
+				default: {
+					break;
+				}
+			}
+		}
+
+		void stop() {
+			switch (mode) {
+				case 0: {
+					StopSoundMem(soundHandles["s_game_bgm"]);
+					break;
+				}
+				case 1: {
+					StopSoundMem(soundHandles["game_over"]);
+					break;
+				}
+				default: {
+					break;
+				}
+			}
+		}
+
+		// プレイヤーが死んだときの効果音
+		void playDeadSound() {
+			PlaySoundMem(soundHandles["dead"] , DX_PLAYTYPE_NORMAL, true);
 		}
 	};
 
@@ -126,11 +175,14 @@ class SinglePlayerGame : public Game {
 			for (auto marker : markerList) {
 				if (left() < marker->right() && top() < marker->bottom() &&
 					right() > marker->left() && bottom() > marker->top()) {
+					if (isAlive) {
+						PlaySoundMem(soundHandles["attack"] , DX_PLAYTYPE_BACK, true);
+					}
 					isAlive = false;
-					return true;
+					return !isAlive;
 				}
 			}
-			return false;
+			return !isAlive;
 		}
 	};
 
@@ -138,6 +190,7 @@ class SinglePlayerGame : public Game {
 		double prevX;
 		double prevY;
 		bool isJumping = true;
+		bool isAlive = true;
 
 	public:
 		Player(int x_, int y_, int width_, int height_) {
@@ -174,6 +227,7 @@ class SinglePlayerGame : public Game {
 
 			if (key[KEY_INPUT_UP] && !isJumping) {
 				acY = -50;
+				PlaySoundMem(soundHandles["jump"] , DX_PLAYTYPE_BACK, true);
 			}
 			isJumping = true;
 
@@ -255,35 +309,30 @@ class SinglePlayerGame : public Game {
 			};
 
 			if (prevX < field["left"] || prevX > field["right"]) {
-				StopSoundMem(soundHandles["s_game_bgm"]);
-				PlaySoundMem(soundHandles["dead"], DX_PLAYTYPE_NORMAL, true);
-				return true;
+				isAlive = false;
 			}
 			if (prevY < field["top"] || prevY > field["bottom"]) {
-				StopSoundMem(soundHandles["s_game_bgm"]);
-				PlaySoundMem(soundHandles["dead"], DX_PLAYTYPE_NORMAL, true);
-				return true;
+				isAlive = false;
 			}
 
 			for (auto enemy : enemyList) {
 				if (left() < enemy->right() && top() < enemy->bottom() &&
 					right() > enemy->left() && bottom() > enemy->top()) {
-					StopSoundMem(soundHandles["s_game_bgm"]);
-					PlaySoundMem(soundHandles["dead"], DX_PLAYTYPE_NORMAL, true);
-					return true;
+					isAlive = false;
 				}
 			}
-			return false;
 
-			return false;
+			return !isAlive;
 		}
 	};
 
 	std::thread thread;
 	std::shared_ptr<Player> player;
-	// std::shared_ptr<Enemy> enemy;
+
 	std::vector<std::shared_ptr<BlockObject>> blockList;
 	std::vector<std::shared_ptr<Enemy>> enemyList;
+
+	std::shared_ptr<BGM> bgm;
 
 	int timer = 3500;
 
@@ -320,6 +369,8 @@ public:
 			drawList.push_back(player);
 			drawList.push_back(make_shared<Background>(share.handle));
 
+			bgm = make_shared<BGM>(0);
+			bgm->start();
 
 		}, -1);
 
@@ -328,7 +379,6 @@ public:
 			class Title : public Object {
 			public:
 				Title() {
-					PlaySoundMem(soundHandles["game_over"] , DX_PLAYTYPE_BACK, true);
 					layer = 50;
 				}
 
@@ -340,8 +390,11 @@ public:
 			};
 
 			drawList.clear();
-			// drawList.push_back(make_shared<BlockObject>(300, 300, 200, 200, true));
 			drawList.push_back(make_shared<Title>());
+
+			bgm->stop();
+			bgm = make_shared<BGM>(1);
+			bgm->start();
 		}, -1);
 
 		return Game::onStart();
@@ -375,6 +428,8 @@ public:
 			}
 
 			if(player->deathDecision(enemyList)){
+				bgm->stop();
+				bgm->playDeadSound();
 				mode.goNext();
 			}
 			break;
@@ -402,6 +457,8 @@ public:
 	}
 
 	bool onFinish() {
+		bgm->stop();
+
 		thread.join();
 		return true;
 	}
