@@ -48,9 +48,14 @@ bool Object::load() {
 	//メニューで使う
 	isSuccess &= loadImage("monhan", "monhan");
 	isSuccess &= loadImage("rockman", "rockman");
-	isSuccess &= loadImage("menu", "wallpaper");
+	isSuccess &= loadImage("ar2016_logo", "wallpaper");
 	isSuccess &= loadImage("menu_title", "menu_title");
 	isSuccess &= loadEffect("effect1", "warp", 1, 6, 640, 2880);
+
+	// Single Player Game
+	isSuccess &= loadImage("s_game_bg", "wallpaper_alpha");
+	isSuccess &= loadImage("s_game_result", "s_game_result");
+	isSuccess &= loadImage("s_game_dead", "dead_sample");
 
 	return isSuccess;
 }

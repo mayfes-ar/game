@@ -2,6 +2,7 @@
 
 //  #include "***_game.h"
 #include "game/first_game.h"
+#include "game/single_player_game.h"
 
 
 std::shared_ptr<Game> startMenu();
@@ -30,11 +31,11 @@ class Menu : Game {
 	class BackGround : public Object {
 	public:
 		BackGround(){
-			layer = 0;
+			layer = 1;
 		}
 		bool draw() {
 			SetDrawBright(40, 40, 40);
-			DrawExtendGraph(0, 0, WIDTH, HEIGHT, imgHandles["menu"], true);
+			DrawExtendGraph(0, 0, WIDTH, HEIGHT, imgHandles["ar2016_logo"], true);
 			SetDrawBright(255, 255, 255);
 			return true;
 		}
@@ -132,11 +133,11 @@ public:
 
 		mode.setMode([this]() {
 			drawList.push_back(make_shared<Title>());
-			// drawList.push_back(make_shared<BackEffect>());
+			drawList.push_back(make_shared<BackEffect>());
 			drawList.push_back(make_shared<BackGround>());
 			drawList.push_back(games);
 		}, -1);
-		
+
 		return Game::onStart();
 	}
 
@@ -151,7 +152,7 @@ public:
 			share.willFinish = true;
 		}
 
-		static int counterForWaiting = 0;
+		static int counterForWaiting = 3;
 		if (counterForWaiting > 0){
 			counterForWaiting--;
 		}
