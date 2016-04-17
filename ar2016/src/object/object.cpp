@@ -4,6 +4,7 @@ using namespace std;
 
 map<string, int> Object::imgHandles;
 map<string, vector<int>> Object::effectHandles;
+map<string, int> Object::soundHandles;
 
 // 一番最初に一回だけ呼ぶ
 bool Object::load() {
@@ -39,6 +40,17 @@ bool Object::load() {
 		return result;
 	};
 
+	auto loadSound = [](string key, string name) -> bool {
+		const string path = "sound/" + name;
+		const int handle = LoadSoundMem(path.c_str());
+		if (handle == -1) {
+			return false;
+		} else {
+			Object::soundHandles[key] = handle;
+			return true;
+		}
+	};
+
 	// 使い方 isSuccess &= loadなんとか(登録するキー, ファイル名, ...);
 	bool isSuccess = true;
 
@@ -50,6 +62,7 @@ bool Object::load() {
 	isSuccess &= loadImage("rockman", "rockman");
 	isSuccess &= loadImage("ar2016_logo", "wallpaper");
 	isSuccess &= loadImage("menu_title", "menu_title");
+	isSuccess &= loadSound("menu_bgm", "welcome_to_the_Chu-2_byo_world!.mp3");
 	isSuccess &= loadEffect("effect1", "warp", 1, 6, 640, 2880);
 
 	// Single Player Game
@@ -58,6 +71,9 @@ bool Object::load() {
 	isSuccess &= loadImage("s_game_dead", "dead_sample");
 	isSuccess &= loadImage("wanwan", "wanwan");
 	isSuccess &= loadImage("luigi", "luigi");
+	isSuccess &= loadSound("dead", "dead.wav");
+	isSuccess &= loadSound("game_over", "game_over.wav");
+	isSuccess &= loadSound("s_game_bgm", "妄想凸守旋律～補完～.mp3");
 
 	return isSuccess;
 }

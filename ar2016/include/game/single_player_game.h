@@ -10,6 +10,8 @@ class SinglePlayerGame : public Game {
 	public:
 		Background(int& handle_) : handle(handle_) {
 			layer = 0;
+			StopSoundMem(soundHandles["menu_bgm"]);
+			PlaySoundMem(soundHandles["s_game_bgm"] , DX_PLAYTYPE_BACK, true);
 		}
 
 		bool draw() {
@@ -253,15 +255,21 @@ class SinglePlayerGame : public Game {
 			};
 
 			if (prevX < field["left"] || prevX > field["right"]) {
+				StopSoundMem(soundHandles["s_game_bgm"]);
+				PlaySoundMem(soundHandles["dead"], DX_PLAYTYPE_NORMAL, true);
 				return true;
 			}
 			if (prevY < field["top"] || prevY > field["bottom"]) {
+				StopSoundMem(soundHandles["s_game_bgm"]);
+				PlaySoundMem(soundHandles["dead"], DX_PLAYTYPE_NORMAL, true);
 				return true;
 			}
 
 			for (auto enemy : enemyList) {
 				if (left() < enemy->right() && top() < enemy->bottom() &&
 					right() > enemy->left() && bottom() > enemy->top()) {
+					StopSoundMem(soundHandles["s_game_bgm"]);
+					PlaySoundMem(soundHandles["dead"], DX_PLAYTYPE_NORMAL, true);
 					return true;
 				}
 			}
@@ -307,9 +315,12 @@ public:
 				drawList.push_back(enemy);
 			};
 			makeEnemy(900, 0, 435/2, 349/2);
+			makeEnemy(350, 200, 435/4, 349/4);
 
 			drawList.push_back(player);
 			drawList.push_back(make_shared<Background>(share.handle));
+
+
 		}, -1);
 
 		// mode 1
@@ -317,6 +328,7 @@ public:
 			class Title : public Object {
 			public:
 				Title() {
+					PlaySoundMem(soundHandles["game_over"] , DX_PLAYTYPE_BACK, true);
 					layer = 50;
 				}
 

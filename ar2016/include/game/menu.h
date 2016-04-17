@@ -32,6 +32,7 @@ class Menu : Game {
 	public:
 		BackGround(){
 			layer = 1;
+			PlaySoundMem(soundHandles["menu_bgm"] , DX_PLAYTYPE_BACK, true);
 		}
 		bool draw() {
 			SetDrawBright(40, 40, 40);
@@ -46,6 +47,7 @@ class Menu : Game {
 	public:
 		Title() {
 			layer = 50;
+
 		}
 
 		bool draw() {
@@ -170,6 +172,7 @@ public:
 	}
 
 	bool onFinish(){
+		// StopSoundMem(soundHandles["menu_bgm"]);
 		return true;
 	}
 
