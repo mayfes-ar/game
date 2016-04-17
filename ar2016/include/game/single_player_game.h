@@ -35,7 +35,7 @@ class SinglePlayerGame : public Game {
 		}
 
 		bool draw() {
-			DrawExtendGraph(left(), top(), right(), bottom(), imgHandles["player"], true);
+			DrawExtendGraph(left(), top(), right(), bottom(), imgHandles["luigi"], true);
 			return false;
 		}
 
