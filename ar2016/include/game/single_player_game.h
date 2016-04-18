@@ -100,18 +100,48 @@ class SinglePlayerGame : public Game {
 	class Enemy : public Object {
 		double prevX;
 		double prevY;
+		bool isJumping = true;
 		bool isAlive = true;
+
+		int enemyType; // 0 : 移動しない、 1 : 左右にぴょこぴょこ
+		int turnCounter = 100;
+		int moveDirection;
+
 	public:
-		Enemy(int x_, int y_, int width_, int height_){
+		Enemy(int x_, int y_, int width_, int height_, int enemyType_){
 			rect.x = prevX = x_;
 			rect.y = prevY = y_;
 			rect.width = width_;
 			rect.height = height_;
+			enemyType = enemyType_;
 			layer = 100;
+			switch (enemyType) {
+				case 1: {
+					moveDirection = 1;
+					break;
+				}
+				case 2: {
+					moveDirection = rand()%4;
+					break;
+				}
+				default: {
+					moveDirection = 0;
+					break;
+				}
+			}
 		}
 
 		bool draw() {
-			DrawExtendGraph(left(), top(), right(), bottom(), imgHandles["wanwan"], true);
+			switch (enemyType) {
+				case 3: {
+					DrawExtendGraph(left(), top(), right(), bottom(), imgHandles["teresa"], true);
+					break;
+				}
+				default: {
+					DrawExtendGraph(left(), top(), right(), bottom(), imgHandles["wanwan"], true);
+					break;
+				}
+			}
 			return isAlive;
 		}
 
@@ -131,8 +161,71 @@ class SinglePlayerGame : public Game {
 			const double diffX = x - prevX;
 			const double diffY = y - prevY;
 
-			double acX = -0.5 * (1 - (diffX <= 0) - (diffX < 0));
-			double acY = 4;
+			double acX = 0;
+			double acY = 0;
+
+			switch (enemyType) {
+				case 0:{
+					acX = -0.5 * (1 - (diffX <= 0) - (diffX < 0));
+					acY = 4;
+					break;
+				}
+				case 1:{
+					acY = 2;
+					// turnCounter : 方向転換するまでの残りカウンタ数
+					// moveDirection とあわせて、方向転換の制御に用いる。
+					// moveDirection は x軸方向の正とわざわざ対応付けてはいません。
+					if (turnCounter <= 0 && !isJumping) {
+						moveDirection *= -1;
+						turnCounter = 100;
+					} else {
+						acX = moveDirection*0.2 * (moveDirection*diffX <= 2);
+						turnCounter--;
+					}
+					if (!isJumping) {
+						acY = -15;
+					}
+					isJumping = true;
+					break;
+				}
+				case 2:{
+					switch(moveDirection) {
+						case 0:{
+							acX = 0;
+							acY = 10;
+							break;
+						}
+						case 1:{
+							acX = -10;
+							acY = 0;
+							break;
+						}
+						case 2:{
+							acX = 0;
+							acY = -10;
+							break;
+						}
+						case 3:{
+							acX = 10;
+							acY = 0;
+							break;
+						}
+						default:{
+							break;
+						}
+					}
+					break;
+				}
+				case 3:{
+					acX = rand() % 5 -2;
+					acY = rand() % 5 -2;
+					break;
+				}
+				default:{
+					break;
+				}
+			}
+
 
 			// verlet法
 			const double tempX = x;
@@ -142,26 +235,31 @@ class SinglePlayerGame : public Game {
 			y += diffY + acY;
 			prevY = tempY;
 
-			// ブロックとの当たり判定
-			for (auto block : blockList) {
-				if (left() < block->right() && top() < block->bottom() &&
-					right() > block->left() && bottom() > block->top()) {
+			if (enemyType == 2) {
 
-					if (prevY < block->bottomHit() && prevY + height > block->topHit()) {
-						if (prevX >= block->rightHit()) {
-							x = block->right();
-						} else if (prevX + width <= block->leftHit()) {
-							x = block->left() - width;
+			} else {
+				// ブロックとの当たり判定
+				for (auto block : blockList) {
+					if (left() < block->right() && top() < block->bottom() &&
+						right() > block->left() && bottom() > block->top()) {
+
+						if (prevY < block->bottomHit() && prevY + height > block->topHit()) {
+							if (prevX >= block->rightHit()) {
+								x = block->right();
+							} else if (prevX + width <= block->leftHit()) {
+								x = block->left() - width;
+							} else {
+								// TODO
+							}
 						} else {
-							// TODO
-						}
-					} else {
-						if (prevY >= block->bottomHit()) {
-							y = block->bottom();
-						} else if (prevY + height <= block->topHit()) {
-							y = block->top() - height;
-						} else {
-							// TODO
+							if (prevY >= block->bottomHit()) {
+								y = block->bottom();
+							} else if (prevY + height <= block->topHit()) {
+								y = block->top() - height;
+								isJumping = false;
+							} else {
+								// TODO
+							}
 						}
 					}
 				}
@@ -171,6 +269,21 @@ class SinglePlayerGame : public Game {
 		// 死亡判定。マーカーで殴られたら死ぬ。
 		bool deathDecision(const std::vector<std::shared_ptr<Marker>> markerList){
 			// 生死判定
+
+			std::map<std::string, int> field = {
+				{"left", 0 - 200},
+				{"right", WIDTH + 200},
+				{"top", 0 - 200},
+				{"bottom", HEIGHT + 200}
+			};
+
+			if (prevX < field["left"] || prevX > field["right"]) {
+				isAlive = false;
+			}
+			if (prevY < field["top"] || prevY > field["bottom"]) {
+				isAlive = false;
+			}
+
 			// この場合、ブロックに当たったら死ぬ、的な
 			for (auto marker : markerList) {
 				if (left() < marker->right() && top() < marker->bottom() &&
@@ -332,6 +445,13 @@ class SinglePlayerGame : public Game {
 	std::vector<std::shared_ptr<BlockObject>> blockList;
 	std::vector<std::shared_ptr<Enemy>> enemyList;
 
+	// 敵作成。enemyType については Enemy クラスを参照
+	void makeEnemy(int x, int y, int width, int height, int enemyType) {
+		auto enemy = std::make_shared<Enemy>(x, y, width, height, enemyType);
+		enemyList.push_back(enemy);
+		drawList.push_back(enemy);
+	}
+
 	std::shared_ptr<BGM> bgm;
 
 	int timer = 3500;
@@ -345,6 +465,7 @@ public:
 	bool onStart() {
 		using namespace std;
 		fps.isShow = true;
+		srand((unsigned int)time(NULL));
 
 		// mode 0
 		mode.setMode([this]() {
@@ -358,13 +479,8 @@ public:
 			makeBlock(10, 100, 30, 720);
 			makeBlock(300, 300, 200, 50);
 
-			auto makeEnemy = [this](int x, int y, int width, int height) {
-				auto enemy = make_shared<Enemy>(x, y, width, height);
-				enemyList.push_back(enemy);
-				drawList.push_back(enemy);
-			};
-			makeEnemy(900, 0, 435/2, 349/2);
-			makeEnemy(350, 200, 435/4, 349/4);
+			makeEnemy(350, 200, 435/4, 349/4, 0);
+			makeEnemy(900, 0, 435/2, 349/2, 1);
 
 			drawList.push_back(player);
 			drawList.push_back(make_shared<Background>(share.handle));
@@ -451,6 +567,26 @@ public:
 		}
 		if (key[KEY_INPUT_N]) {
 			mode.goNext();
+		}
+		if (key[KEY_INPUT_0]) {
+			makeEnemy(350, 200, 435/4, 349/4, 1);
+		}
+		if (key[KEY_INPUT_1]) {
+			makeEnemy(900, 0, 435 / 2, 349 / 2, 1);
+		}
+		if (key[KEY_INPUT_2]) {
+			makeEnemy(WIDTH/2, HEIGHT/2, 435/2, 349/2, 2);
+		}
+		if (key[KEY_INPUT_3]) {
+			makeEnemy(WIDTH/2, HEIGHT/2, 120, 120, 3);
+		}
+
+		for ( auto& itr = enemyList.begin(); itr != enemyList.end();) {
+			if ((*itr)->draw()) {
+				++itr;
+			} else {
+				itr = enemyList.erase(itr);
+			}
 		}
 
 		return Game::onUpdate();

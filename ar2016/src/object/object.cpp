@@ -76,6 +76,7 @@ bool Object::load() {
 	isSuccess &= loadSound("s_game_bgm", "妄想凸守旋律～補完～.mp3");
 	isSuccess &= loadSound("attack", "bomb.mp3");
 	isSuccess &= loadSound("jump", "jump.mp3");
+	isSuccess &= loadImage("teresa", "teresa");
 
 	return isSuccess;
 }
