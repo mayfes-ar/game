@@ -89,7 +89,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>c:\DxLib_VC\プロジェクトに追加すべきファイル_VC用;C:\lib\opencv-3.1.0\build\install\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\;.\include;..\external;c:\DxLib_VC\プロジェクトに追加すべきファイル_VC用;C:\lib\opencv-3.1.0\build\install\include</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <ExceptionHandling>Async</ExceptionHandling>
       <FloatingPointModel>Fast</FloatingPointModel>
@@ -159,22 +159,23 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="const.cpp" />
-    <ClCompile Include="image_process.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="menu.cpp" />
-    <ClCompile Include="object.cpp" />
+    <ClCompile Include="src\game\image_process.cpp" />
+    <ClCompile Include="src\game\menu.cpp" />
+    <ClCompile Include="src\object\object.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="block_object.h" />
     <ClInclude Include="const.h" />
-    <ClInclude Include="first_game.h" />
-    <ClInclude Include="fps.h" />
-    <ClInclude Include="game.h" />
-    <ClInclude Include="image_process.h" />
+    <ClInclude Include="include\game\first_game.h" />
+    <ClInclude Include="include\game\fps.h" />
+    <ClInclude Include="include\game\game.h" />
+    <ClInclude Include="include\game\image_process.h" />
+    <ClInclude Include="include\game\menu.h" />
+    <ClInclude Include="include\game\single_player_game.h" />
+    <ClInclude Include="include\object\block_object.h" />
+    <ClInclude Include="include\object\object.h" />
+    <ClInclude Include="include\object\units.h" />
     <ClInclude Include="main.h" />
-    <ClInclude Include="menu.h" />
-    <ClInclude Include="object.h" />
-    <ClInclude Include="units.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
