@@ -204,6 +204,46 @@ public:
 			setNeedle(400, 400, 100, 0, 0);
 		}, -1);
 
+		// mode 2
+		mode.setMode([this]() {
+			makeStageBase();
+			setPlayer(100, 100);
+			setGoal(1000, 600);
+			setNeedle(400, 400, 100, 0, 0);
+		}, -1);
+
+		// mode 3
+		mode.setMode([this]() {
+			makeStageBase();
+			setPlayer(100, 100);
+			setGoal(1000, 600);
+			setNeedle(400, 400, 100, 0, 0);
+		}, -1);
+
+		// mode 4
+		mode.setMode([this]() {
+			makeStageBase();
+			setPlayer(100, 100);
+			setGoal(1000, 600);
+			setNeedle(400, 400, 100, 0, 0);
+		}, -1);
+
+		// mode 5
+		mode.setMode([this]() {
+			makeStageBase();
+			setPlayer(100, 100);
+			setGoal(1000, 600);
+			setNeedle(400, 400, 100, 0, 0);
+		}, -1);
+
+		// mode 6
+		mode.setMode([this]() {
+			makeStageBase();
+			setPlayer(100, 100);
+			setGoal(1000, 600);
+			setNeedle(400, 400, 100, 0, 0);
+		}, -1);
+
 		// result
 		mode.setMode([this](){
 			drawList.clear();
