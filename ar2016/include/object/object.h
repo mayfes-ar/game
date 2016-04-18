@@ -19,16 +19,27 @@ public:
 	int width, height;
 	// rad
 	double rotate;
-	int id;
+	int life;
 
-	Rectan(){}
-	Rectan(int x_, int y_, int width_, int height_, int rotate_, int id_) : x(x_), y(y_), width(width_), height(height_), rotate(rotate_), id(id_) {}
+	Rectan(){
+		x = 0;
+		y = 0;
+		width = 0;
+		height = 0;
+		life = 5;
+		rotate = 0;
+	}
+	Rectan(int x_, int y_, int width_, int height_, int rotate_/*, int id_*/) : x(x_), y(y_), width(width_), height(height_), rotate(rotate_)/*, id(id_)*/ {}
 
 	void scale(double rate) {
 		x *= rate; y *= rate; width *= rate; height *= rate;
 	}
 	void translate(int xShift, int yShift) {
 		x += xShift; y += yShift;
+	}
+	bool isAlive() {
+		if (life > 0) return true;
+		return false;
 	}
 };
 

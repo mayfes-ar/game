@@ -13,6 +13,7 @@
 
 #define _USE_MATH_DEFINES
 #include <math.h>
+#include <array>
 
 // スレッド間で共有するデータ
 class ShareData {
@@ -25,7 +26,7 @@ public:
 
 	//rects が認識結果（座標と大きさ）
 	std::mutex rectMutex;
-	std::vector<Rectan> rects;
+	std::array<Rectan, 7>  rects;
 };
 
 void capture(ShareData& share);
