@@ -22,6 +22,7 @@ public:
 	int id;
 
 	Rectan(){}
+	Rectan(int x_, int y_, int width_, int height_) : x(x_), y(y_), width(width_), height(height_), rotate(0), id(0) {}
 	Rectan(int x_, int y_, int width_, int height_, int rotate_, int id_) : x(x_), y(y_), width(width_), height(height_), rotate(rotate_), id(id_) {}
 
 	void scale(double rate) {
@@ -53,6 +54,11 @@ public:
 	double left() const { return rect.x; }
 	double top() const { return rect.y; }
 	double bottom() const { return rect.y + rect.height; }
+
+	bool isContacted(std::shared_ptr<Object> object) {
+		return  (left() < object->right() && top() < object->bottom() &&
+			right() > object->left() && bottom() > object->top());
+	}
 
 	virtual bool draw() = 0;
 
