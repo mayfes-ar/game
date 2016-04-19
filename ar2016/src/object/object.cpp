@@ -77,5 +77,8 @@ bool Object::load() {
 	isSuccess &= loadSound("attack", "bomb.mp3");
 	isSuccess &= loadSound("jump", "jump.mp3");
 
+	// puzzle game
+	isSuccess &= loadImage("p_explain", "puzzle_explanation");
+
 	return isSuccess;
 }

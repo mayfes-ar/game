@@ -18,6 +18,14 @@ class PuzzleGame : public Game {
 		}
 	};
 
+	class Explanation : public Object {
+	public:
+		bool draw() {
+			DrawGraph(0, 0, imgHandles["p_explain"], false);
+			return true;
+		}
+	};
+
 	class Player : public Object {
 		double prevX;
 		double prevY;
@@ -52,6 +60,11 @@ class PuzzleGame : public Game {
 			double acX = -0.3 * (1 - (diffX <= 0) - (diffX < 0));
 			double acY = 2;
 
+			bool onTop = false;
+			bool onBottom = false;
+			bool onLeft = false;
+			bool onRight = false;
+
 			if (key[KEY_INPUT_UP] && !isJumping) {
 				acY = -25;
 			}
@@ -77,25 +90,36 @@ class PuzzleGame : public Game {
 
 					if (prevY < block->bottomHit() && prevY + height > block->topHit()) {
 						if (prevX >= block->rightHit()) {
-							x = block->right();
+							x = prevX = block->right();
+							onLeft = true;
 						} else if (prevX + width <= block->leftHit()) {
-							x = block->left() - width;
+							x = prevX = block->left() - width;
+							onRight = true;
 						} else {
 							// TODO
+							init();
+							break;
 						}
 					} else {
 						if (prevY >= block->bottomHit()) {
-							y = block->bottom();
+							y = prevY = block->bottom();
+							onTop = true;
 						} else if (prevY + height <= block->topHit()) {
-							y = block->top() - height;
+							y = prevY = block->top() - height;
 							isJumping = false;
+							onBottom = true;
 						} else {
 							// TODO
+							init();
+							break;
 						}
 					}
 				}
 			}
 
+			if ((onTop && onBottom) || (onLeft && onRight)) {
+				init();
+			}
 		}
 
 		void init() {
@@ -128,7 +152,8 @@ class PuzzleGame : public Game {
 			layer = 50;
 		}
 		bool draw() {
-			DrawExtendGraph(left(), top(), right(), bottom(), imgHandles["wanwan"], true);
+			static const int offset = rect.height/10;
+			DrawExtendGraph(left() - offset, top() - offset, right() + offset, bottom() + offset, imgHandles["wanwan"], true);
 			return willExist;
 		}
 		bool update(std::vector<std::shared_ptr<BlockObject>> blockList) {
@@ -149,6 +174,8 @@ class PuzzleGame : public Game {
 	std::shared_ptr<GoalObject> goal;
 	std::vector<std::shared_ptr<BlockObject>> blockList;
 	std::vector<std::shared_ptr<NeedleObject>> needleList;
+
+	int timer = 0;
 
 	void setBlock(int x, int y, int width, int height, bool willStay) {
 		auto block = std::make_shared<BlockObject>(x, y, width, height, willStay);
@@ -177,9 +204,9 @@ class PuzzleGame : public Game {
 		drawList.push_back(std::make_shared<Background>(share.handle));
 
 		setBlock(0, 700, 1280, 100, true);
-		setBlock(-50, 0, 100, 720, true);
-		setBlock(1230, 0, 100, 720, true);
-		setBlock(0, -50, 1280, 100, true);
+		setBlock(-50, -720, 100, 720*2, true);
+		setBlock(1230, -720, 100, 720*2, true);
+		setBlock(200, -720, 100, 620, true);
 	}
 
 public:
@@ -193,77 +220,97 @@ public:
 
 		// mode 0: opening
 		mode.setMode([this]() {
-			setBlock(300, 300, 200, 200, true);
-		}, 3 * FPS);
+			drawList.push_back(std::make_shared<Explanation>());
+		}, -1);
 
 		// mode 1
 		mode.setMode([this]() {
 			makeStageBase();
-			setPlayer(100, 100);
-			setGoal(1000, 600);
-			setNeedle(400, 400, 100, 0, 0);
+			setPlayer(100, -300);
+			setGoal(1100, 600);
+			
+			setBlock(400, 300, 300, 500, true);
+
 		}, -1);
 
 		// mode 2
 		mode.setMode([this]() {
 			makeStageBase();
-			setPlayer(100, 100);
-			setGoal(1000, 600);
-			setNeedle(400, 400, 100, 0, 0);
+			setPlayer(100, -300);
+			setGoal(1100, 600);
 		}, -1);
 
 		// mode 3
-		mode.setMode([this]() {
-			makeStageBase();
-			setPlayer(100, 100);
-			setGoal(1000, 600);
-			setNeedle(400, 400, 100, 0, 0);
-		}, -1);
+		//mode.setMode([this]() {
+		//	makeStageBase();
+		//	setPlayer(100, 100);
+		//	setGoal(1000, 600);
+		//	setNeedle(400, 400, 100, 0, 0);
+		//}, -1);
 
 		// mode 4
-		mode.setMode([this]() {
+	/*	mode.setMode([this]() {
 			makeStageBase();
 			setPlayer(100, 100);
 			setGoal(1000, 600);
 			setNeedle(400, 400, 100, 0, 0);
-		}, -1);
+		}, -1);*/
 
 		// mode 5
-		mode.setMode([this]() {
+		/*mode.setMode([this]() {
 			makeStageBase();
 			setPlayer(100, 100);
 			setGoal(1000, 600);
 			setNeedle(400, 400, 100, 0, 0);
-		}, -1);
+		}, -1);*/
 
 		// mode 6
-		mode.setMode([this]() {
+	/*	mode.setMode([this]() {
 			makeStageBase();
 			setPlayer(100, 100);
 			setGoal(1000, 600);
 			setNeedle(400, 400, 100, 0, 0);
-		}, -1);
+		}, -1);*/
 
 		// result
 		mode.setMode([this](){
 			drawList.clear();
+			
 		}, -1);
 
 		return Game::onStart();
 	}
 
 	bool onUpdate() {
+		timer++;
+		if (timer == 3600) {
+			timer = 0;
+		}
+
 		// modeに応じて
 		switch (mode.getMode()) {
-		case 0: { 
+		case 0: { // explain
+			if (key[KEY_INPUT_RETURN]) {
+				mode.goNext();
+			}
 			return Game::onUpdate();
 		}
 		case 1: {
+			
+			break;
+		}
+		case 2: {
+			if (timer % (FPS/2) == 0) {
+				setNeedle(300, -100, 100, 0, 7);
+				setNeedle(600, -100, 100, 0, 7);
+				setNeedle(900, -100, 100, 0, 7);
+
+			}
 
 			break;
 		}
 
-		default:
+		default: // result
 			if (key[KEY_INPUT_RETURN]) {
 				share.willFinish = true;
 			}
