@@ -169,23 +169,56 @@ class PuzzleGame : public Game {
 		}
 	};
 
+	class SmogObject : public Object {
+		int counter = 0;
+		bool willFinish = false;
+	public:
+		SmogObject(int x, int y, int size) {
+			rect = Rectan(x, y, size, size);
+			layer = 120;
+		}
+		bool draw() {
+			static const int offset = rect.width / 10;
+			DrawExtendGraph(left() - offset, top() - offset, right() + offset, bottom() + offset, effectHandles["smog"][counter%13], true);
+			counter++;
+			
+			if (willFinish) {
+				return false;
+			}
+			return true;
+		}
+		void vanish() {
+			willFinish = true;
+		}
+	};
+
 	std::thread thread;
 	std::shared_ptr<Player> player;
 	std::shared_ptr<GoalObject> goal;
-	std::vector<std::shared_ptr<BlockObject>> blockList;
+	std::vector<std::shared_ptr<BlockObject>> stageBlockList;
+	std::vector<std::shared_ptr<BlockObject>> markerBlockList;
 	std::vector<std::shared_ptr<NeedleObject>> needleList;
+	std::vector<std::shared_ptr<SmogObject>> smogList;
+
+	std::mt19937 mt;
+	std::uniform_int_distribution<> rand100 = std::uniform_int_distribution<>(0, 99);
 
 	int timer = 0;
 
 	void setBlock(int x, int y, int width, int height, bool willStay) {
 		auto block = std::make_shared<BlockObject>(x, y, width, height, willStay);
-		blockList.push_back(block);
+		stageBlockList.push_back(block);
 		drawList.push_back(block);
 	}
 	void setNeedle(int x, int y, int size, double vx, double vy) {
 		auto needle = std::make_shared<NeedleObject>(x, y, size, vx, vy);
 		needleList.push_back(needle);
 		drawList.push_back(needle);
+	}
+	void setSmog() {
+		auto smog = std::make_shared<SmogObject>(rand100(mt) * 11, rand100(mt) * 6, 3 * rand100(mt) + 50);
+		smogList.push_back(smog);
+		drawList.push_back(smog);
 	}
 	void setPlayer(int x, int y) {
 		player = std::make_shared<Player>(x, y);
@@ -198,8 +231,9 @@ class PuzzleGame : public Game {
 
 	void makeStageBase() {
 		drawList.clear();
-		blockList.clear();
+		stageBlockList.clear();
 		needleList.clear();
+		smogList.clear();
 
 		drawList.push_back(std::make_shared<Background>(share.handle));
 
@@ -212,6 +246,8 @@ class PuzzleGame : public Game {
 public:
 	PuzzleGame() {
 		thread = std::thread::thread(capture, std::ref(share));
+		std::random_device rnd;
+		mt = std::mt19937(rnd());
 	}
 
 	bool onStart() {
@@ -241,12 +277,14 @@ public:
 		}, -1);
 
 		// mode 3
-		//mode.setMode([this]() {
-		//	makeStageBase();
-		//	setPlayer(100, 100);
-		//	setGoal(1000, 600);
-		//	setNeedle(400, 400, 100, 0, 0);
-		//}, -1);
+		mode.setMode([this]() {
+			makeStageBase();
+			setPlayer(100, -300);
+			setGoal(1100, 100);
+			for (int i = 0; i < 120; i++) {
+				setSmog();
+			}
+		}, -1);
 
 		// mode 4
 	/*	mode.setMode([this]() {
@@ -304,12 +342,15 @@ public:
 				setNeedle(300, -100, 100, 0, 7);
 				setNeedle(600, -100, 100, 0, 7);
 				setNeedle(900, -100, 100, 0, 7);
-
 			}
-
 			break;
 		}
-
+		case 3: {
+			if (timer % (FPS) == 0 && smogList.size() < 150) {
+				setSmog();
+			}
+			break;
+		}
 		default: // result
 			if (key[KEY_INPUT_RETURN]) {
 				share.willFinish = true;
@@ -322,10 +363,12 @@ public:
 		}
 
 		// 全ステージ共通
-		std::vector<std::shared_ptr<BlockObject>> allBlockList = blockList;
+		std::vector<std::shared_ptr<BlockObject>> allBlockList = stageBlockList;
+		markerBlockList.clear();
 		share.rectMutex.lock();
 		for (auto rect : share.rects) {
 			auto block = std::make_shared<BlockObject>(rect, false);
+			markerBlockList.push_back(block);
 			allBlockList.push_back(block);
 			drawList.push_back(block);
 		}
@@ -342,6 +385,22 @@ public:
 		for (auto needle : needleList) {
 			if (needle->isContacted(player)) {
 				player->init();
+			}
+		}
+
+		// smog
+		for (auto& itr = smogList.begin(); itr != smogList.end();) {
+			bool hit = false;
+			for (auto mBlock : markerBlockList) {
+				if ((*itr)->isContacted(mBlock)) {
+					(*itr)->vanish();
+					hit = true;
+					itr = smogList.erase(itr);
+					break;
+				}
+			}
+			if (!hit) {
+				itr++;
 			}
 		}
 

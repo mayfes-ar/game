@@ -79,6 +79,8 @@ bool Object::load() {
 
 	// puzzle game
 	isSuccess &= loadImage("p_explain", "puzzle_explanation");
+	isSuccess &= loadEffect("smog", "dark_smog", 13, 1, 3120, 240);
+	isSuccess &= loadEffect("coin", "coin", 5, 2, 1000, 400);
 
 	return isSuccess;
 }

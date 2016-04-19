@@ -7,6 +7,7 @@
 #include <memory>
 #include <list>
 #include <vector>
+#include <random>
 
 
 // double x, y;　左上の座標
