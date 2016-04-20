@@ -8,17 +8,17 @@
 
 namespace Breakout {
 // 描画の優先順位
-const int PRIORITY_BACKGROUND = 0;
-const int PRIORITY_STATIC_OBJECT = 1;
-const int PRIORITY_DYNAMIC_OBJECT = 2;
-const int PRIORITY_CHARACTER = 3;
+constexpr int PRIORITY_BACKGROUND = 0;
+constexpr int PRIORITY_STATIC_OBJECT = 1;
+constexpr int PRIORITY_DYNAMIC_OBJECT = 2;
+constexpr int PRIORITY_CHARACTER = 3;
 
 
 class Background : public Object
 {
 public:
-    Background(){
-        Object::layer = PRIORITY_BACKGROUND;
+    BackGround(){
+        layer = PRIORITY_BACKGROUND;
     }
 
     bool draw() {
