@@ -17,17 +17,21 @@ const int PRIORITY_CHARACTER = 3;
 class Background : public Object
 {
 public:
-    Background(){
+    Background(int& handle)
+        : m_handle(handle)
+    {
         Object::layer = PRIORITY_BACKGROUND;
     }
 
     bool draw() {
         SetDrawBright(40, 40, 40);
         DrawExtendGraph(0, 0, WIDTH, HEIGHT, 
-                imgHandles["breakout-background"], true);
+                imgHandles["ar2016_logo"], true);
         SetDrawBright(255, 255, 255);
         return true;
     }
+
+    int& m_handle;
 };
 
 } // namespace Breakout
