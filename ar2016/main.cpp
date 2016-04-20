@@ -38,12 +38,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		// メニューからゲームを選択
 		const auto game = startMenu(); //game には選択されたゲームが入る（例: std::shared_ptr<FirstGame>()）
 
-        std::cout << "hoge\r\n";
 		if (game == nullptr) {
 			break;
 		}
-
-        std::cout << "hoge\r\n";
 
 		if (!game->onStart()) { //onStart の返り値はただのエラーチェック
 			game->onFinish();
