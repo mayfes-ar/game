@@ -4,13 +4,14 @@
 #include "game/game.h"
 #include "game/image_process.h"
 #include "object/breakout_object.h"
+#include "game/breakout_components.h"
 
 
 class BreakoutGame : public Game
 {
 public:
     // コンストラクタ
-    BreakoutGame() {}
+    explicit BreakoutGame() {}
 
     // modeに登録する関数の実行回数の定義
     enum TimerKind
@@ -29,14 +30,13 @@ public:
             // フィールド
             drawList.push_back(std::make_shared<Breakout::Background>(
                         share.handle));
-                },
-        OnOnce);
+            // BLOCK
+            }, OnOnce);
 
         //mode 1
         mode.setMode([this]() {
             //drawList.clear();
-                },
-        OnOnce);
+                }, OnOnce);
 
         return Game::onStart();
     }
@@ -44,9 +44,13 @@ public:
     bool onUpdate() override
     {
         // 動的オブジェクトの位置更新
+        moveShip();
+        moveFireBall();
         // キャラクターの位置更新
         // 静的オブジェクトの位置更新
+        updateBlockStatus();
         // 描画
+        draw();
 		if (key[KEY_INPUT_ESCAPE]) {
 			share.willFinish = true;
 		}
@@ -62,6 +66,8 @@ public:
 private:
     std::thread m_detect_thread;
 
+    std::unique_ptr<BreakoutComponents> m_components;
+
     void init()
     {
 		fps.isShow = true;
@@ -70,4 +76,10 @@ private:
     }
 
     void draw() {}
+
+    void moveShip() {}
+
+    void moveFireBall() {}
+
+    void updateBlockStatus() {}
 };
