@@ -1,5 +1,6 @@
 ﻿#include "game/menu.h"
 
+
 std::shared_ptr<Game> startMenu() {
 
 	std::shared_ptr<Game> gameType;
@@ -41,7 +42,7 @@ Menu::SelectGame::SelectGame() {
 						imgHandles["rockman"],
 						150,
 						270,
-						[]() -> std::shared_ptr<Game> {return nullptr; })
+						[]() -> std::shared_ptr<Game> {return std::make_shared<BreakoutGame>(); })
 	};
 
 	selectedGameIndex = 0;
