@@ -56,7 +56,7 @@ bool Object::load() {
 
 	isSuccess &= loadImage("player", "mario");
 	isSuccess &= loadImage("block", "block");
-	isSuccess &= loadImage("brakout-background", "firefox");
+	//isSuccess &= loadImage("brakout-background", "firefox");
 
 	//メニューで使う
 	isSuccess &= loadImage("monhan", "monhan");

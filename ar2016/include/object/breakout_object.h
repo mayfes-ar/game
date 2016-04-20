@@ -84,10 +84,10 @@ struct Circle {
 // Block崩しに使われるBlock
 // Firebollにぶつかると消える
 // 初期位置に固定という意味で静的オブジェクト
-class Fireboll : public Object
+class Fireball : public Object
 {
 public:
-    explicit Fireboll(const Circle& realm) 
+    explicit Fireball(const Circle& realm) 
         : m_realm(realm)
     {
         Object::layer = PRIORITY_DYNAMIC_OBJECT;
