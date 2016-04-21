@@ -26,7 +26,7 @@ public:
 
 	//rects が認識結果（座標と大きさ）
 	std::mutex rectMutex;
-	std::array<Rectan, 7>  rects;
+	std::array<Rectan, MARKER_NUM>  rects;
 };
 
 void capture(ShareData& share);

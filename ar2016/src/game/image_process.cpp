@@ -52,7 +52,7 @@ void detect(cv::Mat& src, ShareData& share) {
 	dictionary.maxCorrectionBits = 1;
 	// lets create a dictionary of 100 markers
 
-	unsigned char markers[7][49] = {
+	unsigned char markers[MARKER_NUM][49] = {
 		{
 			0,0,0,1,0,0,0,
 			0,0,1,0,0,0,0,
@@ -118,7 +118,7 @@ void detect(cv::Mat& src, ShareData& share) {
 		}
 	};
 
-	for (int i = 0; i<sizeof(markers) / sizeof(markers[0]); i++) {
+	for (int i = 0; i < MARKER_NUM; i++) {
 		// assume generateMarkerBits() generate a new marker in binary format, so that
 		// markerBits is a 5x5 matrix of CV_8UC1 type, only containing 0s and 1s
 
@@ -135,7 +135,7 @@ void detect(cv::Mat& src, ShareData& share) {
 
 	static aruco::DetectorParameters detectorParams;
 	detectorParams.doCornerRefinement = true; // do corner refinement in markers
-
+ 
 	static vector<int> ids;
 	static vector<vector<Point2f>> corners;
 	//auto *rejected = new vector<vector<Point2f>>;
@@ -144,14 +144,14 @@ void detect(cv::Mat& src, ShareData& share) {
 	aruco::detectMarkers(src, dictionary, corners, ids, detectorParams/*, *rejected*/);
 
 	//array<Rectan, 7> rects;
-	array<bool, 7> isDetected = {false, false, false, false, false, false, false};
+	array<bool, MARKER_NUM> isDetected = {false, false, false, false, false, false, false};
 
 	// set results
 	for (int i = 0; i < ids.size(); i++) {
 		Rectan rect;
 
 		isDetected[ids[i]] = true;
-		rect.life = 5;
+		rect.life = KEEP_FRAME;
 		Point2f arrow = (corners)[i][1] - (corners)[i][0];
 		const int size = (int)sqrt(arrow.x*arrow.x + arrow.y*arrow.y);
 		rect.width = size;
@@ -175,7 +175,7 @@ void detect(cv::Mat& src, ShareData& share) {
 		share.rectMutex.unlock();
 	}
 
-	for (int id = 0; id < 7; id++) {
+	for (int id = 0; id < MARKER_NUM; id++) {
 
 		if (isDetected[id]) continue;
 		share.rectMutex.lock();
