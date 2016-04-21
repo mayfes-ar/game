@@ -23,7 +23,7 @@ public:
 
     // コンストラクタ
 	Rectan(){}
-	Rectan(int x_, int y_, int width_, int height_, int rotate_, int id_) 
+	Rectan(int x_, int y_, int width_, int height_, double rotate_, int id_) 
         : x(x_), y(y_), width(width_), height(height_), rotate(rotate_), id(id_) 
     {}
 
