@@ -63,6 +63,11 @@ public:
     {
         m_is_disappered = true;
     }
+
+    void appear()
+    {
+        m_is_disappered = false;
+    }
 private:
     bool m_is_disappered = false; // 火の玉にあったかどうか
     Rectan m_realm = Rectan(); // Blockの領域
@@ -73,12 +78,12 @@ private:
 struct Circle {
     Circle() {}
 
-    Circle(const Eigen::Vector2d& c, double r)
+    Circle(const Eigen::Vector2i& c, int r)
         : center(c), radius(r)
     {}
 
-    Eigen::Vector2d center = Eigen::Vector2d::Zero();
-    double radius = 0.0;
+    Eigen::Vector2i center = Eigen::Vector2i::Zero();
+    int radius = 0;
 };
 
 // Block崩しに使われるBlock
@@ -98,9 +103,9 @@ public:
             // 何も描画しない
             return true;
         }
-        int x = static_cast<int>(m_realm.center.x());
-        int y = static_cast<int>(m_realm.center.y());
-        int r = static_cast<int>(m_realm.radius);
+        int x = m_realm.center.x();
+        int y = m_realm.center.y();
+        int r = m_realm.radius;
         DrawCircle(x, y, r, GetColor(0, 255, 0), true);
 
         return true;

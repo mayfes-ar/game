@@ -22,6 +22,7 @@ public:
     bool onStart() override 
     {
         init();
+        m_components->setup();
         // 描画する
         // フィールド、オブジェクト、キャラクターの順に
         //
@@ -77,9 +78,12 @@ private:
 
     void draw() {}
 
+    // マーカからの情報から舟を移動
     void moveShip() {}
 
+    // Firaballを移動
     void moveFireBall() {}
 
+    // FireBallとBlockのあたり判定をし、blockを消すかを決める
     void updateBlockStatus() {}
 };
