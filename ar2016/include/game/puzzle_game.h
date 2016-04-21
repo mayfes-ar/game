@@ -136,7 +136,7 @@ class PuzzleGame : public Game {
 		}
 
 		bool draw() {
-			DrawExtendGraph(left(), top(), right(), bottom(), imgHandles["luigi"], true);
+			DrawExtendGraph(left(), top(), right(), bottom(), imgHandles["goal"], true);
 			return true;
 		}
 	};
@@ -145,6 +145,7 @@ class PuzzleGame : public Game {
 		const double vx;
 		const double vy;
 		bool willExist = true;
+		int counter = 0;
 
 	public:
 		NeedleObject(int x, int y, int size, double vx_, double vy_) : vx(vx_), vy(vy_){
@@ -152,8 +153,12 @@ class PuzzleGame : public Game {
 			layer = 50;
 		}
 		bool draw() {
-			static const int offset = rect.height/10;
-			DrawExtendGraph(left() - offset, top() - offset, right() + offset, bottom() + offset, imgHandles["wanwan"], true);
+			static const int margin = rect.height/3;
+			DrawExtendGraph(left() - margin, top() - margin, right() + margin, bottom() + margin, effectHandles["ball"][counter], true);
+			counter++;
+			if (counter == 30) {
+				counter = 0;
+			}
 			return willExist;
 		}
 		bool update(std::vector<std::shared_ptr<BlockObject>> blockList) {
@@ -178,8 +183,8 @@ class PuzzleGame : public Game {
 			layer = 120;
 		}
 		bool draw() {
-			static const int offset = rect.width / 10;
-			DrawExtendGraph(left() - offset, top() - offset, right() + offset, bottom() + offset, effectHandles["smog"][counter%13], true);
+			static const int margin = rect.width / 10;
+			DrawExtendGraph(left() - margin, top() - margin, right() + margin, bottom() + margin, effectHandles["smog"][counter%13], true);
 			counter++;
 			
 			if (willFinish) {
@@ -339,9 +344,9 @@ public:
 		}
 		case 2: {
 			if (timer % (FPS/2) == 0) {
-				setNeedle(300, -100, 100, 0, 7);
-				setNeedle(600, -100, 100, 0, 7);
-				setNeedle(900, -100, 100, 0, 7);
+				setNeedle(300, -100, 100, 0, 10);
+				setNeedle(600, -100, 100, 0, 11);
+				setNeedle(900, -100, 100, 0, 12);
 			}
 			break;
 		}
