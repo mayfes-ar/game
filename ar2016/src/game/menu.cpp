@@ -41,7 +41,7 @@ Menu::SelectGame::SelectGame() {
 						imgHandles["rockman"],
 						150,
 						270,
-						[]() -> std::shared_ptr<Game> {return nullptr; })
+						[]() -> std::shared_ptr<Game> {return std::make_shared<PuzzleGame>(); })
 	};
 
 	selectedGameIndex = 0;
