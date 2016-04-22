@@ -166,6 +166,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="const.h" />
+    <ClInclude Include="include\game\breakout_components.h" />
+    <ClInclude Include="include\game\breakout_game.h" />
     <ClInclude Include="include\game\first_game.h" />
     <ClInclude Include="include\game\fps.h" />
     <ClInclude Include="include\game\game.h" />

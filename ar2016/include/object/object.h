@@ -15,20 +15,27 @@
 // int id; マーカーの種類
 class Rectan {
 public:
-	double x, y;
-	int width, height;
+	double x = 0.0, y = 0.0;
+	int width = 0, height = 0;
 	// rad
-	double rotate;
-	int id;
+	double rotate = 0;
+	int id = 0;
 
+    // コンストラクタ
 	Rectan(){}
-	Rectan(int x_, int y_, int width_, int height_, int rotate_, int id_) : x(x_), y(y_), width(width_), height(height_), rotate(rotate_), id(id_) {}
+	Rectan(int x_, int y_, int width_, int height_, double rotate_, int id_) 
+        : x(x_), y(y_), width(width_), height(height_), rotate(rotate_), id(id_) 
+    {}
 
 	void scale(double rate) {
-		x *= rate; y *= rate; width *= rate; height *= rate;
+		x *= rate; y *= rate; 
+        width = static_cast<double>(width * rate); 
+        height = static_cast<double>(height * rate);
 	}
+
 	void translate(int xShift, int yShift) {
-		x += xShift; y += yShift;
+		x += static_cast<double>(xShift); 
+        y += static_cast<double>(yShift);
 	}
 };
 
