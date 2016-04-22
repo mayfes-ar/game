@@ -18,12 +18,12 @@ constexpr int BLOCK_HEIGHT = 50;
 
 // Fireballのパラメータ
 const Eigen::Vector2i FIREBALL_STRATPOS = Eigen::Vector2i{
-    HEIGHT - 100, WIDTH / 2};
+    HEIGHT - 500, WIDTH / 2 - 100};
 constexpr int FIREBALL_RADIUS = 50;
 
 // Shipのパラメータ
-constexpr int SHIP_START_X = 0;
-constexpr int SHIP_START_Y = 720 - 20;
+constexpr int SHIP_START_X = 200;
+constexpr int SHIP_START_Y = 600;
 constexpr int SHIP_WIDTH = 100;
 constexpr int SHIP_HEIGHT = 50;
 
@@ -47,12 +47,13 @@ public:
 
         const auto circle 
             = Breakout::Circle( FIREBALL_STRATPOS, FIREBALL_RADIUS );
-        auto fireball = std::make_shared<Breakout::Fireball>(circle);
+        fireball = std::make_shared<Breakout::Fireball>(circle);
 
         const Rectan ship_realm
             = Rectan(SHIP_START_X, SHIP_START_Y, SHIP_WIDTH, SHIP_HEIGHT, 
                0.0, 0);
-        auto ship = std::make_shared<Breakout::Ship>(ship_realm);
+
+        ship = std::make_shared<Breakout::Ship>(ship_realm);
 		// Todo Player
     }
 

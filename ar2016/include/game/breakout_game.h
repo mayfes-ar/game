@@ -11,7 +11,7 @@ class BreakoutGame : public Game
 {
 public:
     // コンストラクタ
-    explicit BreakoutGame() {}
+    explicit BreakoutGame() : m_components(){}
 
     // modeに登録する関数の実行回数の定義
     enum TimerKind
@@ -22,19 +22,21 @@ public:
     bool onStart() override 
     {
         init();
+        m_components = new BreakoutComponents();
         m_components->setup();
-        // 描画する
-        // フィールド、オブジェクト、キャラクターの順に
-        //
-        // mode 0
-        mode.setMode([this]() {
-            // フィールド
+        mode.setMode([&]() {
+
             drawList.push_back(std::make_shared<Breakout::Background>(
                         share.handle));
-            // BLOCK
+
+            for (const auto& block: m_components->block_list) {
+                drawList.push_back(block);
+            }
+
+            drawList.push_back(m_components->fireball);
+            drawList.push_back(m_components->ship);
             }, OnOnce);
 
-        //mode 1
         mode.setMode([this]() {
             //drawList.clear();
                 }, OnOnce);
@@ -44,14 +46,9 @@ public:
 
     bool onUpdate() override
     {
-        // 動的オブジェクトの位置更新
         moveShip();
         moveFireBall();
-        // キャラクターの位置更新
-        // 静的オブジェクトの位置更新
         updateBlockStatus();
-        // 描画
-        draw();
 		if (key[KEY_INPUT_ESCAPE]) {
 			share.willFinish = true;
 		}
@@ -67,7 +64,7 @@ public:
 private:
     std::thread m_detect_thread;
 
-    std::unique_ptr<BreakoutComponents> m_components;
+    BreakoutComponents* m_components = new BreakoutComponents();
 
     void init()
     {
@@ -75,8 +72,6 @@ private:
         // 認識スレッドを回す
         m_detect_thread = std::thread(capture, std::ref(share));
     }
-
-    void draw() {}
 
     // マーカからの情報から舟を移動
     void moveShip() {}

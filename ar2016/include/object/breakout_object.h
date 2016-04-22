@@ -42,10 +42,10 @@ public:
 class Block : public Object
 {
 public:
-    explicit Block(const Rectan& realm) 
-        : m_realm(realm)
+    explicit Block(const Rectan realm) 
     {
         Object::layer = PRIORITY_STATIC_OBJECT;
+        Object::rect = realm;
     }
 
     bool draw() override {
@@ -70,7 +70,6 @@ public:
     }
 private:
     bool m_is_disappered = false; // 火の玉にあったかどうか
-    Rectan m_realm = Rectan(); // Blockの領域
 };
 
 
@@ -92,7 +91,7 @@ struct Circle {
 class Fireball : public Object
 {
 public:
-    explicit Fireball(const Circle& realm) 
+    explicit Fireball(Circle realm) 
         : m_realm(realm)
     {
         Object::layer = PRIORITY_DYNAMIC_OBJECT;
@@ -127,10 +126,10 @@ private:
 class Ship : public Object
 {
 public:
-    explicit Ship(const Rectan& realm) 
-        : m_realm(realm)
+    explicit Ship(const Rectan realm)
     {
         Object::layer = PRIORITY_DYNAMIC_OBJECT;
+        Object::rect = realm;
     }
 
     bool draw() override {
@@ -138,10 +137,12 @@ public:
             // 何も描画しない
             return true;
         }
-        DrawBox(left(), top(), right(), bottom(), GetColor(255, 0, 0), false);
+
+        DrawBox(left(), top(), right(), bottom(), GetColor(0, 100, 100), true);
 
         return true;
     }
+
 
     // Blockの消滅
     void disapper()
@@ -150,7 +151,6 @@ public:
     }
 private:
     bool m_is_disappered = false; 
-    Rectan m_realm = Rectan(); // Blockの領域
     int life_num = 4; // defaultは４つ。火の玉に当たるごとに一つ減る
 };
 
