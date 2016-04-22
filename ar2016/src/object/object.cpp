@@ -56,6 +56,7 @@ bool Object::load() {
 
 	isSuccess &= loadImage("player", "mario");
 	isSuccess &= loadImage("block", "block");
+
 	//メニューで使う
 	isSuccess &= loadImage("monhan", "monhan");
 	isSuccess &= loadImage("rockman", "rockman");
