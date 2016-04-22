@@ -19,7 +19,7 @@ public:
 
 	bool draw() {
 		if (willStay) {
-			DrawBox(left(), top(), right(), bottom(), GetColor(240, 117, 28), true);
+			DrawBox(left(), top(), right(), bottom(), GetColor(240, 117, 50), true);
 		} else {
 			DrawExtendGraph(left(), top(), right(), bottom(), imgHandles["block"], true);
 		}
