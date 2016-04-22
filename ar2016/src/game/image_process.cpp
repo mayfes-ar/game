@@ -138,10 +138,9 @@ void detect(cv::Mat& src, ShareData& share) {
  
 	static vector<int> ids;
 	static vector<vector<Point2f>> corners;
-	//auto *rejected = new vector<vector<Point2f>>;
 
 	// detect markers and estimate pose
-	aruco::detectMarkers(src, dictionary, corners, ids, detectorParams/*, *rejected*/);
+	aruco::detectMarkers(src, dictionary, corners, ids, detectorParams);
 
 	//array<Rectan, 7> rects;
 	array<bool, MARKER_NUM> isDetected = {false, false, false, false, false, false, false};
@@ -151,7 +150,7 @@ void detect(cv::Mat& src, ShareData& share) {
 		Rectan rect;
 
 		isDetected[ids[i]] = true;
-		rect.life = KEEP_FRAME;
+		share.lives[ids[i]] = KEEP_FRAME;
 		Point2f arrow = (corners)[i][1] - (corners)[i][0];
 		const int size = (int)sqrt(arrow.x*arrow.x + arrow.y*arrow.y);
 		rect.width = size;
@@ -179,8 +178,8 @@ void detect(cv::Mat& src, ShareData& share) {
 
 		if (isDetected[id]) continue;
 		share.rectMutex.lock();
-		share.rects[id].life--;
-		if (!share.rects[id].isAlive()) {
+		share.lives[id]--;
+		if (share.lives[id] < 0) {
 			share.rects[id].width = 0;
 			share.rects[id].height = 0;
 		}
