@@ -1,6 +1,4 @@
-/*
- * BreakoutGameクラスが持つフィールド上のオブジェクト一覧
- */
+
 
 #pragma once
 
@@ -9,6 +7,7 @@
 #include <vector>
 #include "object/breakout_object.h"
 #include "const.h"
+#include <Eigen/Core>
 
 // Blockのパラメータ
 constexpr int BLOCK_WIDTH_NUM = 10;
@@ -18,12 +17,11 @@ constexpr int BLOCK_HEIGHT = 50;
 
 // Fireballのパラメータ
 const Eigen::Vector2i FIREBALL_STRATPOS = Eigen::Vector2i{
-    HEIGHT - 500, WIDTH / 2 - 100};
-constexpr int FIREBALL_RADIUS = 50;
+    WIDTH /2, HEIGHT - 200};
+constexpr int FIREBALL_RADIUS = 30;
 
 // Shipのパラメータ
-constexpr int SHIP_START_X = 200;
-constexpr int SHIP_START_Y = 600;
+const Eigen::Vector2i SHIP_START_POS = Eigen::Vector2i{WIDTH / 2, HEIGHT - 200};
 constexpr int SHIP_WIDTH = 100;
 constexpr int SHIP_HEIGHT = 50;
 
@@ -36,8 +34,9 @@ public:
 	{
 		for (int x = 0; x < BLOCK_WIDTH_NUM; ++x) {
 			for (int y = 0; y < BLOCK_HEIGHT_NUM; ++y) {
-				const Rectan rec(x * BLOCK_WIDTH, y * BLOCK_HEIGHT,
-					BLOCK_WIDTH, BLOCK_HEIGHT, 0, 0);
+				const Eigen::Vector2i realm = Eigen::Vector2i{ x * BLOCK_WIDTH, y * BLOCK_HEIGHT };
+			
+				const Shape::Rectangle rec(realm,BLOCK_WIDTH, BLOCK_HEIGHT);
 
 				auto block = std::make_shared<Breakout::Block>(rec);
 
@@ -46,12 +45,12 @@ public:
 		}
 
         const auto circle 
-            = Breakout::Circle( FIREBALL_STRATPOS, FIREBALL_RADIUS );
+            = Shape::Circle( FIREBALL_STRATPOS, FIREBALL_RADIUS );
         fireball = std::make_shared<Breakout::Fireball>(circle);
 
-        const Rectan ship_realm
-            = Rectan(SHIP_START_X, SHIP_START_Y, SHIP_WIDTH, SHIP_HEIGHT, 
-               0.0, 0);
+		
+        const Shape::Rectangle ship_realm
+			= Shape::Rectangle(Eigen::Vector2i::Zero(), 100, 100);
 
         ship = std::make_shared<Breakout::Ship>(ship_realm);
 		// Todo Player

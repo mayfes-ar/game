@@ -5,6 +5,7 @@
 #pragma once
 
 #include "object/object.h"
+#include "object/shape.h"
 #include <Eigen/Core>
 
 namespace Breakout {
@@ -42,10 +43,10 @@ public:
 class Block : public Object
 {
 public:
-    explicit Block(const Rectan realm) 
+    explicit Block(const Shape::Rectangle& realm) 
+        : m_realm(realm)
     {
         Object::layer = PRIORITY_STATIC_OBJECT;
-        Object::rect = realm;
     }
 
     bool draw() override {
@@ -53,7 +54,9 @@ public:
             // 何も描画しない
             return true;
         }
-        DrawBox(left(), top(), right(), bottom(), GetColor(255, 0, 0), false);
+        DrawBox(m_realm.left(), m_realm.top(), 
+                m_realm.right(), m_realm.bottom(), 
+                GetColor(255, 0, 0), false);
 
         return true;
     }
@@ -70,20 +73,11 @@ public:
     }
 private:
     bool m_is_disappered = false; // 火の玉にあったかどうか
+    Shape::Rectangle m_realm = Shape::Rectangle();
 };
 
 
-// 円のデータ構造。円の中心座標と半径で円を構築
-struct Circle {
-    Circle() {}
-
-    Circle(const Eigen::Vector2i& c, int r)
-        : center(c), radius(r)
-    {}
-
-    Eigen::Vector2i center = Eigen::Vector2i::Zero();
-    int radius = 0;
-};
+;
 
 // Block崩しに使われるBlock
 // Firebollにぶつかると消える
@@ -91,7 +85,7 @@ struct Circle {
 class Fireball : public Object
 {
 public:
-    explicit Fireball(Circle realm) 
+    explicit Fireball(const Shape::Circle& realm) 
         : m_realm(realm)
     {
         Object::layer = PRIORITY_DYNAMIC_OBJECT;
@@ -117,7 +111,7 @@ public:
     }
 private:
     bool m_is_disappered = false; // 火の玉にあったかどうか
-    Circle m_realm = Circle(); // Firebollの領域
+    Shape::Circle m_realm = Shape::Circle(); // Firebollの領域
     Eigen::Vector2d dir = Eigen::Vector2d::Zero(); // Firebollの進んでいる方向
 };
 
@@ -126,10 +120,10 @@ private:
 class Ship : public Object
 {
 public:
-    explicit Ship(const Rectan realm)
+    explicit Ship(const Shape::Rectangle& realm)
+		: m_realm(realm)
     {
         Object::layer = PRIORITY_DYNAMIC_OBJECT;
-        Object::rect = realm;
     }
 
     bool draw() override {
@@ -138,7 +132,10 @@ public:
             return true;
         }
 
-        DrawBox(left(), top(), right(), bottom(), GetColor(0, 100, 100), true);
+		
+        DrawBox(m_realm.left(), m_realm.top(),
+              m_realm.right(), m_realm.bottom(), 
+            GetColor(0, 100, 100), TRUE);
 
         return true;
     }
@@ -151,6 +148,7 @@ public:
     }
 private:
     bool m_is_disappered = false; 
+    Shape::Rectangle m_realm = Shape::Rectangle();
     int life_num = 4; // defaultは４つ。火の玉に当たるごとに一つ減る
 };
 
