@@ -104,6 +104,8 @@ public:
         return true;
     }
 
+	// Blockと衝突しているかどうかを判断し、衝突した場合は反射する。
+
     // Firebollの消滅
     void disapper()
     {
@@ -112,7 +114,6 @@ public:
 private:
     bool m_is_disappered = false; // 火の玉にあったかどうか
     Shape::Circle m_realm = Shape::Circle(); // Firebollの領域
-    Eigen::Vector2d dir = Eigen::Vector2d::Zero(); // Firebollの進んでいる方向
 };
 
 // キャラクタがのる船
@@ -125,6 +126,13 @@ public:
     {
         Object::layer = PRIORITY_DYNAMIC_OBJECT;
     }
+
+	//! @brief 舟を動かす
+	bool translate(int translation) {
+		// 範囲外にあるかどうかのチェックを実装すべき
+		m_realm.start_point.x() += translation;
+		return true;
+	}
 
     bool draw() override {
         if (m_is_disappered) {

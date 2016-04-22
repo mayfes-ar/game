@@ -74,11 +74,11 @@ private:
     }
 
     // マーカからの情報から舟を移動
-    void moveShip() {}
+	void moveShip();
 
     // Firaballを移動
-    void moveFireBall() {}
+	void moveFireBall();
 
     // FireBallとBlockのあたり判定をし、blockを消すかを決める
-    void updateBlockStatus() {}
+	void updateBlockStatus();
 };
