@@ -46,9 +46,10 @@ public:
 
     bool onUpdate() override
     {
-        moveShip();
-        moveFireBall();
-        updateBlockStatus();
+		moveShip();
+		moveFireBall();
+		updateBlockStatus();
+		
 		if (key[KEY_INPUT_ESCAPE]) {
 			share.willFinish = true;
 		}

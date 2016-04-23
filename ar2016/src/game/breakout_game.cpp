@@ -14,6 +14,7 @@ void BreakoutGame::moveShip()
 
 void BreakoutGame::moveFireBall()
 {
+	m_components->fireball->Fireball::updatePosition();
 }
 
 void BreakoutGame::updateBlockStatus() {}

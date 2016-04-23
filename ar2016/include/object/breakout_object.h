@@ -6,6 +6,7 @@
 
 #include "object/object.h"
 #include "object/shape.h"
+#include "moving/moving.h"
 #include <Eigen/Core>
 
 namespace Breakout {
@@ -77,16 +78,14 @@ private:
 };
 
 
-;
-
 // Block崩しに使われるBlock
 // Firebollにぶつかると消える
 // 初期位置に固定という意味で静的オブジェクト
 class Fireball : public Object
 {
 public:
-    explicit Fireball(const Shape::Circle& realm) 
-        : m_realm(realm)
+    Fireball(const Shape::Circle& realm, const Moving& moving) 
+        : m_realm(realm), m_moving(moving)
     {
         Object::layer = PRIORITY_DYNAMIC_OBJECT;
     }
@@ -104,7 +103,15 @@ public:
         return true;
     }
 
-	// Blockと衝突しているかどうかを判断し、衝突した場合は反射する。
+	void updatePosition() {
+		m_moving.updateAccel();
+		m_moving.updateVelocity();
+		m_moving.updatePosition();
+		const Eigen::Vector2d pos = m_moving.getPosition();
+		m_realm.center.x() = static_cast<int>(pos.x());
+		m_realm.center.y() = static_cast<int>(pos.y());
+	}
+	
 
     // Firebollの消滅
     void disapper()
@@ -114,6 +121,7 @@ public:
 private:
     bool m_is_disappered = false; // 火の玉にあったかどうか
     Shape::Circle m_realm = Shape::Circle(); // Firebollの領域
+	Moving m_moving = Moving();
 };
 
 // キャラクタがのる船

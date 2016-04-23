@@ -34,6 +34,7 @@ public:
 
 	void setup()
 	{
+		// Blockの初期化
 		for (int x = 0; x < BLOCK_WIDTH_NUM; ++x) {
 			for (int y = 0; y < BLOCK_HEIGHT_NUM; ++y) {
 				const Eigen::Vector2i realm 
@@ -47,15 +48,28 @@ public:
 			}
 		}
 
-        const auto circle 
-            = Shape::Circle( FIREBALL_STRATPOS, FIREBALL_RADIUS );
-        fireball = std::make_shared<Breakout::Fireball>(circle);
+		// fireballの初期化
+		{
+			const auto circle
+				= Shape::Circle(FIREBALL_STRATPOS, FIREBALL_RADIUS);
 
-		
-        const Shape::Rectangle ship_realm
-			= Shape::Rectangle(SHIP_START_POS, SHIP_WIDTH, SHIP_HEIGHT);
+			Eigen::Vector2d start_pos = Eigen::Vector2d(static_cast<double>(WIDTH) / 2.0, static_cast<double>(HEIGHT) - 200.0);
+			Eigen::Vector2d start_vel = Eigen::Vector2d::Random();
+			Eigen::Vector2d start_accel = Eigen::Vector2d::Random();
+			Moving moving = Moving(0.1, start_accel, start_vel, start_pos);
+			//Moving moving = Moving();
 
-        ship = std::make_shared<Breakout::Ship>(ship_realm);
+			fireball = std::make_shared<Breakout::Fireball>(circle, moving);
+			//fireball = std::make_shared<Breakout::Fireball>(circle);
+		}
+
+		// shipの初期化
+		{
+			const Shape::Rectangle ship_realm
+				= Shape::Rectangle(SHIP_START_POS, SHIP_WIDTH, SHIP_HEIGHT);
+
+			ship = std::make_shared<Breakout::Ship>(ship_realm);
+		}
 		// Todo Player
     }
 
