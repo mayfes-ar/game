@@ -78,5 +78,12 @@ bool Object::load() {
 	isSuccess &= loadSound("attack", "bomb.mp3");
 	isSuccess &= loadSound("jump", "jump.mp3");
 
+	// puzzle game
+	isSuccess &= loadImage("p_explain", "puzzle_explanation");
+	isSuccess &= loadImage("p_goal", "goal");
+	isSuccess &= loadEffect("p_smog", "dark_smog", 13, 1, 3120, 240);
+	isSuccess &= loadEffect("p_ball", "ball", 3, 10, 960, 2400);
+	isSuccess &= loadEffect("p_coin", "coin", 5, 2, 1000, 400);
+
 	return isSuccess;
 }

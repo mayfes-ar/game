@@ -30,7 +30,7 @@ Menu::SelectGame::SelectGame() {
 						imgHandles["player"], // サムネイルのハンドル
 						150,
 						225, // 起動するゲーム
-						[]() -> std::shared_ptr<Game> {return std::make_shared<FirstGame>(); }),
+						[]() -> std::shared_ptr<Game> {return std::make_shared<BreakoutGame>(); }),
 		GameDescription("モンスターハンター4",
 						"進化したのは、モンスターか、ハンターか。\n■広大なフィールドに生息するモンスター達\n■生まれ変わるハンティングアクション\n■進化したオトモアイルー\n■広がる世界、個性豊かなキャラクター\n■Wi-Fi通信無料\n  待望のインターネット通信によるマルチプレイ対応！",
 						imgHandles["monhan"],
@@ -42,7 +42,7 @@ Menu::SelectGame::SelectGame() {
 						imgHandles["rockman"],
 						150,
 						270,
-						[]() -> std::shared_ptr<Game> {return std::make_shared<BreakoutGame>(); })
+						[]() -> std::shared_ptr<Game> {return std::make_shared<PuzzleGame>(); })
 	};
 
 	selectedGameIndex = 0;

@@ -175,6 +175,7 @@
     <ClInclude Include="include\game\game.h" />
     <ClInclude Include="include\game\image_process.h" />
     <ClInclude Include="include\game\menu.h" />
+    <ClInclude Include="include\game\puzzle_game.h" />
     <ClInclude Include="include\game\single_player_game.h" />
     <ClInclude Include="include\input\input.h" />
     <ClInclude Include="include\math\collision_detection.h" />

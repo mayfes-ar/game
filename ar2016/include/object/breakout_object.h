@@ -142,6 +142,18 @@ public:
 		return true;
 	}
 
+	bool setLeft(int left) {
+		m_realm.start_point.x() = left;
+		return true;
+	}
+
+	double left() {
+		return m_realm.left();
+	}
+	double right() {
+		return m_realm.right();
+	}
+
     bool draw() override {
         if (m_is_disappered) {
             // 何も描画しない
