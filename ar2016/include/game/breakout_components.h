@@ -57,10 +57,8 @@ public:
 			Eigen::Vector2d start_vel = Eigen::Vector2d::Random();
 			Eigen::Vector2d start_accel = Eigen::Vector2d::Random();
 			Moving moving = Moving(0.1, start_accel, start_vel, start_pos);
-			//Moving moving = Moving();
 
 			fireball = std::make_shared<Breakout::Fireball>(circle, moving);
-			//fireball = std::make_shared<Breakout::Fireball>(circle);
 		}
 
 		// shipの初期化
