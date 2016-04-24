@@ -337,20 +337,26 @@ class SinglePlayerGame : public Game {
 
 			double acX = -0.5 * (1 - (diffX <= 0) - (diffX < 0));
 			double acY = 4;
+			
+			
+			if (key[KEY_INPUT_LSHIFT]) {
+				if (key[KEY_INPUT_UP] && !isJumping) {
+					acY = -50;
+					PlaySoundMem(soundHandles["jump"], DX_PLAYTYPE_BACK, true);
+					isJumping = true;
+				}
+				
 
-			if (key[KEY_INPUT_UP] && !isJumping) {
-				acY = -50;
-				PlaySoundMem(soundHandles["jump"] , DX_PLAYTYPE_BACK, true);
+				if (key[KEY_INPUT_RIGHT]) {
+					acX = 1.5 * (diffX < 15);
+				}
+				if (key[KEY_INPUT_LEFT]) {
+					acX = -1.5 * (diffX > -15);
+				}
 			}
-			isJumping = true;
-
-			if (key[KEY_INPUT_RIGHT]) {
-				acX = 1.5 * (diffX < 15);
+			else if(acX == 0 && !isJumping){
+				acX = rand() % 30 - 15;
 			}
-			if (key[KEY_INPUT_LEFT]) {
-				acX = -1.5 * (diffX > -15);
-			}
-
 			// verlet法
 			const double tempX = x;
 			x += diffX + acX;
