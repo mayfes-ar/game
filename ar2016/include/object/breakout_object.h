@@ -11,10 +11,11 @@
 
 namespace Breakout {
 // 描画の優先順位
-constexpr int PRIORITY_BACKGROUND = 0;
-constexpr int PRIORITY_STATIC_OBJECT = 1;
-constexpr int PRIORITY_DYNAMIC_OBJECT = 2;
-constexpr int PRIORITY_CHARACTER = 3;
+constexpr int PRIORITY_BACKGROUND = 0; // 背景画像
+constexpr int PRIORITY_SECTION = 1; // レイアウト（ゲームフィールド、スコア表示、デバッグ表示等）
+constexpr int PRIORITY_STATIC_OBJECT = 2; // 静的オブジェクト (Block)
+constexpr int PRIORITY_DYNAMIC_OBJECT = 3; // 動的オブジェクト(Ship, Fireball)
+constexpr int PRIORITY_CHARACTER = 4; // キャラクター(マリオ)
 
 // 背景画像
 // 溶岩の絵がほしい
@@ -36,6 +37,56 @@ public:
     }
 
     int& m_handle;
+};
+
+// 時間やスコアを表示する
+class Info : public Object
+{
+public:
+	explicit Info(const Shape::Rectangle& realm)
+		: m_realm(realm)
+	{
+		Object::layer = PRIORITY_SECTION;
+	}
+
+	bool draw() {
+        SetDrawBright(100, 100, 100);
+        DrawBox(m_realm.left(), m_realm.top(), 
+                m_realm.right(), m_realm.bottom(), 
+                GetColor(50, 50, 50), TRUE);
+        SetDrawBright(255, 255, 255);
+		return true;
+	}
+
+private:
+	Shape::Rectangle m_realm = Shape::Rectangle();
+};
+
+// フィールド 
+class Field : public Object
+{
+public:
+	explicit Field(const Shape::Rectangle& realm)
+		: m_realm(realm)
+	{
+		Object::layer = PRIORITY_SECTION;
+	}
+
+	bool draw() override {
+        SetDrawBright(100, 100, 100);
+        DrawBox(m_realm.left(), m_realm.top(), 
+                m_realm.right(), m_realm.bottom(), 
+                GetColor(255, 255, 255), false);
+        SetDrawBright(255, 255, 255);
+		return true;
+	}
+
+	// フィールド外にいるかどうか
+	bool isOutOfField(const Shape::Rectangle& rect);
+	bool isOutOfField(const Shape::Circle& cir);
+
+private:
+	Shape::Rectangle m_realm = Shape::Rectangle();
 };
 
 // Block崩しに使われるBlock

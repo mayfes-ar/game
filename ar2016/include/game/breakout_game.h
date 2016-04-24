@@ -29,6 +29,11 @@ public:
             drawList.push_back(std::make_shared<Breakout::Background>(
                         share.handle));
 
+			drawList.push_back(m_components->info);
+			drawList.push_back(m_components->debug);
+			drawList.push_back(m_components->field);
+			
+
             for (const auto& block: m_components->block_list) {
                 drawList.push_back(block);
             }
