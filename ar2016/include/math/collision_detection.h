@@ -8,4 +8,6 @@
 
 namespace CollisionDetection {
 
+bool collideCircleWithRect()
+
 } // namespace CollisionDetection
