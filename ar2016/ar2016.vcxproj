@@ -164,10 +164,13 @@
     <ClCompile Include="src\game\image_process.cpp" />
     <ClCompile Include="src\game\menu.cpp" />
     <ClCompile Include="src\moving\moving.cpp" />
+    <ClCompile Include="src\object\breakout_object.cpp" />
     <ClCompile Include="src\object\object.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="const.h" />
+    <ClInclude Include="include\game\breakout_components.h" />
+    <ClInclude Include="include\game\breakout_game.h" />
     <ClInclude Include="include\game\first_game.h" />
     <ClInclude Include="include\game\fps.h" />
     <ClInclude Include="include\game\game.h" />
