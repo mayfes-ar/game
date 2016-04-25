@@ -114,7 +114,13 @@ class SinglePlayerGame : public Game {
 			rect.width = width_;
 			rect.height = height_;
 			enemyType = enemyType_;
-			layer = 100;
+			if (enemyType == 4 || enemyType == 5) {
+				layer =101 ;
+			}
+			else {
+				layer = 100;
+			}
+
 			switch (enemyType) {
 				case 1: {
 					moveDirection = 1;
@@ -135,6 +141,14 @@ class SinglePlayerGame : public Game {
 			switch (enemyType) {
 				case 3: {
 					DrawExtendGraph(left(), top(), right(), bottom(), imgHandles["teresa"], true);
+					break;
+				}
+				case 4: {
+					DrawExtendGraph(left(), top()-150, right(), bottom(), imgHandles["water"], true);
+					break;
+				}
+				case 5: {
+					DrawExtendGraph(left(), top()-150, right(), bottom(), imgHandles["water"], true);
 					break;
 				}
 				default: {
@@ -163,6 +177,9 @@ class SinglePlayerGame : public Game {
 
 			double acX = 0;
 			double acY = 0;
+
+			char key[256];
+			GetHitKeyStateAll(key);
 
 			switch (enemyType) {
 				case 0:{
@@ -221,6 +238,23 @@ class SinglePlayerGame : public Game {
 					acY = rand() % 5 -2;
 					break;
 				}
+				case 4: {
+					acX = 0;
+					acY = -0.01;
+					if (key[KEY_INPUT_9]) {
+						acY = 0.05;
+					}
+					break;
+				}
+				case 5: {
+					acX = 0;
+					acY = -0.02;
+					if (key[KEY_INPUT_9]) {
+						acY = 0.05;
+					}
+					break;
+				}
+
 				default:{
 					break;
 				}
@@ -235,7 +269,7 @@ class SinglePlayerGame : public Game {
 			y += diffY + acY;
 			prevY = tempY;
 
-			if (enemyType == 2) {
+			if (enemyType == 2 || enemyType == 4) {
 
 			} else {
 				// ブロックとの当たり判定
@@ -481,6 +515,8 @@ public:
 
 			makeEnemy(350, 200, 435/4, 349/4, 0);
 			makeEnemy(900, 0, 435/2, 349/2, 1);
+			makeEnemy(0, HEIGHT+150, 1280, 200, 4);
+			makeEnemy(0, HEIGHT+150, 1280, 200, 5);
 
 			drawList.push_back(player);
 			drawList.push_back(make_shared<Background>(share.handle));
@@ -581,13 +617,13 @@ public:
 			makeEnemy(WIDTH/2, HEIGHT/2, 120, 120, 3);
 		}
 
-		for ( auto& itr = enemyList.begin(); itr != enemyList.end();) {
+		/*for ( auto& itr = enemyList.begin(); itr != enemyList.end();) {
 			if ((*itr)->draw()) {
 				++itr;
 			} else {
 				itr = enemyList.erase(itr);
 			}
-		}
+		}*/
 
 		return Game::onUpdate();
 	}

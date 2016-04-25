@@ -77,6 +77,7 @@ bool Object::load() {
 	isSuccess &= loadSound("attack", "bomb.mp3");
 	isSuccess &= loadSound("jump", "jump.mp3");
 	isSuccess &= loadImage("teresa", "teresa");
+	isSuccess &= loadImage("water", "water");
 
 	return isSuccess;
 }
