@@ -7,7 +7,28 @@
 #include "object/object.h"
 #include "object/shape.h"
 #include "moving/moving.h"
+#include "util/util.h"
+#include "const.h"
 #include <Eigen/Core>
+
+
+const Eigen::Vector2i INFO_START_POS = Eigen::Vector2i::Zero();
+const int INFO_WIDTH = WIDTH / 4;
+const int INFO_HEIGHT = HEIGHT;
+const Eigen::Vector2i FIELD_START_POS = Eigen::Vector2i(INFO_WIDTH, 0);
+const int FIELD_WIDTH = 2 * WIDTH / 4;
+const int FIELD_HEIGHT = HEIGHT;
+const Eigen::Vector2i DEBUG_WINDOW_START_POS = Eigen::Vector2i(INFO_WIDTH + FIELD_WIDTH, 0);
+const int DEBUG_WINDOW_WIDTH = 3 * WIDTH / 4 - 50;
+const int DEBUG_WINDOW_HEIGHT = HEIGHT;
+
+// Blockのパラメータ
+const int BLOCK_OFFSET_X = WIDTH / 4;
+const int BLOCK_OFFSET_Y = HEIGHT / 10;
+constexpr int BLOCK_WIDTH_NUM = 10;
+constexpr int BLOCK_HEIGHT_NUM = 5;
+const int BLOCK_WIDTH = (WIDTH / 2) / BLOCK_WIDTH_NUM;
+const int BLOCK_HEIGHT = (HEIGHT / 4) / BLOCK_HEIGHT_NUM;
 
 namespace Breakout {
 // 描画の優先順位
@@ -180,29 +201,70 @@ private:
 class Ship : public Object
 {
 public:
-    explicit Ship(const Shape::Rectangle& realm)
-		: m_realm(realm)
+    explicit Ship(const Eigen::Vector2i start_point, const Life& life)
+		: m_start_point(start_point) , m_life(life)
     {
         Object::layer = PRIORITY_DYNAMIC_OBJECT;
+		for (int i = 0; i < m_life.getLifeNum(); i++) {
+			m_blocks.push_back(Shape::Rectangle(start_point + Eigen::Vector2i{ BLOCK_WIDTH, 0 } * i, BLOCK_WIDTH, BLOCK_HEIGHT));
+		}
     }
 
 	//! @brief 舟を動かす
-	bool translate(int translation) {
-		// 範囲外にあるかどうかのチェックを実装すべき
-		m_realm.start_point.x() += translation;
+	bool translate(int translation) {	
+		//範囲外なら移動させない
+		//start_pointの更新
+		m_start_point = m_blocks[0].getLeftTopPoints();
+		if (m_blocks[m_blocks.size() - 1].right() + translation > FIELD_START_POS.x() + FIELD_WIDTH ||
+			m_blocks[0].left() + translation < FIELD_START_POS.x()) return false;
+
+		for (auto &block: m_blocks) {
+			block.start_point.x() += translation;
+		}
 		return true;
 	}
 
-	bool setLeft(int left) {
-		m_realm.start_point.x() = left;
+	bool restoreShip(int amount) {
+		if (!m_life.restore(amount)) return false;
+		if (m_blocks.empty()) {
+			m_blocks.push_back(Shape::Rectangle(m_start_point, BLOCK_WIDTH, BLOCK_HEIGHT));
+			return true;
+		}
+		for (int i = 0; i < amount; i++) {
+			if (m_blocks[m_blocks.size() - 1].getRightBottomPoints().x() + BLOCK_WIDTH > FIELD_START_POS.x() + FIELD_WIDTH) {
+				m_blocks.insert(m_blocks.begin(), Shape::Rectangle(m_blocks[0].getLeftTopPoints() - Eigen::Vector2i(BLOCK_WIDTH, 0), BLOCK_WIDTH, BLOCK_HEIGHT));
+			}
+			else
+				m_blocks.push_back(Shape::Rectangle(m_blocks[m_blocks.size() - 1].getRightTopPoints(), BLOCK_WIDTH, BLOCK_HEIGHT));
+		}
 		return true;
+	}
+
+	bool damageShip(int amount) {
+		if (!m_life.damage(amount)) return false;
+		for (int i = 0; i < amount; i++) {
+			m_blocks.pop_back();
+		}
+		return true;
+	}
+
+	void resetShip() {
+		m_blocks.clear();
+		m_life.resetLife();
+		for (int i = 0; i < m_life.getLifeNum(); i++) {
+			m_blocks.push_back(Shape::Rectangle(m_start_point + Eigen::Vector2i{ BLOCK_WIDTH, 0 } *i, BLOCK_WIDTH, BLOCK_HEIGHT));
+		}
+	}
+
+	int getLifeNum() {
+		return m_life.getLifeNum();
 	}
 
 	double left() {
-		return m_realm.left();
+		return m_blocks[0].left();
 	}
 	double right() {
-		return m_realm.right();
+		return m_blocks[m_blocks.size() - 1].right();
 	}
 
     bool draw() override {
@@ -211,10 +273,11 @@ public:
             return true;
         }
 
-		
-        DrawBox(m_realm.left(), m_realm.top(),
-              m_realm.right(), m_realm.bottom(), 
-            GetColor(0, 100, 100), TRUE);
+		for (auto block : m_blocks) {
+			DrawExtendGraph(block.left(), block.top(),
+				block.right(), block.bottom(),
+				imgHandles["ship_block"], TRUE);
+		}
 
         return true;
     }
@@ -226,9 +289,10 @@ public:
         m_is_disappered = true;
     }
 private:
-    bool m_is_disappered = false; 
-    Shape::Rectangle m_realm = Shape::Rectangle();
-    int life_num = 4; // defaultは４つ。火の玉に当たるごとに一つ減る
+    bool m_is_disappered = false;
+	std::vector<Shape::Rectangle> m_blocks = {};
+	Eigen::Vector2i m_start_point = Eigen::Vector2i::Zero();
+    Life m_life = Life(); // defaultは４つ。火の玉に当たるごとに一つ減る
 };
 
 
