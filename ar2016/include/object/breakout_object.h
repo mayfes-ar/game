@@ -150,11 +150,6 @@ private:
 // Firebollにぶつかると消える
 // 初期位置に固定という意味で静的オブジェクト
 /*
-	位置更新は、
-	auto moving = fireball->getMoving();
-	moving->updatePosition();
-	// 範囲外かどうか
-	fireball->syncPosition();
 */
 class Fireball : public Object
 {
@@ -201,8 +196,34 @@ public:
 		return m_realm;
 	}
 
-	std::shared_ptr<Moving> getMoving() const {
-		return m_moving;
+	// 衝突したかどうか
+	bool isCollided(const Shape::Rectangle& parent) {
+		// 四角形の左側との衝突
+		if (CollisionDetection::isOnLine(m_realm, parent.getLeftLine())) {
+			auto vel = m_moving->getVelocity();
+			m_moving->setVelocity(Eigen::Vector2d{-vel.x(), vel.y() });
+			return true;
+		}
+		// 四角形の右側との衝突
+		else if (CollisionDetection::isOnLine(m_realm, parent.getRightLine())) {
+			auto vel = m_moving->getVelocity();
+			m_moving->setVelocity(Eigen::Vector2d{ -vel.x(), vel.y() });
+			return true;
+		}
+		// 四角形の上側との衝突
+		else if (CollisionDetection::isOnLine(m_realm, parent.getTopLine())) {
+			auto vel = m_moving->getVelocity();
+			m_moving->setVelocity(Eigen::Vector2d{ vel.x(), -vel.y() });
+			return true;
+		}
+		// 四角形の下側との衝突
+		else if (CollisionDetection::isOnLine(m_realm, parent.getBottomLine())) {
+			auto vel = m_moving->getVelocity();
+			m_moving->setVelocity(Eigen::Vector2d{ vel.x(), -vel.y() });
+			return true;
+		}
+
+		return false;
 	}
 
 

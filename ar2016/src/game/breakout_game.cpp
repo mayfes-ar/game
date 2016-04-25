@@ -37,45 +37,27 @@ void BreakoutGame::updateShipStatus()
 void BreakoutGame::moveFireBall()
 {
 	m_components->fireball->updatePosition();
-	auto realm = m_components->fireball->getRealm();
-	auto moving = m_components->fireball->getMoving();
+	// 壁との衝突判定
+	if (m_components->fireball->isCollided(m_components->field->getRealm())) {
+		return;
+	}
+
 	// Ship衝突判定
 	for (const auto& block : m_components->ship->getRealm()) {
-		if (CollisionDetection::isOnRectangle(realm, block)) {
-				auto vel = moving->getVelocity();
-				moving->setVelocity(Eigen::Vector2d{vel.x(), -vel.y()});
+		if (m_components->fireball->isCollided(block)) {
+			// 
+			m_components->ship->damageShip(1);
+			return;
 		}
 	}
 
 	// Block衝突判定
-/*
-	for (const auto& block : m_components->block_list) {
-		if (CollisionDetection::isOnLine(realm, block->getRealm().getLeftLine())) {
-			block->disappear();
-			auto vel = moving->getVelocity();
-			moving->setVelocity(Eigen::Vector2d{-vel.x(), vel.y() });
-			break;
-		}
-		else if (CollisionDetection::isOnLine(realm, block->getRealm().getRightLine())) {
-			block->disappear();
-			auto vel = moving->getVelocity();
-			moving->setVelocity(Eigen::Vector2d{ -vel.x(), vel.y() });
-			break;
-		}
-		else if (CollisionDetection::isOnLine(realm, block->getRealm().getTopLine())) {
-			block->disappear();
-			auto vel = moving->getVelocity();
-			moving->setVelocity(Eigen::Vector2d{ vel.x(), -vel.y() });
-			break;
-		}
-		else if (CollisionDetection::isOnLine(realm, block->getRealm().getBottomLine())) {
-			block->disappear();
-			auto vel = moving->getVelocity();
-			moving->setVelocity(Eigen::Vector2d{ vel.x(), -vel.y() });
-			break;
+	for (auto& block : m_components->block_list) {
+		if (m_components->fireball->isCollided(block->getRealm())) {
+		block->disappear();
+		return;
 		}
 	}
-*/
 }
 
 void BreakoutGame::updateBlockStatus() {}
