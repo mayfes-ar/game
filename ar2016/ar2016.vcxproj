@@ -189,6 +189,7 @@
     <ClInclude Include="include\object\object.h" />
     <ClInclude Include="include\object\shape.h" />
     <ClInclude Include="include\object\units.h" />
+    <ClInclude Include="include\util\util.h" />
     <ClInclude Include="main.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

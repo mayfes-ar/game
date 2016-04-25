@@ -54,6 +54,7 @@ public:
 		moveShip();
 		moveFireBall();
 		updateBlockStatus();
+		updateShipStatus();
 		
 		if (key[KEY_INPUT_ESCAPE]) {
 			share.willFinish = true;
@@ -81,6 +82,8 @@ private:
 
     // マーカからの情報から舟を移動
 	void moveShip();
+
+	void updateShipStatus();
 
     // Firaballを移動
 	void moveFireBall();

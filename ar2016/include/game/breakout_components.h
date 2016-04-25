@@ -17,7 +17,6 @@ public:
 
 	void setup();
 
-
     std::shared_ptr<Breakout::Info> info = nullptr;
     std::shared_ptr<Breakout::Info> debug = nullptr;
     std::shared_ptr<Breakout::Field> field = nullptr;
