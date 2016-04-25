@@ -3,6 +3,7 @@
 //  #include "***_game.h"
 #include "game/first_game.h"
 #include "game/single_player_game.h"
+#include "game/puzzle_game.h"
 
 
 std::shared_ptr<Game> startMenu();
