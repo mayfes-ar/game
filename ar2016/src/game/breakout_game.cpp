@@ -40,9 +40,11 @@ void BreakoutGame::moveFireBall()
 	auto realm = m_components->fireball->getRealm();
 	auto moving = m_components->fireball->getMoving();
 	// Ship衝突判定
-	if (CollisionDetection::isOnRectangle(realm, m_components->ship->getRealm())) {
-			auto vel = moving->getVelocity();
-			moving->setVelocity(Eigen::Vector2d{vel.x(), -vel.y()});
+	for (const auto& block : m_components->ship->getRealm()) {
+		if (CollisionDetection::isOnRectangle(realm, block)) {
+				auto vel = moving->getVelocity();
+				moving->setVelocity(Eigen::Vector2d{vel.x(), -vel.y()});
+		}
 	}
 
 	// Block衝突判定

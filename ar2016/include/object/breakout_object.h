@@ -4,13 +4,14 @@
 
 #pragma once
 
+#include <Eigen/Core>
+#include <memory>
 #include "object/object.h"
 #include "object/shape.h"
 #include "moving/moving.h"
 #include "math/collision_detection.h"
 #include "util/util.h"
-#include <Eigen/Core>
-#include <memory>
+#include "util/breakout_params.h"
 
 
 namespace Breakout {
@@ -229,7 +230,7 @@ public:
 	bool translate(int translation) {	
 		//範囲外なら移動させない
 		//start_pointの更新
-		m_start_point = m_blocks[0].getLeftTopPoints();
+		m_start_point = m_blocks[0].getLeftTopPoint();
 		if (m_blocks[m_blocks.size() - 1].right() + translation > FIELD_START_POS.x() + FIELD_WIDTH ||
 			m_blocks[0].left() + translation < FIELD_START_POS.x()) return false;
 
@@ -246,11 +247,11 @@ public:
 			return true;
 		}
 		for (int i = 0; i < amount; i++) {
-			if (m_blocks[m_blocks.size() - 1].getRightBottomPoints().x() + BLOCK_WIDTH > FIELD_START_POS.x() + FIELD_WIDTH) {
-				m_blocks.insert(m_blocks.begin(), Shape::Rectangle(m_blocks[0].getLeftTopPoints() - Eigen::Vector2i(BLOCK_WIDTH, 0), BLOCK_WIDTH, BLOCK_HEIGHT));
+			if (m_blocks[m_blocks.size() - 1].getRightBottomPoint().x() + BLOCK_WIDTH > FIELD_START_POS.x() + FIELD_WIDTH) {
+				m_blocks.insert(m_blocks.begin(), Shape::Rectangle(m_blocks[0].getLeftTopPoint() - Eigen::Vector2i(BLOCK_WIDTH, 0), BLOCK_WIDTH, BLOCK_HEIGHT));
 			}
 			else
-				m_blocks.push_back(Shape::Rectangle(m_blocks[m_blocks.size() - 1].getRightTopPoints(), BLOCK_WIDTH, BLOCK_HEIGHT));
+				m_blocks.push_back(Shape::Rectangle(m_blocks[m_blocks.size() - 1].getRightTopPoint(), BLOCK_WIDTH, BLOCK_HEIGHT));
 		}
 		return true;
 	}
@@ -304,8 +305,8 @@ public:
         m_is_disappered = true;
     }
 
-	Shape::Rectangle getRealm() const {
-		return m_realm;
+	std::vector<Shape::Rectangle> getRealm() const {
+		return m_blocks;
 	}
 
 private:
