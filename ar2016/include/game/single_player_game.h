@@ -103,7 +103,7 @@ class SinglePlayerGame : public Game {
 		bool isJumping = true;
 		bool isAlive = true;
 
-		int enemyType; // 0 : 移動しない、 1 : 左右にぴょこぴょこ
+		int enemyType; // 0 : 移動しない、 1 : 左右にぴょこぴょこ  4 : ランダムに左右　5 :　上から下  
 		int turnCounter = 100;
 		int moveDirection;
 
@@ -124,17 +124,37 @@ class SinglePlayerGame : public Game {
 					moveDirection = rand()%4;
 					break;
 				}
+				case 4: {
+					moveDirection = 1;
+					break;
+				}
 				default: {
 					moveDirection = 0;
 					break;
 				}
 			}
-		}
+	}
 
 		bool draw() {
 			switch (enemyType) {
 				case 3: {
 					DrawExtendGraph(left(), top(), right(), bottom(), imgHandles["teresa"], true);
+					break;
+				}
+				case 4: {
+					DrawExtendGraph(left(), top(), right(), bottom(), imgHandles["ufo"], true);
+					break;
+				}
+				case 5: {
+					DrawExtendGraph(left(), top(), right(), bottom(), imgHandles["drop"], true);
+					break;
+				}
+				case 6: {
+					DrawExtendGraph(left(), top(), right(), bottom(), imgHandles["washi"], true);
+					break;
+				}
+				case 7: {
+					DrawExtendGraph(left(), top(), right(), bottom(), imgHandles["cloud"], true);
 					break;
 				}
 				default: {
@@ -221,6 +241,45 @@ class SinglePlayerGame : public Game {
 					acY = rand() % 5 -2;
 					break;
 				}
+				case 4: {
+					acY = 0;
+
+					if (turnCounter <= 0) {
+						moveDirection *= -1;
+						turnCounter = rand() % 100 + 1;
+					}
+					else {
+						acX = moveDirection * 10 * (moveDirection * diffX <= 30);
+						turnCounter--;
+					}
+
+					if (x == 20 + rand() % (WIDTH - 40) + 1) {
+						moveDirection = 0;
+						
+						
+						//ここで新しく当たり判定のある光をだしたい
+					}
+					if (x == 0) {
+						x = WIDTH;
+					}
+					else if (x == WIDTH) {
+						x = 0;
+					}
+			
+					break;
+				
+				}
+				case 5: {
+					acX = 0;
+					acY = 10;
+					
+					break;
+					/*１フレームごとにｘ座標ランダムｙ座標０のしずくを出現させて自由落下させたかった*/
+				}
+				case 6: {
+					acX = 20;
+					acY = 30;
+				}
 				default:{
 					break;
 				}
@@ -228,14 +287,14 @@ class SinglePlayerGame : public Game {
 
 
 			// verlet法
-			const double tempX = x;
 			x += diffX + acX;
+			const double tempX = x;
 			prevX = tempX;
 			const double tempY = y;
 			y += diffY + acY;
 			prevY = tempY;
 
-			if (enemyType == 2) {
+			if (enemyType == 2 || enemyType == 5) {
 
 			} else {
 				// ブロックとの当たり判定
@@ -479,8 +538,11 @@ public:
 			makeBlock(10, 100, 30, 720);
 			makeBlock(300, 300, 200, 50);
 
-			makeEnemy(350, 200, 435/4, 349/4, 0);
-			makeEnemy(900, 0, 435/2, 349/2, 1);
+			makeEnemy(350, 200, 435/4, 349/4, 1);
+			
+			
+			
+		
 
 			drawList.push_back(player);
 			drawList.push_back(make_shared<Background>(share.handle));
@@ -580,14 +642,25 @@ public:
 		if (key[KEY_INPUT_3]) {
 			makeEnemy(WIDTH/2, HEIGHT/2, 120, 120, 3);
 		}
+		if (key[KEY_INPUT_4]) {
+			
+			makeEnemy(WIDTH / 2, 10, 225 / 2, 225 / 2, 4); //ufo
+		}
+		if (key[KEY_INPUT_5]) {
+			makeEnemy( 500 + rand() % 300 , 0, 200 / 8, 200 / 8, 5); //drop
+		}
+		if (key[KEY_INPUT_6]) {
+			makeEnemy(rand()%(WIDTH/2), 0, 430 / 4, 263 / 4, 6); //washi
+		}
+		
 
-		for ( auto& itr = enemyList.begin(); itr != enemyList.end();) {
+		/*for ( auto& itr = enemyList.begin(); itr != enemyList.end();) {
 			if ((*itr)->draw()) {
 				++itr;
 			} else {
 				itr = enemyList.erase(itr);
 			}
-		}
+		}*/
 
 		return Game::onUpdate();
 	}

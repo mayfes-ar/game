@@ -57,6 +57,7 @@ bool Object::load() {
 	isSuccess &= loadImage("player", "mario");
 	isSuccess &= loadImage("block", "block");
 
+
 	//メニューで使う
 	isSuccess &= loadImage("monhan", "monhan");
 	isSuccess &= loadImage("rockman", "rockman");
@@ -77,6 +78,10 @@ bool Object::load() {
 	isSuccess &= loadSound("attack", "bomb.mp3");
 	isSuccess &= loadSound("jump", "jump.mp3");
 	isSuccess &= loadImage("teresa", "teresa");
-
+	isSuccess &= loadImage("ufo", "ufo");
+	isSuccess &= loadImage("drop", "drop");
+	//isSuccess &= loadImage("uforay", "uforaytrans");
+	isSuccess &= loadImage("cloud", "cloud");
+	isSuccess &= loadImage("washi", "wasi");
 	return isSuccess;
 }
