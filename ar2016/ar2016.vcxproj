@@ -160,6 +160,7 @@
   <ItemGroup>
     <ClCompile Include="const.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="src\game\breakout_components.cpp" />
     <ClCompile Include="src\game\breakout_game.cpp" />
     <ClCompile Include="src\game\image_process.cpp" />
     <ClCompile Include="src\game\menu.cpp" />
