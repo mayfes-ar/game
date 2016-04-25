@@ -7,7 +7,9 @@
 #include "object/object.h"
 #include "object/shape.h"
 #include "moving/moving.h"
+#include "math/collision_detection.h"
 #include <Eigen/Core>
+#include <memory>
 
 namespace Breakout {
 // 描画の優先順位
@@ -81,6 +83,10 @@ public:
 		return true;
 	}
 
+	Shape::Rectangle getRealm() const {
+		return m_realm;
+	}
+
 	// フィールド外にいるかどうか
 	bool isOutOfField(const Shape::Rectangle& rect);
 	bool isOutOfField(const Shape::Circle& cir);
@@ -102,7 +108,7 @@ public:
     }
 
     bool draw() override {
-        if (m_is_disappered) {
+        if (m_is_disappeared) {
             // 何も描画しない
             return true;
         }
@@ -113,18 +119,26 @@ public:
         return true;
     }
 
+	Shape::Rectangle getRealm() const {
+		return m_realm;
+	}
+
+	bool isDisappeared() const {
+		return m_is_disappeared;
+	}
+
     // Blockの消滅
-    void disapper()
+    void disappear()
     {
-        m_is_disappered = true;
+        m_is_disappeared = true;
     }
 
     void appear()
     {
-        m_is_disappered = false;
+        m_is_disappeared = false;
     }
 private:
-    bool m_is_disappered = false; // 火の玉にあったかどうか
+    bool m_is_disappeared = false; // 火の玉にあったかどうか
     Shape::Rectangle m_realm = Shape::Rectangle();
 };
 
@@ -132,17 +146,24 @@ private:
 // Block崩しに使われるBlock
 // Firebollにぶつかると消える
 // 初期位置に固定という意味で静的オブジェクト
+/*
+	位置更新は、
+	auto moving = fireball->getMoving();
+	moving->updatePosition();
+	// 範囲外かどうか
+	fireball->syncPosition();
+*/
 class Fireball : public Object
 {
 public:
-    Fireball(const Shape::Circle& realm, const Moving& moving) 
+    Fireball(const Shape::Circle& realm, const std::shared_ptr<Moving>& moving) 
         : m_realm(realm), m_moving(moving)
     {
         Object::layer = PRIORITY_DYNAMIC_OBJECT;
     }
 
     bool draw() {
-        if (m_is_disappered) {
+        if (m_is_disappeared) {
             // 何も描画しない
             return true;
         }
@@ -155,24 +176,37 @@ public:
     }
 
 	void updatePosition() {
-		m_moving.updateAccel();
-		m_moving.updateVelocity();
-		m_moving.updatePosition();
-		const Eigen::Vector2d pos = m_moving.getPosition();
-		m_realm.center.x() = static_cast<int>(pos.x());
-		m_realm.center.y() = static_cast<int>(pos.y());
+		m_moving->updatePosition(m_realm.center);
 	}
-	
+
+	void setPosition(const Eigen::Vector2i& pos) {
+		m_realm.center = pos;
+	}
+
+	bool isDisappeared() const {
+		m_is_disappeared;
+	}
 
     // Firebollの消滅
-    void disapper()
+    void disappear()
     {
-        m_is_disappered = true;
+        m_is_disappeared = true;
     }
+
+	Shape::Circle getRealm() const
+	{
+		return m_realm;
+	}
+
+	std::shared_ptr<Moving> getMoving() const {
+		return m_moving;
+	}
+
+
 private:
-    bool m_is_disappered = false; // 火の玉にあったかどうか
+    bool m_is_disappeared = false; // 火の玉にあったかどうか
     Shape::Circle m_realm = Shape::Circle(); // Firebollの領域
-	Moving m_moving = Moving();
+	std::shared_ptr<Moving> m_moving = nullptr;
 };
 
 // キャラクタがのる船
@@ -225,6 +259,11 @@ public:
     {
         m_is_disappered = true;
     }
+
+	Shape::Rectangle getRealm() const {
+		return m_realm;
+	}
+
 private:
     bool m_is_disappered = false; 
     Shape::Rectangle m_realm = Shape::Rectangle();

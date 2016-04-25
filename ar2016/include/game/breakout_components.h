@@ -79,10 +79,9 @@ public:
 			const auto circle
 				= Shape::Circle(FIREBALL_STRATPOS, FIREBALL_RADIUS);
 
-			Eigen::Vector2d start_pos = Eigen::Vector2d(static_cast<double>(WIDTH) / 2.0, static_cast<double>(HEIGHT) - 200.0);
 			Eigen::Vector2d start_vel = Eigen::Vector2d::UnitY();
 			Eigen::Vector2d start_accel = Eigen::Vector2d::Zero();
-			Moving moving = Moving(0.1, start_accel, start_vel, start_pos);
+			auto moving = std::make_shared<Moving>(0.1, start_accel, start_vel);
 
 			fireball = std::make_shared<Breakout::Fireball>(circle, moving);
 		}
