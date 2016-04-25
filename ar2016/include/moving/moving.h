@@ -6,14 +6,11 @@ class Moving {
 public:
 	Moving() {}
 
-	Moving(double time_step, const Eigen::Vector2d& accel, const Eigen::Vector2d& velocity,
-		const Eigen::Vector2d& position)
-		: m_time_step(time_step), m_accel(accel), m_velocity(velocity), m_position(position)
+	Moving(double time_step, const Eigen::Vector2d& accel, const Eigen::Vector2d& velocity)
+		: m_time_step(time_step), m_accel(accel), m_velocity(velocity)
 	{}
 
-	void updateAccel();
-	void updateVelocity();
-	void updatePosition();
+	void updatePosition(Eigen::Vector2i& position);
 
 	void setAccel(const Eigen::Vector2d& accel) {
 		m_accel = accel;
@@ -21,9 +18,6 @@ public:
 
 	void setVelocity(const Eigen::Vector2d& velocity) {
 		m_velocity = velocity;
-	}
-	void setPosition(const Eigen::Vector2d& position) {
-		m_position = position;
 	}
 
 	Eigen::Vector2d getAccel() const
@@ -35,15 +29,12 @@ public:
 	{
 		return m_velocity;
 	}
-	Eigen::Vector2d getPosition() const
-	{
-		return m_position;
-	}
 
 private:
 	double m_time_step = 0.1;
 	Eigen::Vector2d m_accel = Eigen::Vector2d::Zero();
-	Eigen::Vector2d m_velocity = Eigen::Vector2d::UnitY(); 
-	Eigen::Vector2d m_position = Eigen::Vector2d::Zero();
+	Eigen::Vector2d m_velocity = Eigen::Vector2d::Zero(); 
+
+	void updateVelocity();
 
 };
