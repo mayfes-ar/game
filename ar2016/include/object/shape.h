@@ -1,12 +1,34 @@
-/*
-	図形関連のデータ
-	円と四角形が定義されている
-*/
 #pragma once
 
 #include <Eigen/Core>
 
 namespace Shape {
+
+	using Point = Eigen::Matrix<int, 2, 1, Eigen::DontAlign>;
+
+	// 直線の定義
+	struct Line {
+		explicit Line(const Eigen::Vector2i& point, const Eigen::Vector2i& dir)
+			: point(point), dir(dir)
+		{}
+
+		virtual ~Line() {}
+
+		Eigen::Vector2i point = Eigen::Vector2i::Zero();
+		Eigen::Vector2i dir = Eigen::Vector2i::Zero();
+	};
+
+	// 線分の定義
+	// コンストラクタで端と端の点を渡すように
+	struct LineSeg : public Line {
+		explicit LineSeg(const Eigen::Vector2i& start_point, const Eigen::Vector2i& end_point)
+			: start_point(start_point), end_point(end_point),
+			  Line(start_point, end_point - start_point)
+		{}
+
+		Eigen::Vector2i start_point = Eigen::Vector2i::Zero();
+		Eigen::Vector2i end_point = Eigen::Vector2i::Zero();
+	};
 
 
 	struct Circle {
@@ -44,24 +66,43 @@ namespace Shape {
 			return start_point.y() + height;
 		}
 
-		Eigen::Vector2i getLeftTopPoints() const {
+
+		Eigen::Vector2i getLeftTopPoint() const {
 			const Eigen::Vector2i ret = Eigen::Vector2i{ left(), top() };
 			return ret;
 		}
 
-		Eigen::Vector2i getLeftBottomPoints() const {
+		Eigen::Vector2i getLeftBottomPoint() const {
 			const Eigen::Vector2i ret = Eigen::Vector2i{ left(), bottom() };
 			return ret;
 		}
 
-		Eigen::Vector2i getRightTopPoints() const {
+		Eigen::Vector2i getRightTopPoint() const {
 			const Eigen::Vector2i ret = Eigen::Vector2i{ right(), top() };
 			return ret;
 		}
 
-		Eigen::Vector2i getRightBottomPoints() const {
+		Eigen::Vector2i getRightBottomPoint() const {
 			const Eigen::Vector2i ret = Eigen::Vector2i{ right(), bottom() };
 			return ret;
+		}
+
+		Line getLeftLine() const {
+			Line line(getLeftTopPoint(), getLeftBottomPoint());
+			return line;
+		}
+
+		Line getRightLine() const {
+			Line line(getRightTopPoint(), getRightBottomPoint());
+			return line;
+		}
+		Line getTopLine() const {
+			Line line(getLeftTopPoint(), getRightTopPoint());
+			return line;
+		}
+		Line getBottomLine() const {
+			Line line(getLeftBottomPoint(), getRightBottomPoint());
+			return line;
 		}
 	};
 

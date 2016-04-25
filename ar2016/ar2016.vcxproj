@@ -163,6 +163,7 @@
     <ClCompile Include="src\game\breakout_game.cpp" />
     <ClCompile Include="src\game\image_process.cpp" />
     <ClCompile Include="src\game\menu.cpp" />
+    <ClCompile Include="src\math\collision_detection.cpp" />
     <ClCompile Include="src\moving\moving.cpp" />
     <ClCompile Include="src\object\breakout_object.cpp" />
     <ClCompile Include="src\object\object.cpp" />
@@ -180,6 +181,7 @@
     <ClInclude Include="include\game\single_player_game.h" />
     <ClInclude Include="include\input\input.h" />
     <ClInclude Include="include\math\collision_detection.h" />
+    <ClInclude Include="include\math\math_util.h" />
     <ClInclude Include="include\moving\moving.h" />
     <ClInclude Include="include\object\block_object.h" />
     <ClInclude Include="include\object\breakout_object.h" />
