@@ -32,19 +32,25 @@ class PuzzleGame : public Game {
 		const double initX;
 		const double initY;
 
+		bool isRightDirection = true;
+
 		bool isJumping = true;
 
 	public:
 		Player(int x_, int y_) : initX(x_), initY(y_) {
 			rect.x = prevX = x_;
 			rect.y = prevY = y_;
-			rect.width = 50;
-			rect.height =75;
+			rect.width = 75;
+			rect.height =100;
 			layer = 100;
 		}
 
 		bool draw() {
-			DrawExtendGraph(left(), top(), right(), bottom(), imgHandles["player"], true);
+			if (isRightDirection) {
+				DrawExtendGraph(left(), top(), right(), bottom(), imgHandles["p_girl"], true);
+			} else {	
+				DrawExtendGraph(right(), top(), left(), bottom(), imgHandles["p_girl"], true);
+			}
 			return true;
 		}
 
@@ -71,9 +77,11 @@ class PuzzleGame : public Game {
 			isJumping = true;
 
 			if (key[KEY_INPUT_RIGHT]) {
+				isRightDirection = true;
 				acX = 0.8 * (diffX < 8);
 			}
 			if (key[KEY_INPUT_LEFT]) {
+				isRightDirection = false;
 				acX = -0.8 * (diffX > -8);
 			}
 
@@ -131,12 +139,12 @@ class PuzzleGame : public Game {
 	class GoalObject : public Object {
 	public:
 		GoalObject(int x_, int y_) {
-			rect = Rectan(x_, y_, 100, 100);
+			rect = Rectan(x_, y_, 100, 150);
 			layer = 100;
 		}
 
 		bool draw() {
-			DrawExtendGraph(left(), top(), right(), bottom(), imgHandles["goal"], true);
+			DrawExtendGraph(left(), top(), right(), bottom(), imgHandles["p_goal"], true);
 			return true;
 		}
 	};
@@ -154,7 +162,7 @@ class PuzzleGame : public Game {
 		}
 		bool draw() {
 			static const int margin = rect.height/3;
-			DrawExtendGraph(left() - margin, top() - margin, right() + margin, bottom() + margin, effectHandles["ball"][counter], true);
+			DrawExtendGraph(left() - margin, top() - margin, right() + margin, bottom() + margin, effectHandles["p_ball"][counter], true);
 			counter++;
 			if (counter == 30) {
 				counter = 0;
@@ -184,7 +192,7 @@ class PuzzleGame : public Game {
 		}
 		bool draw() {
 			static const int margin = rect.width / 10;
-			DrawExtendGraph(left() - margin, top() - margin, right() + margin, bottom() + margin, effectHandles["smog"][counter%13], true);
+			DrawExtendGraph(left() - margin, top() - margin, right() + margin, bottom() + margin, effectHandles["p_smog"][counter%13], true);
 			counter++;
 			
 			if (willFinish) {
@@ -268,7 +276,7 @@ public:
 		mode.setMode([this]() {
 			makeStageBase();
 			setPlayer(100, -300);
-			setGoal(1100, 600);
+			setGoal(1100, 550);
 			
 			setBlock(400, 300, 300, 500, true);
 
@@ -278,7 +286,7 @@ public:
 		mode.setMode([this]() {
 			makeStageBase();
 			setPlayer(100, -300);
-			setGoal(1100, 600);
+			setGoal(1100, 550);
 		}, -1);
 
 		// mode 3
