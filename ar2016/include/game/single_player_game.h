@@ -325,6 +325,8 @@ class SinglePlayerGame : public Game {
 		double prevY;
 		bool isJumping = true;
 		bool isAlive = true;
+		bool isToJump = false;
+		int frameCount;
 
 	public:
 		Player(int x_, int y_, int width_, int height_) {
@@ -337,6 +339,9 @@ class SinglePlayerGame : public Game {
 
 		bool draw() {
 			DrawExtendGraph(left(), top(), right(), bottom(), imgHandles["s_game_player"], true);
+			if (isToJump) {
+				DrawExtendGraph(left(), top()-150, right(), bottom()-150, imgHandles["s_game_balloon"], true);
+			}
 			return true;
 		}
 
@@ -358,9 +363,9 @@ class SinglePlayerGame : public Game {
 
 			double acX = -0.5 * (1 - (diffX <= 0) - (diffX < 0));
 			double acY = 4;
-			
-			
+
 			if (key[KEY_INPUT_LSHIFT]) {
+				isToJump = false;
 				if (key[KEY_INPUT_UP] && !isJumping) {
 					acY = -50;
 					PlaySoundMem(soundHandles["jump"], DX_PLAYTYPE_BACK, true);
@@ -373,9 +378,33 @@ class SinglePlayerGame : public Game {
 					acX = -1.5 * (diffX > -15);
 				}
 			}
-			else if(acX == 0 && !isJumping){
-				acX = rand() % 30 - 15;
+			else if (acX == 0 && !isJumping && !isToJump) {
+				if (rand() % 3 == 0) {
+					frameCount = 0;
+					isToJump = true;
+				}
+				else {
+					acX = rand() % 30 - 15;
+				}
+
+
 			}
+
+			if (isToJump) {
+				if (frameCount >= 30) {
+					acY = -50;
+					PlaySoundMem(soundHandles["jump"], DX_PLAYTYPE_BACK, true);
+					isJumping = true;
+				}
+				else {
+					frameCount++;
+							}
+			}
+
+			if (isJumping) {
+				isToJump = false;
+			}
+
 			// verlet法
 			const double tempX = x;
 			x += diffX + acX;

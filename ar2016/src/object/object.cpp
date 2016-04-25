@@ -75,6 +75,7 @@ bool Object::load() {
 	isSuccess &= loadImage("s_game_wanwan", "wanwan");
 	isSuccess &= loadImage("s_game_marker", "luigi");
 	isSuccess &= loadImage("s_game_teresa", "teresa");
+	isSuccess &= loadImage("s_game_balloon", "balloon");
 
 	isSuccess &= loadSound("s_game_bgm", "妄想凸守旋律～補完～.mp3");
 	isSuccess &= loadSound("s_game_dead", "dead.wav");
