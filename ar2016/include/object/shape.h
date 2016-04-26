@@ -88,20 +88,20 @@ namespace Shape {
 		}
 
 		Line getLeftLine() const {
-			Line line(getLeftTopPoint(), getLeftBottomPoint());
+			Line line(getLeftTopPoint(), getLeftBottomPoint() - getLeftTopPoint());
 			return line;
 		}
 
 		Line getRightLine() const {
-			Line line(getRightTopPoint(), getRightBottomPoint());
+			Line line(getRightTopPoint(), getRightBottomPoint() - getRightTopPoint());
 			return line;
 		}
 		Line getTopLine() const {
-			Line line(getLeftTopPoint(), getRightTopPoint());
+			Line line(getLeftTopPoint(), getRightTopPoint() - getLeftTopPoint());
 			return line;
 		}
 		Line getBottomLine() const {
-			Line line(getLeftBottomPoint(), getRightBottomPoint());
+			Line line(getLeftBottomPoint(), getRightBottomPoint() - getLeftBottomPoint());
 			return line;
 		}
 	};
