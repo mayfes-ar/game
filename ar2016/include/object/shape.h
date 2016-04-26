@@ -87,6 +87,11 @@ namespace Shape {
 			return ret;
 		}
 
+		Eigen::Vector2i getCenterPoint() const {
+			const Eigen::Vector2i ret = Eigen::Vector2i{ start_point.x() + width * 0.5, start_point.y() + height * 0.5 };
+			return ret;
+		}
+
 		Line getLeftLine() const {
 			Line line(getLeftTopPoint(), getLeftBottomPoint() - getLeftTopPoint());
 			return line;

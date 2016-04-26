@@ -37,7 +37,7 @@ void BreakoutComponents::setup()
 		const auto circle
 			= Shape::Circle(FIREBALL_STRATPOS, FIREBALL_RADIUS);
 
-		Eigen::Vector2d start_vel = Eigen::Vector2d{0.0, 50.0};
+		Eigen::Vector2d start_vel = Eigen::Vector2d{50.0, 50.0};
 		Eigen::Vector2d start_accel = Eigen::Vector2d::Zero();
 		auto moving = std::make_shared<Moving>(0.1, start_accel, start_vel);
 
