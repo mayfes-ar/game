@@ -1,4 +1,5 @@
 ﻿#include "game/breakout_game.h"
+#include "util/breakout_params.h"
 
 void BreakoutGame::moveShip()
 {
@@ -43,21 +44,22 @@ void BreakoutGame::moveFireBall()
 	}
 
 	// Ship衝突判定
-	for (const auto& block : m_components->ship->getRealm()) {
+	for (const auto& block: m_components->ship->getRealm()) {
 		if (m_components->fireball->isCollided(block)) {
-			// 
 			m_components->ship->damageShip(1);
 			return;
 		}
 	}
 
 	// Block衝突判定
-	for (auto& block : m_components->block_list) {
-		if (m_components->fireball->isCollided(block->getRealm())) {
-		block->disappear();
-		return;
+	for (int block_id = 0; block_id < Breakout::BLOCK_HEIGHT_NUM * Breakout::BLOCK_WIDTH_NUM; ++block_id) {
+		if (m_components->fireball->isCollided(m_components->block_list.at(block_id)->getRealm())) {
+			m_components->block_list.at(block_id)->disappear();
+			// 
+			return;
 		}
 	}
+
 }
 
 void BreakoutGame::updateBlockStatus() {}

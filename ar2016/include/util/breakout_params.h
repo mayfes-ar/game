@@ -15,7 +15,7 @@ namespace Breakout {
 	const int FIELD_WIDTH = 2 * WIDTH / 4;
 	const int FIELD_HEIGHT = HEIGHT;
 	const Eigen::Vector2i DEBUG_WINDOW_START_POS = Eigen::Vector2i(INFO_WIDTH + FIELD_WIDTH, 0);
-	const int DEBUG_WINDOW_WIDTH = 3 * WIDTH / 4 - 50;
+	const int DEBUG_WINDOW_WIDTH = WIDTH / 4;
 	const int DEBUG_WINDOW_HEIGHT = HEIGHT;
 
 	// Blockのパラメータ
