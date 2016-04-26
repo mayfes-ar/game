@@ -40,6 +40,7 @@ void BreakoutGame::moveFireBall()
 	m_components->fireball->updatePosition();
 	// 壁との衝突判定
 	if (m_components->fireball->isCollided(m_components->field->getRealm())) {
+
 		return;
 	}
 
@@ -53,6 +54,7 @@ void BreakoutGame::moveFireBall()
 
 	// Block衝突判定
 	for (int block_id = 0; block_id < Breakout::BLOCK_HEIGHT_NUM * Breakout::BLOCK_WIDTH_NUM; ++block_id) {
+		if (m_components->block_list.at(block_id)->isDisappeared()) continue;
 		if (m_components->fireball->isCollided(m_components->block_list.at(block_id)->getRealm())) {
 			m_components->block_list.at(block_id)->disappear();
 			// 

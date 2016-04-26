@@ -14,7 +14,7 @@ void BreakoutComponents::setup()
 		const auto debug_realm = Shape::Rectangle(DEBUG_WINDOW_START_POS, DEBUG_WINDOW_WIDTH, DEBUG_WINDOW_HEIGHT);
 		debug = std::make_shared<Breakout::Info>(debug_realm);
 
-		const auto field_realm = Shape::Rectangle(FIELD_START_POS,FIELD_WIDTH, FIELD_HEIGHT);
+		const auto field_realm = Shape::Rectangle(FIELD_START_POS, FIELD_WIDTH, FIELD_HEIGHT);
 		field = std::make_shared<Breakout::Field>(field_realm);
 	}
 

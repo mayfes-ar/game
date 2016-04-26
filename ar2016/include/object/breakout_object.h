@@ -198,20 +198,8 @@ public:
 
 	// 衝突したかどうか
 	bool isCollided(const Shape::Rectangle& parent) {
-		// 四角形の左側との衝突
-		if (CollisionDetection::isOnLine(m_realm, parent.getLeftLine())) {
-			auto vel = m_moving->getVelocity();
-			m_moving->setVelocity(Eigen::Vector2d{-vel.x(), vel.y() });
-			return true;
-		}
-		// 四角形の右側との衝突
-		else if (CollisionDetection::isOnLine(m_realm, parent.getRightLine())) {
-			auto vel = m_moving->getVelocity();
-			m_moving->setVelocity(Eigen::Vector2d{ -vel.x(), vel.y() });
-			return true;
-		}
 		// 四角形の上側との衝突
-		else if (CollisionDetection::isOnLine(m_realm, parent.getTopLine())) {
+		if (CollisionDetection::isOnLine(m_realm, parent.getTopLine())) {
 			auto vel = m_moving->getVelocity();
 			m_moving->setVelocity(Eigen::Vector2d{ vel.x(), -vel.y() });
 			return true;
@@ -222,6 +210,19 @@ public:
 			m_moving->setVelocity(Eigen::Vector2d{ vel.x(), -vel.y() });
 			return true;
 		}
+		// 四角形の左側との衝突
+		else if (CollisionDetection::isOnLine(m_realm, parent.getLeftLine())) {
+			auto vel = m_moving->getVelocity();
+			m_moving->setVelocity(Eigen::Vector2d{ -vel.x(), vel.y() });
+			return true;
+		}
+		// 四角形の右側との衝突
+		else if (CollisionDetection::isOnLine(m_realm, parent.getRightLine())) {
+			auto vel = m_moving->getVelocity();
+			m_moving->setVelocity(Eigen::Vector2d{ -vel.x(), vel.y() });
+			return true;
+		}
+		
 
 		return false;
 	}

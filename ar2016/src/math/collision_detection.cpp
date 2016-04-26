@@ -7,8 +7,15 @@ namespace CollisionDetection {
 
 	bool isOnLine(const Shape::Circle& child, const Shape::Line& parent) {
 		const auto dist = MathUtil::distPointToLine(child.center, parent);
-		if (dist < child.radius) {
-			return true;
+		if (dist < child.radius) { 
+			const Eigen::Vector2i vector_a_to_center = child.center - parent.point;
+			const Eigen::Vector2i vector_b_to_center = child.center - (parent.point + parent.dir);
+			const int a_dot_p = vector_a_to_center.dot(parent.dir);
+			const int b_dot_p = vector_b_to_center.dot(parent.dir);
+			if ((a_dot_p >= 0 && b_dot_p <= 0) || (a_dot_p <= 0 && b_dot_p >=0)) 
+				return true;
+			else if (child.radius > vector_a_to_center.norm() || child.radius > vector_b_to_center.norm())
+				return true;
 		}
 		return false;
 	}
@@ -127,9 +134,6 @@ namespace CollisionDetection {
 	bool isOnRectangle(const Shape::Circle& child, const Shape::Rectangle& parent)
 	{
 		if (!isOnLine(child, parent.getLeftLine())) {
-			return false;
-		}
-		else if (!isOnLine(child, parent.getLeftLine())) {
 			return false;
 		}
 		else if (!isOnLine(child, parent.getTopLine())) {
