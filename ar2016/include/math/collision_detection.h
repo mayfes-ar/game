@@ -8,8 +8,11 @@
 
 namespace CollisionDetection {
 
-	// 円が直線上にあるかどうか
+	// 円が線分上にあるかどうか
 	bool isOnLine(const Shape::Circle& child, const Shape::Line& parent);
+
+	// 円が線分内にあるかどうか
+	bool isInLine(const Shape::Circle& child, const Shape::Line& parent);
 
 	// 円が円の輪郭上にあるかどうか
 	bool isOnCircle(const Shape::Circle& child, const Shape::Circle& parent);

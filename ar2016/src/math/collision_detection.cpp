@@ -5,6 +5,7 @@
 
 namespace CollisionDetection {
 
+	// 円が線分に触れているか
 	bool isOnLine(const Shape::Circle& child, const Shape::Line& parent) {
 		const auto dist = MathUtil::distPointToLine(child.center, parent);
 		if (dist < child.radius) { 
@@ -16,6 +17,26 @@ namespace CollisionDetection {
 				return true;
 			else if (child.radius > vector_a_to_center.norm() || child.radius > vector_b_to_center.norm())
 				return true;
+		}
+		return false;
+	}
+
+	// 円の中心が線分に収まっているか
+	bool isInLine(const Shape::Circle& child, const Shape::Line& parent) {
+		const auto dist = MathUtil::distPointToLine(child.center, parent);
+		if (dist < child.radius) {
+			const Eigen::Vector2i vector_a_to_circle_corner1 = (child.center - (parent.dir * child.radius) / parent.dir.norm()) - parent.point;
+			const Eigen::Vector2i vector_b_to_circle_corner1 = (child.center - (parent.dir * child.radius) / parent.dir.norm()) - (parent.point - parent.dir);
+			const Eigen::Vector2i vector_a_to_circle_corner2 = (child.center + (parent.dir * child.radius) / parent.dir.norm()) - parent.point;
+			const Eigen::Vector2i vector_b_to_circle_corner2 = (child.center + (parent.dir * child.radius) / parent.dir.norm()) - (parent.point - parent.dir);
+			const int a_dot_corner1 = vector_a_to_circle_corner1.dot(parent.dir);
+			const int b_dot_corner1 = vector_b_to_circle_corner1.dot(parent.dir);
+			const int a_dot_corner2 = vector_a_to_circle_corner2.dot(parent.dir);
+			const int b_dot_corner2 = vector_b_to_circle_corner2.dot(parent.dir);
+			if ((a_dot_corner1 >= 0 && b_dot_corner1 <= 0) || (a_dot_corner1 <= 0 && b_dot_corner1 >= 0) &&
+				(a_dot_corner2 >= 0 && b_dot_corner2 <= 0) || (a_dot_corner2 <= 0 && b_dot_corner2 >= 0)) {
+				return true;
+			}
 		}
 		return false;
 	}
