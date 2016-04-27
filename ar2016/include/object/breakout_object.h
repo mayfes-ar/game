@@ -182,8 +182,16 @@ public:
 		m_realm.center = pos;
 	}
 
+	void setVelocity(const Eigen::Vector2d& velocity) {
+		m_moving->setVelocity(velocity);
+	}
+
+	Eigen::Vector2d getVelocity() {
+		return m_moving->getVelocity();
+	}
+
 	bool isDisappeared() const {
-		m_is_disappeared;
+		return m_is_disappeared;
 	}
 
     // Firebollの消滅
@@ -191,6 +199,11 @@ public:
     {
         m_is_disappeared = true;
     }
+
+	void appear()
+	{
+		m_is_disappeared = false;
+	}
 
 	Shape::Circle getRealm() const
 	{
@@ -257,6 +270,8 @@ public:
 	}
 
 
+
+
 private:
     bool m_is_disappeared = false; // 火の玉にあったかどうか
     Shape::Circle m_realm = Shape::Circle(); // Firebollの領域
@@ -268,7 +283,7 @@ private:
 class Ship : public Object
 {
 public:
-    explicit Ship(const Eigen::Vector2i start_point, const Life& life)
+    explicit Ship(const Eigen::Vector2i& start_point, const Life& life)
 		: m_start_point(start_point) , m_life(life)
     {
         Object::layer = PRIORITY_DYNAMIC_OBJECT;
@@ -327,10 +342,10 @@ public:
 		return m_life.getLifeNum();
 	}
 
-	double left() {
+	int left() {
 		return m_blocks[0].left();
 	}
-	double right() {
+	int right() {
 		return m_blocks[m_blocks.size() - 1].right();
 	}
 
@@ -365,6 +380,139 @@ private:
 	std::vector<Shape::Rectangle> m_blocks = {};
 	Eigen::Vector2i m_start_point = Eigen::Vector2i::Zero();
     Life m_life = Life(); // defaultは４つ。火の玉に当たるごとに一つ減る
+};
+
+
+class Pot : public Object
+{
+public:
+	explicit Pot(const Shape::Rectangle& realm)
+		: m_realm(realm)
+	{
+		Object::layer = PRIORITY_DYNAMIC_OBJECT;
+	}
+
+	bool translate(const Eigen::Vector2i& translation) {
+		//範囲外なら移動させない
+		//realmの更新
+		if (m_realm.right() + translation.x() > FIELD_START_POS.x() + FIELD_WIDTH ||
+			m_realm.left() + translation.x() < FIELD_START_POS.x() ||
+			m_realm.top() + translation.y() < FIELD_START_POS.y() ||
+			m_realm.bottom() + translation.y() > FIELD_START_POS.y() + FIELD_HEIGHT) return false;
+
+		m_realm.start_point += translation;
+		updateFireballPosition();
+		return true;
+	}
+
+	bool rotate(double rotation) {
+		m_rotation += rotation;
+		return true;
+	}
+
+	// マーカーを認識したらis_disappearedはonにする。吸い込んでから3病後に発射。このときポットにカウントダウンを表示する。0になったとき発射不可能な場所にいた場合は発射失敗。
+
+	// fireballを吸い込む（特定のfireballのほうがいいかも？）
+	void inhareFireball(std::shared_ptr<Fireball>& fireball) {
+		m_fireball = fireball;
+		m_fireball->disappear();
+		m_fireball->setPosition(m_realm.getLeftTopPoint());
+		m_initial_fireball_speed = m_fireball->getVelocity().norm();
+		m_fireball->setVelocity(Eigen::Vector2d::Zero());
+	}
+
+	// fireballを吐き出す。吸い込んでから3秒後。
+	void exhareFireball() {
+		m_fireball->setVelocity(Eigen::Vector2d(- m_initial_fireball_speed * cos(m_rotation+M_PI/2.0), - m_initial_fireball_speed * sin(m_rotation+M_PI/2.0)));
+		m_fireball->appear();
+		m_fireball = nullptr;
+	}
+	
+	Shape::Rectangle getRealm() const {
+		return m_realm;
+	}
+
+	double getRotation() const {
+		return m_rotation;
+	}
+
+	bool hasFireball() {
+		return m_fireball == nullptr ? false : true;
+	}
+	
+	void appear() {
+		m_is_disappered = false;
+	}
+
+	void disappear() {
+		m_is_disappered = true;
+	}
+
+	bool isDisappeared() {
+		return m_is_disappered;
+	}
+
+	bool isAvailable() {
+		return !isExhared();
+	}
+
+	// 吐き出したかどうか（countをみる)
+	bool isExhared() {
+		return m_count >= 0 ? false : true;
+	}
+
+	void countDown() {
+		m_count--;
+	}
+
+	bool draw() override {
+		if (m_is_disappered || !isAvailable()) {
+			// 何も描画しない
+			return true;
+		}
+
+		auto rotatedTopLine = getRealm().getTopLine().getRotatedLine(m_realm.getCenterPoint(), getRotation());
+		auto rotatedLeftLine = getRealm().getLeftLine().getRotatedLine(getRealm().getCenterPoint(), getRotation());
+		auto rotatedRightLine = getRealm().getRightLine().getRotatedLine(getRealm().getCenterPoint(), getRotation());
+		auto rotatedBottomLine = getRealm().getBottomLine().getRotatedLine(getRealm().getCenterPoint(), getRotation());
+
+
+		DrawLine(rotatedTopLine.point.x(), rotatedTopLine.point.y(), (rotatedTopLine.point + rotatedTopLine.dir).x(), (rotatedTopLine.point + rotatedTopLine.dir).y(), GetColor(0, 255, 0), 3);
+		DrawLine(rotatedLeftLine.point.x(), rotatedLeftLine.point.y(), (rotatedLeftLine.point + rotatedLeftLine.dir).x(), (rotatedLeftLine.point + rotatedLeftLine.dir).y(), GetColor(200, 255, 0), 3);
+		DrawLine(rotatedRightLine.point.x(), rotatedRightLine.point.y(), (rotatedRightLine.point + rotatedRightLine.dir).x(), (rotatedRightLine.point + rotatedRightLine.dir).y(), GetColor(0, 255, 200), 3);
+		DrawLine(rotatedBottomLine.point.x(), rotatedBottomLine.point.y(), (rotatedBottomLine.point + rotatedBottomLine.dir).x(), (rotatedBottomLine.point + rotatedBottomLine.dir).y(), GetColor(200, 0, 200), 3);
+
+		DrawRotaFormatString(m_realm.left(), m_realm.top(),
+			1.0, 1.0,
+			m_realm.width / 2, m_realm.height / 2,
+			m_rotation, GetColor(255, 0, 0), 0, FALSE, "%d", m_count);
+
+		DrawRotaGraph(m_realm.getCenterPoint().x(), m_realm.getCenterPoint().y(),
+			(double)m_realm.width/150.0, m_rotation,
+			imgHandles["pot"], TRUE, FALSE);
+
+
+		DrawBox(m_realm.left(), m_realm.top(),
+			m_realm.right(), m_realm.bottom(),
+			GetColor(255, 0, 0), false);
+
+		return true;
+	}
+
+private:
+	bool m_is_disappered = true;
+	double m_rotation = 0;
+	std::shared_ptr<Fireball> m_fireball = nullptr;
+	Shape::Rectangle m_realm = Shape::Rectangle();
+	double m_initial_fireball_speed = 0;
+	// 吸い込んでからどのくらいで打ち出すか(基本30frames/secだから3秒くらい)
+	int m_count = 90;
+
+	void updateFireballPosition() {
+		if (hasFireball()) {
+			m_fireball->setPosition(m_realm.getLeftTopPoint());
+		}
+	}
 };
 
 
