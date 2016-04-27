@@ -49,5 +49,12 @@ void BreakoutComponents::setup()
 		const Life life = Life{SHIP_LIFE_NUM, SHIP_LIFE_NUM, SHIP_LIFE_NUM};
 		ship = std::make_shared<Breakout::Ship>(SHIP_START_POS, life);
 	}
+
+	// potの初期化
+	{
+		const Shape::Rectangle realm(POT_START_POS, FIREBALL_RADIUS * 2, FIREBALL_RADIUS * 2);
+		pot = std::make_shared<Breakout::Pot>(realm);
+	}
+
 	// Todo Player
 }

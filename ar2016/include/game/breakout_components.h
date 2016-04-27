@@ -26,4 +26,6 @@ public:
     std::shared_ptr<Breakout::Fireball> fireball = nullptr;
 
     std::shared_ptr<Breakout::Ship> ship = nullptr;
+
+	std::shared_ptr<Breakout::Pot> pot = nullptr;
 };
