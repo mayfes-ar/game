@@ -205,24 +205,25 @@ class SinglePlayerGame : public Game {
 					break;
 				}
 				case 2:{
+					moveDirection = 1;
 					switch(moveDirection) {
 						case 0:{
 							acX = 0;
-							acY = 10;
+							acY = 3;
 							break;
 						}
 						case 1:{
-							acX = -10;
+							acX = -3;
 							acY = 0;
 							break;
 						}
 						case 2:{
 							acX = 0;
-							acY = -10;
+							acY = -3;
 							break;
 						}
 						case 3:{
-							acX = 10;
+							acX = 3;
 							acY = 0;
 							break;
 						}
@@ -362,13 +363,13 @@ class SinglePlayerGame : public Game {
 			const double diffY = y - prevY;
 
 			double acX = -0.5 * (1 - (diffX <= 0) - (diffX < 0));
-			double acY = 4;
+			double acY = 3.2;
 
 			if (key[KEY_INPUT_LSHIFT]) {
 				isToJump = false;
 				if (key[KEY_INPUT_UP] && !isJumping) {
-					acY = -50;
-					PlaySoundMem(soundHandles["jump"], DX_PLAYTYPE_BACK, true);
+					acY = -40;
+					PlaySoundMem(soundHandles["s_game_jump"], DX_PLAYTYPE_BACK, true);
 					isJumping = true;
 				}				
 				if (key[KEY_INPUT_RIGHT]) {
@@ -387,13 +388,12 @@ class SinglePlayerGame : public Game {
 					acX = rand() % 30 - 15;
 				}
 
-
 			}
 
 			if (isToJump) {
 				if (frameCount >= 30) {
-					acY = -50;
-					PlaySoundMem(soundHandles["jump"], DX_PLAYTYPE_BACK, true);
+					acY = -40;
+					PlaySoundMem(soundHandles["s_game_jump"], DX_PLAYTYPE_BACK, true);
 					isJumping = true;
 				}
 				else {
@@ -507,14 +507,16 @@ class SinglePlayerGame : public Game {
 	}
 
 	std::shared_ptr<BGM> bgm;
-	int timer = 3500;
+	const int MAX_TIME = 30*20;
+	int timer = MAX_TIME;
 	bool hasPlayerWon;
 
 public:
 	SinglePlayerGame() {
 		thread = std::thread::thread(capture, std::ref(share));
-		player = std::make_shared<Player>(WIDTH/2 - 100/2, HEIGHT/2-150/2, 100, 150);
+		player = std::make_shared<Player>(WIDTH/2 - 100/2, HEIGHT/2-150/2, 60, 80);
 		hasPlayerWon = true;
+
 	}
 
 	bool onStart() {
@@ -561,16 +563,13 @@ public:
 			// makeBlock(10, 100, 30, 720);
 			// makeBlock(300, 300, 200, 50);
 
-			makeEnemy(350, 200, 435/4, 349/4, 0);
-			makeEnemy(900, 0, 435/2, 349/2, 1);
-
 			drawList.push_back(player);
 			drawList.push_back(make_shared<Background>(share.handle));
 
 			bgm = make_shared<BGM>(1);
 			bgm->start();
 
-		}, 300);
+		}, MAX_TIME);
 
 		// mode 2
 		mode.setMode([this]() {
@@ -621,8 +620,7 @@ public:
 			case 1: { // playing
 				timer -= 1;
 				if (timer <= 0) {
-					// share.willFinish = true;
-					mode.goNext();
+					willFinishMode = true;
 				}
 
 				std::vector<std::shared_ptr<Marker>> markerList;
@@ -646,10 +644,35 @@ public:
 				if(player->deathDecision(enemyList)){
 					bgm->stop();
 					bgm->playDeadSound();
-					// mode.goNext();
 					hasPlayerWon = false;
 					willFinishMode = true;
 				}
+
+				// 敵の出現を管理する
+				switch(MAX_TIME-timer) {
+					case 1: {
+						makeEnemy(350, 200, 435/5, 349/5, 0);
+						break;
+						}
+					case 150: {
+						makeEnemy(900, 0, 435/3, 349/3, 1);
+						break;
+						}
+					case 300: {
+						makeEnemy(WIDTH, HEIGHT/2, 435/2, 349/2, 2);
+						break;
+					}
+					default: {
+						// 定期的に実行する場合など
+						if (MAX_TIME - timer > 400 && (MAX_TIME - timer) % 20 == 0) {
+							makeEnemy(rand()%(WIDTH-200)+100, rand()%(HEIGHT-100), 112*4/5, 112*4/5, 3);
+						} else if ((MAX_TIME - timer) % 60 == 0) {
+							makeEnemy(rand()%(WIDTH-200)+100, rand()%(HEIGHT-100), 112*4/5, 112*4/5, 3);
+						}
+						break;
+					}
+				}
+
 				break;
 			}
 			case 2:{ // リザルト画面
@@ -667,19 +690,7 @@ public:
 			share.willFinish = true;
 		}
 		if (key[KEY_INPUT_N]) {
-			mode.goNext();
-		}
-		if (key[KEY_INPUT_0]) {
-			makeEnemy(350, 200, 435/4, 349/4, 1);
-		}
-		if (key[KEY_INPUT_1]) {
-			makeEnemy(900, 0, 435 / 2, 349 / 2, 1);
-		}
-		if (key[KEY_INPUT_2]) {
-			makeEnemy(WIDTH/2, HEIGHT/2, 435/2, 349/2, 2);
-		}
-		if (key[KEY_INPUT_3]) {
-			makeEnemy(WIDTH/2, HEIGHT/2, 120, 120, 3);
+			willFinishMode = true;
 		}
 
 		for ( auto& itr = enemyList.begin(); itr != enemyList.end();) {
@@ -691,6 +702,7 @@ public:
 		}
 
 		if (willFinishMode) {
+
 			mode.goNext();
 		}
 
