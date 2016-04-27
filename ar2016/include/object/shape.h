@@ -1,6 +1,7 @@
 #pragma once
 
 #include <Eigen/Core>
+#include <Eigen/Geometry>
 
 namespace Shape {
 
@@ -13,6 +14,16 @@ namespace Shape {
 		{}
 
 		virtual ~Line() {}
+
+		Line getRotatedLine(const Eigen::Vector2i& center, double rotation) {
+			Eigen::Vector2i vector_c_a = point - center;
+			Eigen::Vector2i vector_c_b = dir + vector_c_a;
+			Eigen:: Matrix2d rot;
+			rot = Eigen::Rotation2Dd(rotation);
+			Eigen::Vector2i rotated_vector_c_a = (rot * vector_c_a.cast<double>()).cast<int>();
+			Eigen::Vector2i rotated_vector_c_b = (rot * vector_c_b.cast<double>()).cast<int>();
+			return Line(rotated_vector_c_a + center, rotated_vector_c_b - rotated_vector_c_a);
+		}
 
 		Eigen::Vector2i point = Eigen::Vector2i::Zero();
 		Eigen::Vector2i dir = Eigen::Vector2i::Zero();
