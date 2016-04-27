@@ -40,6 +40,7 @@ public:
 
             drawList.push_back(m_components->fireball);
             drawList.push_back(m_components->ship);
+			drawList.push_back(m_components->pot);
             }, OnOnce);
 
         mode.setMode([this]() {
@@ -55,6 +56,7 @@ public:
 		moveFireBall();
 		updateBlockStatus();
 		updateShipStatus();
+		updatePotStatus();
 		
 		if (key[KEY_INPUT_ESCAPE]) {
 			share.willFinish = true;
@@ -90,4 +92,7 @@ private:
 
     // FireBallとBlockのあたり判定をし、blockを消すかを決める
 	void updateBlockStatus();
+
+	// PotとFireBallの当たり判定をし、fireballを吸い込むかを決める
+	void updatePotStatus();
 };
