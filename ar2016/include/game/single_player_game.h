@@ -161,6 +161,11 @@ class SinglePlayerGame : public Game {
 			return isAlive;
 		}
 
+		double rightHit() const { return right() - rect.width / 3; }
+		double leftHit() const { return left() + rect.width / 3; }
+		double topHit() const { return top() + rect.height / 3; }
+		double bottomHit() const { return bottom() - rect.height / 3; }
+
 		void update(const std::vector<std::shared_ptr<BlockObject>> blockList) {
 			// 座標更新以外にも状態の更新を扱う？
 
@@ -328,7 +333,9 @@ class SinglePlayerGame : public Game {
 		bool isAlive = true;
 		bool isToJump = false;
 		int frameCount;
-
+		int damage = 0;
+		int invincibleTime = 0;
+	
 	public:
 		Player(int x_, int y_, int width_, int height_) {
 			rect.x = prevX = x_;
@@ -343,17 +350,18 @@ class SinglePlayerGame : public Game {
 			if (isToJump) {
 				DrawExtendGraph(left(), top()-150, right(), bottom()-150, imgHandles["s_game_balloon"], true);
 			}
+			DrawString(50, 50, std::to_string(damage).c_str(), GetColor(255, 255, 255));
 			return true;
 		}
 
-		void update(const char key[], const std::vector<std::shared_ptr<BlockObject>> blockList, const std::vector<std::shared_ptr<Marker>> markerList) {
+		void update(const char key[], const std::vector<std::shared_ptr<BlockObject>> blockList, const std::vector<std::shared_ptr<Marker>> markerList, const std::vector<std::shared_ptr<Enemy>> enemyList) {
 
-			updateCoordinate(key, blockList, markerList);
+			updateCoordinate(key, blockList, markerList, enemyList);
 
 		}
 
 		// プレイヤーキャラクターの座標更新
-		void updateCoordinate(const char key[], const std::vector<std::shared_ptr<BlockObject>> blockList, const std::vector<std::shared_ptr<Marker>> markerList) {
+		void updateCoordinate(const char key[], const std::vector<std::shared_ptr<BlockObject>> blockList, const std::vector<std::shared_ptr<Marker>> markerList, const std::vector<std::shared_ptr<Enemy>> enemyList) {
 			double& x = rect.x;
 			double& y = rect.y;
 			const int& width = rect.width;
@@ -463,6 +471,31 @@ class SinglePlayerGame : public Game {
 					}
 				}
 			}
+			// 敵との当たり判定
+			// for (auto enemy : enemyList) {
+			// 	if (left() < enemy->right() && top() < enemy->bottom() &&
+			// 		right() > enemy->left() && bottom() > enemy->top()) {
+			//
+			// 		if (prevY < enemy->bottomHit() && prevY + height > enemy->topHit()) {
+			// 			if (prevX >= enemy->rightHit()) {
+			// 				x = enemy->right();
+			// 			} else if (prevX + width <= enemy->leftHit()) {
+			// 				x = enemy->left() - width;
+			// 			} else {
+			// 				// TODO
+			// 			}
+			// 		} else {
+			// 			if (prevY >= enemy->bottomHit()) {
+			// 				y = enemy->bottom();
+			// 			} else if (prevY + height <= enemy->topHit()) {
+			// 				y = enemy->top() - height;
+			// 				isJumping = false;
+			// 			} else {
+			// 				// TODO
+			// 			}
+			// 		}
+			// 	}
+			// }
 		}
 
 		// プレイヤーキャラクターの生死判定更新
@@ -482,11 +515,20 @@ class SinglePlayerGame : public Game {
 				isAlive = false;
 			}
 
-			for (auto enemy : enemyList) {
-				if (left() < enemy->right() && top() < enemy->bottom() &&
-					right() > enemy->left() && bottom() > enemy->top()) {
-					isAlive = false;
+			if (invincibleTime == 0) {
+				for (auto enemy : enemyList) {
+					if (left() <= enemy->right() && top() <= enemy->bottom() &&
+						right() >= enemy->left() && bottom() >= enemy->top()) {
+						damage += 1;
+						invincibleTime = 50;
+					}
 				}
+			} else if (invincibleTime > 0){
+				invincibleTime--;
+			}
+
+			if (damage > 3) {
+				isAlive = false;
 			}
 
 			return !isAlive;
@@ -536,7 +578,7 @@ public:
 				bool draw() {
 					DrawExtendGraph(0, 0, WIDTH, HEIGHT, imgHandles["s_game_op"], true);
 					DrawExtendGraph(WIDTH/2-429/2, 30, WIDTH/2+429/2, 30+47, imgHandles["s_game_op_title"], true);
-					DrawExtendGraph(WIDTH/2-50, 400, WIDTH/2+50, 400+150, imgHandles["s_game_player"], true);
+					// DrawExtendGraph(WIDTH/2-50, 400, WIDTH/2+50, 400+150, imgHandles["s_game_player"], true);
 					return true;
 				}
 			};
@@ -558,10 +600,7 @@ public:
 				blockList.push_back(block);
 				drawList.push_back(block);
 			};
-			makeBlock(0-200, 600, WIDTH+200+200, 50);
-			// makeBlock(900, 600, 480, 50);
-			// makeBlock(10, 100, 30, 720);
-			// makeBlock(300, 300, 200, 50);
+			makeBlock(0-200, 700, WIDTH+200+200, 50);
 
 			drawList.push_back(player);
 			drawList.push_back(make_shared<Background>(share.handle));
@@ -634,7 +673,7 @@ public:
 				}
 				share.rectMutex.unlock();
 
-				player->update(key, blockList, markerList);
+				player->update(key, blockList, markerList, enemyList);
 
 				for (auto enemy : enemyList) {
 					enemy->update(blockList);
@@ -664,9 +703,9 @@ public:
 					}
 					default: {
 						// 定期的に実行する場合など
-						if (MAX_TIME - timer > 400 && (MAX_TIME - timer) % 20 == 0) {
+						if (MAX_TIME - timer > 300 && (MAX_TIME - timer) % 10 == 0) {
 							makeEnemy(rand()%(WIDTH-200)+100, rand()%(HEIGHT-100), 112*4/5, 112*4/5, 3);
-						} else if ((MAX_TIME - timer) % 60 == 0) {
+						} else if ((MAX_TIME - timer) % 30 == 0) {
 							makeEnemy(rand()%(WIDTH-200)+100, rand()%(HEIGHT-100), 112*4/5, 112*4/5, 3);
 						}
 						break;
