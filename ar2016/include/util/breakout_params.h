@@ -34,4 +34,7 @@ namespace Breakout {
 	// Shipのパラメータ
 	const Eigen::Vector2i SHIP_START_POS = Eigen::Vector2i{ BLOCK_OFFSET_X, HEIGHT - 100 };
 	constexpr int SHIP_LIFE_NUM = 4;
+
+	// Potのパラメータ
+	const Eigen::Vector2i POT_START_POS = Eigen::Vector2i{ BLOCK_OFFSET_X , HEIGHT - 200 };
 } // namespace Breakout
