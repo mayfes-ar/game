@@ -89,6 +89,7 @@ bool Object::load() {
 
 	// breakout game
 	isSuccess &= loadImage("ship_block", "shipBlock");
+	isSuccess &= loadImage("pot", "pot");
 
 	return isSuccess;
 }
