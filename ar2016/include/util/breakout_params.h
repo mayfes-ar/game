@@ -18,6 +18,11 @@ namespace Breakout {
 	const int DEBUG_WINDOW_WIDTH = WIDTH / 4;
 	const int DEBUG_WINDOW_HEIGHT = HEIGHT;
 
+	// Timerのパラメータ
+	constexpr int TIMER_MAX_MIN = 3;
+	constexpr int TIMER_MAX_SEC = 0;
+	constexpr int TIMER_MAX_MSEC = 0;
+
 	// Blockのパラメータ
 	const int BLOCK_OFFSET_X = WIDTH / 4;
 	const int BLOCK_OFFSET_Y = HEIGHT / 10;
@@ -34,4 +39,5 @@ namespace Breakout {
 	// Shipのパラメータ
 	const Eigen::Vector2i SHIP_START_POS = Eigen::Vector2i{ BLOCK_OFFSET_X, HEIGHT - 100 };
 	constexpr int SHIP_LIFE_NUM = 4;
+
 } // namespace Breakout

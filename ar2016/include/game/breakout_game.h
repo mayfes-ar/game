@@ -11,7 +11,7 @@ class BreakoutGame : public Game
 {
 public:
     // コンストラクタ
-    explicit BreakoutGame() : m_components(){}
+    explicit BreakoutGame() : m_components(new BreakoutComponents){}
 
     // modeに登録する関数の実行回数の定義
     enum TimerKind
@@ -22,15 +22,13 @@ public:
     bool onStart() override 
     {
         init();
-        m_components = new BreakoutComponents();
-        m_components->setup();
         mode.setMode([&]() {
 
             drawList.push_back(std::make_shared<Breakout::Background>(
                         share.handle));
 
 			drawList.push_back(m_components->info);
-			drawList.push_back(m_components->debug);
+			//drawList.push_back(m_components->debug);
 			drawList.push_back(m_components->field);
 			
 
@@ -78,6 +76,9 @@ private:
 		fps.isShow = true;
         // 認識スレッドを回す
         m_detect_thread = std::thread(capture, std::ref(share));
+
+        m_components->setup();
+		m_components->info->init();
     }
 
     // マーカからの情報から舟を移動

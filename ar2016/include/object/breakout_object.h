@@ -13,6 +13,7 @@
 #include "math/math_util.h"
 #include "util/util.h"
 #include "util/breakout_params.h"
+#include "util/timer.h"
 
 
 namespace Breakout {
@@ -22,6 +23,7 @@ constexpr int PRIORITY_SECTION = 1; // レイアウト（ゲームフィール�
 constexpr int PRIORITY_STATIC_OBJECT = 2; // 静的オブジェクト (Block)
 constexpr int PRIORITY_DYNAMIC_OBJECT = 3; // 動的オブジェクト(Ship, Fireball)
 constexpr int PRIORITY_CHARACTER = 4; // キャラクター(マリオ)
+constexpr int PRIORITY_INFO = 5; // インフォメーション
 
 // 背景画像
 // 溶岩の絵がほしい
@@ -49,10 +51,14 @@ public:
 class Info : public Object
 {
 public:
-	explicit Info(const Shape::Rectangle& realm)
-		: m_realm(realm)
+	explicit Info(const Shape::Rectangle realm, const std::shared_ptr<Timer>& timer)
+		: m_realm(realm), m_timer(timer)
 	{
 		Object::layer = PRIORITY_SECTION;
+	}
+
+	void init() {
+		m_timer->start();
 	}
 
 	bool draw() {
@@ -61,11 +67,21 @@ public:
                 m_realm.right(), m_realm.bottom(), 
                 GetColor(50, 50, 50), TRUE);
         SetDrawBright(255, 255, 255);
+		// Timer の描画
+		const auto time = m_timer->getLeftedTime();
+		DrawFormatString(m_realm.left(), m_realm.top() + 50, GetColor(255, 255, 255), "%02d:%02d:%02d",
+			std::get<0>(time), std::get<1>(time), std::get<2>(time));
+		// Score の描画
 		return true;
+	}
+
+	bool isTimeOver() const {
+		return m_timer->isTimerEnd();
 	}
 
 private:
 	Shape::Rectangle m_realm = Shape::Rectangle();
+	std::shared_ptr<Timer> m_timer = nullptr;
 };
 
 // フィールド 

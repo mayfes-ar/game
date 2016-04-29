@@ -8,11 +8,12 @@ void BreakoutComponents::setup()
 {
 	// Layoutの初期化
 	{
-		const auto info_realm = Shape::Rectangle(INFO_START_POS, INFO_WIDTH, INFO_HEIGHT);
-		info = std::make_shared<Breakout::Info>(info_realm);
+		auto info_realm = Shape::Rectangle(INFO_START_POS, INFO_WIDTH, INFO_HEIGHT);
+		std::shared_ptr<Timer> timer = std::make_shared<Timer>(TIMER_MAX_MIN, TIMER_MAX_SEC, TIMER_MAX_MSEC);
+		info = std::make_shared<Breakout::Info>(info_realm, timer);
 
-		const auto debug_realm = Shape::Rectangle(DEBUG_WINDOW_START_POS, DEBUG_WINDOW_WIDTH, DEBUG_WINDOW_HEIGHT);
-		debug = std::make_shared<Breakout::Info>(debug_realm);
+		//const auto debug_realm = Shape::Rectangle(DEBUG_WINDOW_START_POS, DEBUG_WINDOW_WIDTH, DEBUG_WINDOW_HEIGHT);
+		//debug = std::make_shared<Breakout::Info>(debug_realm);
 
 		const auto field_realm = Shape::Rectangle(FIELD_START_POS, FIELD_WIDTH, FIELD_HEIGHT);
 		field = std::make_shared<Breakout::Field>(field_realm);
