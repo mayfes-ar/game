@@ -14,6 +14,7 @@
 #include "util/util.h"
 #include "util/breakout_params.h"
 #include "util/timer.h"
+#include "util/color_palette.h"
 
 
 namespace Breakout {
@@ -69,7 +70,7 @@ public:
         SetDrawBright(255, 255, 255);
 		// Timer の描画
 		const auto time = m_timer->getLeftedTime();
-		DrawFormatString(m_realm.left(), m_realm.top() + 50, GetColor(255, 255, 255), "%02d:%02d:%02d",
+		DrawFormatString(m_realm.left(), m_realm.top() + 50, Color::WHITE, "%02d:%02d:%02d",
 			std::get<0>(time), std::get<1>(time), std::get<2>(time));
 		// Score の描画
 		return true;
@@ -103,7 +104,7 @@ public:
 		}
 
 		DrawString(m_start_point.x(), m_start_point.y(),
-				"Game Over", GetColor(255, 0, 0));
+				"Game Over", Color::RED);
 
 		return true;
 	}
@@ -127,7 +128,7 @@ public:
         SetDrawBright(100, 100, 100);
         DrawBox(m_realm.left(), m_realm.top(), 
                 m_realm.right(), m_realm.bottom(), 
-                GetColor(255, 255, 255), false);
+                Color::WHITE, false);
         SetDrawBright(255, 255, 255);
 		return true;
 	}
@@ -163,7 +164,7 @@ public:
         }
         DrawBox(m_realm.left(), m_realm.top(), 
                 m_realm.right(), m_realm.bottom(), 
-                GetColor(255, 0, 0), false);
+                Color::GREEN, false);
 
         return true;
     }
@@ -214,7 +215,7 @@ public:
         int x = m_realm.center.x();
         int y = m_realm.center.y();
         int r = m_realm.radius;
-        DrawCircle(x, y, r, GetColor(0, 255, 0), true);
+        DrawCircle(x, y, r, Color::RED, true);
 
         return true;
     }

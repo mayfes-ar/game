@@ -36,8 +36,6 @@ public:
 		// Result画面
         mode.setMode([this]() {
             drawList.clear();
-            drawList.push_back(std::make_shared<Breakout::Background>(
-                        share.handle));
 			m_components->result->init();
 			drawList.push_back(m_components->result);
                 }, -1);

@@ -168,6 +168,7 @@
     <ClCompile Include="src\moving\moving.cpp" />
     <ClCompile Include="src\object\breakout_object.cpp" />
     <ClCompile Include="src\object\object.cpp" />
+    <ClCompile Include="src\util\color_palette.cpp" />
     <ClCompile Include="src\util\timer.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -191,6 +192,7 @@
     <ClInclude Include="include\object\shape.h" />
     <ClInclude Include="include\object\units.h" />
     <ClInclude Include="include\util\breakout_params.h" />
+    <ClInclude Include="include\util\color_palette.h" />
     <ClInclude Include="include\util\timer.h" />
     <ClInclude Include="include\util\util.h" />
     <ClInclude Include="main.h" />
