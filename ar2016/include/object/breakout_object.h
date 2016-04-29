@@ -84,6 +84,35 @@ private:
 	std::shared_ptr<Timer> m_timer = nullptr;
 };
 
+class Result : public Object
+{
+public:
+	explicit Result(const Shape::Point& start_point)
+		: m_start_point(start_point) {
+		Object::layer = PRIORITY_INFO;
+	}
+
+	void init() {
+		SetFontSize(80);
+		m_is_initialized = true;
+	}
+
+	bool draw() override {
+		if (!m_is_initialized) {
+			return false;
+		}
+
+		DrawString(m_start_point.x(), m_start_point.y(),
+				"Game Over", GetColor(255, 0, 0));
+
+		return true;
+	}
+
+private:
+	Shape::Point m_start_point = Shape::Point();
+	bool m_is_initialized = false;
+};
+
 // フィールド 
 class Field : public Object
 {

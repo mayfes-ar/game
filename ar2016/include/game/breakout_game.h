@@ -13,12 +13,6 @@ public:
     // コンストラクタ
     explicit BreakoutGame() : m_components(new BreakoutComponents){}
 
-    // modeに登録する関数の実行回数の定義
-    enum TimerKind
-    {
-        OnOnce = -1,
-    };
-
     bool onStart() override 
     {
         init();
@@ -28,7 +22,6 @@ public:
                         share.handle));
 
 			drawList.push_back(m_components->info);
-			//drawList.push_back(m_components->debug);
 			drawList.push_back(m_components->field);
 			
 
@@ -38,11 +31,16 @@ public:
 
             drawList.push_back(m_components->fireball);
             drawList.push_back(m_components->ship);
-            }, OnOnce);
+            }, -1);
 
+		// Result画面
         mode.setMode([this]() {
-            //drawList.clear();
-                }, OnOnce);
+            drawList.clear();
+            drawList.push_back(std::make_shared<Breakout::Background>(
+                        share.handle));
+			m_components->result->init();
+			drawList.push_back(m_components->result);
+                }, -1);
 
         return Game::onStart();
     }
@@ -53,10 +51,8 @@ public:
 		moveFireBall();
 		updateBlockStatus();
 		updateShipStatus();
-		
-		if (key[KEY_INPUT_ESCAPE]) {
-			share.willFinish = true;
-		}
+		updateGameState();
+
         return Game::onUpdate();
     }
 
@@ -91,4 +87,7 @@ private:
 
     // FireBallとBlockのあたり判定をし、blockを消すかを決める
 	void updateBlockStatus();
+
+	// Game画面の状態更新
+	void updateGameState();
 };

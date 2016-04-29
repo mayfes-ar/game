@@ -17,10 +17,13 @@ namespace Breakout {
 	const Eigen::Vector2i DEBUG_WINDOW_START_POS = Eigen::Vector2i(INFO_WIDTH + FIELD_WIDTH, 0);
 	const int DEBUG_WINDOW_WIDTH = WIDTH / 4;
 	const int DEBUG_WINDOW_HEIGHT = HEIGHT;
+	
+	const Eigen::Vector2i RESULT_START_POINT 
+		= Eigen::Vector2i(WIDTH / 4, HEIGHT / 3);
 
 	// Timerのパラメータ
-	constexpr int TIMER_MAX_MIN = 3;
-	constexpr int TIMER_MAX_SEC = 0;
+	constexpr int TIMER_MAX_MIN = 0;
+	constexpr int TIMER_MAX_SEC = 30;
 	constexpr int TIMER_MAX_MSEC = 0;
 
 	// Blockのパラメータ

@@ -12,8 +12,8 @@ void BreakoutComponents::setup()
 		std::shared_ptr<Timer> timer = std::make_shared<Timer>(TIMER_MAX_MIN, TIMER_MAX_SEC, TIMER_MAX_MSEC);
 		info = std::make_shared<Breakout::Info>(info_realm, timer);
 
-		//const auto debug_realm = Shape::Rectangle(DEBUG_WINDOW_START_POS, DEBUG_WINDOW_WIDTH, DEBUG_WINDOW_HEIGHT);
-		//debug = std::make_shared<Breakout::Info>(debug_realm);
+		result = std::make_shared<Breakout::Result>(RESULT_START_POINT);
+
 
 		const auto field_realm = Shape::Rectangle(FIELD_START_POS, FIELD_WIDTH, FIELD_HEIGHT);
 		field = std::make_shared<Breakout::Field>(field_realm);
@@ -40,7 +40,7 @@ void BreakoutComponents::setup()
 
 		Eigen::Vector2d start_vel = Eigen::Vector2d{50.0, 50.0};
 		Eigen::Vector2d start_accel = Eigen::Vector2d::Zero();
-		auto moving = std::make_shared<Moving>(0.1, start_accel, start_vel);
+		auto moving = std::make_shared<Moving>(0.1, std::move(start_accel), std::move(start_vel));
 
 		fireball = std::make_shared<Breakout::Fireball>(circle, moving);
 	}

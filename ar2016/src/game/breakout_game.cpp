@@ -65,3 +65,32 @@ void BreakoutGame::moveFireBall()
 }
 
 void BreakoutGame::updateBlockStatus() {}
+
+void BreakoutGame::updateGameState()
+{
+	int kind = mode.getMode();
+
+	enum Kind {
+		Playing = 0,
+		Result = 1
+	};
+	switch (kind) {
+	case Playing:
+		if (m_components->info->isTimeOver()) {
+			mode.goNext();
+		}
+
+		if (key[KEY_INPUT_ESCAPE]) {
+			mode.goNext();
+		}
+		break;
+	case Result: {
+		if (key[KEY_INPUT_ESCAPE]) {
+			share.willFinish = true;
+		}
+		break;
+	}
+	default:
+		break;
+	}
+}
