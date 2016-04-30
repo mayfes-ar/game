@@ -3,6 +3,78 @@
 #include "game/game.h"
 
 class PuzzleGame : public Game {
+	// 指定フレーム後に、登録した関数を実行してくれる
+	class FuncTimer {
+		std::vector<std::function<void()>> funcs;
+		std::vector<int> timers;
+	public:
+		void update() {
+			auto funcsItr = funcs.begin();
+			for (auto timersItr = timers.begin(); timersItr != timers.end();) {
+				(*timersItr)--;
+				if ((*timersItr) > 0) {
+					funcsItr++;
+					timersItr++;
+				} else {
+					(*funcsItr)();
+					funcsItr = funcs.erase(funcsItr);
+					timersItr = timers.erase(timersItr);
+				}
+				
+			}
+		}
+
+		void set(std::function<void()> func, int timer) {
+			funcs.push_back(func);
+			timers.push_back(timer);
+		}
+		void clear() {
+			funcs.clear();
+			timers.clear();
+		}
+	} funcTimer;
+
+	//
+	class StageBlock : public BlockObject {
+	public:
+		const int kind = 0;
+
+		StageBlock(Rectan rect_) {
+			rect = rect_;
+			willStay = true;
+		}
+		bool draw() {
+			if (canHit) {
+				DrawBox(left(), top(), right(), bottom(), GetColor(240, 117, 50), true);
+			} else {
+				DrawBox(left(), top(), right(), bottom(), GetColor(240, 117, 50), false);
+			}
+			return willStay;
+		}
+	};
+	//
+	class MarkerBlock : public BlockObject {
+	public:
+		MarkerBlock(Rectan rect_) {
+			rect = rect_;
+			willStay = true;
+		}
+
+		bool draw() {
+			DrawExtendGraph(left(), top(), right(), bottom(), imgHandles["block"], true);
+			return willStay;
+		}
+		
+	};
+
+	// gimmick
+	class Gimmick : public Object {
+		bool willExist = true;
+		const PuzzleGame& game;
+	public:
+		virtual bool update() = 0;
+	};
+
 
 	class Background : public Object {
 		int& handle;
@@ -27,6 +99,8 @@ class PuzzleGame : public Game {
 	};
 
 	class Player : public Object {
+		const PuzzleGame& game;
+
 		double prevX;
 		double prevY;
 		const double initX;
@@ -37,7 +111,7 @@ class PuzzleGame : public Game {
 		bool isJumping = true;
 
 	public:
-		Player(int x_, int y_) : initX(x_), initY(y_) {
+		Player(int x_, int y_, PuzzleGame& game_) : initX(x_), initY(y_), game(game_) {
 			rect.x = prevX = x_;
 			rect.y = prevY = y_;
 			rect.width = 75;
@@ -54,7 +128,7 @@ class PuzzleGame : public Game {
 			return true;
 		}
 
-		void update(const char key[], const std::vector<std::shared_ptr<BlockObject>> blockList) {
+		void update(const std::vector<std::shared_ptr<BlockObject>> blockList) {
 			double& x = rect.x;
 			double& y = rect.y;
 			const int& width = rect.width;
@@ -71,16 +145,16 @@ class PuzzleGame : public Game {
 			bool onLeft = false;
 			bool onRight = false;
 
-			if (key[KEY_INPUT_UP] && !isJumping) {
+			if (game.key[KEY_INPUT_UP] && !isJumping) {
 				acY = -25;
 			}
 			isJumping = true;
 
-			if (key[KEY_INPUT_RIGHT]) {
+			if (game.key[KEY_INPUT_RIGHT]) {
 				isRightDirection = true;
 				acX = 0.8 * (diffX < 8);
 			}
-			if (key[KEY_INPUT_LEFT]) {
+			if (game.key[KEY_INPUT_LEFT]) {
 				isRightDirection = false;
 				acX = -0.8 * (diffX > -8);
 			}
@@ -130,23 +204,37 @@ class PuzzleGame : public Game {
 			}
 		}
 
+		void warp(int x, int y) {
+			rect.x = prevX = x;
+			rect.y = prevY = y;
+		}
 		void init() {
 			rect.x = prevX = initX;
 			rect.y = prevY = initY;
 		}
 	};
 
+	// Goal
 	class GoalObject : public Object {
+		bool isReached = false;
 	public:
 		GoalObject(int x_, int y_) {
 			rect = Rectan(x_, y_, 100, 150);
 			layer = 100;
 		}
-
 		bool draw() {
 			DrawExtendGraph(left(), top(), right(), bottom(), imgHandles["p_goal"], true);
 			return true;
 		}
+		bool check(std::shared_ptr<Player>& player) {
+			if (isContacted(player) && !isReached) {
+				isReached = true;
+				return true;
+			} else {
+				return false;
+			}
+		}
+
 	};
 
 	class NeedleObject : public Object {
@@ -208,8 +296,10 @@ class PuzzleGame : public Game {
 	std::thread thread;
 	std::shared_ptr<Player> player;
 	std::shared_ptr<GoalObject> goal;
+
 	std::vector<std::shared_ptr<BlockObject>> stageBlockList;
-	std::vector<std::shared_ptr<BlockObject>> markerBlockList;
+	std::shared_ptr<BlockObject> markerBlock;
+
 	std::vector<std::shared_ptr<NeedleObject>> needleList;
 	std::vector<std::shared_ptr<SmogObject>> smogList;
 
@@ -234,7 +324,7 @@ class PuzzleGame : public Game {
 		drawList.push_back(smog);
 	}
 	void setPlayer(int x, int y) {
-		player = std::make_shared<Player>(x, y);
+		player = std::make_shared<Player>(x, y, *this);
 		drawList.push_back(player);
 	}
 	void setGoal(int x, int y) {
@@ -263,169 +353,8 @@ public:
 		mt = std::mt19937(rnd());
 	}
 
-	bool onStart() {
-		using namespace std;
-		fps.isShow = true;
-
-		// mode 0: opening
-		mode.setMode([this]() {
-			drawList.push_back(std::make_shared<Explanation>());
-		}, -1);
-
-		// mode 1
-		mode.setMode([this]() {
-			makeStageBase();
-			setPlayer(100, -300);
-			setGoal(1100, 550);
-			
-			setBlock(400, 300, 300, 500, true);
-
-		}, -1);
-
-		// mode 2
-		mode.setMode([this]() {
-			makeStageBase();
-			setPlayer(100, -300);
-			setGoal(1100, 550);
-		}, -1);
-
-		// mode 3
-		mode.setMode([this]() {
-			makeStageBase();
-			setPlayer(100, -300);
-			setGoal(1100, 100);
-			for (int i = 0; i < 120; i++) {
-				setSmog();
-			}
-		}, -1);
-
-		// mode 4
-	/*	mode.setMode([this]() {
-			makeStageBase();
-			setPlayer(100, 100);
-			setGoal(1000, 600);
-			setNeedle(400, 400, 100, 0, 0);
-		}, -1);*/
-
-		// mode 5
-		/*mode.setMode([this]() {
-			makeStageBase();
-			setPlayer(100, 100);
-			setGoal(1000, 600);
-			setNeedle(400, 400, 100, 0, 0);
-		}, -1);*/
-
-		// mode 6
-	/*	mode.setMode([this]() {
-			makeStageBase();
-			setPlayer(100, 100);
-			setGoal(1000, 600);
-			setNeedle(400, 400, 100, 0, 0);
-		}, -1);*/
-
-		// result
-		mode.setMode([this](){
-			drawList.clear();
-			
-		}, -1);
-
-		return Game::onStart();
-	}
-
-	bool onUpdate() {
-		timer++;
-		if (timer == 3600) {
-			timer = 0;
-		}
-
-		// modeに応じて
-		switch (mode.getMode()) {
-		case 0: { // explain
-			if (key[KEY_INPUT_RETURN]) {
-				mode.goNext();
-			}
-			return Game::onUpdate();
-		}
-		case 1: {
-			
-			break;
-		}
-		case 2: {
-			if (timer % (FPS/2) == 0) {
-				setNeedle(300, -100, 100, 0, 10);
-				setNeedle(600, -100, 100, 0, 11);
-				setNeedle(900, -100, 100, 0, 12);
-			}
-			break;
-		}
-		case 3: {
-			if (timer % (FPS) == 0 && smogList.size() < 150) {
-				setSmog();
-			}
-			break;
-		}
-		default: // result
-			if (key[KEY_INPUT_RETURN]) {
-				share.willFinish = true;
-			}
-			return Game::onUpdate();
-		}
-
-		if (player->isContacted(goal)) {
-			mode.goNext();
-		}
-
-		// 全ステージ共通
-		std::vector<std::shared_ptr<BlockObject>> allBlockList = stageBlockList;
-		markerBlockList.clear();
-		share.rectMutex.lock();
-		for (auto rect : share.rects) {
-			auto block = std::make_shared<BlockObject>(rect, false);
-			markerBlockList.push_back(block);
-			allBlockList.push_back(block);
-			drawList.push_back(block);
-		}
-		share.rectMutex.unlock();
-
-		// needleList
-		for (auto& itr = needleList.begin(); itr != needleList.end();) {
-			if ((*itr)->update(allBlockList)) {
-				++itr;
-			} else {
-				itr = needleList.erase(itr);
-			}
-		}
-		for (auto needle : needleList) {
-			if (needle->isContacted(player)) {
-				player->init();
-			}
-		}
-
-		// smog
-		for (auto& itr = smogList.begin(); itr != smogList.end();) {
-			bool hit = false;
-			for (auto mBlock : markerBlockList) {
-				if ((*itr)->isContacted(mBlock)) {
-					(*itr)->vanish();
-					hit = true;
-					itr = smogList.erase(itr);
-					break;
-				}
-			}
-			if (!hit) {
-				itr++;
-			}
-		}
-
-		player->update(key, allBlockList);
-
-		if (key[KEY_INPUT_ESCAPE]) {
-			share.willFinish = true;
-		}
-
-		return Game::onUpdate();
-	}
-
+	bool onStart();
+	bool onUpdate();
 	bool onFinish() {
 		thread.join();
 		return true;

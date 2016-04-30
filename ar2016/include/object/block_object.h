@@ -3,8 +3,12 @@
 #include "object/object.h"
 
 class BlockObject : public Object {
+protected:
 	bool willStay;
 public:
+	bool canHit = true;
+
+	BlockObject(){}
 	BlockObject(int x_, int y_, int width_, int height_, bool willStay_) {
 		rect.x = x_, rect.y = y_, rect.width = width_, rect.height = height_;
 		willStay = willStay_;
@@ -17,7 +21,7 @@ public:
 		layer = 20;
 	}
 
-	bool draw() {
+	virtual bool draw() {
 		if (willStay) {
 			DrawBox(left(), top(), right(), bottom(), GetColor(240, 117, 50), true);
 		} else {
