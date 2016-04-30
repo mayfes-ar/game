@@ -1,5 +1,6 @@
 ﻿#include "game/breakout_components.h"
 #include "util/breakout_params.h"
+#include <random>
 
 using namespace Breakout;
 
@@ -19,6 +20,9 @@ void BreakoutComponents::setup()
 		field = std::make_shared<Breakout::Field>(field_realm);
 	}
 
+	std::random_device rnd;
+	std::mt19937 mt(rnd());
+	std::uniform_real_distribution<> block_generator(0.0, 1.0);
 	// Blockの初期化
 	for (int x = 0; x < BLOCK_WIDTH_NUM; ++x) {
 		for (int y = 0; y < BLOCK_HEIGHT_NUM; ++y) {
@@ -28,6 +32,10 @@ void BreakoutComponents::setup()
 			const Shape::Rectangle rec(realm,BLOCK_WIDTH, BLOCK_HEIGHT);
 
 			auto block = std::make_shared<Breakout::Block>(rec);
+
+			if (block_generator(mt) > BLOCK_GENERATE_RATIO) {
+				block->disappear();
+			}
 
 			block_list.push_back(block);
 		}
