@@ -102,6 +102,19 @@ class PuzzleGame : public Game {
 		}
 	};
 
+	class ScoreObject : public Object {
+	public:
+		int score = 0;
+
+		ScoreObject() {
+			layer = 200;
+		}
+		bool draw() {
+			DrawFormatString(400, 0, GetColor(65, 205, 63), "SCORE: %d", score);
+			return true;
+		}
+	};
+
 	class Player : public Object {
 		const PuzzleGame& game;
 
@@ -306,10 +319,36 @@ class PuzzleGame : public Game {
 		}
 	};
 	
+	class CoinGimmick : public Gimmick {
+		const int value;
+		int counter = 0;
+		const int countMax = effectHandles["p_coin"].size();
+	public:
+		CoinGimmick(int x, int y, int size, int value_, PuzzleGame& game_) : value(value_), Gimmick(game_) {
+			rect = Rectan(x, y, size, size);
+			layer = 40;
+		}
+		bool draw() {
+			const int margin = rect.width / 10;
+			DrawExtendGraph(left() - margin, top() - margin, right() + margin, bottom() + margin, effectHandles["p_coin"][counter], true);
+			counter++;
+			if (counter == countMax) { counter = 0; }
+			return willExist;
+		}
+		bool update() {
+			if (isContacted(game.player)) {
+				game.score->score += value;
+				willExist = false;
+			}
+			return willExist;
+		}
+
+	};
 
 	std::thread thread;
 	std::shared_ptr<Player> player;
 	std::shared_ptr<GoalObject> goal;
+	std::shared_ptr<ScoreObject> score;
 
 	std::vector<std::shared_ptr<BlockObject>> stageBlocks;
 	std::shared_ptr<BlockObject> markerBlock;
@@ -338,6 +377,11 @@ class PuzzleGame : public Game {
 		gimmicks.push_back(smog);
 		drawList.push_back(smog);
 	}
+	void setCoin(int x, int y, int size=60, int value=100) {
+		auto coin = std::make_shared<CoinGimmick>(x, y, size, value, *this);
+		gimmicks.push_back(coin);
+		drawList.push_back(coin);
+	}
 
 	void setPlayer(int x, int y) {
 		player = std::make_shared<Player>(x, y, *this);
@@ -354,6 +398,7 @@ class PuzzleGame : public Game {
 		gimmicks.clear();
 
 		drawList.push_back(std::make_shared<Background>(share.handle));
+		drawList.push_back(score);
 
 		setBlock(0, 700, 1280, 100, true);
 		setBlock(-50, -720, 100, 720*2, true);
@@ -366,6 +411,7 @@ public:
 		thread = std::thread::thread(capture, std::ref(share));
 		std::random_device rnd;
 		mt = std::mt19937(rnd());
+		score = std::make_shared<ScoreObject>();
 	}
 
 	bool onStart();

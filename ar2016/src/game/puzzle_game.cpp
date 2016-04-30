@@ -16,6 +16,8 @@ bool PuzzleGame::onStart() {
 		setPlayer(100, -300);
 		setGoal(1100, 550);
 
+		setCoin(800, 100);
+		setCoin(900, 100);
 		setDamage(600, 300, 200);
 		setBlock(400, 300, 300, 200, true);
 
