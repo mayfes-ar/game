@@ -18,8 +18,10 @@ bool PuzzleGame::onStart() {
 
 		setCoin(800, 100);
 		setCoin(900, 100);
-		setDamage(600, 300, 200);
-		setBlock(400, 300, 300, 200, true);
+		setDamage(800, 300, 100);
+		setBlock(400, 300, 300, 200);
+		setBlock(450, 550, 100, 100, false);
+		setBlock(650, 550, 100, 100, false);
 
 	}, -1);
 
@@ -123,6 +125,78 @@ bool PuzzleGame::onUpdate() {
 }
 
 
-//void PuzzleGame::Player::update() {
-//
-//}
+void PuzzleGame::Player::update() {
+	double& x = rect.x;
+	double& y = rect.y;
+	const int& width = rect.width;
+	const int& height = rect.height;
+
+	const double diffX = x - prevX;
+	const double diffY = y - prevY;
+
+	double acX = -0.3 * (1 - (diffX <= 0) - (diffX < 0));
+	double acY = 2;
+
+	bool onTop = false;
+	bool onBottom = false;
+	bool onLeft = false;
+	bool onRight = false;
+
+	if (game.key[KEY_INPUT_UP] && !isJumping) {
+		acY = -25;
+	}
+	isJumping = true;
+
+	if (game.key[KEY_INPUT_RIGHT]) {
+		isRightDirection = true;
+		acX = 0.8 * (diffX < 8);
+	}
+	if (game.key[KEY_INPUT_LEFT]) {
+		isRightDirection = false;
+		acX = -0.8 * (diffX > -8);
+	}
+
+	// verlet法
+	const double tempX = x;
+	x += diffX + acX;
+	prevX = tempX;
+	const double tempY = y;
+	y += diffY + acY;
+	prevY = tempY;
+
+	for (auto block : game.allBlocks) {
+		if (block->canHit && isContacted(block)) {
+
+			if (prevY < block->bottomHit() && prevY + height > block->topHit()) {
+				if (prevX >= block->rightHit()) {
+					x = prevX = block->right();
+					onLeft = true;
+				} else if (prevX + width <= block->leftHit()) {
+					x = prevX = block->left() - width;
+					onRight = true;
+				} else {
+					// TODO
+					init();
+					break;
+				}
+			} else {
+				if (prevY >= block->bottomHit()) {
+					y = prevY = block->bottom();
+					onTop = true;
+				} else if (prevY + height <= block->topHit()) {
+					y = prevY = block->top() - height;
+					isJumping = false;
+					onBottom = true;
+				} else {
+					// TODO
+					init();
+					break;
+				}
+			}
+		}
+	}
+
+	if ((onTop && onBottom) || (onLeft && onRight)) {
+		init();
+	}
+}

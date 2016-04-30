@@ -38,16 +38,17 @@ class PuzzleGame : public Game {
 	public:
 		const int kind = 0;
 
-		StageBlock(Rectan rect_) {
+		StageBlock(Rectan rect_, bool canHit_=true) {
 			rect = rect_;
 			willStay = true;
 			layer = 20;
+			canHit = canHit_;
 		}
 		bool draw() {
 			if (canHit) {
 				DrawBox(left(), top(), right(), bottom(), GetColor(240, 117, 50), true);
 			} else {
-				DrawBox(left(), top(), right(), bottom(), GetColor(240, 117, 50), false);
+				DrawBox(left(), top(), right(), bottom(), GetColor(40, 117, 50), false);
 			}
 			return willStay;
 		}
@@ -145,81 +146,7 @@ class PuzzleGame : public Game {
 			return true;
 		}
 
-		void update() {
-			double& x = rect.x;
-			double& y = rect.y;
-			const int& width = rect.width;
-			const int& height = rect.height;
-
-			const double diffX = x - prevX;
-			const double diffY = y - prevY;
-
-			double acX = -0.3 * (1 - (diffX <= 0) - (diffX < 0));
-			double acY = 2;
-
-			bool onTop = false;
-			bool onBottom = false;
-			bool onLeft = false;
-			bool onRight = false;
-
-			if (game.key[KEY_INPUT_UP] && !isJumping) {
-				acY = -25;
-			}
-			isJumping = true;
-
-			if (game.key[KEY_INPUT_RIGHT]) {
-				isRightDirection = true;
-				acX = 0.8 * (diffX < 8);
-			}
-			if (game.key[KEY_INPUT_LEFT]) {
-				isRightDirection = false;
-				acX = -0.8 * (diffX > -8);
-			}
-
-			// verlet法
-			const double tempX = x;
-			x += diffX + acX;
-			prevX = tempX;
-			const double tempY = y;
-			y += diffY + acY;
-			prevY = tempY;
-
-			for (auto block : game.allBlocks) {
-				if (isContacted(block)) {
-
-					if (prevY < block->bottomHit() && prevY + height > block->topHit()) {
-						if (prevX >= block->rightHit()) {
-							x = prevX = block->right();
-							onLeft = true;
-						} else if (prevX + width <= block->leftHit()) {
-							x = prevX = block->left() - width;
-							onRight = true;
-						} else {
-							// TODO
-							init();
-							break;
-						}
-					} else {
-						if (prevY >= block->bottomHit()) {
-							y = prevY = block->bottom();
-							onTop = true;
-						} else if (prevY + height <= block->topHit()) {
-							y = prevY = block->top() - height;
-							isJumping = false;
-							onBottom = true;
-						} else {
-							// TODO
-							init();
-							break;
-						}
-					}
-				}
-			}
-
-			if ((onTop && onBottom) || (onLeft && onRight)) {
-				init();
-			}
-		}
+		void update();
 
 		void warp(int x, int y) {
 			rect.x = prevX = x;
@@ -342,6 +269,17 @@ class PuzzleGame : public Game {
 			}
 			return willExist;
 		}
+	};
+
+	class SwitchGimmick : public Gimmick {
+
+	};
+
+	class WarpGimmick : public Gimmick {
+
+	};
+
+	class WindGimmick : public Gimmick {
 
 	};
 
@@ -360,8 +298,8 @@ class PuzzleGame : public Game {
 
 	int timer = 0;
 
-	std::shared_ptr<StageBlock> setBlock(int x, int y, int width, int height, bool willStay) {
-		auto block = std::make_shared<StageBlock>(Rectan(x, y, width, height));
+	std::shared_ptr<StageBlock> setBlock(int x, int y, int width, int height, bool canHit=true) {
+		auto block = std::make_shared<StageBlock>(Rectan(x, y, width, height), canHit);
 		stageBlocks.push_back(block);
 		drawList.push_back(block);
 		return block;
