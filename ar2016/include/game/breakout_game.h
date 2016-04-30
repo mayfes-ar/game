@@ -45,10 +45,9 @@ public:
 
     bool onUpdate() override
     {
+		updateFireball();
+		updateCollisionDetection();
 		moveShip();
-		moveFireBall();
-		updateBlockStatus();
-		updateShipStatus();
 		updateGameState();
 
         return Game::onUpdate();
@@ -69,23 +68,26 @@ private:
     {
 		fps.isShow = true;
         // 認識スレッドを回す
-        m_detect_thread = std::thread(capture, std::ref(share));
+		m_detect_thread = std::thread(capture, std::ref(share));
 
         m_components->setup();
 		m_components->info->init();
     }
 
+	// FireBallが消えていて、ゲームがまだ続いている場合は再びFireBallを復活させる
+	void updateFireball();
+
+	// すべての衝突判定
+	// Fireball, Itemなど
+	void updateCollisionDetection();
+
     // マーカからの情報から舟を移動
 	void moveShip();
 
-	void updateShipStatus();
-
-    // Firaballを移動
-	void moveFireBall();
-
-    // FireBallとBlockのあたり判定をし、blockを消すかを決める
-	void updateBlockStatus();
-
 	// Game画面の状態更新
 	void updateGameState();
+
+	// ゲームをクリアしたかどうか
+	// 現在はBlockが一つもない場合はクリアとみなす
+	bool isGameClear() const;
 };

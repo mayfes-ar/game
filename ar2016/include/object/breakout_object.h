@@ -103,15 +103,27 @@ public:
 			return false;
 		}
 
+		if (m_is_game_clear) {
+		DrawString(m_start_point.x(), m_start_point.y(),
+				"Game Clear", Color::BLUE);
+				return true;
+		}
+
 		DrawString(m_start_point.x(), m_start_point.y(),
 				"Game Over", Color::RED);
 
 		return true;
 	}
 
+	// ゲームをクリアしたかどうか
+	void clearGame() {
+		m_is_game_clear = true;
+	}
+
 private:
 	Shape::Point m_start_point = Shape::Point();
 	bool m_is_initialized = false;
+	bool m_is_game_clear = false;
 };
 
 // フィールド 
@@ -229,10 +241,15 @@ public:
 	}
 
 	bool isDisappeared() const {
-		m_is_disappeared;
+		return m_is_disappeared;
 	}
 
-    // Firebollの消滅
+	void appear(const Shape::Circle& start_realm) {
+		m_realm = start_realm;
+		m_is_disappeared = false;
+	}
+
+    // Fireballの消滅
     void disappear()
     {
         m_is_disappeared = true;
@@ -315,6 +332,10 @@ public:
 
 	int getLifeNum() {
 		return m_life.getLifeNum();
+	}
+
+	bool isAlive() const {
+		return m_life.isAlive();
 	}
 
 	double left() {
