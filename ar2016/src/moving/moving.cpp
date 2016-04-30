@@ -9,7 +9,7 @@ void Moving::updateVelocity()
 void Moving::updatePosition(Eigen::Vector2i& position)
 {
 	updateVelocity();
-	Eigen::Vector2d pos = position.cast<double>();
-	pos += m_time_step * m_velocity + 1.0 / 2.0 * std::pow(m_time_step, 2.0) * m_accel;
+	Eigen::Vector2f pos = position.cast<float>();
+	pos += m_time_step * m_velocity + (std::pow(m_time_step, 2.0f) * m_accel) / 2.0f;
 	position = pos.cast<int>();
 }

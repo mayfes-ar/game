@@ -36,11 +36,11 @@ void BreakoutComponents::setup()
 	// fireballの初期化
 	{
 		const auto circle
-			= Shape::Circle(FIREBALL_STRATPOS, FIREBALL_RADIUS);
+			= Shape::Circle(FIREBALL_STARTPOS, FIREBALL_RADIUS);
 
-		Eigen::Vector2d start_vel = Eigen::Vector2d{50.0, 50.0};
-		Eigen::Vector2d start_accel = Eigen::Vector2d::Zero();
-		auto moving = std::make_shared<Moving>(0.1, std::move(start_accel), std::move(start_vel));
+		const Eigen::Vector2f start_vel = FIREBALL_STARTVEL;
+		const Eigen::Vector2f start_accel = Eigen::Vector2f::Zero();
+		auto moving = std::make_shared<Moving>(1.0, start_accel, start_vel);
 
 		fireball = std::make_shared<Breakout::Fireball>(circle, moving);
 	}
