@@ -16,6 +16,7 @@ bool PuzzleGame::onStart() {
 		setPlayer(100, -300);
 		setGoal(1100, 550);
 
+		setDamage(600, 300, 200);
 		setBlock(400, 300, 300, 200, true);
 
 	}, -1);
@@ -68,14 +69,14 @@ bool PuzzleGame::onUpdate() {
 	}
 	case 2: {
 		if (timer % (FPS / 2) == 0) {
-			setNeedle(300, -100, 100, 0, 10);
-			setNeedle(600, -100, 100, 0, 11);
-			setNeedle(900, -100, 100, 0, 12);
+			setDamage(300, -100, 100, 0, 10);
+			setDamage(600, -100, 100, 0, 11);
+			setDamage(900, -100, 100, 0, 12);
 		}
 		break;
 	}
 	case 3: {
-		if (timer % (FPS) == 0 && smogList.size() < 150) {
+		if (timer % (FPS) == 0 && gimmicks.size() < 150) {
 			setSmog();
 		}
 		break;
@@ -93,43 +94,24 @@ bool PuzzleGame::onUpdate() {
 	}
 
 	// 全ステージ共通
-	std::vector<std::shared_ptr<BlockObject>> allBlockList = stageBlockList;
+	allBlocks = stageBlocks;
 	
 	share.rectMutex.lock();
-	markerBlock = std::make_shared<BlockObject>(share.rects[0], false);
-	allBlockList.push_back(markerBlock);
+	markerBlock = std::make_shared<MarkerBlock>(share.rects[0]);
+	allBlocks.push_back(markerBlock);
 	drawList.push_back(markerBlock);
 	share.rectMutex.unlock();
 
-	// needleList
-	for (auto& itr = needleList.begin(); itr != needleList.end();) {
-		if ((*itr)->update(allBlockList)) {
+	// gimmick
+	for (auto& itr = gimmicks.begin(); itr != gimmicks.end();) {
+		if ((*itr)->update()) {
 			++itr;
 		} else {
-			itr = needleList.erase(itr);
-		}
-	}
-	for (auto needle : needleList) {
-		if (needle->isContacted(player)) {
-			player->init();
+			itr = gimmicks.erase(itr);
 		}
 	}
 
-	// smog
-	for (auto& itr = smogList.begin(); itr != smogList.end();) {
-		bool hit = false;
-		if ((*itr)->isContacted(markerBlock)) {
-			(*itr)->vanish();
-			hit = true;
-			itr = smogList.erase(itr);
-			break;
-		}
-		if (!hit) {
-			itr++;
-		}
-	}
-
-	player->update(allBlockList);
+	player->update();
 
 	if (key[KEY_INPUT_ESCAPE]) {
 		share.willFinish = true;

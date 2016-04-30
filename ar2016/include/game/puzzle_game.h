@@ -23,7 +23,6 @@ class PuzzleGame : public Game {
 				
 			}
 		}
-
 		void set(std::function<void()> func, int timer) {
 			funcs.push_back(func);
 			timers.push_back(timer);
@@ -42,6 +41,7 @@ class PuzzleGame : public Game {
 		StageBlock(Rectan rect_) {
 			rect = rect_;
 			willStay = true;
+			layer = 20;
 		}
 		bool draw() {
 			if (canHit) {
@@ -57,7 +57,8 @@ class PuzzleGame : public Game {
 	public:
 		MarkerBlock(Rectan rect_) {
 			rect = rect_;
-			willStay = true;
+			willStay = false;
+			layer = 25;
 		}
 
 		bool draw() {
@@ -67,10 +68,13 @@ class PuzzleGame : public Game {
 		
 	};
 
-	// gimmick
+	// gimmick共通クラス
+	// updateの返り値で存続判定
 	class Gimmick : public Object {
+	protected:
 		bool willExist = true;
 		const PuzzleGame& game;
+		Gimmick(PuzzleGame& game_) : game(game_){}
 	public:
 		virtual bool update() = 0;
 	};
@@ -128,7 +132,7 @@ class PuzzleGame : public Game {
 			return true;
 		}
 
-		void update(const std::vector<std::shared_ptr<BlockObject>> blockList) {
+		void update() {
 			double& x = rect.x;
 			double& y = rect.y;
 			const int& width = rect.width;
@@ -167,7 +171,7 @@ class PuzzleGame : public Game {
 			y += diffY + acY;
 			prevY = tempY;
 
-			for (auto block : blockList) {
+			for (auto block : game.allBlocks) {
 				if (isContacted(block)) {
 
 					if (prevY < block->bottomHit() && prevY + height > block->topHit()) {
@@ -214,7 +218,6 @@ class PuzzleGame : public Game {
 		}
 	};
 
-	// Goal
 	class GoalObject : public Object {
 		bool isReached = false;
 	public:
@@ -237,92 +240,105 @@ class PuzzleGame : public Game {
 
 	};
 
-	class NeedleObject : public Object {
+
+	class DamageGimmick : public Gimmick {
+		const bool canVanish;
 		const double vx;
 		const double vy;
-		bool willExist = true;
 		int counter = 0;
-
+		const int countMax = effectHandles["p_ball"].size();
 	public:
-		NeedleObject(int x, int y, int size, double vx_, double vy_) : vx(vx_), vy(vy_){
+		DamageGimmick(int x, int y, int size, double vx_, double vy_, PuzzleGame& game_) : canVanish(vx_*vx_ + vy_*vy_ > 0), vx(vx_), vy(vy_), Gimmick(game_) {
 			rect = Rectan(x, y, size, size);
 			layer = 50;
 		}
 		bool draw() {
-			static const int margin = rect.height/3;
-			DrawExtendGraph(left() - margin, top() - margin, right() + margin, bottom() + margin, effectHandles["p_ball"][counter], true);
-			counter++;
-			if (counter == 30) {
-				counter = 0;
+			const int margin = rect.height / 3;
+			if (canVanish) {
+				DrawExtendGraph(left() - margin, top() - margin, right() + margin, bottom() + margin, effectHandles["p_ball"][counter], true);
+				counter++;
+				if (counter == countMax) {
+					counter = 0;
+				}
+			} else {
+				DrawExtendGraph(left() - margin, top() - margin, right() + margin, bottom() + margin, imgHandles["s_game_dead"], true);
 			}
+			
 			return willExist;
 		}
-		bool update(std::vector<std::shared_ptr<BlockObject>> blockList) {
-			rect.x += vx;
-			rect.y += vy;
-			for (auto block : blockList) {
-				if (isContacted(block)) {
-					if (!(vx == 0 && vy == 0)) { willExist = false; }
+		bool update() {
+			if (canVanish) {
+				rect.x += vx;
+				rect.y += vy;
+				
+				for (auto block : game.allBlocks) {
+					if (isContacted(block)) {
+						willExist = false;
+					}
 				}
 			}
 
+			if (isContacted(game.player)) {
+				game.player->init();
+			}
 			return willExist;
 		}
 	};
 
-	class SmogObject : public Object {
+	class SmogGimmick : public Gimmick {
 		int counter = 0;
-		bool willFinish = false;
+		const int countMax = effectHandles["p_smog"].size();
 	public:
-		SmogObject(int x, int y, int size) {
+		SmogGimmick(int x, int y, int size, PuzzleGame& game_) : Gimmick(game_) {
 			rect = Rectan(x, y, size, size);
 			layer = 120;
 		}
 		bool draw() {
-			static const int margin = rect.width / 10;
-			DrawExtendGraph(left() - margin, top() - margin, right() + margin, bottom() + margin, effectHandles["p_smog"][counter%13], true);
+			const int margin = rect.width / 10;
+			DrawExtendGraph(left() - margin, top() - margin, right() + margin, bottom() + margin, effectHandles["p_smog"][counter], true);
 			counter++;
-			
-			if (willFinish) {
-				return false;
-			}
-			return true;
+			if (counter == countMax) { counter = 0; }
+			return willExist;
 		}
-		void vanish() {
-			willFinish = true;
+		bool update() {
+			if (isContacted(game.markerBlock)) { willExist = false; }
+			return willExist;
 		}
 	};
+	
 
 	std::thread thread;
 	std::shared_ptr<Player> player;
 	std::shared_ptr<GoalObject> goal;
 
-	std::vector<std::shared_ptr<BlockObject>> stageBlockList;
+	std::vector<std::shared_ptr<BlockObject>> stageBlocks;
 	std::shared_ptr<BlockObject> markerBlock;
-
-	std::vector<std::shared_ptr<NeedleObject>> needleList;
-	std::vector<std::shared_ptr<SmogObject>> smogList;
+	std::vector<std::shared_ptr<BlockObject>> allBlocks;
+	std::vector<std::shared_ptr<Gimmick>> gimmicks;
 
 	std::mt19937 mt;
 	std::uniform_int_distribution<> rand100 = std::uniform_int_distribution<>(0, 99);
 
 	int timer = 0;
 
-	void setBlock(int x, int y, int width, int height, bool willStay) {
-		auto block = std::make_shared<BlockObject>(x, y, width, height, willStay);
-		stageBlockList.push_back(block);
+	std::shared_ptr<StageBlock> setBlock(int x, int y, int width, int height, bool willStay) {
+		auto block = std::make_shared<StageBlock>(Rectan(x, y, width, height));
+		stageBlocks.push_back(block);
 		drawList.push_back(block);
+		return block;
 	}
-	void setNeedle(int x, int y, int size, double vx, double vy) {
-		auto needle = std::make_shared<NeedleObject>(x, y, size, vx, vy);
-		needleList.push_back(needle);
-		drawList.push_back(needle);
+	
+	void setDamage(int x, int y, int size, double vx = 0, double vy = 0) {
+		auto damage = std::make_shared<DamageGimmick>(x, y, size, vx, vy, *this);
+		gimmicks.push_back(damage);
+		drawList.push_back(damage);
 	}
 	void setSmog() {
-		auto smog = std::make_shared<SmogObject>(rand100(mt) * 11, rand100(mt) * 6, 3 * rand100(mt) + 50);
-		smogList.push_back(smog);
+		auto smog = std::make_shared<SmogGimmick>(rand100(mt) * 11, rand100(mt) * 6, 3 * rand100(mt) + 50, *this);
+		gimmicks.push_back(smog);
 		drawList.push_back(smog);
 	}
+
 	void setPlayer(int x, int y) {
 		player = std::make_shared<Player>(x, y, *this);
 		drawList.push_back(player);
@@ -334,9 +350,8 @@ class PuzzleGame : public Game {
 
 	void makeStageBase() {
 		drawList.clear();
-		stageBlockList.clear();
-		needleList.clear();
-		smogList.clear();
+		stageBlocks.clear();
+		gimmicks.clear();
 
 		drawList.push_back(std::make_shared<Background>(share.handle));
 
