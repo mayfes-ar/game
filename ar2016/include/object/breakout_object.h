@@ -13,6 +13,8 @@
 #include "math/math_util.h"
 #include "util/util.h"
 #include "util/breakout_params.h"
+#include "util/timer.h"
+#include "util/color_palette.h"
 
 
 namespace Breakout {
@@ -22,6 +24,7 @@ constexpr int PRIORITY_SECTION = 1; // レイアウト（ゲームフィール�
 constexpr int PRIORITY_STATIC_OBJECT = 2; // 静的オブジェクト (Block)
 constexpr int PRIORITY_DYNAMIC_OBJECT = 3; // 動的オブジェクト(Ship, Fireball)
 constexpr int PRIORITY_CHARACTER = 4; // キャラクター(マリオ)
+constexpr int PRIORITY_INFO = 5; // インフォメーション
 
 // 背景画像
 // 溶岩の絵がほしい
@@ -49,10 +52,14 @@ public:
 class Info : public Object
 {
 public:
-	explicit Info(const Shape::Rectangle& realm)
-		: m_realm(realm)
+	explicit Info(const Shape::Rectangle realm, const std::shared_ptr<Timer>& timer)
+		: m_realm(realm), m_timer(timer)
 	{
 		Object::layer = PRIORITY_SECTION;
+	}
+
+	void init() {
+		m_timer->start();
 	}
 
 	bool draw() {
@@ -61,11 +68,62 @@ public:
                 m_realm.right(), m_realm.bottom(), 
                 GetColor(50, 50, 50), TRUE);
         SetDrawBright(255, 255, 255);
+		// Timer の描画
+		const auto time = m_timer->getLeftedTime();
+		DrawFormatString(m_realm.left(), m_realm.top() + 50, Color::WHITE, "%02d:%02d:%02d",
+			std::get<0>(time), std::get<1>(time), std::get<2>(time));
+		// Score の描画
 		return true;
+	}
+
+	bool isTimeOver() const {
+		return m_timer->isTimerEnd();
 	}
 
 private:
 	Shape::Rectangle m_realm = Shape::Rectangle();
+	std::shared_ptr<Timer> m_timer = nullptr;
+};
+
+class Result : public Object
+{
+public:
+	explicit Result(const Shape::Point& start_point)
+		: m_start_point(start_point) {
+		Object::layer = PRIORITY_INFO;
+	}
+
+	void init() {
+		SetFontSize(80);
+		m_is_initialized = true;
+	}
+
+	bool draw() override {
+		if (!m_is_initialized) {
+			return false;
+		}
+
+		if (m_is_game_clear) {
+		DrawString(m_start_point.x(), m_start_point.y(),
+				"Game Clear", Color::BLUE);
+				return true;
+		}
+
+		DrawString(m_start_point.x(), m_start_point.y(),
+				"Game Over", Color::RED);
+
+		return true;
+	}
+
+	// ゲームをクリアしたかどうか
+	void clearGame() {
+		m_is_game_clear = true;
+	}
+
+private:
+	Shape::Point m_start_point = Shape::Point();
+	bool m_is_initialized = false;
+	bool m_is_game_clear = false;
 };
 
 // フィールド 
@@ -82,7 +140,7 @@ public:
         SetDrawBright(100, 100, 100);
         DrawBox(m_realm.left(), m_realm.top(), 
                 m_realm.right(), m_realm.bottom(), 
-                GetColor(255, 255, 255), false);
+                Color::WHITE, false);
         SetDrawBright(255, 255, 255);
 		return true;
 	}
@@ -118,7 +176,7 @@ public:
         }
         DrawBox(m_realm.left(), m_realm.top(), 
                 m_realm.right(), m_realm.bottom(), 
-                GetColor(255, 0, 0), false);
+                Color::GREEN, false);
 
         return true;
     }
@@ -169,7 +227,7 @@ public:
         int x = m_realm.center.x();
         int y = m_realm.center.y();
         int r = m_realm.radius;
-        DrawCircle(x, y, r, GetColor(0, 255, 0), true);
+        DrawCircle(x, y, r, Color::RED, true);
 
         return true;
     }
@@ -182,11 +240,11 @@ public:
 		m_realm.center = pos;
 	}
 
-	void setVelocity(const Eigen::Vector2d& velocity) {
+	void setVelocity(const Eigen::Vector2f& velocity) {
 		m_moving->setVelocity(velocity);
 	}
 
-	Eigen::Vector2d getVelocity() {
+	Eigen::Vector2f getVelocity() {
 		return m_moving->getVelocity();
 	}
 
@@ -194,7 +252,12 @@ public:
 		return m_is_disappeared;
 	}
 
-    // Firebollの消滅
+	void appear(const Shape::Circle& start_realm) {
+		m_realm = start_realm;
+		m_is_disappeared = false;
+	}
+
+    // Fireballの消滅
     void disappear()
     {
         m_is_disappeared = true;
@@ -210,64 +273,8 @@ public:
 		return m_realm;
 	}
 
-	// 衝突したかどうか
-	bool isCollided(const Shape::Rectangle& parent) {
-		// 四角形の上側との衝突
-		const int dist_center_top = MathUtil::distPointToLine(m_realm.center, parent.getTopLine());
-		const int dist_center_right = MathUtil::distPointToLine(m_realm.center, parent.getRightLine());
-		const int dist_center_left = MathUtil::distPointToLine(m_realm.center, parent.getLeftLine());
-		const int dist_center_bottom = MathUtil::distPointToLine(m_realm.center, parent.getBottomLine());
+	bool isCollided(const Shape::Rectangle& parent);
 
-		if (CollisionDetection::isOnLine(m_realm, parent.getTopLine())) {
-			auto vel = m_moving->getVelocity();
-			if (m_realm.center.x() < parent.left()) {
-				if (dist_center_top < dist_center_left) {
-					m_moving->setVelocity(Eigen::Vector2d{ -vel.x(), vel.y() });
-					return true;
-				}
-			} else if (m_realm.center.x() > parent.right()) {
-				if (dist_center_top < dist_center_right) {
-					m_moving->setVelocity(Eigen::Vector2d{ -vel.x(), vel.y() });
-					return true;
-				}
-			}
-			m_moving->setVelocity(Eigen::Vector2d{ vel.x(), -vel.y() });
-			return true;
-		}
-		// 四角形の下側との衝突
-		else if (CollisionDetection::isOnLine(m_realm, parent.getBottomLine())) {
-			auto vel = m_moving->getVelocity();
-			if (m_realm.center.x() < parent.left()) {
-				if (dist_center_bottom < dist_center_left) {
-					m_moving->setVelocity(Eigen::Vector2d{ -vel.x(), vel.y() });
-					return true;
-				}
-			}
-			else if (m_realm.center.x() > parent.right()) {
-				if (dist_center_bottom < dist_center_right) {
-					m_moving->setVelocity(Eigen::Vector2d{ -vel.x(), vel.y() });
-					return true;
-				}
-			}
-			m_moving->setVelocity(Eigen::Vector2d{ vel.x(), -vel.y() });
-			return true;
-		}
-		// 四角形の左側との衝突
-		else if (CollisionDetection::isOnLine(m_realm, parent.getLeftLine())) {
-			auto vel = m_moving->getVelocity();
-			m_moving->setVelocity(Eigen::Vector2d{ -vel.x(), vel.y() });
-			return true;
-		}
-		// 四角形の右側との衝突
-		else if (CollisionDetection::isOnLine(m_realm, parent.getRightLine())) {
-			auto vel = m_moving->getVelocity();
-			m_moving->setVelocity(Eigen::Vector2d{ -vel.x(), vel.y() });
-			return true;
-		}
-		
-
-		return false;
-	}
 
 
 
@@ -342,6 +349,10 @@ public:
 		return m_life.getLifeNum();
 	}
 
+	bool isAlive() const {
+		return m_life.isAlive();
+	}
+
 	int left() {
 		return m_blocks[0].left();
 	}
@@ -405,7 +416,7 @@ public:
 		return true;
 	}
 
-	bool rotate(double rotation) {
+	bool rotate(float rotation) {
 		m_rotation += rotation;
 		return true;
 	}
@@ -418,12 +429,12 @@ public:
 		m_fireball->disappear();
 		m_fireball->setPosition(m_realm.getLeftTopPoint());
 		m_initial_fireball_speed = m_fireball->getVelocity().norm();
-		m_fireball->setVelocity(Eigen::Vector2d::Zero());
+		m_fireball->setVelocity(Eigen::Vector2f::Zero());
 	}
 
 	// fireballを吐き出す。吸い込んでから3秒後。
 	void exhareFireball() {
-		m_fireball->setVelocity(Eigen::Vector2d(- m_initial_fireball_speed * cos(m_rotation+M_PI/2.0), - m_initial_fireball_speed * sin(m_rotation+M_PI/2.0)));
+		m_fireball->setVelocity(Eigen::Vector2f(- m_initial_fireball_speed * (float)cos(m_rotation+M_PI/2.0), - m_initial_fireball_speed * (float)sin(m_rotation+M_PI/2.0)));
 		m_fireball->appear();
 		m_fireball = nullptr;
 	}
@@ -432,7 +443,7 @@ public:
 		return m_realm;
 	}
 
-	double getRotation() const {
+	float getRotation() const {
 		return m_rotation;
 	}
 
@@ -459,6 +470,10 @@ public:
 	// 吐き出したかどうか（countをみる)
 	bool isExhared() {
 		return m_count >= 0 ? false : true;
+	}
+
+	bool isInhared() {
+		return m_fireball == nullptr ? false : true;
 	}
 
 	void countDown() {
@@ -501,10 +516,10 @@ public:
 
 private:
 	bool m_is_disappered = true;
-	double m_rotation = 0;
+	float m_rotation = 0;
 	std::shared_ptr<Fireball> m_fireball = nullptr;
 	Shape::Rectangle m_realm = Shape::Rectangle();
-	double m_initial_fireball_speed = 0;
+	float m_initial_fireball_speed = 0;
 	// 吸い込んでからどのくらいで打ち出すか(基本30frames/secだから3秒くらい)
 	int m_count = 90;
 

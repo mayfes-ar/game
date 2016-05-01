@@ -28,4 +28,9 @@ public:
 		if (m_life > m_max_life) m_life = m_max_life;
 		return true;
 	}
+
+	bool isAlive() const {
+		return m_life != 0;
+	}
+
 };

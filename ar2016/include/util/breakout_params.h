@@ -17,18 +17,29 @@ namespace Breakout {
 	const Eigen::Vector2i DEBUG_WINDOW_START_POS = Eigen::Vector2i(INFO_WIDTH + FIELD_WIDTH, 0);
 	const int DEBUG_WINDOW_WIDTH = WIDTH / 4;
 	const int DEBUG_WINDOW_HEIGHT = HEIGHT;
+	
+	const Eigen::Vector2i RESULT_START_POINT 
+		= Eigen::Vector2i(WIDTH / 4, HEIGHT / 3);
+
+	// Timerのパラメータ
+	constexpr int TIMER_MAX_MIN = 0;
+	constexpr int TIMER_MAX_SEC = 30;
+	constexpr int TIMER_MAX_MSEC = 0;
 
 	// Blockのパラメータ
 	const int BLOCK_OFFSET_X = WIDTH / 4;
-	const int BLOCK_OFFSET_Y = HEIGHT / 10;
+	const int BLOCK_OFFSET_Y = HEIGHT / 8;
 	constexpr int BLOCK_WIDTH_NUM = 10;
 	constexpr int BLOCK_HEIGHT_NUM = 5;
 	const int BLOCK_WIDTH = (WIDTH / 2) / BLOCK_WIDTH_NUM;
 	const int BLOCK_HEIGHT = (HEIGHT / 4) / BLOCK_HEIGHT_NUM;
+	constexpr double BLOCK_GENERATE_RATIO = 0.1; // Blockが生成される確率
 
 	// Fireballのパラメータ
-	const Eigen::Vector2i FIREBALL_STRATPOS = Eigen::Vector2i{
-		WIDTH / 2, HEIGHT - 200 };
+	const Eigen::Vector2i FIREBALL_STARTPOS = Eigen::Vector2i{
+		WIDTH / 2, HEIGHT / 2 };
+	const Eigen::Vector2f FIREBALL_STARTVEL = Eigen::Vector2f{
+		2.0f, 10.0f};
 	constexpr int FIREBALL_RADIUS = 30;
 
 	// Shipのパラメータ

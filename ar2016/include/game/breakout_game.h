@@ -11,26 +11,17 @@ class BreakoutGame : public Game
 {
 public:
     // コンストラクタ
-    explicit BreakoutGame() : m_components(){}
-
-    // modeに登録する関数の実行回数の定義
-    enum TimerKind
-    {
-        OnOnce = -1,
-    };
+    explicit BreakoutGame() : m_components(new BreakoutComponents){}
 
     bool onStart() override 
     {
         init();
-        m_components = new BreakoutComponents();
-        m_components->setup();
         mode.setMode([&]() {
 
             drawList.push_back(std::make_shared<Breakout::Background>(
                         share.handle));
 
 			drawList.push_back(m_components->info);
-			drawList.push_back(m_components->debug);
 			drawList.push_back(m_components->field);
 			
 
@@ -41,26 +32,31 @@ public:
             drawList.push_back(m_components->fireball);
             drawList.push_back(m_components->ship);
 			drawList.push_back(m_components->pot);
-            }, OnOnce);
+		}, -1);
 
+		// Result画面
         mode.setMode([this]() {
-            //drawList.clear();
-                }, OnOnce);
+            drawList.clear();
+			m_components->result->init();
+			drawList.push_back(m_components->result);
+		}, -1);
 
         return Game::onStart();
     }
 
     bool onUpdate() override
     {
+		updateFireball();
+		updateCollisionDetection();
 		moveShip();
-		moveFireBall();
 		updateBlockStatus();
-		updateShipStatus();
 		updatePotStatus();
 		
 		if (key[KEY_INPUT_ESCAPE]) {
 			share.willFinish = true;
 		}
+		updateGameState();
+
         return Game::onUpdate();
     }
 
@@ -79,20 +75,32 @@ private:
     {
 		fps.isShow = true;
         // 認識スレッドを回す
-        m_detect_thread = std::thread(capture, std::ref(share));
+		m_detect_thread = std::thread(capture, std::ref(share));
+
+        m_components->setup();
+		m_components->info->init();
     }
+
+	// FireBallが消えていて、ゲームがまだ続いている場合は再びFireBallを復活させる
+	void updateFireball();
+
+	// すべての衝突判定
+	// Fireball, Itemなど
+	void updateCollisionDetection();
 
     // マーカからの情報から舟を移動
 	void moveShip();
 
-	void updateShipStatus();
-
-    // Firaballを移動
-	void moveFireBall();
+	// Game画面の状態更新
+	void updateGameState();
 
     // FireBallとBlockのあたり判定をし、blockを消すかを決める
 	void updateBlockStatus();
 
 	// PotとFireBallの当たり判定をし、fireballを吸い込むかを決める
 	void updatePotStatus();
+
+	// ゲームをクリアしたかどうか
+	// 現在はBlockが一つもない場合はクリアとみなす
+	bool isGameClear() const;
 };

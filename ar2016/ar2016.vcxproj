@@ -125,7 +125,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>c:\DxLib_VC\プロジェクトに追加すべきファイル_VC用;C:\lib\opencv-3.1.0\build\install\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.;..\external;.\include;c:\DxLib_VC\プロジェクトに追加すべきファイル_VC用;C:\lib\opencv-3.1.0\build\install\include</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <ExceptionHandling>Async</ExceptionHandling>
       <FloatingPointModel>Fast</FloatingPointModel>
@@ -168,6 +168,8 @@
     <ClCompile Include="src\moving\moving.cpp" />
     <ClCompile Include="src\object\breakout_object.cpp" />
     <ClCompile Include="src\object\object.cpp" />
+    <ClCompile Include="src\util\color_palette.cpp" />
+    <ClCompile Include="src\util\timer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="const.h" />
@@ -190,6 +192,8 @@
     <ClInclude Include="include\object\shape.h" />
     <ClInclude Include="include\object\units.h" />
     <ClInclude Include="include\util\breakout_params.h" />
+    <ClInclude Include="include\util\color_palette.h" />
+    <ClInclude Include="include\util\timer.h" />
     <ClInclude Include="include\util\util.h" />
     <ClInclude Include="main.h" />
   </ItemGroup>

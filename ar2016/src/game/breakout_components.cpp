@@ -1,5 +1,6 @@
 ﻿#include "game/breakout_components.h"
 #include "util/breakout_params.h"
+#include <random>
 
 using namespace Breakout;
 
@@ -8,16 +9,20 @@ void BreakoutComponents::setup()
 {
 	// Layoutの初期化
 	{
-		const auto info_realm = Shape::Rectangle(INFO_START_POS, INFO_WIDTH, INFO_HEIGHT);
-		info = std::make_shared<Breakout::Info>(info_realm);
+		auto info_realm = Shape::Rectangle(INFO_START_POS, INFO_WIDTH, INFO_HEIGHT);
+		std::shared_ptr<Timer> timer = std::make_shared<Timer>(TIMER_MAX_MIN, TIMER_MAX_SEC, TIMER_MAX_MSEC);
+		info = std::make_shared<Breakout::Info>(info_realm, timer);
 
-		const auto debug_realm = Shape::Rectangle(DEBUG_WINDOW_START_POS, DEBUG_WINDOW_WIDTH, DEBUG_WINDOW_HEIGHT);
-		debug = std::make_shared<Breakout::Info>(debug_realm);
+		result = std::make_shared<Breakout::Result>(RESULT_START_POINT);
+
 
 		const auto field_realm = Shape::Rectangle(FIELD_START_POS, FIELD_WIDTH, FIELD_HEIGHT);
 		field = std::make_shared<Breakout::Field>(field_realm);
 	}
 
+	std::random_device rnd;
+	std::mt19937 mt(rnd());
+	std::uniform_real_distribution<> block_generator(0.0, 1.0);
 	// Blockの初期化
 	for (int x = 0; x < BLOCK_WIDTH_NUM; ++x) {
 		for (int y = 0; y < BLOCK_HEIGHT_NUM; ++y) {
@@ -28,6 +33,10 @@ void BreakoutComponents::setup()
 
 			auto block = std::make_shared<Breakout::Block>(rec);
 
+			if (block_generator(mt) > BLOCK_GENERATE_RATIO) {
+				block->disappear();
+			}
+
 			block_list.push_back(block);
 		}
 	}
@@ -35,11 +44,11 @@ void BreakoutComponents::setup()
 	// fireballの初期化
 	{
 		const auto circle
-			= Shape::Circle(FIREBALL_STRATPOS, FIREBALL_RADIUS);
+			= Shape::Circle(FIREBALL_STARTPOS, FIREBALL_RADIUS);
 
-		Eigen::Vector2d start_vel = Eigen::Vector2d{50.0, 50.0};
-		Eigen::Vector2d start_accel = Eigen::Vector2d::Zero();
-		auto moving = std::make_shared<Moving>(0.1, start_accel, start_vel);
+		const Eigen::Vector2f start_vel = FIREBALL_STARTVEL;
+		const Eigen::Vector2f start_accel = Eigen::Vector2f::Zero();
+		auto moving = std::make_shared<Moving>(1.0, start_accel, start_vel);
 
 		fireball = std::make_shared<Breakout::Fireball>(circle, moving);
 	}

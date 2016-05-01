@@ -15,13 +15,13 @@ namespace Shape {
 
 		virtual ~Line() {}
 
-		Line getRotatedLine(const Eigen::Vector2i& center, double rotation) {
+		Line getRotatedLine(const Eigen::Vector2i& center, float rotation) {
 			Eigen::Vector2i vector_c_a = point - center;
 			Eigen::Vector2i vector_c_b = dir + vector_c_a;
-			Eigen:: Matrix2d rot;
-			rot = Eigen::Rotation2Dd(rotation);
-			Eigen::Vector2i rotated_vector_c_a = (rot * vector_c_a.cast<double>()).cast<int>();
-			Eigen::Vector2i rotated_vector_c_b = (rot * vector_c_b.cast<double>()).cast<int>();
+			Eigen:: Matrix2f rot;
+			rot = Eigen::Rotation2Df(rotation);
+			Eigen::Vector2i rotated_vector_c_a = (rot * vector_c_a.cast<float>()).cast<int>();
+			Eigen::Vector2i rotated_vector_c_b = (rot * vector_c_b.cast<float>()).cast<int>();
 			return Line(rotated_vector_c_a + center, rotated_vector_c_b - rotated_vector_c_a);
 		}
 
