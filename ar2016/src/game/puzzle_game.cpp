@@ -21,7 +21,7 @@ bool PuzzleGame::onStart() {
 		setDamage(800, 300, 100);
 		setBlock(400, 300, 300, 200);
 		setBlock(450, 550, 100, 100, false);
-		setBlock(650, 550, 100, 100, false);
+		setSwitch(1000, 200, 60, setBlock(650, 550, 100, 100, false)->canHit);
 
 	}, -1);
 
@@ -45,6 +45,7 @@ bool PuzzleGame::onStart() {
 	// result
 	mode.setMode([this]() {
 		drawList.clear();
+		gimmicks.clear();
 
 	}, -1);
 
@@ -106,6 +107,8 @@ bool PuzzleGame::onUpdate() {
 	drawList.push_back(markerBlock);
 	share.rectMutex.unlock();
 
+	player->preUpdate();
+
 	// gimmick
 	for (auto& itr = gimmicks.begin(); itr != gimmicks.end();) {
 		if ((*itr)->update()) {
@@ -158,10 +161,10 @@ void PuzzleGame::Player::update() {
 
 	// verlet法
 	const double tempX = x;
-	x += diffX + acX;
+	x += diffX + acX + exForceX;
 	prevX = tempX;
 	const double tempY = y;
-	y += diffY + acY;
+	y += diffY + acY + exForceY;
 	prevY = tempY;
 
 	for (auto block : game.allBlocks) {
