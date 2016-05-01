@@ -22,6 +22,8 @@ bool PuzzleGame::onStart() {
 		setBlock(400, 300, 300, 200);
 		setBlock(450, 550, 100, 100, false);
 		setSwitch(1000, 200, 60, setBlock(650, 550, 100, 100, false)->canHit);
+		setWarp(550, 550, 50, 50, 550, -100);
+		setWind(1100, 200, 200, 300, 0, -3);
 
 	}, -1);
 
@@ -107,6 +109,7 @@ bool PuzzleGame::onUpdate() {
 	drawList.push_back(markerBlock);
 	share.rectMutex.unlock();
 
+	// gimmicks作用前の準備
 	player->preUpdate();
 
 	// gimmick
@@ -118,6 +121,7 @@ bool PuzzleGame::onUpdate() {
 		}
 	}
 
+	// gimmicks作用後の位置計算
 	player->update();
 
 	if (key[KEY_INPUT_ESCAPE]) {

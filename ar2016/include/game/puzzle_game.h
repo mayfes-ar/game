@@ -322,7 +322,7 @@ class PuzzleGame : public Game {
 			layer = 70;
 		}
 		bool draw() {
-			// TODO
+			DrawBox(left(), top(), right(), bottom(), GetColor(238, 46, 213), false);
 			return willExist;
 		}
 		bool update() {
@@ -342,7 +342,7 @@ class PuzzleGame : public Game {
 			layer = 80;
 		}
 		bool draw() {
-			// TODO
+			DrawBox(left(), top(), right(), bottom(), GetColor(125, 224, 227), false);
 			return willExist;
 		}
 		bool update() {
@@ -395,6 +395,16 @@ class PuzzleGame : public Game {
 		auto switch_ = std::make_shared<SwitchGimmick>(x, y, size, target, isReverse, *this);
 		gimmicks.push_back(switch_);
 		drawList.push_back(switch_);
+	}
+	void setWarp(int x, int y, int width, int height, int posX, int posY) {
+		auto warp = std::make_shared<WarpGimmick>(Rectan(x, y, width, height), posX, posY, *this);
+		gimmicks.push_back(warp);
+		drawList.push_back(warp);
+	}
+	void setWind(int x, int y, int width, int height, double windX, double windY) {
+		auto wind = std::make_shared<WindGimmick>(Rectan(x, y, width, height), windX, windY, *this);
+		gimmicks.push_back(wind);
+		drawList.push_back(wind);
 	}
 
 	void setPlayer(int x, int y) {
