@@ -28,4 +28,6 @@ public:
     std::shared_ptr<Breakout::Ship> ship = nullptr;
 
 	std::shared_ptr<Breakout::Pot> pot = nullptr;
+
+	std::vector<std::shared_ptr<Breakout::Item>> item_list;
 };

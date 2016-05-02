@@ -28,24 +28,35 @@ void BreakoutGame::updateCollisionDetection()
 		}
 
 		// Ship衝突判定
-		for (const auto& block : m_components->ship->getRealm()) {
-			if (m_components->fireball->isCollided(block)) {
+		if (m_components->ship->isAlive())
+			if (m_components->fireball->isCollided(m_components->ship->getRealm())) {
 				return;
 			}
-		}
 
 		// Block衝突判定
 		for (int block_id = 0; block_id < Breakout::BLOCK_HEIGHT_NUM * Breakout::BLOCK_WIDTH_NUM; ++block_id) {
 			if (m_components->block_list.at(block_id)->isDisappeared()) continue;
 			if (m_components->fireball->isCollided(m_components->block_list.at(block_id)->getRealm())) {
 				m_components->block_list.at(block_id)->disappear();
-				// 
+				m_components->block_list.at(block_id)->detachAllItems();
 				return;
 			}
 		}
 	}
 	//Itemの衝突判定
+	{
+		for (auto &item : m_components->item_list) {
+			item->updateStatus();
+			if (item->isAttached()) continue;
+			item->getRealm();
+			m_components->ship->top();
 
+
+			if (item->getRealm().bottom() > m_components->ship->top() && item->getRealm().right() > m_components->ship->left() && item->getRealm().left() < m_components->ship->right() && item->getRealm().top() < m_components->ship->bottom()) {
+				m_components->ship->attachItem(item);
+			}
+		}
+	}
 }
 
 void BreakoutGame::moveShip()
@@ -94,7 +105,7 @@ void BreakoutGame::updateGameState()
 			return;
 		}
 
-		if (m_components->info->isTimeOver() ||
+		if (/*m_components->info->isTimeOver() ||*/
 			!m_components->ship->isAlive()) {
 			mode.goNext();
 			return;

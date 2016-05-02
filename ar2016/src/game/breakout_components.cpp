@@ -65,5 +65,12 @@ void BreakoutComponents::setup()
 		pot = std::make_shared<Breakout::Pot>(realm);
 	}
 
+	// itemの初期化
+	for (auto &block : block_list) {
+		auto item = std::make_shared<Item>(Breakout::ItemKind::RestoreShip);
+		block->attachItem(item);
+		item_list.push_back(item);
+	}
+
 	// Todo Player
 }

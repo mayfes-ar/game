@@ -26,6 +26,124 @@ constexpr int PRIORITY_DYNAMIC_OBJECT = 3; // 動的オブジェクト(Ship, Fir
 constexpr int PRIORITY_CHARACTER = 4; // キャラクター(マリオ)
 constexpr int PRIORITY_INFO = 5; // インフォメーション
 
+class ItemReceiverBase;
+
+enum ItemKind {
+	RestoreShip,
+	DamageShip
+};
+
+//アイテムクラス
+class ItemBase 
+{
+public:
+	virtual ~ItemBase() {}
+	virtual void updateStatus() = 0;
+
+	void attachItemReceiver(std::shared_ptr<ItemReceiverBase> item_receiver) {
+		m_item_receiver = item_receiver;
+		updateStatus();
+	}
+	void detachItemReceiver() {
+		m_item_receiver = nullptr;
+		updateStatus();
+	}
+
+	bool isAttached() {
+		return m_item_receiver == nullptr ? false : true;
+	}
+
+	ItemKind getItemKind() {
+		return m_item_kind;
+	}
+
+protected:
+	std::shared_ptr<ItemReceiverBase> m_item_receiver = nullptr;
+	ItemKind m_item_kind;
+};
+
+//アイテムレシーバー基礎クラス
+class ItemReceiverBase
+{
+public:
+	ItemReceiverBase() {}
+	virtual ~ItemReceiverBase() {}
+	//本当は純粋仮想にしたかったけどそうするとこのクラスのインスタンスthisがつくれないからこのようにした
+	virtual void applyItems() {}
+	virtual const Shape::Rectangle getRealm() { return m_realm; }
+
+	void detachItem(std::shared_ptr<ItemBase> item) {
+		m_items.remove(item);
+		item->detachItemReceiver();
+	}
+
+	void detachAllItems() {
+		for (auto item : m_items) {
+			item->detachItemReceiver();
+		}
+		m_items.clear();
+	}
+
+	void attachItem(std::shared_ptr<ItemBase> item) {
+		m_items.push_back(item);
+		item->attachItemReceiver(std::make_shared<ItemReceiverBase>(*this));
+		applyItems();
+	}
+
+	//使用済みのアイテムを消す。ただしitemのitemreceiverは消さないでおく。そうすればitem側はまだblockに残っていると判断するから誤作動しないし、itemreceiver側はitemをもうもっていないと判断するから効果も適応されなくなる
+	void deleteItem(std::shared_ptr<ItemBase> item) {
+		m_items.remove(item);
+	}
+
+protected:
+	std::list<std::shared_ptr<ItemBase>> m_items = {};
+	Shape::Rectangle m_realm = Shape::Rectangle();
+};
+
+class Item : public Object, public ItemBase
+{
+public:
+	virtual ~Item() {}
+	Item(ItemKind item_kind) {
+		m_item_kind = item_kind;
+		Object::layer = PRIORITY_DYNAMIC_OBJECT;
+	}
+
+	Shape::Rectangle getRealm() const {
+		return m_realm;
+	}
+
+	void updateStatus() override {
+		if (m_item_receiver != nullptr) {
+			m_realm.start_point = m_item_receiver->getRealm().start_point;// + Eigen::Vector2i((m_item_receiver->getRealm().width - m_realm.width) / 2, 0);
+		}
+		else {
+			m_realm.start_point += Eigen::Vector2i(0, 20);
+		}
+	}
+
+	bool draw() override {
+		//誰にかに保持されていたら描画しない
+		if (m_item_receiver != nullptr) return true;
+
+		switch (m_item_kind) {
+		case RestoreShip:
+			DrawExtendGraph(m_realm.left(), m_realm.top(), m_realm.right(), m_realm.bottom(), imgHandles["restore_ship"], TRUE);
+			break;
+		case DamageShip:
+			DrawExtendGraph(m_realm.left(), m_realm.top(), m_realm.right(), m_realm.bottom(), imgHandles["damage_ship"], TRUE);
+			break;
+		}
+
+		//DrawBox(m_realm.left(), m_realm.top(), m_realm.right(), m_realm.bottom(), GetColor(255, 255, 0), TRUE);
+		return true;
+	}
+
+private:
+	Shape::Rectangle m_realm = Shape::Rectangle(Eigen::Vector2i(0,0), BLOCK_WIDTH/2, BLOCK_HEIGHT);
+};
+
+
 // 背景画像
 // 溶岩の絵がほしい
 class Background : public Object
@@ -160,12 +278,12 @@ private:
 // Block崩しに使われるBlock
 // Firebollにぶつかると消える
 // 初期位置に固定という意味で静的オブジェクト
-class Block : public Object
+class Block : public Object, public ItemReceiverBase
 {
 public:
     explicit Block(const Shape::Rectangle& realm) 
-        : m_realm(realm)
     {
+		m_realm = realm;
         Object::layer = PRIORITY_STATIC_OBJECT;
     }
 
@@ -181,8 +299,12 @@ public:
         return true;
     }
 
-	Shape::Rectangle getRealm() const {
+	const Shape::Rectangle getRealm() override {
 		return m_realm;
+	}
+
+	void applyItems() override {
+		return;
 	}
 
 	bool isDisappeared() const {
@@ -201,7 +323,7 @@ public:
     }
 private:
     bool m_is_disappeared = false; // 火の玉にあったかどうか
-    Shape::Rectangle m_realm = Shape::Rectangle();
+    //Shape::Rectangle m_realm = Shape::Rectangle();
 };
 
 
@@ -287,7 +409,7 @@ private:
 
 // キャラクタがのる船
 // ライフをもつ
-class Ship : public Object
+class Ship : public Object, public ItemReceiverBase
 {
 public:
     explicit Ship(const Eigen::Vector2i& start_point, const Life& life)
@@ -354,10 +476,16 @@ public:
 	}
 
 	int left() {
-		return m_blocks[0].left();
+		return m_start_point[0];
 	}
 	int right() {
-		return m_blocks[m_blocks.size() - 1].right();
+		return m_start_point[0] + m_blocks.size() * BLOCK_WIDTH;
+	}
+	int top() {
+		return m_start_point[1];
+	}
+	int bottom() {
+		return m_start_point[1] + BLOCK_HEIGHT;
 	}
 
     bool draw() override {
@@ -382,8 +510,29 @@ public:
         m_is_disappered = true;
     }
 
-	std::vector<Shape::Rectangle> getRealm() const {
-		return m_blocks;
+	const Shape::Rectangle getRealm() override {
+		return Shape::Rectangle(m_start_point, m_blocks.size() * BLOCK_WIDTH, BLOCK_HEIGHT);
+	}
+
+	void applyItems() override {
+		std::vector<std::shared_ptr<ItemBase>> will_be_deleted = {};
+		for (auto& item : m_items) {
+			switch (item->getItemKind()) {
+				//継続的な効果を持たないものは適用したら消す
+				
+			case RestoreShip:
+				restoreShip(1);
+				will_be_deleted.push_back(item);
+				break;
+			case DamageShip:
+				damageShip(1);
+				will_be_deleted.push_back(item);
+				break;
+			}
+		}
+		for (auto& item : will_be_deleted) {
+			m_items.remove(item);
+		}
 	}
 
 private:

@@ -32,6 +32,9 @@ public:
             drawList.push_back(m_components->fireball);
             drawList.push_back(m_components->ship);
 			drawList.push_back(m_components->pot);
+			for (const auto& item : m_components->item_list) {
+				drawList.push_back(item);
+			}
 		}, -1);
 
 		// Result画面
