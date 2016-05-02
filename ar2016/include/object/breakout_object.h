@@ -289,7 +289,7 @@ public:
 	};
 
     explicit Block(const Shape::Rectangle& realm, Color color) 
-		: m_realm(realm), m_color(color), ItemReceiverBase(realm)
+		: m_color(color), ItemReceiverBase(realm)
     {
         Object::layer = PRIORITY_STATIC_OBJECT;
     }
@@ -349,7 +349,6 @@ public:
     }
 private:
     bool m_is_disappeared = false; // 火の玉にあったかどうか
-    Shape::Rectangle m_realm = Shape::Rectangle();
 	Color m_color = Color::Green;
 };
 
