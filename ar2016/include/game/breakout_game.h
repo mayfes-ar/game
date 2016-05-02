@@ -40,7 +40,6 @@ public:
 		// Result画面
         mode.setMode([this]() {
             drawList.clear();
-			m_components->result->init();
 			drawList.push_back(m_components->result);
 		}, -1);
 

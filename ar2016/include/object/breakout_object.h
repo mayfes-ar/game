@@ -207,29 +207,23 @@ private:
 class Result : public Object
 {
 public:
-	explicit Result(const Shape::Point& start_point)
-		: m_start_point(start_point) {
+	explicit Result(const Shape::Rectangle& m_realm)
+		: m_realm(m_realm) {
 		Object::layer = PRIORITY_INFO;
 	}
 
-	void init() {
-		SetFontSize(80);
-		m_is_initialized = true;
-	}
 
 	bool draw() override {
-		if (!m_is_initialized) {
-			return false;
-		}
-
 		if (m_is_game_clear) {
-		DrawString(m_start_point.x(), m_start_point.y(),
-				"Game Clear", Color::BLUE);
+			DrawExtendGraph(m_realm.left(), m_realm.top(),
+				m_realm.right(), m_realm.bottom(),
+				imgHandles["s_game_result_clear"], TRUE);
 				return true;
 		}
 
-		DrawString(m_start_point.x(), m_start_point.y(),
-				"Game Over", Color::RED);
+			DrawExtendGraph(m_realm.left(), m_realm.top(),
+				m_realm.right(), m_realm.bottom(),
+				imgHandles["game_over"], TRUE);
 
 		return true;
 	}
@@ -240,8 +234,7 @@ public:
 	}
 
 private:
-	Shape::Point m_start_point = Shape::Point();
-	bool m_is_initialized = false;
+	Shape::Rectangle m_realm = Shape::Rectangle();
 	bool m_is_game_clear = false;
 };
 

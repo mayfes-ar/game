@@ -105,7 +105,7 @@ void BreakoutGame::updateGameState()
 			return;
 		}
 
-		if (/*m_components->info->isTimeOver() ||*/
+		if (m_components->info->isTimeOver() ||
 			!m_components->ship->isAlive()) {
 			mode.goNext();
 			return;
