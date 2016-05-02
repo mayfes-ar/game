@@ -24,9 +24,14 @@ class SinglePlayerGame : public Game {
 	// BGM の処理
 	class BGM : public Object {
 		int mode;
+		bool hasPlayerWon = true;
 	public:
 		BGM(int mode_) {
 			mode = mode_;
+		}
+		BGM(int mode_, bool hasPlayerWon_) {
+			mode = mode_;
+			hasPlayerWon = hasPlayerWon_;
 		}
 
 		bool draw() {
@@ -37,11 +42,18 @@ class SinglePlayerGame : public Game {
 		void start() {
 			switch (mode) {
 				case 0: {
-					PlaySoundMem(soundHandles["s_game_bgm"] , DX_PLAYTYPE_LOOP, true);
 					break;
 				}
 				case 1: {
-					PlaySoundMem(soundHandles["game_over"] , DX_PLAYTYPE_BACK, true);
+					PlaySoundMem(soundHandles["s_game_bgm"] , DX_PLAYTYPE_LOOP, true);
+					break;
+				}
+				case 2: {
+					if (hasPlayerWon) {
+
+					} else {
+						PlaySoundMem(soundHandles["s_game_over"] , DX_PLAYTYPE_BACK, true);
+					}
 					break;
 				}
 				default: {
@@ -53,11 +65,14 @@ class SinglePlayerGame : public Game {
 		void stop() {
 			switch (mode) {
 				case 0: {
-					StopSoundMem(soundHandles["s_game_bgm"]);
 					break;
 				}
 				case 1: {
-					StopSoundMem(soundHandles["game_over"]);
+					StopSoundMem(soundHandles["s_game_bgm"]);
+					break;
+				}
+				case 2: {
+					StopSoundMem(soundHandles["s_game_over"]);
 					break;
 				}
 				default: {
@@ -68,12 +83,13 @@ class SinglePlayerGame : public Game {
 
 		// プレイヤーが死んだときの効果音
 		void playDeadSound() {
-			PlaySoundMem(soundHandles["dead"] , DX_PLAYTYPE_NORMAL, true);
+			PlaySoundMem(soundHandles["s_game_dead"] , DX_PLAYTYPE_NORMAL, true);
 		}
 	};
 
 	// 認識したマーカーの扱い
 	class Marker : public Object {
+
 	public:
 		Marker(int x_, int y_, int width_, int height_, bool willStay_) {
 			rect.x = x_, rect.y = y_, rect.width = width_, rect.height = height_;
@@ -86,7 +102,7 @@ class SinglePlayerGame : public Game {
 		}
 
 		bool draw() {
-			DrawExtendGraph(left(), top(), right(), bottom(), imgHandles["luigi"], true);
+			DrawExtendGraph(left(), top(), right(), bottom(), imgHandles["s_game_marker"], true);
 			return false;
 		}
 
@@ -96,6 +112,8 @@ class SinglePlayerGame : public Game {
 		double bottomHit() const { return bottom() - rect.height / 3; }
 	};
 
+
+
 	// 敵キャラクター
 	class Enemy : public Object {
 		double prevX;
@@ -103,9 +121,12 @@ class SinglePlayerGame : public Game {
 		bool isJumping = true;
 		bool isAlive = true;
 
+
 		int enemyType; // 0 : 移動しない、 1 : 左右にぴょこぴょこ
 		int turnCounter = 100;
 		int moveDirection;
+
+		std::shared_ptr<Enemy> childEnemy;
 
 	public:
 		Enemy(int x_, int y_, int width_, int height_, int enemyType_){
@@ -114,9 +135,10 @@ class SinglePlayerGame : public Game {
 			rect.width = width_;
 			rect.height = height_;
 			enemyType = enemyType_;
-			if (enemyType == 4 || enemyType == 5) {
+			if (enemyType == 4 ) {
 				layer =101 ;
 			}
+			
 			else {
 				layer = 100;
 			}
@@ -140,24 +162,32 @@ class SinglePlayerGame : public Game {
 		bool draw() {
 			switch (enemyType) {
 				case 3: {
-					DrawExtendGraph(left(), top(), right(), bottom(), imgHandles["teresa"], true);
+					DrawExtendGraph(left(), top(), right(), bottom(), imgHandles["s_game_teresa"], true);
 					break;
 				}
-				case 4: {
-					DrawExtendGraph(left(), top()-150, right(), bottom(), imgHandles["water"], true);
+				case 11: {
+					DrawExtendGraph(left(), top()-80, right(), bottom()+800, imgHandles["s_game_water"], true);
 					break;
 				}
-				case 5: {
-					DrawExtendGraph(left(), top()-150, right(), bottom(), imgHandles["water"], true);
+				case 12: {
+					DrawExtendGraph(left(), top(), right(), bottom(), imgHandles["s_game_switch"], true);
 					break;
 				}
 				default: {
-					DrawExtendGraph(left(), top(), right(), bottom(), imgHandles["wanwan"], true);
+					DrawExtendGraph(left(), top(), right(), bottom(), imgHandles["s_game_wanwan"], true);
 					break;
 				}
 			}
 			return isAlive;
 		}
+
+		bool isWaterUp = true;
+
+		bool getIsWaterUp(){
+			return isWaterUp;
+		}
+
+
 
 		void update(const std::vector<std::shared_ptr<BlockObject>> blockList) {
 			// 座標更新以外にも状態の更新を扱う？
@@ -178,8 +208,6 @@ class SinglePlayerGame : public Game {
 			double acX = 0;
 			double acY = 0;
 
-			char key[256];
-			GetHitKeyStateAll(key);
 
 			switch (enemyType) {
 				case 0:{
@@ -206,24 +234,25 @@ class SinglePlayerGame : public Game {
 					break;
 				}
 				case 2:{
+					moveDirection = 1;
 					switch(moveDirection) {
 						case 0:{
 							acX = 0;
-							acY = 10;
+							acY = 3;
 							break;
 						}
 						case 1:{
-							acX = -10;
+							acX = -3;
 							acY = 0;
 							break;
 						}
 						case 2:{
 							acX = 0;
-							acY = -10;
+							acY = -3;
 							break;
 						}
 						case 3:{
-							acX = 10;
+							acX = 3;
 							acY = 0;
 							break;
 						}
@@ -238,20 +267,23 @@ class SinglePlayerGame : public Game {
 					acY = rand() % 5 -2;
 					break;
 				}
-				case 4: {
-					acX = 0;
-					acY = -0.01;
-					if (key[KEY_INPUT_9]) {
-						acY = 0.05;
+				case 11: {
+					if (isWaterUp == false ) {
+						acX = 0;
+						acY = 0.005;
+						break;
+					}
+					else {
+						acX = 0;
+						acY = -0.005;
+						break;
 					}
 					break;
 				}
-				case 5: {
+
+				case 12: {
 					acX = 0;
-					acY = -0.02;
-					if (key[KEY_INPUT_9]) {
-						acY = 0.05;
-					}
+					acY = 0;
 					break;
 				}
 
@@ -301,7 +333,8 @@ class SinglePlayerGame : public Game {
 		}
 
 		// 死亡判定。マーカーで殴られたら死ぬ。
-		bool deathDecision(const std::vector<std::shared_ptr<Marker>> markerList){
+
+		bool deathDecision(const std::vector<std::shared_ptr<Marker>> markerList) {
 			// 生死判定
 
 			std::map<std::string, int> field = {
@@ -322,14 +355,20 @@ class SinglePlayerGame : public Game {
 			for (auto marker : markerList) {
 				if (left() < marker->right() && top() < marker->bottom() &&
 					right() > marker->left() && bottom() > marker->top()) {
+
 					if (isAlive) {
-						PlaySoundMem(soundHandles["attack"] , DX_PLAYTYPE_BACK, true);
+						PlaySoundMem(soundHandles["s_game_attack"], DX_PLAYTYPE_BACK, true);
 					}
 					isAlive = false;
 					return !isAlive;
 				}
+
 			}
 			return !isAlive;
+		}
+
+		bool getIsAlive() {
+			return isAlive;
 		}
 	};
 
@@ -349,7 +388,7 @@ class SinglePlayerGame : public Game {
 		}
 
 		bool draw() {
-			DrawExtendGraph(left(), top(), right(), bottom(), imgHandles["player"], true);
+			DrawExtendGraph(left(), top(), right(), bottom(), imgHandles["s_game_player"], true);
 			return true;
 		}
 
@@ -370,19 +409,19 @@ class SinglePlayerGame : public Game {
 			const double diffY = y - prevY;
 
 			double acX = -0.5 * (1 - (diffX <= 0) - (diffX < 0));
-			double acY = 4;
+			double acY = 3.2;
 
 			if (key[KEY_INPUT_UP] && !isJumping) {
-				acY = -50;
-				PlaySoundMem(soundHandles["jump"] , DX_PLAYTYPE_BACK, true);
+				acY = -40;
+				PlaySoundMem(soundHandles["s_game_jump"] , DX_PLAYTYPE_BACK, true);
 			}
 			isJumping = true;
 
 			if (key[KEY_INPUT_RIGHT]) {
-				acX = 1.5 * (diffX < 15);
+				acX = 1.5 * (diffX < 10);
 			}
 			if (key[KEY_INPUT_LEFT]) {
-				acX = -1.5 * (diffX > -15);
+				acX = -1.5 * (diffX > -10);
 			}
 
 			// verlet法
@@ -480,53 +519,33 @@ class SinglePlayerGame : public Game {
 	std::vector<std::shared_ptr<Enemy>> enemyList;
 
 	// 敵作成。enemyType については Enemy クラスを参照
-	void makeEnemy(int x, int y, int width, int height, int enemyType) {
+	std::shared_ptr<Enemy> makeEnemy(int x, int y, int width, int height, int enemyType) {
 		auto enemy = std::make_shared<Enemy>(x, y, width, height, enemyType);
 		enemyList.push_back(enemy);
 		drawList.push_back(enemy);
+		return enemy;
 	}
 
 	std::shared_ptr<BGM> bgm;
-
-	int timer = 3500;
+	const int MAX_TIME = 30*20;
+	int timer = MAX_TIME;
+	bool hasPlayerWon;
 
 public:
 	SinglePlayerGame() {
 		thread = std::thread::thread(capture, std::ref(share));
-		player = std::make_shared<Player>(200, 0, 100, 150);
+		player = std::make_shared<Player>(WIDTH/2 - 100/2, HEIGHT/2-150/2, 60, 80);
+		hasPlayerWon = true;
+
 	}
 
 	bool onStart() {
 		using namespace std;
 		fps.isShow = true;
+
 		srand((unsigned int)time(NULL));
 
 		// mode 0
-		mode.setMode([this]() {
-			auto makeBlock = [this](int x, int y, int width, int height) {
-				auto block = make_shared<BlockObject>(x, y, width, height, true);
-				blockList.push_back(block);
-				drawList.push_back(block);
-			};
-			makeBlock(-100, 600, 700, 50);
-			makeBlock(900, 600, 480, 50);
-			makeBlock(10, 100, 30, 720);
-			makeBlock(300, 300, 200, 50);
-
-			makeEnemy(350, 200, 435/4, 349/4, 0);
-			makeEnemy(900, 0, 435/2, 349/2, 1);
-			makeEnemy(0, HEIGHT+150, 1280, 200, 4);
-			makeEnemy(0, HEIGHT+150, 1280, 200, 5);
-
-			drawList.push_back(player);
-			drawList.push_back(make_shared<Background>(share.handle));
-
-			bgm = make_shared<BGM>(0);
-			bgm->start();
-
-		}, -1);
-
-		// mode 1
 		mode.setMode([this]() {
 			class Title : public Object {
 			public:
@@ -535,8 +554,9 @@ public:
 				}
 
 				bool draw() {
-					DrawExtendGraph(WIDTH/2-400, 30, WIDTH/2+400, 30+296, imgHandles["s_game_result"], true);
-					DrawExtendGraph(WIDTH/2-75, 400, WIDTH/2+75, 400+150, imgHandles["s_game_dead"], true);
+					DrawExtendGraph(0, 0, WIDTH, HEIGHT, imgHandles["s_game_op"], true);
+					DrawExtendGraph(WIDTH/2-429/2, 30, WIDTH/2+429/2, 30+47, imgHandles["s_game_op_title"], true);
+					DrawExtendGraph(WIDTH/2-50, 400, WIDTH/2+50, 400+150, imgHandles["s_game_player"], true);
 					return true;
 				}
 			};
@@ -544,8 +564,61 @@ public:
 			drawList.clear();
 			drawList.push_back(make_shared<Title>());
 
-			bgm->stop();
+			bgm = make_shared<BGM>(0);
+			bgm->start();
+
+			for(int i = 0; i < 20; i++);
+		}, 150);
+
+		// mode 1
+		mode.setMode([this]() {
+			drawList.clear();
+			auto makeBlock = [this](int x, int y, int width, int height) {
+				auto block = make_shared<BlockObject>(x, y, width, height, true);
+				blockList.push_back(block);
+				drawList.push_back(block);
+			};
+			makeBlock(0-200, 600, WIDTH+200+200, 50);
+			// makeBlock(900, 600, 480, 50);
+			// makeBlock(10, 100, 30, 720);
+			// makeBlock(300, 300, 200, 50);
+
+
+
+			drawList.push_back(player);
+			drawList.push_back(make_shared<Background>(share.handle));
+
 			bgm = make_shared<BGM>(1);
+			bgm->start();
+
+		}, MAX_TIME);
+
+		// mode 2
+		mode.setMode([this]() {
+			class Title : public Object {
+				bool hasPlayerWon = true;
+			public:
+				Title(bool hasPlayerWon_) {
+					layer = 50;
+					hasPlayerWon = hasPlayerWon_;
+				}
+
+				bool draw() {
+					if (hasPlayerWon) {
+						DrawExtendGraph(0, 0, WIDTH, HEIGHT, imgHandles["s_game_result_clear"], true);
+					} else {
+						DrawExtendGraph(WIDTH/2-400, 30, WIDTH/2+400, 30+296, imgHandles["s_game_result_dead"], true);
+						DrawExtendGraph(WIDTH/2-75, 400, WIDTH/2+75, 400+150, imgHandles["s_game_dead"], true);
+					}
+					return true;
+				}
+			};
+
+			drawList.clear();
+			drawList.push_back(make_shared<Title>(hasPlayerWon));
+
+			bgm->stop();
+			bgm = make_shared<BGM>(2, hasPlayerWon);
 			bgm->start();
 		}, -1);
 
@@ -553,77 +626,125 @@ public:
 	}
 
 	bool onUpdate() {
+		bool willFinishMode = false;
+		static std::shared_ptr <Enemy> water;
+		static std::shared_ptr <Enemy> button;
+
 		switch (mode.getMode())	{
-		case 0: { // playing
-			timer -= 1;
-			if (timer <= 0) {
-				// share.willFinish = true;
-				mode.goNext();
+			case 0:{ // イントロダクション
+				static int counterForWaiting = 10;
+				if (key[KEY_INPUT_RETURN] && counterForWaiting == 0) {
+					willFinishMode = true;
+				}
+				if (counterForWaiting > 0) {
+					counterForWaiting--;
+				}
+				break;
+			}
+			case 1: { // playing
+				timer -= 1;
+				if (timer <= 0) {
+					willFinishMode = true;
+				}
+
+				std::vector<std::shared_ptr<Marker>> markerList;
+
+				// 認識したマーカーを描画
+				share.rectMutex.lock();
+				for (auto rect : share.rects) {
+					auto marker = std::make_shared<Marker>(rect, false);
+					markerList.push_back(marker);
+					drawList.push_back(marker);
+				}
+				share.rectMutex.unlock();
+
+				player->update(key, blockList, markerList);
+
+
+				for (auto enemy : enemyList) {
+					enemy->update(blockList);
+					enemy->deathDecision(markerList);
+				}
+
+
+				if(player->deathDecision(enemyList)){
+					bgm->stop();
+					bgm->playDeadSound();
+					hasPlayerWon = false;
+					willFinishMode = true;
+				}
+
+				// 敵の出現を管理する
+
+				switch(MAX_TIME-timer) {					
+					case 1: {
+						makeEnemy(350, 200, 435/5, 349/5, 0);
+						water = makeEnemy(0, HEIGHT + 80, 1280, 800, 11);
+						button = makeEnemy(0, 100, 40, 40, 12);
+
+						break;
+						}
+					case 150: {
+						makeEnemy(900, 0, 435/3, 349/3, 1);
+						break;
+						}
+					case 300: {
+						makeEnemy(WIDTH, HEIGHT/2, 435/2, 349/2, 2);
+						break;
+					}
+					default: {
+						// 定期的に実行する場合など
+						if (MAX_TIME - timer > 400 && (MAX_TIME - timer) % 20 == 0) {
+							makeEnemy(rand() % (WIDTH - 200) + 100, rand() % (HEIGHT - 100), 112 * 4 / 5, 112 * 4 / 5, 3);
+						}
+						else if ((MAX_TIME - timer) % 60 == 0) {
+							makeEnemy(rand() % (WIDTH - 200) + 100, rand() % (HEIGHT - 100), 112 * 4 / 5, 112 * 4 / 5, 3);
+						}
+						break;
+					}
+							
+				}
+				if (button->getIsAlive() == false) {
+					water->isWaterUp = false;
+				}
+				break;
+				
+			}
+					
+
+			case 2:{ // リザルト画面
+				if (key[KEY_INPUT_RETURN]) {
+					willFinishMode = true;
+				}
+				break;
 			}
 
-			std::vector<std::shared_ptr<Marker>> markerList;
+			default: 
 
-			// 認識したマーカーを描画
-			share.rectMutex.lock();
-			for (auto rect : share.rects) {
-				auto marker = std::make_shared<Marker>(rect, false);
-				markerList.push_back(marker);
-				drawList.push_back(marker);
-			}
-			share.rectMutex.unlock();
-
-			player->update(key, blockList, markerList);
-
-			for (auto enemy : enemyList) {
-				enemy->update(blockList);
-				enemy->deathDecision(markerList);
+				break;
 			}
 
-			if(player->deathDecision(enemyList)){
-				bgm->stop();
-				bgm->playDeadSound();
-				mode.goNext();
-			}
-			break;
-		}
-		case 1:{ // リザルト画面
-			if (key[KEY_INPUT_RETURN]) {
-				mode.goNext();
-			}
-
-			break;
-		}
-
-		default:
-			break;
-		}
 
 		if (key[KEY_INPUT_ESCAPE]) {
 			share.willFinish = true;
 		}
 		if (key[KEY_INPUT_N]) {
-			mode.goNext();
-		}
-		if (key[KEY_INPUT_0]) {
-			makeEnemy(350, 200, 435/4, 349/4, 1);
-		}
-		if (key[KEY_INPUT_1]) {
-			makeEnemy(900, 0, 435 / 2, 349 / 2, 1);
-		}
-		if (key[KEY_INPUT_2]) {
-			makeEnemy(WIDTH/2, HEIGHT/2, 435/2, 349/2, 2);
-		}
-		if (key[KEY_INPUT_3]) {
-			makeEnemy(WIDTH/2, HEIGHT/2, 120, 120, 3);
+			willFinishMode = true;
 		}
 
-		/*for ( auto& itr = enemyList.begin(); itr != enemyList.end();) {
-			if ((*itr)->draw()) {
+
+		for ( auto& itr = enemyList.begin(); itr != enemyList.end();) {
+			if ((*itr)->getIsAlive()) {
 				++itr;
 			} else {
 				itr = enemyList.erase(itr);
 			}
-		}*/
+		}
+
+		if (willFinishMode) {
+
+			mode.goNext();
+		}
 
 		return Game::onUpdate();
 	}

@@ -66,18 +66,41 @@ bool Object::load() {
 	isSuccess &= loadEffect("effect1", "warp", 1, 6, 640, 2880);
 
 	// Single Player Game
-	isSuccess &= loadImage("s_game_bg", "wallpaper_alpha");
-	isSuccess &= loadImage("s_game_result", "s_game_result");
-	isSuccess &= loadImage("s_game_dead", "dead_sample");
-	isSuccess &= loadImage("wanwan", "wanwan");
-	isSuccess &= loadImage("luigi", "luigi");
-	isSuccess &= loadSound("dead", "dead.wav");
-	isSuccess &= loadSound("game_over", "game_over.wav");
+	// オープニング
+	isSuccess &= loadImage("s_game_op_title", "s_game_op_title");
+	isSuccess &= loadImage("s_game_op", "s_game_op");
+
+	//　ゲーム本編
+	isSuccess &= loadImage("s_game_player", "mario");
+	isSuccess &= loadImage("s_game_wanwan", "wanwan");
+	isSuccess &= loadImage("s_game_marker", "luigi");
+	isSuccess &= loadImage("s_game_teresa", "teresa");
+
 	isSuccess &= loadSound("s_game_bgm", "妄想凸守旋律～補完～.mp3");
-	isSuccess &= loadSound("attack", "bomb.mp3");
-	isSuccess &= loadSound("jump", "jump.mp3");
-	isSuccess &= loadImage("teresa", "teresa");
-	isSuccess &= loadImage("water", "water");
+
+	isSuccess &= loadImage("s_game_water", "water");
+	isSuccess &= loadImage("s_game_switch", "switch");
+
+	isSuccess &= loadSound("s_game_dead", "dead.wav");
+	isSuccess &= loadSound("s_game_attack", "bomb.mp3");
+	isSuccess &= loadSound("s_game_jump", "jump.mp3");
+
+	// リザルト
+	isSuccess &= loadImage("s_game_result_clear", "s_game_clear");
+	isSuccess &= loadImage("s_game_result_dead", "s_game_result");
+	isSuccess &= loadImage("s_game_dead", "dead_sample");
+
+	isSuccess &= loadSound("s_game_over", "game_over.wav");
+
+	// isSuccess &= loadImage("s_game_bg", "wallpaper_alpha");
+
+	// puzzle game
+	isSuccess &= loadImage("p_explain", "puzzle_explanation");
+	isSuccess &= loadImage("p_goal", "goal");
+	isSuccess &= loadEffect("p_smog", "dark_smog", 13, 1, 3120, 240);
+	isSuccess &= loadEffect("p_ball", "ball", 3, 10, 960, 2400);
+	isSuccess &= loadEffect("p_coin", "coin", 5, 2, 1000, 400);
+
 
 	return isSuccess;
 }
