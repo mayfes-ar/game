@@ -134,6 +134,8 @@ class SinglePlayerGame : public Game {
 		double bottomHit() const { return bottom() - rect.height / 3; }
 	};
 
+
+
 	// 敵キャラクター
 	class Enemy : public Object {
 		double prevX;
@@ -141,12 +143,15 @@ class SinglePlayerGame : public Game {
 		bool isJumping = true;
 		bool isAlive = true;
 
+
 		int enemyType; // 0 : 移動しない、 1 : 左右にぴょこぴょこ
 		int turnCounter = 100;
 		int moveDirection;
 
+
 		int damage = 0;
 		int invincibleTime = 0;
+
 
 	public:
 		Enemy(int x_, int y_, int width_, int height_, int enemyType_){
@@ -155,7 +160,14 @@ class SinglePlayerGame : public Game {
 			rect.width = width_;
 			rect.height = height_;
 			enemyType = enemyType_;
-			layer = 100;
+			if (enemyType == 4 ) {
+				layer =101 ;
+			}
+			
+			else {
+				layer = 100;
+			}
+
 			switch (enemyType) {
 				case 1: {
 					moveDirection = 1;
@@ -203,6 +215,14 @@ class SinglePlayerGame : public Game {
 					DrawExtendGraph(left(), top(), right(), bottom(), imgHandles["s_game_teresa"], true);
 					break;
 				}
+				case 11: {
+					DrawExtendGraph(left(), top()-80, right(), bottom()+800, imgHandles["s_game_water"], true);
+					break;
+				}
+				case 12: {
+					DrawExtendGraph(left(), top(), right(), bottom(), imgHandles["s_game_switch"], true);
+					break;
+				}
 				default: {
 					DrawExtendGraph(left(), top(), right(), bottom(), imgHandles["s_game_wanwan"], true);
 					break;
@@ -211,12 +231,22 @@ class SinglePlayerGame : public Game {
 			return isAlive;
 		}
 
+
+		bool isWaterUp = true;
+
+		bool getIsWaterUp(){
+			return isWaterUp;
+		}
+
+
+
 		double rightHit() const { return right() - rect.width / 3; }
 		double leftHit() const { return left() + rect.width / 3; }
 		double topHit() const { return top() + rect.height / 3; }
 		double bottomHit() const { return bottom() - rect.height / 3; }
 
 		void update(const std::vector<std::shared_ptr<BlockObject>> blockList, const std::vector<std::shared_ptr<Marker>> markerList) {
+
 			// 座標更新以外にも状態の更新を扱う？
 
 			updateCoordinate(blockList, markerList);
@@ -236,6 +266,7 @@ class SinglePlayerGame : public Game {
 
 			double acX = 0;
 			double acY = 0;
+
 
 			switch (enemyType) {
 				case 0:{
@@ -295,6 +326,26 @@ class SinglePlayerGame : public Game {
 					acY = rand() % 5 -2;
 					break;
 				}
+				case 11: {
+					if (isWaterUp == false ) {
+						acX = 0;
+						acY = 0.005;
+						break;
+					}
+					else {
+						acX = 0;
+						acY = -0.005;
+						break;
+					}
+					break;
+				}
+
+				case 12: {
+					acX = 0;
+					acY = 0;
+					break;
+				}
+
 				default:{
 					break;
 				}
@@ -309,7 +360,7 @@ class SinglePlayerGame : public Game {
 			y += diffY + acY;
 			prevY = tempY;
 
-			if (enemyType == 2) {
+			if (enemyType == 2 || enemyType == 4) {
 
 			} else {
 				// ブロックとの当たり判定
@@ -372,7 +423,9 @@ class SinglePlayerGame : public Game {
 		}
 
 		// 死亡判定。マーカーで殴られたら死ぬ。
+
 		bool deathDecision(const std::vector<std::shared_ptr<Marker>> markerList){
+
 			// 生死判定
 
 			std::map<std::string, int> field = {
@@ -390,6 +443,7 @@ class SinglePlayerGame : public Game {
 			}
 
 			// この場合、ブロックに当たったら死ぬ、的な
+
 			if (invincibleTime == 0) {
 				for (auto marker : markerList) {
 					if (left() < marker->right() && top() < marker->bottom() &&
@@ -402,8 +456,10 @@ class SinglePlayerGame : public Game {
 						invincibleTime = 15;
 
 						return !isAlive;
+
 					}
 				}
+
 			}
 			else if (invincibleTime > 0) {
 				invincibleTime--;
@@ -695,6 +751,8 @@ public:
 			};
 			makeBlock(0-200, 600, WIDTH+200+200, 50);
 
+
+
 			drawList.push_back(player);
 			drawList.push_back(make_shared<Background>(share.handle));
 
@@ -737,6 +795,8 @@ public:
 
 	bool onUpdate() {
 		bool willFinishMode = false;
+		static std::shared_ptr <Enemy> water;
+		static std::shared_ptr <Enemy> button;
 
 		switch (mode.getMode())	{
 			case 0:{ // イントロダクション
@@ -768,10 +828,12 @@ public:
 
 				player->update(key, blockList, markerList, enemyList);
 
+
 				for (auto enemy : enemyList) {
 					enemy->deathDecision(markerList);
 					enemy->update(blockList, markerList);
 				}
+
 
 				if(player->deathDecision(enemyList)){
 					bgm->stop();
@@ -781,9 +843,16 @@ public:
 				}
 
 				// 敵の出現を管理する
-				switch(MAX_TIME-timer) {
+
+				switch(MAX_TIME-timer) {					
 					case 1: {
+
+						water = makeEnemy(0, HEIGHT + 80, 1280, 800, 11);
+						button = makeEnemy(100, 100, 40, 40, 12);
+
+
 						makeEnemy(350, 200, 435/5, 349/5, 1);
+
 						break;
 						}
 					case 1000:
@@ -810,9 +879,15 @@ public:
 					}
 
 					default: {
+
 						break;
 					}
+							
 				}
+				if (button->getIsAlive() == false) {
+					water->isWaterUp = false;
+				}
+
 				// 定期的に実行する場合など
 				if (MAX_TIME - timer > 400 && (MAX_TIME - timer) % 10 == 0) {
 					makeEnemy(rand() % (WIDTH - 200) + 100, rand() % (HEIGHT - 100), 112 * 4 / 5, 112 * 4 / 5, 3);
@@ -822,7 +897,10 @@ public:
 				}
 
 				break;
+				
 			}
+					
+
 			case 2:{ // リザルト画面
 				if (key[KEY_INPUT_RETURN]) {
 					willFinishMode = true;
@@ -830,9 +908,11 @@ public:
 				break;
 			}
 
-			default:
+			default: 
+
 				break;
 			}
+
 
 		if (key[KEY_INPUT_ESCAPE]) {
 			share.willFinish = true;
@@ -840,6 +920,7 @@ public:
 		if (key[KEY_INPUT_N]) {
 			willFinishMode = true;
 		}
+
 
 		for ( auto& itr = enemyList.begin(); itr != enemyList.end();) {
 			if ((*itr)->getIsAlive()) {
