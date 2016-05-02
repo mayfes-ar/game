@@ -67,6 +67,7 @@ class ItemReceiverBase
 {
 public:
 	ItemReceiverBase() {}
+	ItemReceiverBase(const Shape::Rectangle& realm) : m_realm(realm) {}
 	virtual ~ItemReceiverBase() {}
 	//本当は純粋仮想にしたかったけどそうするとこのクラスのインスタンスthisがつくれないからこのようにした
 	virtual void applyItems() {}
@@ -281,9 +282,15 @@ private:
 class Block : public Object, public ItemReceiverBase
 {
 public:
-    explicit Block(const Shape::Rectangle& realm) 
+	enum class Color : uint8_t {
+		Green,
+		Blue,
+		Red
+	};
+
+    explicit Block(const Shape::Rectangle& realm, Color color) 
+		: m_realm(realm), m_color(color), ItemReceiverBase(realm)
     {
-		m_realm = realm;
         Object::layer = PRIORITY_STATIC_OBJECT;
     }
 
@@ -292,15 +299,34 @@ public:
             // 何も描画しない
             return true;
         }
-        DrawBox(m_realm.left(), m_realm.top(), 
-                m_realm.right(), m_realm.bottom(), 
-                Color::GREEN, false);
+
+		switch (m_color) {
+		case Color::Green:
+			DrawExtendGraph(m_realm.left(), m_realm.top(),
+				m_realm.right(), m_realm.bottom(),
+				imgHandles["block_green"], TRUE);
+			break;
+		case Color::Blue:
+			DrawExtendGraph(m_realm.left(), m_realm.top(),
+				m_realm.right(), m_realm.bottom(),
+				imgHandles["block_blue"], TRUE);
+			break;
+		case Color::Red:
+			DrawExtendGraph(m_realm.left(), m_realm.top(),
+				m_realm.right(), m_realm.bottom(),
+				imgHandles["block_red"], TRUE);
+			break;
+		}
 
         return true;
     }
 
 	const Shape::Rectangle getRealm() override {
 		return m_realm;
+	}
+
+	Color getColor() const {
+		return m_color;
 	}
 
 	void applyItems() override {
@@ -323,7 +349,8 @@ public:
     }
 private:
     bool m_is_disappeared = false; // 火の玉にあったかどうか
-    //Shape::Rectangle m_realm = Shape::Rectangle();
+    Shape::Rectangle m_realm = Shape::Rectangle();
+	Color m_color = Color::Green;
 };
 
 
