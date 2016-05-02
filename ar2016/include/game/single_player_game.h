@@ -510,10 +510,11 @@ class SinglePlayerGame : public Game {
 	std::vector<std::shared_ptr<Enemy>> enemyList;
 
 	// 敵作成。enemyType については Enemy クラスを参照
-	void makeEnemy(int x, int y, int width, int height, int enemyType) {
+	std::shared_ptr<Enemy> makeEnemy(int x, int y, int width, int height, int enemyType) {
 		auto enemy = std::make_shared<Enemy>(x, y, width, height, enemyType);
 		enemyList.push_back(enemy);
 		drawList.push_back(enemy);
+		return enemy;
 	}
 
 	std::shared_ptr<BGM> bgm;
