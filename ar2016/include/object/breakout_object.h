@@ -73,8 +73,8 @@ public:
 	virtual const Shape::Rectangle getRealm() { return m_realm; }
 
 	void detachItem(std::shared_ptr<ItemBase> item) {
-		m_items.remove(item);
 		item->detachItemReceiver();
+		deleteItem(item);
 	}
 
 	void detachAllItems() {
@@ -90,13 +90,16 @@ public:
 		applyItems();
 	}
 
-	//使用済みのアイテムを消す。ただしitemのitemreceiverは消さないでおく。そうすればitem側はまだblockに残っていると判断するから誤作動しないし、itemreceiver側はitemをもうもっていないと判断するから効果も適応されなくなる
+	//使用済みのアイテムを消す
 	void deleteItem(std::shared_ptr<ItemBase> item) {
-		m_items.remove(item);
+		for (int i = 0; i < m_items.size(); i++) {
+			if (m_items[i] != item) continue;
+			m_items.erase(m_items.begin() + i);
+		}
 	}
 
 protected:
-	std::list<std::shared_ptr<ItemBase>> m_items = {};
+	std::vector<std::shared_ptr<ItemBase>> m_items = {};
 	Shape::Rectangle m_realm = Shape::Rectangle();
 };
 
@@ -394,8 +397,8 @@ public:
 	{
 		return m_realm;
 	}
-
-	bool isCollided(const Shape::Rectangle& parent);
+	// if in then -1, out then 1, default is 1
+	bool isCollided(const Shape::Rectangle& parent, const int inOrOut = 1);
 
 
 
@@ -515,23 +518,22 @@ public:
 	}
 
 	void applyItems() override {
-		std::vector<std::shared_ptr<ItemBase>> will_be_deleted = {};
-		for (auto& item : m_items) {
-			switch (item->getItemKind()) {
+		for (int i = 0; i < m_items.size(); i++) {
+
+			switch (m_items[i]->getItemKind()) {
 				//継続的な効果を持たないものは適用したら消す
-				
 			case RestoreShip:
 				restoreShip(1);
-				will_be_deleted.push_back(item);
+				deleteItem(m_items[i]);
+				//消したのでその分indexを減らす
+				i--;
 				break;
 			case DamageShip:
 				damageShip(1);
-				will_be_deleted.push_back(item);
+				deleteItem(m_items[i]);
+				i--;
 				break;
 			}
-		}
-		for (auto& item : will_be_deleted) {
-			m_items.remove(item);
 		}
 	}
 

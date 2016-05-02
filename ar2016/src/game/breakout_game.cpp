@@ -23,7 +23,7 @@ void BreakoutGame::updateCollisionDetection()
 			return;
 		}
 
-		if (m_components->fireball->isCollided(m_components->field->getRealm())) {
+		if (m_components->fireball->isCollided(m_components->field->getRealm(), -1)) {
 			return;
 		}
 
