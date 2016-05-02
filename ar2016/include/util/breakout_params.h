@@ -33,13 +33,13 @@ namespace Breakout {
 	constexpr int BLOCK_HEIGHT_NUM = 5;
 	const int BLOCK_WIDTH = (WIDTH / 2) / BLOCK_WIDTH_NUM;
 	const int BLOCK_HEIGHT = (HEIGHT / 4) / BLOCK_HEIGHT_NUM;
-	constexpr double BLOCK_GENERATE_RATIO = 0.1; // Blockが生成される確率
+	constexpr double BLOCK_GENERATE_RATIO = 0.5; // Blockが生成される確率
 
 	// Fireballのパラメータ
 	const Eigen::Vector2i FIREBALL_STARTPOS = Eigen::Vector2i{
 		WIDTH / 2, HEIGHT / 2 };
 	const Eigen::Vector2f FIREBALL_STARTVEL = Eigen::Vector2f{
-		2.0f, 10.0f};
+		2.0f, 4.0f};
 	constexpr int FIREBALL_RADIUS = 30;
 
 	// Shipのパラメータ

@@ -23,6 +23,7 @@ void BreakoutComponents::setup()
 	std::random_device rnd;
 	std::mt19937 mt(rnd());
 	std::uniform_real_distribution<> block_generator(0.0, 1.0);
+	std::uniform_real_distribution<> item_generator(0.0, 1.0);
 	// Blockの初期化
 	for (int x = 0; x < BLOCK_WIDTH_NUM; ++x) {
 		for (int y = 0; y < BLOCK_HEIGHT_NUM; ++y) {
@@ -67,9 +68,17 @@ void BreakoutComponents::setup()
 
 	// itemの初期化
 	for (auto &block : block_list) {
-		auto item = std::make_shared<Item>(Breakout::ItemKind::RestoreShip);
-		block->attachItem(item);
-		item_list.push_back(item);
+		if (item_generator(mt) > 0.8) {
+			auto item = std::make_shared<Item>(Breakout::ItemKind::RestoreShip);
+			block->attachItem(item);
+			item_list.push_back(item);
+		}
+		else if(item_generator(mt) > 0.6 ) {
+			auto item = std::make_shared<Item>(Breakout::ItemKind::DamageShip);
+			block->attachItem(item);
+			item_list.push_back(item);
+		}
+
 	}
 
 	// Todo Player
