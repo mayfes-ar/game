@@ -6,9 +6,9 @@
 namespace CollisionDetection {
 
 	// 円が線分に触れているか
-	bool isOnLine(const Shape::Circle& child, const Shape::Line& parent) {
+	bool isOnLine(const Shape::Circle& child, const Shape::Line& parent, const float speed) {
 		const auto dist = MathUtil::distPointToLine(child.center, parent);
-		if (dist < child.radius) { 
+		if (dist < child.radius + (int)speed) { 
 			const Eigen::Vector2i vector_a_to_center = child.center - parent.point;
 			const Eigen::Vector2i vector_b_to_center = child.center - (parent.point + parent.dir);
 			const int a_dot_p = vector_a_to_center.dot(parent.dir);

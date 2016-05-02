@@ -22,7 +22,7 @@ namespace Breakout {
 		const int dist_center_left = MathUtil::distPointToLine(m_realm.center, parent.getLeftLine());
 		const int dist_center_bottom = MathUtil::distPointToLine(m_realm.center, parent.getBottomLine());
 
-		if (CollisionDetection::isOnLine(m_realm, parent.getTopLine())) {
+		if (CollisionDetection::isOnLine(m_realm, parent.getTopLine(), m_moving->getVelocity().norm())) {
 			auto vel = m_moving->getVelocity();
 			if (m_realm.center.x() < parent.left()) {
 				if (dist_center_top < dist_center_left) {
