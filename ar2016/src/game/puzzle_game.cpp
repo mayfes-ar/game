@@ -10,6 +10,7 @@ bool PuzzleGame::onStart() {
 		drawList.push_back(std::make_shared<Explanation>());
 	}, -1);
 
+	
 	// mode 1
 	mode.setMode([this]() {
 		makeStageBase( );
@@ -58,6 +59,7 @@ bool PuzzleGame::onStart() {
 
 	}, -1);
 
+	
 	// mode 5
 	mode.setMode([this]() {
 		makeStageBase(false);
@@ -85,14 +87,21 @@ bool PuzzleGame::onStart() {
 		setDamage(1150, 600, 50);
 		setDamage(1150, 650, 50);
 		setDamage(1150, 700, 50);
-		setBlock(0, 200, 200, 20);
+		setDamage(800, 100, 50);
+		setBlock(0, 200, 400, 20);
 		setBlock(200, 150, 70, 70);
-		setBlock(500, 400, 24, 240);
+		setBlock(440, 400, 24, 240);
 		setBlock(700, 400, 24, 240);
-		setBlock(524, 400, 176, 24);
-		setBlock(524, 616, 176, 24);
+		setBlock(464, 400, 236, 24);
+		setBlock(464, 616, 236, 24);
 		setWarp(680, 424, 20, 20, 600, 300);
-		setWarp(1220, 700, 20, 20, 530, 450);
+		setWarp(1220, 680, 20, 20, 530, 450);
+		setCoin(40, 240);
+		setCoin(120, 240);
+		setCoin(200, 240);
+		setCoin(280, 240);
+		setCoin(320, 500);
+		setCoin(550, 430, 60, 500);
 
 		setWarp(-500, 1000, 2500, 600, 100, -100);
 		setBlock(-500, 1600, 2500, 600);
