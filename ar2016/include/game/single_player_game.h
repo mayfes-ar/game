@@ -363,17 +363,13 @@ class SinglePlayerGame : public Game {
 				case 20: {
 					acX = 0;
 					acY = 0;
-					if (turnCounter >= 0) {
-						turnCounter--;
-					}
-					else if (turnCounter == 0) {
+					if (turnCounter == 0) {
 						PlaySoundMem(soundHandles["s_game_shuzo"], DX_PLAYTYPE_BACK, true);
 					}
-					else if(turnCounter > -10){
-						turnCounter--;
+					else if(turnCounter < 0 && turnCounter > -10){
 						acX = 1;
 					}
-
+					turnCounter--;
 					break;
 				}
 				case 21: {
