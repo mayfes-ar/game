@@ -164,6 +164,7 @@
     <ClCompile Include="src\game\breakout_game.cpp" />
     <ClCompile Include="src\game\image_process.cpp" />
     <ClCompile Include="src\game\menu.cpp" />
+    <ClCompile Include="src\game\puzzle_game.cpp" />
     <ClCompile Include="src\math\collision_detection.cpp" />
     <ClCompile Include="src\moving\moving.cpp" />
     <ClCompile Include="src\object\breakout_object.cpp" />

@@ -3,15 +3,90 @@
 #include "game/game.h"
 
 class PuzzleGame : public Game {
+	// 指定フレーム後に、登録した関数を実行してくれる
+	class FuncTimer {
+		std::vector<std::function<void()>> funcs;
+		std::vector<int> timers;
+	public:
+		void update() {
+			auto funcsItr = funcs.begin();
+			for (auto timersItr = timers.begin(); timersItr != timers.end();) {
+				(*timersItr)--;
+				if ((*timersItr) > 0) {
+					funcsItr++;
+					timersItr++;
+				} else {
+					(*funcsItr)();
+					funcsItr = funcs.erase(funcsItr);
+					timersItr = timers.erase(timersItr);
+				}
+				
+			}
+		}
+		void set(std::function<void()> func, int timer) {
+			funcs.push_back(func);
+			timers.push_back(timer);
+		}
+		void clear() {
+			funcs.clear();
+			timers.clear();
+		}
+	} funcTimer;
+
+	//
+	class StageBlock : public BlockObject {
+	public:
+		const int kind = 0;
+
+		StageBlock(Rectan rect_, bool canHit_=true) {
+			rect = rect_;
+			willStay = true;
+			layer = 20;
+			canHit = canHit_;
+		}
+		bool draw() {
+			if (canHit) {
+				DrawBox(left(), top(), right(), bottom(), GetColor(240, 117, 50), true);
+			} else {
+				DrawBox(left(), top(), right(), bottom(), GetColor(40, 117, 50), false);
+			}
+			return willStay;
+		}
+	};
+	//
+	class MarkerBlock : public BlockObject {
+	public:
+		MarkerBlock(Rectan rect_) {
+			rect = rect_;
+			willStay = false;
+			layer = 25;
+		}
+
+		bool draw() {
+			drawWithRect(imgHandles["block"]);
+			return willStay;
+		}
+		
+	};
+
+	// gimmick共通クラス
+	// updateの返り値で存続判定
+	class Gimmick : public Object {
+	protected:
+		bool willExist = true;
+		const PuzzleGame& game;
+		Gimmick(PuzzleGame& game_) : game(game_){}
+	public:
+		virtual bool update() = 0;
+	};
+
 
 	class Background : public Object {
 		int& handle;
-
 	public:
 		Background(int& handle_) : handle(handle_) {
 			layer = 0;
 		}
-
 		bool draw() {
 			DrawExtendGraph(CAP2IMG_SHIFT_X, CAP2IMG_SHIFT_Y, CAP2IMG_SHIFT_X + CAP2IMG_RATE*CAP_WIDTH, CAP2IMG_SHIFT_Y + CAP2IMG_RATE*CAP_HEIGHT, handle, FALSE);
 			return true;
@@ -26,18 +101,45 @@ class PuzzleGame : public Game {
 		}
 	};
 
+	// スコアを管理・表示
+	class ScoreObject : public Object {
+		bool isPlaying = true;
+	public:
+		int score = 0;
+
+		ScoreObject() {
+			layer = 200;
+		}
+		bool draw() {
+			if (isPlaying) {
+				DrawFormatString(400, 0, GetColor(65, 205, 63), "SCORE: %d", score);
+			} else {
+				DrawFormatString(400, 400, GetColor(165, 205, 163), "SCORE: %d", score);
+			}
+			return true;
+		}
+		void setResultDraw() { isPlaying = false; }
+	};
+
 	class Player : public Object {
+		const PuzzleGame& game;
+
 		double prevX;
 		double prevY;
 		const double initX;
 		const double initY;
 
 		bool isRightDirection = true;
-
 		bool isJumping = true;
+		bool isReached = false;
+
+		std::function<void()> updateFunc = []() {};
 
 	public:
-		Player(int x_, int y_) : initX(x_), initY(y_) {
+		double exForceX = 0;
+		double exForceY = 0;
+
+		Player(int x_, int y_, PuzzleGame& game_) : initX(x_), initY(y_), game(game_) {
 			rect.x = prevX = x_;
 			rect.y = prevY = y_;
 			rect.width = 75;
@@ -46,195 +148,283 @@ class PuzzleGame : public Game {
 		}
 
 		bool draw() {
-			if (isRightDirection) {
-				DrawExtendGraph(left(), top(), right(), bottom(), imgHandles["p_girl"], true);
-			} else {	
-				DrawExtendGraph(right(), top(), left(), bottom(), imgHandles["p_girl"], true);
-			}
+			drawWithRect(imgHandles["p_girl"], 0, !isRightDirection);
 			return true;
 		}
-
-		void update(const char key[], const std::vector<std::shared_ptr<BlockObject>> blockList) {
-			double& x = rect.x;
-			double& y = rect.y;
-			const int& width = rect.width;
-			const int& height = rect.height;
-
-			const double diffX = x - prevX;
-			const double diffY = y - prevY;
-
-			double acX = -0.3 * (1 - (diffX <= 0) - (diffX < 0));
-			double acY = 2;
-
-			bool onTop = false;
-			bool onBottom = false;
-			bool onLeft = false;
-			bool onRight = false;
-
-			if (key[KEY_INPUT_UP] && !isJumping) {
-				acY = -25;
-			}
-			isJumping = true;
-
-			if (key[KEY_INPUT_RIGHT]) {
-				isRightDirection = true;
-				acX = 0.8 * (diffX < 8);
-			}
-			if (key[KEY_INPUT_LEFT]) {
-				isRightDirection = false;
-				acX = -0.8 * (diffX > -8);
-			}
-
-			// verlet法
-			const double tempX = x;
-			x += diffX + acX;
-			prevX = tempX;
-			const double tempY = y;
-			y += diffY + acY;
-			prevY = tempY;
-
-			for (auto block : blockList) {
-				if (isContacted(block)) {
-
-					if (prevY < block->bottomHit() && prevY + height > block->topHit()) {
-						if (prevX >= block->rightHit()) {
-							x = prevX = block->right();
-							onLeft = true;
-						} else if (prevX + width <= block->leftHit()) {
-							x = prevX = block->left() - width;
-							onRight = true;
-						} else {
-							// TODO
-							init();
-							break;
-						}
-					} else {
-						if (prevY >= block->bottomHit()) {
-							y = prevY = block->bottom();
-							onTop = true;
-						} else if (prevY + height <= block->topHit()) {
-							y = prevY = block->top() - height;
-							isJumping = false;
-							onBottom = true;
-						} else {
-							// TODO
-							init();
-							break;
-						}
-					}
-				}
-			}
-
-			if ((onTop && onBottom) || (onLeft && onRight)) {
-				init();
-			}
+		void preUpdate() {
+			exForceX = exForceY = 0;
 		}
-
+		void update();
+		void warp(int x, int y) {
+			updateFunc = [this, x, y]() {
+				rect.x = prevX = x;
+				rect.y = prevY = y;
+				exForceX = exForceY = 0;
+			};
+		}
 		void init() {
-			rect.x = prevX = initX;
-			rect.y = prevY = initY;
+			updateFunc = [this]() {
+				rect.x = prevX = initX;
+				rect.y = prevY = initY;
+				exForceX = exForceY = 0;
+			};
+		}
+		void goal() { 
+			const int goalScore = 1000;
+			game.score->score += goalScore;
+			isReached = true;
 		}
 	};
 
 	class GoalObject : public Object {
+		bool isReached = false;
+		const int margin = 20;
 	public:
 		GoalObject(int x_, int y_) {
-			rect = Rectan(x_, y_, 100, 150);
+			rect = Rectan(x_ + margin, y_ + margin, 100 - margin*2, 150 - margin*2);
 			layer = 100;
 		}
-
 		bool draw() {
-			DrawExtendGraph(left(), top(), right(), bottom(), imgHandles["p_goal"], true);
+			drawWithRect(imgHandles["p_goal"], margin
+				);
 			return true;
 		}
+		bool check(std::shared_ptr<Player>& player) {
+			if (isContacted(player) && !isReached) {
+				isReached = true;
+				player->goal();
+				return true;
+			} else {
+				return false;
+			}
+		}
+
 	};
 
-	class NeedleObject : public Object {
+	// gimmicks
+	class DamageGimmick : public Gimmick {
+		const bool canVanish;
 		const double vx;
 		const double vy;
-		bool willExist = true;
 		int counter = 0;
-
+		const int countMax = effectHandles["p_ball"].size();
 	public:
-		NeedleObject(int x, int y, int size, double vx_, double vy_) : vx(vx_), vy(vy_){
+		DamageGimmick(int x, int y, int size, double vx_, double vy_, PuzzleGame& game_) : canVanish(vx_*vx_ + vy_*vy_ > 0), vx(vx_), vy(vy_), Gimmick(game_) {
 			rect = Rectan(x, y, size, size);
 			layer = 50;
 		}
 		bool draw() {
-			static const int margin = rect.height/3;
-			DrawExtendGraph(left() - margin, top() - margin, right() + margin, bottom() + margin, effectHandles["p_ball"][counter], true);
-			counter++;
-			if (counter == 30) {
-				counter = 0;
+			const int margin = rect.height / 3;
+			if (canVanish) {
+				drawWithRect(effectHandles["p_ball"][counter], margin);
+				counter++;
+				if (counter == countMax) {
+					counter = 0;
+				}
+			} else {
+				drawWithRect(imgHandles["s_game_dead"], margin);
+			}
+			
+			return willExist;
+		}
+		bool update() {
+			if (canVanish) {
+				rect.x += vx;
+				rect.y += vy;
+				
+				for (auto block : game.allBlocks) {
+					if (isContacted(block)) {
+						willExist = false;
+					}
+				}
+			}
+
+			if (isContacted(game.player)) {
+				game.player->init();
 			}
 			return willExist;
 		}
-		bool update(std::vector<std::shared_ptr<BlockObject>> blockList) {
-			rect.x += vx;
-			rect.y += vy;
-			for (auto block : blockList) {
-				if (isContacted(block)) {
-					if (!(vx == 0 && vy == 0)) { willExist = false; }
-				}
+	};
+
+	class SmogGimmick : public Gimmick {
+		int counter = 0;
+		const int countMax = effectHandles["p_smog"].size();
+	public:
+		SmogGimmick(int x, int y, int size, PuzzleGame& game_) : Gimmick(game_) {
+			rect = Rectan(x, y, size, size);
+			layer = 120;
+		}
+		bool draw() {
+			const int margin = rect.width / 10;
+			DrawExtendGraph(left() - margin, top() - margin, right() + margin, bottom() + margin, effectHandles["p_smog"][counter], true);
+			counter++;
+			if (counter == countMax) { counter = 0; }
+			return willExist;
+		}
+		bool update() {
+			if (isContacted(game.markerBlock)) { willExist = false; }
+			return willExist;
+		}
+	};
+	
+	class CoinGimmick : public Gimmick {
+		const int value;
+		int counter = 0;
+		const int countMax = effectHandles["p_coin"].size();
+	public:
+		CoinGimmick(int x, int y, int size, int value_, PuzzleGame& game_) : value(value_), Gimmick(game_) {
+			rect = Rectan(x, y, size, size);
+			layer = 40;
+		}
+		bool draw() {
+			const int margin = rect.width / 10;
+			drawWithRect(effectHandles["p_coin"][counter], margin);
+			counter++;
+			if (counter == countMax) { counter = 0; }
+			return willExist;
+		}
+		bool update() {
+			if (isContacted(game.player)) {
+				game.score->score += value;
+				willExist = false;
+			}
+			return willExist;
+		}
+	};
+
+	class SwitchGimmick : public Gimmick {
+		bool isOn;
+		const bool isReverse;
+		bool& targetBool;
+		void setSwitch(bool isOn_) {
+			isOn = isOn_;
+			if (isReverse) {
+				targetBool = !isOn_;
+			} else {
+				targetBool = isOn_;
+			}
+		}
+	public:
+		SwitchGimmick(int x, int y, int size, bool& target, bool isReverse_, PuzzleGame& game_) : targetBool(target), isReverse(isReverse_), Gimmick(game_) {
+			rect = Rectan(x, y, size, size);
+			layer = 50;
+			setSwitch(false);
+		}
+		bool draw() {
+			if (isOn) {
+				drawWithRect(imgHandles["p_on"]);
+			} else {
+				drawWithRect(imgHandles["p_off"]);
+			}
+			return willExist;
+		}
+		bool update() {
+			setSwitch(false);
+			if (isContacted(game.player) || isContacted(game.markerBlock)) {
+				setSwitch(true);
 			}
 
 			return willExist;
 		}
 	};
 
-	class SmogObject : public Object {
-		int counter = 0;
-		bool willFinish = false;
+	class WarpGimmick : public Gimmick {
+		const double posX;
+		const double posY;
+
 	public:
-		SmogObject(int x, int y, int size) {
-			rect = Rectan(x, y, size, size);
-			layer = 120;
+		WarpGimmick(Rectan rect_, double posX_, double posY_, PuzzleGame& game_) : posX(posX_), posY(posY_), Gimmick(game_) {
+			rect = rect_;
+			layer = 70;
 		}
 		bool draw() {
-			static const int margin = rect.width / 10;
-			DrawExtendGraph(left() - margin, top() - margin, right() + margin, bottom() + margin, effectHandles["p_smog"][counter%13], true);
-			counter++;
-			
-			if (willFinish) {
-				return false;
-			}
-			return true;
+			DrawBox(left(), top(), right(), bottom(), GetColor(238, 46, 213), false);
+			return willExist;
 		}
-		void vanish() {
-			willFinish = true;
+		bool update() {
+			if (isContacted(game.player)) {
+				game.player->warp(posX, posY);
+			}
+			return willExist;
+		}
+	};
+
+	class WindGimmick : public Gimmick {
+		const double windX;
+		const double windY;
+	public:
+		WindGimmick(Rectan rect_, double windX_, double windY_, PuzzleGame& game_) :windX(windX_), windY(windY_), Gimmick(game_) {
+			rect = rect_;
+			layer = 80;
+		}
+		bool draw() {
+			DrawBox(left(), top(), right(), bottom(), GetColor(125, 224, 227), false);
+			return willExist;
+		}
+		bool update() {
+			if (isContacted(game.player)) {
+				game.player->exForceX += windX;
+				game.player->exForceY += windY;
+			}
+			return willExist;
 		}
 	};
 
 	std::thread thread;
 	std::shared_ptr<Player> player;
 	std::shared_ptr<GoalObject> goal;
-	std::vector<std::shared_ptr<BlockObject>> stageBlockList;
-	std::vector<std::shared_ptr<BlockObject>> markerBlockList;
-	std::vector<std::shared_ptr<NeedleObject>> needleList;
-	std::vector<std::shared_ptr<SmogObject>> smogList;
+	std::shared_ptr<ScoreObject> score;
+
+	std::vector<std::shared_ptr<BlockObject>> stageBlocks;
+	std::shared_ptr<BlockObject> markerBlock;
+	std::vector<std::shared_ptr<BlockObject>> allBlocks;
+	std::vector<std::shared_ptr<Gimmick>> gimmicks;
 
 	std::mt19937 mt;
 	std::uniform_int_distribution<> rand100 = std::uniform_int_distribution<>(0, 99);
 
 	int timer = 0;
 
-	void setBlock(int x, int y, int width, int height, bool willStay) {
-		auto block = std::make_shared<BlockObject>(x, y, width, height, willStay);
-		stageBlockList.push_back(block);
+	std::shared_ptr<StageBlock> setBlock(int x, int y, int width, int height, bool canHit=true) {
+		auto block = std::make_shared<StageBlock>(Rectan(x, y, width, height), canHit);
+		stageBlocks.push_back(block);
 		drawList.push_back(block);
+		return block;
 	}
-	void setNeedle(int x, int y, int size, double vx, double vy) {
-		auto needle = std::make_shared<NeedleObject>(x, y, size, vx, vy);
-		needleList.push_back(needle);
-		drawList.push_back(needle);
+	
+	void setDamage(int x, int y, int size, double vx = 0, double vy = 0) {
+		auto damage = std::make_shared<DamageGimmick>(x, y, size, vx, vy, *this);
+		gimmicks.push_back(damage);
+		drawList.push_back(damage);
 	}
 	void setSmog() {
-		auto smog = std::make_shared<SmogObject>(rand100(mt) * 11, rand100(mt) * 6, 3 * rand100(mt) + 50);
-		smogList.push_back(smog);
+		auto smog = std::make_shared<SmogGimmick>(rand100(mt) * 11, rand100(mt) * 6, 3 * rand100(mt) + 50, *this);
+		gimmicks.push_back(smog);
 		drawList.push_back(smog);
 	}
+	void setCoin(int x, int y, int size=60, int value=100) {
+		auto coin = std::make_shared<CoinGimmick>(x, y, size, value, *this);
+		gimmicks.push_back(coin);
+		drawList.push_back(coin);
+	}
+	void setSwitch(int x, int y, int size, bool& target, bool isReverse = false) {
+		auto switch_ = std::make_shared<SwitchGimmick>(x, y, size, target, isReverse, *this);
+		gimmicks.push_back(switch_);
+		drawList.push_back(switch_);
+	}
+	void setWarp(int x, int y, int width, int height, int posX, int posY) {
+		auto warp = std::make_shared<WarpGimmick>(Rectan(x, y, width, height), posX, posY, *this);
+		gimmicks.push_back(warp);
+		drawList.push_back(warp);
+	}
+	void setWind(int x, int y, int width, int height, double windX, double windY) {
+		auto wind = std::make_shared<WindGimmick>(Rectan(x, y, width, height), windX, windY, *this);
+		gimmicks.push_back(wind);
+		drawList.push_back(wind);
+	}
+
 	void setPlayer(int x, int y) {
-		player = std::make_shared<Player>(x, y);
+		player = std::make_shared<Player>(x, y, *this);
 		drawList.push_back(player);
 	}
 	void setGoal(int x, int y) {
@@ -242,18 +432,22 @@ class PuzzleGame : public Game {
 		drawList.push_back(goal);
 	}
 
-	void makeStageBase() {
+	// setMode内で最初に呼ぶこと
+	// true -> under-700, left-50, right-1230 
+	void makeStageBase(bool isSurrounded=true) {
 		drawList.clear();
-		stageBlockList.clear();
-		needleList.clear();
-		smogList.clear();
+		stageBlocks.clear();
+		gimmicks.clear();
 
 		drawList.push_back(std::make_shared<Background>(share.handle));
+		drawList.push_back(score);
 
-		setBlock(0, 700, 1280, 100, true);
-		setBlock(-50, -720, 100, 720*2, true);
-		setBlock(1230, -720, 100, 720*2, true);
-		setBlock(200, -720, 100, 620, true);
+		if (isSurrounded) {
+			setBlock(0, 700, 1280, 100, true);
+			setBlock(-50, -720, 100, 720 * 2, true);
+			setBlock(1230, -720, 100, 720 * 2, true);
+			setBlock(200, -720, 100, 620, true);
+		}
 	}
 
 public:
@@ -261,171 +455,11 @@ public:
 		thread = std::thread::thread(capture, std::ref(share));
 		std::random_device rnd;
 		mt = std::mt19937(rnd());
+		score = std::make_shared<ScoreObject>();
 	}
 
-	bool onStart() {
-		using namespace std;
-		fps.isShow = true;
-
-		// mode 0: opening
-		mode.setMode([this]() {
-			drawList.push_back(std::make_shared<Explanation>());
-		}, -1);
-
-		// mode 1
-		mode.setMode([this]() {
-			makeStageBase();
-			setPlayer(100, -300);
-			setGoal(1100, 550);
-			
-			setBlock(400, 300, 300, 500, true);
-
-		}, -1);
-
-		// mode 2
-		mode.setMode([this]() {
-			makeStageBase();
-			setPlayer(100, -300);
-			setGoal(1100, 550);
-		}, -1);
-
-		// mode 3
-		mode.setMode([this]() {
-			makeStageBase();
-			setPlayer(100, -300);
-			setGoal(1100, 100);
-			for (int i = 0; i < 120; i++) {
-				setSmog();
-			}
-		}, -1);
-
-		// mode 4
-	/*	mode.setMode([this]() {
-			makeStageBase();
-			setPlayer(100, 100);
-			setGoal(1000, 600);
-			setNeedle(400, 400, 100, 0, 0);
-		}, -1);*/
-
-		// mode 5
-		/*mode.setMode([this]() {
-			makeStageBase();
-			setPlayer(100, 100);
-			setGoal(1000, 600);
-			setNeedle(400, 400, 100, 0, 0);
-		}, -1);*/
-
-		// mode 6
-	/*	mode.setMode([this]() {
-			makeStageBase();
-			setPlayer(100, 100);
-			setGoal(1000, 600);
-			setNeedle(400, 400, 100, 0, 0);
-		}, -1);*/
-
-		// result
-		mode.setMode([this](){
-			drawList.clear();
-			
-		}, -1);
-
-		return Game::onStart();
-	}
-
-	bool onUpdate() {
-		timer++;
-		if (timer == 3600) {
-			timer = 0;
-		}
-
-		// modeに応じて
-		switch (mode.getMode()) {
-		case 0: { // explain
-			if (key[KEY_INPUT_RETURN]) {
-				mode.goNext();
-			}
-			return Game::onUpdate();
-		}
-		case 1: {
-			
-			break;
-		}
-		case 2: {
-			if (timer % (FPS/2) == 0) {
-				setNeedle(300, -100, 100, 0, 10);
-				setNeedle(600, -100, 100, 0, 11);
-				setNeedle(900, -100, 100, 0, 12);
-			}
-			break;
-		}
-		case 3: {
-			if (timer % (FPS) == 0 && smogList.size() < 150) {
-				setSmog();
-			}
-			break;
-		}
-		default: // result
-			if (key[KEY_INPUT_RETURN]) {
-				share.willFinish = true;
-			}
-			return Game::onUpdate();
-		}
-
-		if (player->isContacted(goal)) {
-			mode.goNext();
-		}
-
-		// 全ステージ共通
-		std::vector<std::shared_ptr<BlockObject>> allBlockList = stageBlockList;
-		markerBlockList.clear();
-		share.rectMutex.lock();
-		for (auto rect : share.rects) {
-			auto block = std::make_shared<BlockObject>(rect, false);
-			markerBlockList.push_back(block);
-			allBlockList.push_back(block);
-			drawList.push_back(block);
-		}
-		share.rectMutex.unlock();
-
-		// needleList
-		for (auto& itr = needleList.begin(); itr != needleList.end();) {
-			if ((*itr)->update(allBlockList)) {
-				++itr;
-			} else {
-				itr = needleList.erase(itr);
-			}
-		}
-		for (auto needle : needleList) {
-			if (needle->isContacted(player)) {
-				player->init();
-			}
-		}
-
-		// smog
-		for (auto& itr = smogList.begin(); itr != smogList.end();) {
-			bool hit = false;
-			for (auto mBlock : markerBlockList) {
-				if ((*itr)->isContacted(mBlock)) {
-					(*itr)->vanish();
-					hit = true;
-					itr = smogList.erase(itr);
-					break;
-				}
-			}
-			if (!hit) {
-				itr++;
-			}
-		}
-
-		player->update(key, allBlockList);
-
-		if (key[KEY_INPUT_ESCAPE]) {
-			share.willFinish = true;
-		}
-
-		return Game::onUpdate();
-	}
-
+	bool onStart();
+	bool onUpdate();
 	bool onFinish() {
 		thread.join();
 		return true;
