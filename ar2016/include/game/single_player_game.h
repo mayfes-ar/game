@@ -2,8 +2,8 @@
 
 #include "game/game.h"
 
-class SinglePlayerGame : public Game {
 
+class SinglePlayerGame : public Game {
 	class Background : public Object {
 		int& handle;
 
@@ -121,7 +121,7 @@ class SinglePlayerGame : public Game {
 
 		int enemyType; // 0 : 移動しない、 1 : 左右にぴょこぴょこ
 		int turnCounter = 100;
-		int moveDirection;
+		int moveDirection;//加速度 0:(0,3),1:(-3,0),2:(0,-3),3:(3,0)
 
 	public:
 		Enemy(int x_, int y_, int width_, int height_, int enemyType_){
@@ -140,6 +140,14 @@ class SinglePlayerGame : public Game {
 					moveDirection = rand()%4;
 					break;
 				}
+				case 20: {
+					PlaySoundMem(soundHandles["s_game_shuzo"], DX_PLAYTYPE_BACK, true);
+					break;	
+				}
+				case 21: {
+					prevX = rect.x + 5;	
+					break;
+				}
 				default: {
 					moveDirection = 0;
 					break;
@@ -151,6 +159,14 @@ class SinglePlayerGame : public Game {
 			switch (enemyType) {
 				case 3: {
 					DrawExtendGraph(left(), top(), right(), bottom(), imgHandles["s_game_teresa"], true);
+					break;
+				}
+				case 20: {
+					DrawExtendGraph(left(), top(), right(), bottom(), imgHandles["s_game_heiho"], true);
+					break;
+				}
+				case 21: {
+					DrawExtendGraph(left(), top(), right(), bottom(), imgHandles["s_game_fire"], true);
 					break;
 				}
 				default: {
@@ -243,6 +259,16 @@ class SinglePlayerGame : public Game {
 					acY = rand() % 5 -2;
 					break;
 				}
+				case 20: {
+					acX = rand() % 10 -5;
+					acY = rand() % 10 -5;
+					
+					break;
+				}
+				case 21: {
+					acX = 0;
+					acY = 0;
+				}
 				default:{
 					break;
 				}
@@ -257,7 +283,7 @@ class SinglePlayerGame : public Game {
 			y += diffY + acY;
 			prevY = tempY;
 
-			if (enemyType == 2) {
+			if (enemyType == 2 || enemyType == 4) {
 
 			} else {
 				// ブロックとの当たり判定
@@ -324,6 +350,13 @@ class SinglePlayerGame : public Game {
 		bool getIsAlive() {
 			return isAlive;
 		}
+
+		int getX() {
+			return prevX;
+		}
+		int getY() {
+			return prevY;
+		}
 	};
 
 	class Player : public Object {
@@ -335,7 +368,9 @@ class SinglePlayerGame : public Game {
 		int frameCount;
 		int damage = 0;
 		int invincibleTime = 0;
-	
+		std::string message;
+
+
 	public:
 		Player(int x_, int y_, int width_, int height_) {
 			rect.x = prevX = x_;
@@ -348,7 +383,25 @@ class SinglePlayerGame : public Game {
 		bool draw() {
 			DrawExtendGraph(left(), top(), right(), bottom(), imgHandles["s_game_player"], true);
 			if (isToJump) {
-				DrawExtendGraph(left(), top()-150, right(), bottom()-150, imgHandles["s_game_balloon"], true);
+				DrawExtendGraph(left()-50, top()-rect.height - 50, right()+50, bottom()-rect.height, imgHandles["s_game_balloon"], true);
+				int commentX = left() - 10;
+				int commentY = top() - rect.height - 20;
+				if (frameCount <= 60) {
+					message = "I want to\njump!!";
+					commentY = top() - rect.height - 40;
+				}
+				else if (frameCount <= 90 ) {
+					message = "3";
+				}
+				else if (frameCount <= 120) {
+					message = "2";
+				}
+				else if (frameCount <= 150) {
+					message = "1";
+				}
+
+				DrawString(commentX, commentY, message.c_str(), GetColor(0, 0, 0));
+
 			}
 			DrawString(50, 50, std::to_string(damage).c_str(), GetColor(255, 255, 255));
 			return true;
@@ -399,7 +452,7 @@ class SinglePlayerGame : public Game {
 			}
 
 			if (isToJump) {
-				if (frameCount >= 30) {
+				if (frameCount >= 150) {
 					acY = -40;
 					PlaySoundMem(soundHandles["s_game_jump"], DX_PLAYTYPE_BACK, true);
 					isJumping = true;
@@ -534,19 +587,23 @@ class SinglePlayerGame : public Game {
 			return !isAlive;
 		}
 	};
-
 	std::thread thread;
 	std::shared_ptr<Player> player;
 
 	std::vector<std::shared_ptr<BlockObject>> blockList;
 	std::vector<std::shared_ptr<Enemy>> enemyList;
+	std::shared_ptr<Enemy> heiho[10] = {NULL};
+
 
 	// 敵作成。enemyType については Enemy クラスを参照
-	void makeEnemy(int x, int y, int width, int height, int enemyType) {
+	std::shared_ptr<Enemy> makeEnemy(int x, int y, int width, int height, int enemyType) {
 		auto enemy = std::make_shared<Enemy>(x, y, width, height, enemyType);
 		enemyList.push_back(enemy);
 		drawList.push_back(enemy);
+		return	enemy;
 	}
+
+	
 
 	std::shared_ptr<BGM> bgm;
 	const int MAX_TIME = 30*20;
@@ -704,9 +761,20 @@ public:
 					default: {
 						// 定期的に実行する場合など
 						if (MAX_TIME - timer > 300 && (MAX_TIME - timer) % 10 == 0) {
-							makeEnemy(rand()%(WIDTH-200)+100, rand()%(HEIGHT-100), 112*4/5, 112*4/5, 3);
-						} else if ((MAX_TIME - timer) % 30 == 0) {
-							makeEnemy(rand()%(WIDTH-200)+100, rand()%(HEIGHT-100), 112*4/5, 112*4/5, 3);
+							makeEnemy(rand() % (WIDTH - 200) + 100, rand() % (HEIGHT - 100), 112 * 4 / 5, 112 * 4 / 5, 3);
+
+						}
+						else if ((MAX_TIME - timer) % 30 == 0) {
+							makeEnemy(rand() % (WIDTH - 200) + 100, rand() % (HEIGHT - 100), 112 * 4 / 5, 112 * 4 / 5, 3);
+						}
+						int i = rand() % 10;
+						if (heiho[i] == NULL || heiho[i]->getIsAlive() == false) {
+							if (rand() % 30 == 0) {
+								heiho[i] = makeEnemy(WIDTH-100, HEIGHT - 100, 112 * 4 / 5, 112 * 4 / 5, 20);
+							}
+						}
+						else if (rand() % 30 == 0) {
+							makeEnemy(heiho[i]->getX(), heiho[i]->getY(), 112 * 4 / 5, 112 * 4 / 5, 21);
 						}
 						break;
 					}
@@ -754,4 +822,5 @@ public:
 		thread.join();
 		return true;
 	}
+	
 };
