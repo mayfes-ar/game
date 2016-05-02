@@ -126,7 +126,7 @@ bool PuzzleGame::onUpdate() {
 
 	// 初めてゴールに触れた時だけ
 	if (goal->check(player)) {
-		funcTimer.set([this]() { mode.goLast(); }, FPS * 2);
+		funcTimer.set([this]() { mode.goNext(); }, FPS * 2);
 	}
 
 	allBlocks = stageBlocks;
