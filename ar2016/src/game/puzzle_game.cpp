@@ -23,7 +23,8 @@ bool PuzzleGame::onStart() {
 		setBlock(450, 550, 100, 100, false);
 		setSwitch(1000, 200, 60, setBlock(650, 550, 100, 100, false)->canHit);
 		setWarp(550, 550, 50, 50, 550, -100);
-		setWind(1100, 200, 200, 300, 0, -3);
+		setWind(1100, 180, 100, 300, 0, -3);
+		setWind(50, 695, 5, 5, 30, -60);
 
 	}, -1);
 
@@ -42,12 +43,33 @@ bool PuzzleGame::onStart() {
 		for (int i = 0; i < 120; i++) {
 			setSmog();
 		}
+		setBlock(0, 500, 200, 50);
+		setSwitch(500, 0, 50, setBlock(200, 500, 50, 200)->canHit, true);
+		setWarp(100, 570, 50, 50, 1100, -100);
+	}, -1);
+
+	// mode 4
+	mode.setMode([this]() {
+		makeStageBase(false);
+		setPlayer(100, -100);
+		setGoal(1100, 100);
+
+		setWarp(-500, 800, 2500, 600, 100, -100);
+		setWind(100, 200, 100, 400, 0, -3);
+		setWind(400, 200, 100, 400, 0, -3);
+		setWind(650, -200, 200, 1000, 0, 3);
+		setWind(1000, 200, 100, 400, 0, -3);
+
 	}, -1);
 
 	// result
 	mode.setMode([this]() {
 		drawList.clear();
 		gimmicks.clear();
+
+		score->setResultDraw();
+
+		drawList.push_back(score);
 
 	}, -1);
 
@@ -63,9 +85,10 @@ bool PuzzleGame::onUpdate() {
 	}
 
 	// modeに応じて
+	// <---各ステージ--->
 	switch (mode.getMode()) {
 	case 0: { // explain
-		if (key[KEY_INPUT_RETURN]) {
+		if (key[KEY_INPUT_UP]) {
 			mode.goNext();
 		}
 		return Game::onUpdate();
@@ -88,6 +111,9 @@ bool PuzzleGame::onUpdate() {
 		}
 		break;
 	}
+	case 4: {
+		break;
+	}
 	default: // result
 		if (key[KEY_INPUT_RETURN]) {
 			share.willFinish = true;
@@ -95,12 +121,14 @@ bool PuzzleGame::onUpdate() {
 		return Game::onUpdate();
 	}
 
+	// <---全ステージ共通--->
+	
+
 	// 初めてゴールに触れた時だけ
 	if (goal->check(player)) {
-		funcTimer.set([this]() { mode.goNext(); }, FPS * 2);
+		funcTimer.set([this]() { mode.goLast(); }, FPS * 2);
 	}
 
-	// 全ステージ共通
 	allBlocks = stageBlocks;
 	
 	share.rectMutex.lock();
@@ -133,6 +161,10 @@ bool PuzzleGame::onUpdate() {
 
 
 void PuzzleGame::Player::update() {
+	if (isReached) { return; }
+	updateFunc();
+	updateFunc = []() {};
+
 	double& x = rect.x;
 	double& y = rect.y;
 	const int& width = rect.width;

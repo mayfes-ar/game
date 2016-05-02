@@ -114,7 +114,7 @@ class PuzzleGame : public Game {
 			if (isPlaying) {
 				DrawFormatString(400, 0, GetColor(65, 205, 63), "SCORE: %d", score);
 			} else {
-
+				DrawFormatString(400, 400, GetColor(165, 205, 163), "SCORE: %d", score);
 			}
 			return true;
 		}
@@ -130,8 +130,10 @@ class PuzzleGame : public Game {
 		const double initY;
 
 		bool isRightDirection = true;
-
 		bool isJumping = true;
+		bool isReached = false;
+
+		std::function<void()> updateFunc = []() {};
 
 	public:
 		double exForceX = 0;
@@ -154,29 +156,43 @@ class PuzzleGame : public Game {
 		}
 		void update();
 		void warp(int x, int y) {
-			rect.x = prevX = x;
-			rect.y = prevY = y;
+			updateFunc = [this, x, y]() {
+				rect.x = prevX = x;
+				rect.y = prevY = y;
+				exForceX = exForceY = 0;
+			};
 		}
 		void init() {
-			rect.x = prevX = initX;
-			rect.y = prevY = initY;
+			updateFunc = [this]() {
+				rect.x = prevX = initX;
+				rect.y = prevY = initY;
+				exForceX = exForceY = 0;
+			};
+		}
+		void goal() { 
+			const int goalScore = 1000;
+			game.score->score += goalScore;
+			isReached = true;
 		}
 	};
 
 	class GoalObject : public Object {
 		bool isReached = false;
+		const int margin = 20;
 	public:
 		GoalObject(int x_, int y_) {
-			rect = Rectan(x_, y_, 100, 150);
+			rect = Rectan(x_ + margin, y_ + margin, 100 - margin*2, 150 - margin*2);
 			layer = 100;
 		}
 		bool draw() {
-			drawWithRect(imgHandles["p_goal"]);
+			drawWithRect(imgHandles["p_goal"], margin
+				);
 			return true;
 		}
 		bool check(std::shared_ptr<Player>& player) {
 			if (isContacted(player) && !isReached) {
 				isReached = true;
+				player->goal();
 				return true;
 			} else {
 				return false;
@@ -416,7 +432,9 @@ class PuzzleGame : public Game {
 		drawList.push_back(goal);
 	}
 
-	void makeStageBase() {
+	// setMode内で最初に呼ぶこと
+	// true -> under-700, left-50, right-1230 
+	void makeStageBase(bool isSurrounded=true) {
 		drawList.clear();
 		stageBlocks.clear();
 		gimmicks.clear();
@@ -424,10 +442,12 @@ class PuzzleGame : public Game {
 		drawList.push_back(std::make_shared<Background>(share.handle));
 		drawList.push_back(score);
 
-		setBlock(0, 700, 1280, 100, true);
-		setBlock(-50, -720, 100, 720*2, true);
-		setBlock(1230, -720, 100, 720*2, true);
-		setBlock(200, -720, 100, 620, true);
+		if (isSurrounded) {
+			setBlock(0, 700, 1280, 100, true);
+			setBlock(-50, -720, 100, 720 * 2, true);
+			setBlock(1230, -720, 100, 720 * 2, true);
+			setBlock(200, -720, 100, 620, true);
+		}
 	}
 
 public:
