@@ -162,6 +162,17 @@ class PuzzleGame : public Game {
 				exForceX = exForceY = 0;
 			};
 		}
+		void loop(int x, int y) {
+			updateFunc = [this, x, y]() {
+				const int diffX = x - rect.x;
+				const int diffY = y - rect.y;
+				rect.x = x; 
+				rect.y = y;
+				prevX += diffX;
+				prevY += diffY;
+				exForceX = exForceY = 0;
+			};
+		}
 		void init() {
 			updateFunc = [this]() {
 				rect.x = prevX = initX;
@@ -349,6 +360,27 @@ class PuzzleGame : public Game {
 		}
 	};
 
+	class LoopGimmick : public Gimmick {
+		const double posX;
+		const double posY;
+
+	public:
+		LoopGimmick(Rectan rect_, double posX_, double posY_, PuzzleGame& game_) : posX(posX_), posY(posY_), Gimmick(game_) {
+			rect = rect_;
+			layer = 70;
+		}
+		bool draw() {
+			DrawBox(left(), top(), right(), bottom(), GetColor(146, 138, 213), false);
+			return willExist;
+		}
+		bool update() {
+			if (isContacted(game.player)) {
+				game.player->loop(posX, posY);
+			}
+			return willExist;
+		}
+	};
+
 	class WindGimmick : public Gimmick {
 		const double windX;
 		const double windY;
@@ -416,6 +448,11 @@ class PuzzleGame : public Game {
 		auto warp = std::make_shared<WarpGimmick>(Rectan(x, y, width, height), posX, posY, *this);
 		gimmicks.push_back(warp);
 		drawList.push_back(warp);
+	}
+	void setLoop(int x, int y, int width, int height, int posX, int posY) {
+		auto loop = std::make_shared<LoopGimmick>(Rectan(x, y, width, height), posX, posY, *this);
+		gimmicks.push_back(loop);
+		drawList.push_back(loop);
 	}
 	void setWind(int x, int y, int width, int height, double windX, double windY) {
 		auto wind = std::make_shared<WindGimmick>(Rectan(x, y, width, height), windX, windY, *this);
