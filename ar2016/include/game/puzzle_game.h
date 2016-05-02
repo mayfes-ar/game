@@ -201,59 +201,19 @@ public:
 			makeStageBase();
 			setPlayer(100, 400);
 			setGoal(50, 100);
-			setBlock(0, 360, 1000, 50, true);//mannaka
-			setBlock(1100, 0, 50, 720, true);//migi
 
-			setBlock(1165, 100, 50, 50, true);//switch
-			setBlock(1165, 250, 50, 50, true);
-			setBlock(1165, 400, 50, 50, true);
-			setBlock(1165, 550, 50, 50, true);
+			setBlock(0, 0, 400, 300, true);
+			setBlock(0, 500, 300, 300, true);
+			setBlock(800, 5, 700, 295, true);
 
-			setBlock(180, 600, 100, 100, true);//hidaridaiza
-			setBlock(1000, 600, 100, 100, true);//migidaiza
+			setBlock(400, 500, 400, 100, true);
+			setBlock(650, 600, 50, 200, true);
+			setBlock(400, 700, 250, 50, true);
 
-			setBlock(900, 250, 100, 50, true);//migiuedaiza
-
-			setBlock(50, 200, 150, 100, true);//goaldaiza
-
-			setBlock(600, 600, 100, 50, true);//shitanaka
-
-			setBlock(550, 250, 100, 50, true);//uenaka
-
-			//if (switchA) {
-			setBlock(400, 600, 100, 50, true);//shitahidari
-
-			setBlock(890, 100, 10, 200, true);//bariamigi
-			//}
-			//if (switchB) {
-			setBlock(800, 600, 100, 50, true);//shitamigi
-
-			setBlock(750, 200, 100, 50, true);//uemigi
-			//}
-			//if (switchC) {
-			setBlock(540, 100, 10, 200, true);//barianaka
-			setNeedle(900, 500, 100, -6, 0);
-			//}
-			//if (switchD) {
-			setBlock(300, 200, 100, 50, true);//uehidari
-			setNeedle(850, 450, 150, -4, 0);
-			//}
-			//while(onUpdate() == true){
-				setNeedle(400, 650, 50, 0, -3);
-			//}
-			int i;
-			for (i = 6; i < 20; i++) {
-				setNeedle(50*i, 650, 50, 0, 0);
-			}
-			for (i = 1; i < 20; i++) {
-				setNeedle(50 * i, 300, 50, 0, 0);
-			}
-
-			//if () {
-				setNeedle(50, 150, 50, 5,0);
-				setNeedle(550, 650, 50, 0, -5);
-				setNeedle(750, 410, 50, 0, 5);
-			//}
+			setBlock(900, 500, 300, 300, true);
+			
+	
+			
 			
 			
 		}, -1);
