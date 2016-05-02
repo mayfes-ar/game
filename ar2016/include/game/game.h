@@ -32,6 +32,11 @@ protected:
 		void goNext() {
 			isGoNext = true;
 		}
+		
+		void goLast() {
+			currentMode = funcs.size() - 2;
+			isGoNext = true;
+		}
 
 		// モード移行を判定し、タイマーを進める
 		// 次に移るモードが存在しなかった時 return false;
