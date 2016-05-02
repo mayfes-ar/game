@@ -89,20 +89,42 @@ class SinglePlayerGame : public Game {
 
 	// 認識したマーカーの扱い
 	class Marker : public Object {
+		int index = 0;
 
 	public:
 		Marker(int x_, int y_, int width_, int height_, bool willStay_) {
 			rect.x = x_, rect.y = y_, rect.width = width_, rect.height = height_;
 			layer = 101;
 		}
-
-		Marker(Rectan rect_, bool willStay_) {
+		
+		Marker(Rectan rect_, bool willStay_, int index_) {
 			rect = rect_;
+			index = index_;
+			if (rect.width > 0 || rect.height > 0) {
+				rect.width = 100;
+				rect.height = 100;
+			}
+			else {
+				rect.x = rect.y = -300;
+			}
 			layer = 101;
 		}
 
 		bool draw() {
-			DrawExtendGraph(left(), top(), right(), bottom(), imgHandles["s_game_marker"], true);
+			switch (index)
+			{
+			case 0: {
+				DrawExtendGraph(left(), top(), right(), bottom(), imgHandles["s_game_marker"], true);
+				break;
+			}
+			case 1: {
+				DrawExtendGraph(left(), top(), right(), bottom(), imgHandles["p_goal"], true);
+				break;
+			}
+			default:
+				DrawExtendGraph(left(), top(), right(), bottom(), imgHandles["block"], true);
+				break;
+			}
 			return false;
 		}
 
@@ -123,6 +145,9 @@ class SinglePlayerGame : public Game {
 		int turnCounter = 100;
 		int moveDirection;
 
+		int damage = 0;
+		int invincibleTime = 0;
+
 	public:
 		Enemy(int x_, int y_, int width_, int height_, int enemyType_){
 			rect.x = prevX = x_;
@@ -138,6 +163,31 @@ class SinglePlayerGame : public Game {
 				}
 				case 2: {
 					moveDirection = rand()%4;
+					switch (moveDirection)
+					{
+					case 0: {
+						rect.x = prevX = WIDTH / 2;
+						rect.y = prevY = 0 - 200;
+						break;
+					}
+					case 1: {
+						rect.x = prevX = WIDTH + 200;
+						rect.y = prevY = HEIGHT / 2 + 50;
+						break;
+					}
+					case 2: {
+						rect.x = prevX = WIDTH / 2;
+						rect.y = prevY = HEIGHT + 200;
+						break;
+					}
+					case 3: {
+						rect.x = prevX = 0 - 200;
+						rect.y = prevY = HEIGHT / 2 + 50;
+						break;
+					}
+					default:
+						break;
+					}
 					break;
 				}
 				default: {
@@ -166,21 +216,23 @@ class SinglePlayerGame : public Game {
 		double topHit() const { return top() + rect.height / 3; }
 		double bottomHit() const { return bottom() - rect.height / 3; }
 
-		void update(const std::vector<std::shared_ptr<BlockObject>> blockList) {
+		void update(const std::vector<std::shared_ptr<BlockObject>> blockList, const std::vector<std::shared_ptr<Marker>> markerList) {
 			// 座標更新以外にも状態の更新を扱う？
 
-			updateCoordinate(blockList);
+			updateCoordinate(blockList, markerList);
 		}
 
 		// 座標の更新
-		void updateCoordinate(const std::vector<std::shared_ptr<BlockObject>> blockList) {
+		void updateCoordinate(const std::vector<std::shared_ptr<BlockObject>> blockList, const std::vector<std::shared_ptr<Marker>> markerList) {
 			double& x = rect.x;
 			double& y = rect.y;
 			const int& width = rect.width;
 			const int& height = rect.height;
 
-			const double diffX = x - prevX;
-			const double diffY = y - prevY;
+			//const double diffX = x - prevX > 25 ? 15 : x - prevX < -25 ? -15 : x - prevX;
+			//const double diffY = y - prevY > 25 ? 15 : y - prevY < -25 ? -15 : y - prevY;
+			const double diffX = 40 * tanh((x - prevX) / 40);
+			const double diffY = 40 * tanh((y - prevY) / 40);
 
 			double acX = 0;
 			double acY = 0;
@@ -210,25 +262,25 @@ class SinglePlayerGame : public Game {
 					break;
 				}
 				case 2:{
-					moveDirection = 1;
+					//moveDirection = 1;
 					switch(moveDirection) {
 						case 0:{
 							acX = 0;
-							acY = 3;
+							acY = 10;
 							break;
 						}
 						case 1:{
-							acX = -3;
+							acX = -10;
 							acY = 0;
 							break;
 						}
 						case 2:{
 							acX = 0;
-							acY = -3;
+							acY = -10;
 							break;
 						}
 						case 3:{
-							acX = 3;
+							acX = 10;
 							acY = 0;
 							break;
 						}
@@ -286,10 +338,40 @@ class SinglePlayerGame : public Game {
 					}
 				}
 			}
+
+			// マーカーとの当たり判定
+			for (auto marker : markerList) {
+				if (left() < marker->right() && top() < marker->bottom() &&
+					right() > marker->left() && bottom() > marker->top()) {
+
+					if (prevY < marker->bottomHit() && prevY + height > marker->topHit()) {
+						if (prevX >= marker->rightHit()) {
+							x = marker->right();
+						}
+						else if (prevX + width <= marker->leftHit()) {
+							x = marker->left() - width;
+						}
+						else {
+							// TODO
+						}
+					}
+					else {
+						if (prevY >= marker->bottomHit()) {
+							y = marker->bottom();
+						}
+						else if (prevY + height <= marker->topHit()) {
+							y = marker->top() - height;
+							isJumping = false;
+						}
+						else {
+							// TODO
+						}
+					}
+				}
+			}
 		}
 
 		// 死亡判定。マーカーで殴られたら死ぬ。
-
 		bool deathDecision(const std::vector<std::shared_ptr<Marker>> markerList){
 			// 生死判定
 
@@ -308,21 +390,56 @@ class SinglePlayerGame : public Game {
 			}
 
 			// この場合、ブロックに当たったら死ぬ、的な
-			for (auto marker : markerList) {
-				if (left() < marker->right() && top() < marker->bottom() &&
-					right() > marker->left() && bottom() > marker->top()) {
-					if (isAlive) {
-						PlaySoundMem(soundHandles["s_game_attack"] , DX_PLAYTYPE_BACK, true);
+			if (invincibleTime == 0) {
+				for (auto marker : markerList) {
+					if (left() < marker->right() && top() < marker->bottom() &&
+						right() > marker->left() && bottom() > marker->top()) {
+						if (isAlive) {
+							PlaySoundMem(soundHandles["s_game_attack"], DX_PLAYTYPE_BACK, true);
+						}
+						damage++;
+						isAlive = damageControl();
+						invincibleTime = 15;
+
+						return !isAlive;
 					}
-					isAlive = false;
-					return !isAlive;
 				}
 			}
+			else if (invincibleTime > 0) {
+				invincibleTime--;
+			}
+
+
 			return !isAlive;
 		}
 
 		bool getIsAlive() {
 			return isAlive;
+		}
+
+		// ダメージが何点以上で死亡とするか。返り値は 死：false, 生：true
+		bool damageControl() {
+			int maxDamage;
+			switch (enemyType)
+			{
+			case 1: {
+				maxDamage = 2;
+				break;
+			}
+			case 2: {
+				maxDamage = 5;
+				break;
+			}
+			case 3: {
+				maxDamage = 2;
+				break;
+			}
+			default:
+				maxDamage = 1;
+				break;
+			}
+
+			return damage < maxDamage;
 		}
 	};
 
@@ -415,7 +532,7 @@ class SinglePlayerGame : public Game {
 				}
 			}
 			// マーカーとの当たり判定
-			for (auto marker : markerList) {
+			/*for (auto marker : markerList) {
 				if (left() < marker->right() && top() < marker->bottom() &&
 					right() > marker->left() && bottom() > marker->top()) {
 
@@ -438,7 +555,7 @@ class SinglePlayerGame : public Game {
 						}
 					}
 				}
-			}
+			}*/
 			// 敵との当たり判定
 			// for (auto enemy : enemyList) {
 			// 	if (left() < enemy->right() && top() < enemy->bottom() &&
@@ -489,13 +606,14 @@ class SinglePlayerGame : public Game {
 						right() >= enemy->left() && bottom() >= enemy->top()) {
 						damage += 1;
 						invincibleTime = 50;
+						break;
 					}
 				}
 			} else if (invincibleTime > 0){
 				invincibleTime--;
 			}
 
-			if (damage > 3) {
+			if (damage > 5) {
 				isAlive = false;
 			}
 
@@ -512,22 +630,24 @@ class SinglePlayerGame : public Game {
 	// 敵作成。enemyType については Enemy クラスを参照
 	std::shared_ptr<Enemy> makeEnemy(int x, int y, int width, int height, int enemyType) {
 		auto enemy = std::make_shared<Enemy>(x, y, width, height, enemyType);
+		if (player->isContacted(enemy)) {
+			enemy = std::make_shared<Enemy>(x, y-100, width, height, enemyType);
+		}
 		enemyList.push_back(enemy);
 		drawList.push_back(enemy);
 		return enemy;
 	}
 
 	std::shared_ptr<BGM> bgm;
-	const int MAX_TIME = 30*20;
+	const int MAX_TIME = 30*40;
 	int timer = MAX_TIME;
 	bool hasPlayerWon;
 
 public:
 	SinglePlayerGame() {
 		thread = std::thread::thread(capture, std::ref(share));
-		player = std::make_shared<Player>(WIDTH/2 - 100/2, HEIGHT/2-150/2, 60, 80);
+		player = std::make_shared<Player>(WIDTH/2 - 100/2, HEIGHT/2-150/2, 75, 100);
 		hasPlayerWon = true;
-
 	}
 
 	bool onStart() {
@@ -569,7 +689,7 @@ public:
 				blockList.push_back(block);
 				drawList.push_back(block);
 			};
-			makeBlock(0-200, 700, WIDTH+200+200, 50);
+			makeBlock(0-200, 600, WIDTH+200+200, 50);
 
 			drawList.push_back(player);
 			drawList.push_back(make_shared<Background>(share.handle));
@@ -635,8 +755,8 @@ public:
 
 				// 認識したマーカーを描画
 				share.rectMutex.lock();
-				for (auto rect : share.rects) {
-					auto marker = std::make_shared<Marker>(rect, false);
+				for (int i = 0; i < share.rects.size(); i++) {
+					auto marker = std::make_shared<Marker>(share.rects[i], false, i);
 					markerList.push_back(marker);
 					drawList.push_back(marker);
 				}
@@ -645,8 +765,8 @@ public:
 				player->update(key, blockList, markerList, enemyList);
 
 				for (auto enemy : enemyList) {
-					enemy->update(blockList);
 					enemy->deathDecision(markerList);
+					enemy->update(blockList, markerList);
 				}
 
 				if(player->deathDecision(enemyList)){
@@ -659,26 +779,42 @@ public:
 				// 敵の出現を管理する
 				switch(MAX_TIME-timer) {
 					case 1: {
-						makeEnemy(350, 200, 435/5, 349/5, 0);
+						makeEnemy(350, 200, 435/5, 349/5, 1);
 						break;
 						}
+					case 1000:
 					case 150: {
+						//makeEnemy(WIDTH, HEIGHT / 2, 435 / 2, 349 / 2, 2);
+						makeEnemy(200, 0, 435 / 3, 349 / 3, 1);
 						makeEnemy(900, 0, 435/3, 349/3, 1);
+						//makeEnemy(WIDTH/2, 200, 435 / 5, 349 / 5, 1);
+
 						break;
 						}
 					case 300: {
 						makeEnemy(WIDTH, HEIGHT/2, 435/2, 349/2, 2);
+						makeEnemy(WIDTH / 2, 200, 435 / 5, 349 / 5, 1);
+
 						break;
 					}
+					case 500:
+					case 700:
+					case 900:
+					case 1100: {
+						makeEnemy(WIDTH, HEIGHT / 2, 435 / 2, 349 / 2, 2);
+						break;
+					}
+
 					default: {
-						// 定期的に実行する場合など
-						if (MAX_TIME - timer > 300 && (MAX_TIME - timer) % 10 == 0) {
-							makeEnemy(rand()%(WIDTH-200)+100, rand()%(HEIGHT-100), 112*4/5, 112*4/5, 3);
-						} else if ((MAX_TIME - timer) % 30 == 0) {
-							makeEnemy(rand()%(WIDTH-200)+100, rand()%(HEIGHT-100), 112*4/5, 112*4/5, 3);
-						}
 						break;
 					}
+				}
+				// 定期的に実行する場合など
+				if (MAX_TIME - timer > 400 && (MAX_TIME - timer) % 10 == 0) {
+					makeEnemy(rand() % (WIDTH - 200) + 100, rand() % (HEIGHT - 100), 112 * 4 / 5, 112 * 4 / 5, 3);
+				}
+				else if ((MAX_TIME - timer) % 30 == 0) {
+					makeEnemy(rand() % (WIDTH - 200) + 100, rand() % (HEIGHT - 100), 112 * 4 / 5, 112 * 4 / 5, 3);
 				}
 
 				break;
