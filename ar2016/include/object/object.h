@@ -16,6 +16,7 @@
 // int id; マーカーの種類
 class Rectan {
 public:
+
 	double x, y;
 	int width, height;
 	double rotate;

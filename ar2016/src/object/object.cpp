@@ -101,5 +101,12 @@ bool Object::load() {
 	isSuccess &= loadEffect("p_ball", "ball", 3, 10, 960, 2400);
 	isSuccess &= loadEffect("p_coin", "coin", 5, 2, 1000, 400);
 
+
+	// breakout game
+	isSuccess &= loadImage("ship_block", "shipBlock");
+	isSuccess &= loadImage("pot", "pot");
+	isSuccess &= loadImage("restore_ship", "restore_ship");
+	isSuccess &= loadImage("damage_ship", "damage_ship");
+
 	return isSuccess;
 }
