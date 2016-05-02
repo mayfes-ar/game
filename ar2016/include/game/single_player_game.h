@@ -680,7 +680,7 @@ public:
 					case 1: {
 						makeEnemy(350, 200, 435/5, 349/5, 0);
 						water = makeEnemy(0, HEIGHT + 80, 1280, 800, 11);
-						button = makeEnemy(0, 100, 40, 40, 12);
+						button = makeEnemy(100, 100, 40, 40, 12);
 
 						break;
 						}
