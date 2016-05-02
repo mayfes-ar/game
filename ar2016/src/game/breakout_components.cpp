@@ -35,16 +35,17 @@ void BreakoutComponents::setup()
 			auto color = Breakout::Block::Color::Green;
 			const auto ratio = block_color_generator(mt);
 
-			if (ratio > 0.8) {
+			if (ratio <= Breakout::BLOCK_RED_PROB) {
 				color = Breakout::Block::Color::Red;
 			}
-			else if (ratio > 0.5) {
+			else if (ratio - Breakout::BLOCK_RED_PROB < Breakout::BLOCK_BLUE_PROB) {
 				color = Breakout::Block::Color::Blue;
 			}
 
 			auto block = std::make_shared<Breakout::Block>(rec, color);
 
-			if (block_generator(mt) > BLOCK_GENERATE_RATIO) {
+			// 無駄な生成をしている(どうしよう)
+			if (block_generator(mt) > BLOCK_GENERATE_PROB) {
 				block->disappear();
 			}
 
