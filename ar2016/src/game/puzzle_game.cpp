@@ -10,62 +10,17 @@ bool PuzzleGame::onStart() {
 		drawList.push_back(std::make_shared<Explanation>());
 	}, -1);
 
-	mode.setMode([this]() {
-		makeStageBase(false);
-		setPlayer(100, 90);
-		setGoal(1000, 500);
-
-		for (int i = 0; i * 50 <= 1200; i++) {
-			setLoop(i * 50, 770, 50, 10, (i - 1) * 50, 0);
-			setLoop(i * 50, -10, 50, 10, (i - 1) * 50, 670);
-		}
-		setDamage(900, 450, 60);
-		setDamage(960, 450, 60);
-		setDamage(1020, 450, 60);
-		setDamage(1080, 450, 60);
-		setDamage(1140, 450, 60);
-		setDamage(1200, 450, 60);
-		setDamage(900, 500, 50);
-		setDamage(900, 550, 50);
-		setDamage(900, 600, 50);
-		setDamage(900, 650, 50);
-		setDamage(900, 700, 50);
-		setDamage(1150, 500, 50);
-		setDamage(1150, 550, 50);
-		setDamage(1150, 600, 50);
-		setDamage(1150, 650, 50);
-		setDamage(1150, 700, 50);
-		setBlock(0, 200, 200, 20);
-		setBlock(200, 150, 70, 70);
-		setBlock(500, 400, 24, 240);
-		setBlock(700, 400, 24, 240);
-		setBlock(524, 400, 176, 24);
-		setBlock(524, 616, 176, 24);
-		setWarp(680, 424, 20, 20, 600, 300);
-		setWarp(1220, 700, 20, 20, 530, 450);
-		
-		setWarp(-500, 1000, 2500, 600, 100, -100);
-		setBlock(-500, 1600, 2500, 600);
-		
-		
-
-	}, -1);
-
 	// mode 1
 	mode.setMode([this]() {
 		makeStageBase( );
 		setPlayer(100, -300);
 		setGoal(1100, 550);
 
-		setCoin(800, 100);
-		setCoin(900, 100);
-		setDamage(800, 300, 100);
-		setBlock(400, 300, 300, 200);
-		setBlock(450, 550, 100, 100, false);
-		setSwitch(1000, 200, 60, setBlock(650, 550, 100, 100, false)->canHit);
-		setWarp(550, 550, 50, 50, 550, -100);
-		setWind(1100, 180, 100, 300, 0, -3);
-		setWind(50, 695, 5, 5, 30, -60);
+		setBlock(0, 520, 440, 200);
+		setBlock(440, 200, 270, 500);
+		setBlock(1000, 220, 300, 20);
+		setCoin(1030, 100);
+		setCoin(1110, 100);
 
 	}, -1);
 
@@ -103,17 +58,44 @@ bool PuzzleGame::onStart() {
 
 	}, -1);
 
-	// mode 4
+	// mode 5
 	mode.setMode([this]() {
 		makeStageBase(false);
-		setPlayer(100, -100);
-		setGoal(1100, 100);
+		setPlayer(100, 90);
+		setGoal(1000, 500);
 
-		setWarp(-500, 800, 2500, 600, 100, -100);
-		setWind(100, 200, 100, 400, 0, -3);
-		setWind(400, 200, 100, 400, 0, -3);
-		setWind(650, -200, 200, 1000, 0, 3);
-		setWind(1000, 200, 100, 400, 0, -3);
+		for (int i = 0; i * 50 <= 1200; i++) {
+			setLoop(i * 50, 770, 50, 10, (i - 1) * 50, 0);
+			setLoop(i * 50, -10, 50, 10, (i - 1) * 50, 670);
+		}
+
+		setDamage(900, 450, 60);
+		setDamage(960, 450, 60);
+		setDamage(1020, 450, 60);
+		setDamage(1080, 450, 60);
+		setDamage(1140, 450, 60);
+		setDamage(1200, 450, 60);
+		setDamage(900, 500, 50);
+		setDamage(900, 550, 50);
+		setDamage(900, 600, 50);
+		setDamage(900, 650, 50);
+		setDamage(900, 700, 50);
+		setDamage(1150, 500, 50);
+		setDamage(1150, 550, 50);
+		setDamage(1150, 600, 50);
+		setDamage(1150, 650, 50);
+		setDamage(1150, 700, 50);
+		setBlock(0, 200, 200, 20);
+		setBlock(200, 150, 70, 70);
+		setBlock(500, 400, 24, 240);
+		setBlock(700, 400, 24, 240);
+		setBlock(524, 400, 176, 24);
+		setBlock(524, 616, 176, 24);
+		setWarp(680, 424, 20, 20, 600, 300);
+		setWarp(1220, 700, 20, 20, 530, 450);
+
+		setWarp(-500, 1000, 2500, 600, 100, -100);
+		setBlock(-500, 1600, 2500, 600);
 
 	}, -1);
 
