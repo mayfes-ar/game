@@ -507,6 +507,10 @@ class SinglePlayerGame : public Game {
 		int damage = 0;
 		int invincibleTime = 0;
 
+		const int maxDamage = 6;
+
+		int heart;
+
 	public:
 		Player(int x_, int y_, int width_, int height_) {
 			rect.x = prevX = x_;
@@ -518,7 +522,12 @@ class SinglePlayerGame : public Game {
 
 		bool draw() {
 			DrawExtendGraph(left(), top(), right(), bottom(), imgHandles["s_game_player"], true);
-			DrawString(50 , 50, std::to_string(damage).c_str(), GetColor(255, 255, 255));
+			//DrawString(50 , 50, std::to_string(damage).c_str(), GetColor(255, 255, 255));
+
+			for (heart = 0; heart <= (maxDamage-damage-1); heart++) {
+				DrawExtendGraph(50 + 50 * heart, 50, 100 + 50 * heart, 100, imgHandles["s_game_heart"], true);
+			}
+
 			return true;
 		}
 
@@ -669,7 +678,7 @@ class SinglePlayerGame : public Game {
 				invincibleTime--;
 			}
 
-			if (damage > 5) {
+			if (damage > (maxDamage-1)) {
 				isAlive = false;
 			}
 
@@ -844,8 +853,7 @@ public:
 					case 1: {
 
 						water = makeEnemy(0, HEIGHT + 80, 1280, 800, 11);
-						button = makeEnemy(100, 100, 40, 40, 12);
-
+						button = makeEnemy(WIDTH-100, 100, 40, 40, 12);
 
 						makeEnemy(350, 200, 435/5, 349/5, 1);
 
