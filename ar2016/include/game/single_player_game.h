@@ -134,20 +134,20 @@ class SinglePlayerGame : public Game {
 		double bottomHit() const { return bottom() - rect.height / 3; }
 	};
 
-
-
 	// 敵キャラクター
 	class Enemy : public Object {
 		double prevX;
 		double prevY;
 		bool isJumping = true;
 		bool isAlive = true;
-
+		bool isStopping1 = false;
 
 		int enemyType; // 0 : 移動しない、 1 : 左右にぴょこぴょこ
 		int moveDirection;//加速度 0:(0,3),1:(-3,0),2:(0,-3),3:(3,0)
 
 
+
+		
 		int damage = 0;
 		int invincibleTime = 0;
 
@@ -197,6 +197,10 @@ class SinglePlayerGame : public Game {
 					rect.y = prevY = HEIGHT / 2 + 50;
 					break;
 				}
+	
+				
+				
+				
 				default:
 					break;
 				}
@@ -221,6 +225,26 @@ class SinglePlayerGame : public Game {
 			switch (enemyType) {
 			case 3: {
 				DrawExtendGraph(left(), top(), right(), bottom(), imgHandles["s_game_teresa"], true);
+				break;
+			}
+			case 4: {
+				DrawExtendGraph(left(), top(), right(), bottom(), imgHandles["ufo"], true);
+				break;
+			}
+			case 5: {
+				DrawExtendGraph(left(), top(), right(), bottom(), imgHandles["drop"], true);
+				break;
+			}
+			case 6: {
+				DrawExtendGraph(left(), top(), right(), bottom(), imgHandles["washi"], true);
+				break;
+			}
+			case 7: {
+				DrawExtendGraph(left(), top(), right(), bottom(), imgHandles["cloud"], true);
+				break;
+			}
+			case 8: {
+				DrawExtendGraph(left(), top(), right(), bottom(), imgHandles["ray"], true);
 				break;
 			}
 			case 11: {
@@ -341,6 +365,53 @@ class SinglePlayerGame : public Game {
 					acX = rand() % 5 -2;
 					acY = rand() % 5 -2;
 					break;
+				}
+				case 4: {
+					acY = 0;
+
+					if (turnCounter <= 0) {
+						moveDirection *= -1;
+						turnCounter = rand() % 100 + 1;
+					}
+					else {
+						acX = moveDirection * 10 * (moveDirection * diffX <= 30);
+						turnCounter--;
+					}
+
+					if (x == 200 || x == 500 || x == 600) {
+						moveDirection = 0;
+						isStopping1 = true;
+					}
+					if (x == 0) {
+						x = WIDTH;
+					}
+					else if (x == WIDTH) {
+						x = 0;
+					}
+
+					break;
+				}
+				case 5: {
+
+					acX = 0;
+					acY = 10;
+
+					break;
+					/*１フレームごとにｘ座標ランダムｙ座標０のしずくを出現させて自由落下させたかった*/
+				}
+				case 6: {
+					acX = 8;
+					acY = 30;
+					break;
+				}
+				case 7: {
+					acX = 5;
+					acY = 0;
+					break;
+				}
+				case 8: {
+					acX = 0;
+					acY = 0;
 				}
 				case 11: {
 					if (isWaterUp == false) {
@@ -497,6 +568,10 @@ class SinglePlayerGame : public Game {
 
 
 			return !isAlive;
+		}
+
+		bool getIsStopping1() {
+			return isStopping1;
 		}
 
 		bool getIsAlive() {
@@ -942,6 +1017,9 @@ public:
 				}
 
 				// 敵の出現を管理する
+				static std::shared_ptr<Enemy> ufo;
+				static std::shared_ptr<Enemy> cloud;
+				static std::shared_ptr<Enemy> washi;
 
 				switch(MAX_TIME-timer) {					
 					case 1: {
@@ -959,9 +1037,18 @@ public:
 						makeEnemy(200, 0, 435 / 3, 349 / 3, 1);
 						makeEnemy(900, 0, 435/3, 349/3, 1);
 						//makeEnemy(WIDTH/2, 200, 435 / 5, 349 / 5, 1);
-
+						ufo = makeEnemy(WIDTH / 2, 10, 225 / 2, 225 / 2, 4); //ufo
 						break;
 						}
+					case 180: {
+						makeEnemy(rand() % (WIDTH / 2), 0, 430 / 4, 263 / 4, 6); //washi
+						break;
+					}
+					case 200: {
+						cloud = makeEnemy(0, 0, 304 / 3, 166 / 3, 7); //cloud
+						break;
+
+					}
 					case 300: {
 						makeEnemy(WIDTH, HEIGHT/2, 435/2, 349/2, 2);
 						makeEnemy(WIDTH / 2, 200, 435 / 5, 349 / 5, 1);
@@ -1001,6 +1088,13 @@ public:
 				}
 				else if ((MAX_TIME - timer) % 30 == 0) {
 					makeEnemy(rand() % (WIDTH - 200) + 100, rand() % (HEIGHT - 100), 112 * 4 / 5, 112 * 4 / 5, 3);
+				}
+
+				if (MAX_TIME - timer >= 150 && ufo->getIsStopping1() == true) {
+					makeEnemy(ufo->left(), 100, 353 / 3, 1265 / 2, 8);
+				}
+				if (MAX_TIME - timer >= 200) {
+					makeEnemy((cloud->left()) + rand() % (int)((cloud->right()) - (cloud->left())), 50, 200 / 8, 200 / 8, 5);
 				}
 
 				break;
