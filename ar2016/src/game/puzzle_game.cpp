@@ -29,6 +29,11 @@ bool PuzzleGame::onStart() {
 		setBlock(50, 300, 400, 100);
 		setSwitch(1000, 250, 50, setBlock(450, 300, 400, 100)->canHit, true);
 		setBlock(850, 300, 400, 100);
+		setCoin(1000, 100);
+		setCoin(60, 420);
+		setCoin(160, 420);
+		setCoin(260, 420);
+
 	}, -1);
 
 	// mode 3
@@ -158,7 +163,7 @@ bool PuzzleGame::onStart() {
 		setSwitch(900, 550, 100, setBlock(900, 150, 50, 250, false)->canHit, true);
 		setSwitch(1150, 550, 100, setBlock(900, 150, 50, 250, false)->canHit, true);
 
-		setFuncSwitch(700, 550, 100, [this]() {funcTimer.set([this]() { setDamage(650, -150, 150, 0, 2); }, 1); });
+		setFuncSwitch(700, 550, 100, [this]() {funcTimer.set([this]() { setDamage(650, -150, 100, 0, 2); }, 1); });
 		setFuncSwitch(1150, 550, 100, [this]() {funcTimer.set([this]() {setDamage(-100, 150, 250, 5, 0); }, 1); });
 
 		setWarp(-1000, 1000, 3000, 100, 50, 300);//shita
@@ -221,7 +226,7 @@ bool PuzzleGame::onUpdate() {
 	case 6: {
 		if (timer % (FPS / 2) == 0) {
 			setDamage(225, 800, 50, 0, -5);
-			setDamage(450, -100, 100, 0, 10);
+			setDamage(450, -100, 70, 0, 10);
 		}
 		break;
 	}
