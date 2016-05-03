@@ -7,7 +7,7 @@ std::shared_ptr<SinglePlayerGame::Teresa> SinglePlayerGame::makeTeresa(int x = 0
 	}
 	auto enemy = std::make_shared<Teresa>(x, y, *this, size);
 	if (player->isContacted(enemy)) {
-		enemy = std::make_shared<Teresa>(x, y - 100, *this, size);
+		enemy = std::make_shared<Teresa>(x, y - 200, *this, size);
 	}
 	enemyList.push_back(enemy);
 	drawList.push_back(enemy);
@@ -17,11 +17,31 @@ std::shared_ptr<SinglePlayerGame::Teresa> SinglePlayerGame::makeTeresa(int x = 0
 std::shared_ptr<SinglePlayerGame::RocketWanwan> SinglePlayerGame::makeRocketWanwan(int x, int y, double size = 1.0) {
 auto enemy = std::make_shared<RocketWanwan>(x, y, *this, size);
 if (player->isContacted(enemy)) {
-enemy = std::make_shared<RocketWanwan>(x, y - 100, *this, size);
+enemy = std::make_shared<RocketWanwan>(x, y - 200, *this, size);
 }
 enemyList.push_back(enemy);
 drawList.push_back(enemy);
 return enemy;
+}
+
+std::shared_ptr<SinglePlayerGame::Inundation> SinglePlayerGame::makeInundation() {
+	auto enemy = std::make_shared<Inundation>(0, HEIGHT+100, *this, 1);
+	if (player->isContacted(enemy)) {
+		enemy = std::make_shared<Inundation>(0, HEIGHT+100, *this, 1);
+	}
+	enemyList.push_back(enemy);
+	drawList.push_back(enemy);
+	return enemy;
+}
+
+std::shared_ptr<SinglePlayerGame::Switch> SinglePlayerGame::makeSwitch(int x, int y, double size = 1.0) {
+	auto enemy = std::make_shared<Switch>(x, y, *this, size);
+	if (player->isContacted(enemy)) {
+		enemy = std::make_shared<Switch>(x, y - 200, *this, size);
+	}
+	enemyList.push_back(enemy);
+	drawList.push_back(enemy);
+	return enemy;
 }
 
 bool SinglePlayerGame::onStart() {
@@ -65,15 +85,13 @@ bool SinglePlayerGame::onStart() {
 		};
 		makeBlock(0 - 200, 600, WIDTH + 200 + 200, 50);
 
-
-
 		drawList.push_back(player);
 		drawList.push_back(make_shared<Background>(share.handle));
 
 		bgm = make_shared<BGM>(1);
 		bgm->start();
 
-	}, MAX_TIME);
+	}, maxTime);
 
 	// mode 2
 	mode.setMode([this]() {
@@ -156,8 +174,10 @@ bool SinglePlayerGame::onUpdate() {
 		}
 
 		// 敵の出現を管理する
-		switch (MAX_TIME - timer) {
+		switch (maxTime - timer) {
 		case 300:
+			makeInundation();
+			makeSwitch(100, 100, 1);
 		case 500:
 		case 100: {
 			makeRocketWanwan(0, HEIGHT / 2 + 50);
@@ -170,7 +190,7 @@ bool SinglePlayerGame::onUpdate() {
 		}
 
 		// 定期的に実行する場合など
-		if ((MAX_TIME - timer) % 30 == 0) {
+		if ((maxTime - timer) % 30 == 0) {
 			makeTeresa();
 		}
 		break;
