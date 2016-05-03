@@ -100,9 +100,10 @@ bool Object::load() {
 	isSuccess &= loadImage("p_off", "switch_off");
 	isSuccess &= loadImage("p_arrow", "arrow");
 	isSuccess &= loadEffect("p_smog", "dark_smog", 13, 1, 3120, 240);
-	isSuccess &= loadEffect("p_ball", "ball", 3, 10, 960, 2400);
-	isSuccess &= loadEffect("p_coin", "coin", 5, 2, 1000, 400);
-
+	isSuccess &= loadEffect("p_ball", "puzzle/ball", 3, 10, 960, 2400);
+	isSuccess &= loadEffect("p_coin", "puzzle/coin", 5, 2, 1000, 400);
+	isSuccess &= loadEffect("p_curtain_close", "puzzle/curtain_close", 1, 18, 640, 8640);
+	isSuccess &= loadEffect("p_curtain_open", "puzzle/curtain_open", 1, 10, 640, 4800);
 
 	// breakout game
 	isSuccess &= loadImage("ship_block", "shipBlock");

@@ -124,6 +124,46 @@ class PuzzleGame : public Game {
 		void setResultDraw() { isPlaying = false; }
 	};
 
+	class TimerObject : public Object {
+		int time = 20 * FPS;
+
+	public:
+		TimerObject() {
+			layer = 200;
+		}
+		bool draw() {
+			DrawFormatString(800, 0, GetColor(165, 205, 163), "TIME: %d", time/FPS);
+			return true;
+		}
+		bool update() {
+			time--;
+			return time == 0;
+		}
+	};
+
+	class CurtainObject : public Object {
+		const bool isOpen;
+		int counter = 0;
+		const int openCountMax = effectHandles["p_curtain_open"].size();
+		const int closeCountMax = effectHandles["p_curtain_close"].size();
+	public:
+		CurtainObject(bool isOpen_) : isOpen(isOpen_) {
+			layer = 300;
+		}
+		bool draw() {
+			const int handle = isOpen ? effectHandles["p_curtain_open"][counter] : effectHandles["p_curtain_close"][counter];
+			DrawExtendGraph(0, 0, 1280, 720, handle, true);
+
+			if (isOpen) {
+				counter++;
+				return !(counter == openCountMax);
+			} else {
+				if (counter < closeCountMax - 1) { counter++; }
+				return true;
+			}
+		}
+	};
+
 	class Player : public Object {
 		const PuzzleGame& game;
 
@@ -449,6 +489,7 @@ class PuzzleGame : public Game {
 	std::shared_ptr<Player> player;
 	std::shared_ptr<GoalObject> goal;
 	std::shared_ptr<ScoreObject> score;
+	std::shared_ptr<TimerObject> timer;
 
 	std::vector<std::shared_ptr<BlockObject>> stageBlocks;
 	std::shared_ptr<BlockObject> markerBlock;
@@ -458,7 +499,7 @@ class PuzzleGame : public Game {
 	std::mt19937 mt;
 	std::uniform_int_distribution<> rand100 = std::uniform_int_distribution<>(0, 99);
 
-	int timer = 0;
+	int counter = 0;
 
 	std::shared_ptr<StageBlock> setBlock(int x, int y, int width, int height, bool canHit=true) {
 		auto block = std::make_shared<StageBlock>(Rectan(x, y, width, height), canHit);
@@ -526,6 +567,7 @@ class PuzzleGame : public Game {
 
 		drawList.push_back(std::make_shared<Background>(share.handle));
 		drawList.push_back(score);
+		drawList.push_back(timer);
 
 		if (isSurrounded) {
 			setBlock(0, 700, 1280, 100, true);
@@ -541,6 +583,7 @@ public:
 		std::random_device rnd;
 		mt = std::mt19937(rnd());
 		score = std::make_shared<ScoreObject>();
+		timer = std::make_shared<TimerObject>();
 	}
 
 	bool onStart();
