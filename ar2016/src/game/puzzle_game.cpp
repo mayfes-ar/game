@@ -16,7 +16,11 @@ bool PuzzleGame::onStart() {
 		setPlayer(100, -300);
 		setGoal(1100, 550);
 
-		setBlock(400, 300, 300, 400);
+		setBlock(0, 520, 440, 200);
+		setBlock(440, 200, 270, 500);
+		setBlock(1000, 220, 300, 20);
+		setCoin(1030, 100);
+		setCoin(1110, 100);
 
 	}, -1);
 
@@ -34,38 +38,37 @@ bool PuzzleGame::onStart() {
 	// mode 3
 	mode.setMode([this]() {
 		makeStageBase();
-		setPlayer(50, 600);
-		setGoal(100, 100);
-		/*
-		for (int i = 0; i < 120; i++) {
-		setSmog();
-		}
-		*/
-		setWind(0, 0, 900, 340, 10, 0);
-		setWind(400, 580, 700, 120, -10, 0);
-		setBlock(0, 320, 1100, 40);
-		setSwitch(1160, 220, 1, setBlock(1100, 320, 200, 40)->canHit);
-		setBlock(200, 580, 290, 220);
 
-		for (int i = 600; i < 700; i += 10) {
+		setPlayer(50, 580);
+		setGoal(100, 80);
+		
+		setWind(0, 240, 900, 80, 1, 0);
+		setWind(440, 600, 700, 80, -1, 0);
+		setBlock(0, 300, 1100, 40);
+		setSwitch(1160, 200, 1, setBlock(1100, 300, 200, 40)->canHit);
+		setBlock(200, 560, 290, 220);
+
+		for (int i = 580; i < 680; i += 10) {
 			setDamage(482, i, 10);
 		}
 
-		setBlock(700, 0, 40, 210);
-		for (int i = 0; i < 200; i += 10) {
+		setBlock(700, 0, 40, 190);
+		for (int i = 0; i < 180; i += 10) {
 			setDamage(692, i, 10);
 		}
-		setCoin(600, 60);
+		setCoin(600, 40);
 
-		setBlock(880, 540, 220, 20);
-		setBlock(640, 540, 100, 20);
-		setDamage(780, 360, 20);
-		setBlock(1050, 360, 30, 180);
-		setCoin(500, 620);
-		setCoin(900, 460);
-		setCoin(980, 460);
-		setCoin(900, 390);
-		setCoin(980, 390);
+		setBlock(880, 520, 220, 20);
+		setBlock(620, 520, 120, 20);
+		setDamage(780, 340, 20);
+		setBlock(1050, 340, 30, 180);
+		setCoin(500, 600);
+		setCoin(900, 440);
+		setCoin(980, 440);
+		setCoin(900, 370);
+		setCoin(980, 370);
+
+		setBlock(0, 680, 1300, 20);
 
 	}, -1);
 
@@ -196,7 +199,7 @@ bool PuzzleGame::onUpdate() {
 		return Game::onUpdate();
 	}
 	case 1: {
-
+		
 		break;
 	}
 	case 2: {
@@ -204,8 +207,11 @@ bool PuzzleGame::onUpdate() {
 		break;
 	}
 	case 3: {
-		if (timer % (FPS) == 0 && gimmicks.size() < 150) {
-			setSmog();
+		if (timer % (FPS * 3) == 0) {
+			setDamage(300, -100, 50, 5, 14);
+		}
+		if (2 * timer % (FPS * 6) == FPS * 3) {
+			setDamage(400, -100, 50, -5, 14);
 		}
 		break;
 	}
