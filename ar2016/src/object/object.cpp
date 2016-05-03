@@ -55,7 +55,6 @@ bool Object::load() {
 	bool isSuccess = true;
 
 	isSuccess &= loadImage("player", "mario");
-	isSuccess &= loadImage("block", "block");
 
 	//メニューで使う
 	isSuccess &= loadImage("monhan", "monhan");
@@ -91,6 +90,8 @@ bool Object::load() {
 	// isSuccess &= loadImage("s_game_bg", "wallpaper_alpha");
 
 	// puzzle game
+	isSuccess &= loadImage("p_block", "puzzle/block");
+	isSuccess &= loadImage("p_block_x", "puzzle/block_x");
 	isSuccess &= loadImage("p_man", "man");
 	isSuccess &= loadImage("p_girl",  "girl");
 	isSuccess &= loadImage("p_explain", "puzzle_explanation");

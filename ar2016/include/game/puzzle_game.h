@@ -63,10 +63,13 @@ class PuzzleGame : public Game {
 		}
 
 		bool draw() {
-			drawWithRect(imgHandles["block"]);
+			if (canHit) {
+				drawWithRect(imgHandles["p_block"]);
+			} else {
+				drawWithRect(imgHandles["p_block_x"]);
+			}
 			return willStay;
 		}
-		
 	};
 
 	// gimmick共通クラス
@@ -185,6 +188,11 @@ class PuzzleGame : public Game {
 			game.score->score += goalScore;
 			isReached = true;
 		}
+		void markerCheck(std::shared_ptr<BlockObject> block) {
+			if (top() < block->bottomHit() && bottom() > block->topHit() && right() > block->leftHit() && left() < block->rightHit()) {
+				block->canHit = false;
+			}
+		}
 	};
 
 	class GoalObject : public Object {
@@ -244,7 +252,7 @@ class PuzzleGame : public Game {
 				rect.y += vy;
 				
 				for (auto block : game.allBlocks) {
-					if (isContacted(block)) {
+					if (isContacted(block) && block->canHit) {
 						willExist = false;
 					}
 				}
@@ -273,7 +281,7 @@ class PuzzleGame : public Game {
 			return willExist;
 		}
 		bool update() {
-			if (isContacted(game.markerBlock)) { willExist = false; }
+			if (isContacted(game.markerBlock) && game.markerBlock->canHit) { willExist = false; }
 			return willExist;
 		}
 	};

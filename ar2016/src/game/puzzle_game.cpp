@@ -254,8 +254,10 @@ bool PuzzleGame::onUpdate() {
 	drawList.push_back(markerBlock);
 	share.rectMutex.unlock();
 
+
 	// gimmicks作用前の準備
 	player->preUpdate();
+	player->markerCheck(markerBlock);
 
 	// gimmick
 	for (auto& itr = gimmicks.begin(); itr != gimmicks.end();) {
