@@ -112,19 +112,22 @@ class SinglePlayerGame : public Game {
 		double bottomHit() const { return bottom() - rect.height / 3; }
 	};
 
+	
+
 	// 敵キャラクター
 	class Enemy : public Object {
 		double prevX;
 		double prevY;
 		bool isJumping = true;
 		bool isAlive = true;
+		bool isStopping1 = false;
 
 		int enemyType; // 0 : 移動しない、 1 : 左右にぴょこぴょこ  4 : ランダムに左右　5 :　上から下  
 		int turnCounter = 100;
 		int moveDirection;
 
 	public:
-		Enemy(int x_, int y_, int width_, int height_, int enemyType_){
+		Enemy(int x_, int y_, int width_, int height_, int enemyType_) {
 			rect.x = prevX = x_;
 			rect.y = prevY = y_;
 			rect.width = width_;
@@ -132,57 +135,63 @@ class SinglePlayerGame : public Game {
 			enemyType = enemyType_;
 			layer = 100;
 			switch (enemyType) {
-				case 1: {
-					moveDirection = 1;
-					break;
-				}
-				case 2: {
-					moveDirection = rand()%4;
-					break;
-				}
-				case 4: {
-					moveDirection = 1;
-					break;
-				}
-				default: {
-					moveDirection = 0;
-					break;
-				}
+			case 1: {
+				moveDirection = 1;
+				break;
 			}
-	}
+			case 2: {
+				moveDirection = rand() % 4;
+				break;
+			}
+			case 4: {
+				moveDirection = 1;
+				break;
+			}
+			default: {
+				moveDirection = 0;
+				break;
+			}
+			}
+		}
 
 		bool draw() {
 			switch (enemyType) {
-				case 3: {
-					DrawExtendGraph(left(), top(), right(), bottom(), imgHandles["s_game_teresa"], true);
-					break;
-				}
-				case 4: {
-					DrawExtendGraph(left(), top(), right(), bottom(), imgHandles["ufo"], true);
-					break;
-				}
-				case 5: {
-					DrawExtendGraph(left(), top(), right(), bottom(), imgHandles["drop"], true);
-					break;
-				}
-				case 6: {
-					DrawExtendGraph(left(), top(), right(), bottom(), imgHandles["washi"], true);
-					break;
-				}
-				case 7: {
-					DrawExtendGraph(left(), top(), right(), bottom(), imgHandles["cloud"], true);
-					break;
-				}
-				default: {
-					DrawExtendGraph(left(), top(), right(), bottom(), imgHandles["s_game_wanwan"], true);
-					break;
-				}
+			case 3: {
+				DrawExtendGraph(left(), top(), right(), bottom(), imgHandles["s_game_teresa"], true);
+				break;
+			}
+			case 4: {
+				DrawExtendGraph(left(), top(), right(), bottom(), imgHandles["ufo"], true);
+				break;
+			}
+			case 5: {
+				DrawExtendGraph(left(), top(), right(), bottom(), imgHandles["drop"], true);
+				break;
+			}
+			case 6: {
+				DrawExtendGraph(left(), top(), right(), bottom(), imgHandles["washi"], true);
+				break;
+			}
+			case 7: {
+				DrawExtendGraph(left(), top(), right(), bottom(), imgHandles["cloud"], true);
+				break;
+			}
+			case 8: {
+				DrawExtendGraph(left(), top(), right(), bottom(), imgHandles["ray"], true);
+				break;
+			}
+			default: {
+				DrawExtendGraph(left(), top(), right(), bottom(), imgHandles["s_game_wanwan"], true);
+				break;
+			}
 			}
 			return isAlive;
 		}
 
+
 		void update(const std::vector<std::shared_ptr<BlockObject>> blockList) {
 			// 座標更新以外にも状態の更新を扱う？
+
 
 			updateCoordinate(blockList);
 		}
@@ -201,106 +210,116 @@ class SinglePlayerGame : public Game {
 			double acY = 0;
 
 			switch (enemyType) {
-				case 0:{
-					acX = -0.5 * (1 - (diffX <= 0) - (diffX < 0));
-					acY = 4;
+			case 0: {
+				acX = -0.5 * (1 - (diffX <= 0) - (diffX < 0));
+				acY = 4;
+				break;
+			}
+			case 1: {
+				acY = 2;
+				// turnCounter : 方向転換するまでの残りカウンタ数
+				// moveDirection とあわせて、方向転換の制御に用いる。
+				// moveDirection は x軸方向の正とわざわざ対応付けてはいません。
+				if (turnCounter <= 0 && !isJumping) {
+					moveDirection *= -1;
+					turnCounter = 100;
+				}
+				else {
+					acX = moveDirection*0.2 * (moveDirection*diffX <= 2);
+					turnCounter--;
+				}
+				if (!isJumping) {
+					acY = -15;
+				}
+				isJumping = true;
+				break;
+			}
+			case 2: {
+				moveDirection = 1;
+				switch (moveDirection) {
+				case 0: {
+					acX = 0;
+					acY = 3;
 					break;
 				}
-				case 1:{
-					acY = 2;
-					// turnCounter : 方向転換するまでの残りカウンタ数
-					// moveDirection とあわせて、方向転換の制御に用いる。
-					// moveDirection は x軸方向の正とわざわざ対応付けてはいません。
-					if (turnCounter <= 0 && !isJumping) {
-						moveDirection *= -1;
-						turnCounter = 100;
-					} else {
-						acX = moveDirection*0.2 * (moveDirection*diffX <= 2);
-						turnCounter--;
-					}
-					if (!isJumping) {
-						acY = -15;
-					}
-					isJumping = true;
-					break;
-				}
-				case 2:{
-					moveDirection = 1;
-					switch(moveDirection) {
-						case 0:{
-							acX = 0;
-							acY = 3;
-							break;
-						}
-						case 1:{
-							acX = -3;
-							acY = 0;
-							break;
-						}
-						case 2:{
-							acX = 0;
-							acY = -3;
-							break;
-						}
-						case 3:{
-							acX = 3;
-							acY = 0;
-							break;
-						}
-						default:{
-							break;
-						}
-					}
-					break;
-				}
-				case 3:{
-					acX = rand() % 5 -2;
-					acY = rand() % 5 -2;
-					break;
-				}
-				case 4: {
+				case 1: {
+					acX = -3;
 					acY = 0;
-
-					if (turnCounter <= 0) {
-						moveDirection *= -1;
-						turnCounter = rand() % 100 + 1;
-					}
-					else {
-						acX = moveDirection * 10 * (moveDirection * diffX <= 30);
-						turnCounter--;
-					}
-
-					if (x == 20 + rand() % (WIDTH - 40) + 1) {
-						moveDirection = 0;
-						
-						
-						//ここで新しく当たり判定のある光をだしたい
-					}
-					if (x == 0) {
-						x = WIDTH;
-					}
-					else if (x == WIDTH) {
-						x = 0;
-					}
-			
 					break;
-				
 				}
-				case 5: {
+				case 2: {
+					acX = 0;
+					acY = -3;
+					break;
+				}
+				case 3: {
+					acX = 3;
+					acY = 0;
+					break;
+				}
+				default: {
+					break;
+				}
+				}
+				break;
+			}
+			case 3: {
+				acX = rand() % 5 - 2;
+				acY = rand() % 5 - 2;
+				break;
+			}
+			case 4: {
+				acY = 0;
+
+				if (turnCounter <= 0) {
+					moveDirection *= -1;
+					turnCounter = rand() % 100 + 1;
+				}
+				else {
+					acX = moveDirection * 10 * (moveDirection * diffX <= 30);
+					turnCounter--;
+				}
+
+				if (x == 200 || x == 500 || x == 600) {
+					moveDirection = 0;
+					isStopping1 = true;
+				}
+				if (x == 0) {
+						x = WIDTH;
+				}
+				else if (x == WIDTH) {
+						x = 0;
+				}
+
+					break;
+			}
+			case 5: {
+
 					acX = 0;
 					acY = 10;
-					
+
 					break;
 					/*１フレームごとにｘ座標ランダムｙ座標０のしずくを出現させて自由落下させたかった*/
 				}
-				case 6: {
-					acX = 20;
+			case 6: {
+					acX = 8;
 					acY = 30;
-				}
-				default:{
 					break;
 				}
+			case 7: {
+					acX = 5;
+					acY = 0;
+					break;
+				}
+			case 8: {
+				acX = 0;
+				acY = 0;
 			}
+			default: {
+					break;
+				}
+		}
+	
 
 
 			// verlet法
@@ -375,9 +394,19 @@ class SinglePlayerGame : public Game {
 			return !isAlive;
 		}
 
+		bool getIsStopping1() {
+			return isStopping1;
+		}
+		
+		int getEnemyType() {
+			return enemyType;
+		}
+
+
 		bool getIsAlive() {
 			return isAlive;
 		}
+		
 	};
 
 	class Player : public Object {
@@ -527,10 +556,12 @@ class SinglePlayerGame : public Game {
 	std::vector<std::shared_ptr<Enemy>> enemyList;
 
 	// 敵作成。enemyType については Enemy クラスを参照
-	void makeEnemy(int x, int y, int width, int height, int enemyType) {
+  std::shared_ptr<Enemy> makeEnemy(int x, int y, int width, int height, int enemyType) {
 		auto enemy = std::make_shared<Enemy>(x, y, width, height, enemyType);
-		enemyList.push_back(enemy);
+         enemyList.push_back(enemy);
 		drawList.push_back(enemy);
+		
+		return enemy;
 	}
 
 	std::shared_ptr<BGM> bgm;
@@ -670,7 +701,7 @@ public:
 					enemy->deathDecision(markerList);
 				}
 
-				if(player->deathDecision(enemyList)){
+				if (player->deathDecision(enemyList)) {
 					bgm->stop();
 					bgm->playDeadSound();
 					hasPlayerWon = false;
@@ -678,32 +709,62 @@ public:
 				}
 
 				// 敵の出現を管理する
-				switch(MAX_TIME-timer) {
-					case 1: {
-						makeEnemy(350, 200, 435/5, 349/5, 0);
-						break;
-						}
-					case 150: {
-						makeEnemy(900, 0, 435/3, 349/3, 1);
-						break;
-						}
-					case 300: {
-						makeEnemy(WIDTH, HEIGHT/2, 435/2, 349/2, 2);
-						break;
+				static std::shared_ptr<Enemy> ufo;
+				static std::shared_ptr<Enemy> cloud;
+				static std::shared_ptr<Enemy> washi;
+
+				switch (MAX_TIME - timer) {
+				case 1: {
+					makeEnemy(350, 200, 435 / 5, 349 / 5, 0);
+					break;
+				}
+				case 150: {
+					makeEnemy(900, 0, 435 / 3, 349 / 3, 1);
+					ufo = makeEnemy(WIDTH / 2, 10, 225 / 2, 225 / 2, 4); //ufo
+					break;
+				}
+				case 180: {
+					makeEnemy(rand() % (WIDTH / 2), 0, 430 / 4, 263 / 4, 6); //washi
+					break;
+				}
+				case 200: {
+					cloud = makeEnemy(0, 0, 304/3, 166/3, 7); //cloud
+					break;
+					
+				}
+				case 300: {
+					makeEnemy(WIDTH, HEIGHT / 2, 435 / 2, 349 / 2, 2);
+					break;
+				}
+				default: {
+					// 定期的に実行する場合など
+					if (MAX_TIME - timer > 400 && (MAX_TIME - timer) % 20 == 0) {
+						makeEnemy(rand() % (WIDTH - 200) + 100, rand() % (HEIGHT - 100), 112 * 4 / 5, 112 * 4 / 5, 3);
 					}
-					default: {
-						// 定期的に実行する場合など
-						if (MAX_TIME - timer > 400 && (MAX_TIME - timer) % 20 == 0) {
-							makeEnemy(rand()%(WIDTH-200)+100, rand()%(HEIGHT-100), 112*4/5, 112*4/5, 3);
-						} else if ((MAX_TIME - timer) % 60 == 0) {
-							makeEnemy(rand()%(WIDTH-200)+100, rand()%(HEIGHT-100), 112*4/5, 112*4/5, 3);
-						}
-						break;
+					else if ((MAX_TIME - timer) % 60 == 0) {
+						makeEnemy(rand() % (WIDTH - 200) + 100, rand() % (HEIGHT - 100), 112 * 4 / 5, 112 * 4 / 5, 3);
 					}
+					break;
+
 				}
 
+				}
+
+
+
+				if (MAX_TIME - timer >= 150 && ufo->getIsStopping1() == true) {
+					makeEnemy(ufo->left(), 100, 353/3, 1265/2, 8);
+				}
+				if (MAX_TIME - timer >= 200) {
+					makeEnemy((cloud->left()) + rand() % (int)((cloud->right()) - (cloud->left())), 50, 200 / 8, 200 / 8, 5);
+				}
+			
+				
+
+
 				break;
-			}
+		
+		}
 			case 2:{ // リザルト画面
 				if (key[KEY_INPUT_RETURN]) {
 					willFinishMode = true;
@@ -721,16 +782,6 @@ public:
 		if (key[KEY_INPUT_N]) {
 			willFinishMode = true;
 		}
-		if (key[KEY_INPUT_4]) {
-			
-			makeEnemy(WIDTH / 2, 10, 225 / 2, 225 / 2, 4); //ufo
-		}
-		if (key[KEY_INPUT_5]) {
-			makeEnemy( 500 + rand() % 300 , 0, 200 / 8, 200 / 8, 5); //drop
-		}
-		if (key[KEY_INPUT_6]) {
-			makeEnemy(rand()%(WIDTH/2), 0, 430 / 4, 263 / 4, 6); //washi
-		}
 		
 
 
@@ -740,7 +791,7 @@ public:
 			} else {
 				itr = enemyList.erase(itr);
 			}
-		}*/
+		}
 
 		if (willFinishMode) {
 

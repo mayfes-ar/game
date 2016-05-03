@@ -81,7 +81,7 @@ bool Object::load() {
 
 	isSuccess &= loadImage("ufo", "ufo");
 	isSuccess &= loadImage("drop", "drop");
-	//isSuccess &= loadImage("uforay", "uforaytrans");
+	isSuccess &= loadImage("ray", "uforay");
 	isSuccess &= loadImage("cloud", "cloud");
 	isSuccess &= loadImage("washi", "wasi");
 	isSuccess &= loadSound("s_game_dead", "dead.wav");
