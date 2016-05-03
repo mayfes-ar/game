@@ -89,6 +89,11 @@ bool PuzzleGame::onStart() {
 		setWind(650, -200, 200, 1000, 0, 3);
 		setWind(1000, 200, 100, 400, 0, -3);
 
+		setCoin(100, 500);
+		setCoin(1140, 550);
+		setCoin(670, 550);
+		setCoin(770, 550);
+
 	}, -1);
 
 	// mode 5
