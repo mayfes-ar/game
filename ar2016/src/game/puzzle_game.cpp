@@ -16,8 +16,8 @@ bool PuzzleGame::onStart() {
 		setPlayer(100, -300);
 		setGoal(1100, 550);
 
-		setBlock(0, 520, 440, 200);
-		setBlock(440, 200, 270, 500);
+		setBlock(0, 520, 540, 200);
+		setBlock(540, 200, 170, 500);
 		setBlock(1000, 220, 300, 20);
 		setCoin(1030, 100);
 		setCoin(1110, 100);
@@ -47,8 +47,8 @@ bool PuzzleGame::onStart() {
 		setPlayer(50, 580);
 		setGoal(100, 80);
 		
-		setWind(0, 240, 900, 80, 1, 0);
-		setWind(440, 600, 700, 80, -1, 0);
+		setWind(0, 240, 900, 80, 3, 0);
+		setWind(440, 560, 600, 120, -3, 0);
 		setBlock(0, 300, 1100, 40);
 		setSwitch(1160, 200, 1, setBlock(1100, 300, 200, 40)->canHit);
 		setBlock(200, 560, 290, 220);
@@ -63,10 +63,10 @@ bool PuzzleGame::onStart() {
 		}
 		setCoin(600, 40);
 
-		setBlock(880, 520, 220, 20);
-		setBlock(620, 520, 120, 20);
+		setBlock(880, 540, 240, 20);
+		setBlock(620, 540, 120, 20);
 		setDamage(780, 340, 20);
-		setBlock(1050, 340, 30, 180);
+		setBlock(1050, 340, 50, 200);
 		setCoin(500, 600);
 		setCoin(900, 440);
 		setCoin(980, 440);
