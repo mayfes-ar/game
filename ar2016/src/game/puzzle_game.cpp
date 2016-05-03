@@ -10,7 +10,7 @@ bool PuzzleGame::onStart() {
 		drawList.push_back(std::make_shared<Explanation>());
 	}, -1);
 
-	
+	/*
 	// mode 1
 	mode.setMode([this]() {
 		makeStageBase( );
@@ -32,17 +32,45 @@ bool PuzzleGame::onStart() {
 		setGoal(1100, 550);
 	}, -1);
 
+	
+	*/
 	// mode 3
 	mode.setMode([this]() {
 		makeStageBase();
-		setPlayer(100, -300);
-		setGoal(1100, 100);
+		setPlayer(50, 600);
+		setGoal(100, 100);
+		/*
 		for (int i = 0; i < 120; i++) {
 			setSmog();
 		}
-		setBlock(0, 500, 200, 50);
-		setSwitch(500, 0, 50, setBlock(200, 500, 50, 200)->canHit, true);
-		setWarp(100, 570, 50, 50, 1100, -100);
+		*/
+		setWind(0, 0, 900, 340, 10, 0);
+		setWind(400, 580, 700, 120, -10, 0);
+		setBlock(0, 320, 1100, 40);
+		setSwitch(1160, 220, 1, setBlock(1100, 320, 200, 40)->canHit);
+		setBlock(200, 580, 290, 220);
+
+		for (int i = 600; i < 700; i += 10) {
+			setDamage(482, i, 10);
+		}
+
+		setBlock(700, 0, 40, 210);
+		for (int i = 0; i < 200; i += 10) {
+			setDamage(692, i, 10);
+		}
+		setCoin(600, 60);
+
+		setBlock(880, 540, 220, 20);
+		setBlock(640, 540, 100, 20);
+		setDamage(780, 360, 20);
+		setBlock(1050, 360, 30, 180);
+		setCoin(500, 620);
+		setCoin(900, 460);
+		setCoin(980, 460);
+		setCoin(900, 390);
+		setCoin(980, 390);
+
+
 	}, -1);
 
 	// mode 4
@@ -59,7 +87,6 @@ bool PuzzleGame::onStart() {
 
 	}, -1);
 
-	
 	// mode 5
 	mode.setMode([this]() {
 		makeStageBase(false);
@@ -67,27 +94,25 @@ bool PuzzleGame::onStart() {
 		setGoal(1000, 500);
 
 		for (int i = 0; i * 50 <= 1200; i++) {
-			setLoop(i * 50, 770, 50, 10, (i - 1) * 50, 0);
+			setLoop(i * 50, 780, 50, 10, (i - 1) * 50, 0);
 			setLoop(i * 50, -10, 50, 10, (i - 1) * 50, 670);
 		}
 
-		setDamage(900, 450, 60);
-		setDamage(960, 450, 60);
-		setDamage(1020, 450, 60);
-		setDamage(1080, 450, 60);
-		setDamage(1140, 450, 60);
-		setDamage(1200, 450, 60);
-		setDamage(900, 500, 50);
-		setDamage(900, 550, 50);
-		setDamage(900, 600, 50);
-		setDamage(900, 650, 50);
-		setDamage(900, 700, 50);
-		setDamage(1150, 500, 50);
-		setDamage(1150, 550, 50);
-		setDamage(1150, 600, 50);
-		setDamage(1150, 650, 50);
-		setDamage(1150, 700, 50);
-		setDamage(800, 100, 50);
+		setDamage(905, 450, 30);
+		setDamage(965, 450, 30);
+		setDamage(1025, 450, 30);
+		setDamage(1085, 450, 30);
+		setDamage(1145, 450, 30);
+		setDamage(900, 500, 30);
+		setDamage(900, 550, 30);
+		setDamage(900, 600, 30);
+		setDamage(900, 650, 30);
+		setDamage(900, 700, 30);
+		setDamage(1150, 500, 30);
+		setDamage(1150, 550, 30);
+		setDamage(1150, 600, 30);
+		setDamage(1150, 650, 30);
+		setDamage(1150, 700, 30);
 		setBlock(0, 200, 400, 20);
 		setBlock(200, 150, 70, 70);
 		setBlock(440, 400, 24, 240);
@@ -95,7 +120,7 @@ bool PuzzleGame::onStart() {
 		setBlock(464, 400, 236, 24);
 		setBlock(464, 616, 236, 24);
 		setWarp(680, 424, 20, 20, 600, 300);
-		setWarp(1220, 680, 20, 20, 530, 450);
+		setWarp(1250, 680, 20, 20, 520, 500);
 		setCoin(40, 240);
 		setCoin(120, 240);
 		setCoin(200, 240);
@@ -154,7 +179,15 @@ bool PuzzleGame::onUpdate() {
 		return Game::onUpdate();
 	}
 	case 1: {
-
+		if (timer % (FPS) == 0 && gimmicks.size() < 150) {
+			setSmog();
+		}
+		if (timer % (FPS*3) == 0 ) {
+			setDamage(300,-100,50,5,14);
+		}
+		if (2*timer % (FPS * 6) == FPS*3) {
+			setDamage(400, -100, 50, -5, 14);
+		}
 		break;
 	}
 	case 2: {
@@ -172,6 +205,15 @@ bool PuzzleGame::onUpdate() {
 		break;
 	}
 	case 4: {
+		break;
+	}
+	case 5: {
+		if (timer % (FPS * 2) == 0) {//Stage 5のギミック
+			setDamage(800, -100, 50, 0, 10);
+		}
+		break;
+	}
+	case 6: {
 		break;
 	}
 	default: // result
