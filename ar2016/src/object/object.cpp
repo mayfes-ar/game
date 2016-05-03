@@ -92,6 +92,7 @@ bool Object::load() {
 	// puzzle game
 	isSuccess &= loadImage("p_block", "puzzle/block");
 	isSuccess &= loadImage("p_block_x", "puzzle/block_x");
+	isSuccess &= loadImage("s_block", "Brick02");
 	isSuccess &= loadImage("p_man", "man");
 	isSuccess &= loadImage("p_girl",  "girl");
 	isSuccess &= loadImage("p_explain", "puzzle_explanation");
