@@ -162,6 +162,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="src\game\image_process.cpp" />
     <ClCompile Include="src\game\menu.cpp" />
+    <ClCompile Include="src\game\puzzle_game.cpp" />
     <ClCompile Include="src\object\object.cpp" />
   </ItemGroup>
   <ItemGroup>
