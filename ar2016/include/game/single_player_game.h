@@ -461,7 +461,7 @@ class SinglePlayerGame : public Game {
 			y += diffY + acY;
 			prevY = tempY;
 
-			if (enemyType == 2 || enemyType == 4) {
+			if (enemyType == 2 || enemyType == 4 || enemyType == 5) {
 
 			} else {
 				// ブロックとの当たり判定
