@@ -495,6 +495,10 @@ class SinglePlayerGame : public Game {
 				break;
 			}
 
+			if (maxDamage < 0) {
+				return true;
+			}
+
 			return damage < maxDamage;
 		}
 	};
