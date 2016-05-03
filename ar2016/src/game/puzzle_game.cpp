@@ -16,15 +16,7 @@ bool PuzzleGame::onStart() {
 		setPlayer(100, -300);
 		setGoal(1100, 550);
 
-		setCoin(800, 100);
-		setCoin(900, 100);
-		setDamage(800, 300, 100);
-		setBlock(400, 300, 300, 200);
-		setBlock(450, 550, 100, 100, false);
-		setSwitch(1000, 200, 60, setBlock(650, 550, 100, 100, false)->canHit);
-		setWarp(550, 550, 50, 50, 550, -100);
-		setWind(1100, 180, 100, 300, 0, -3);
-		setWind(50, 695, 5, 5, 30, -60);
+		setBlock(400, 300, 300, 400);
 
 	}, -1);
 
@@ -33,19 +25,48 @@ bool PuzzleGame::onStart() {
 		makeStageBase();
 		setPlayer(100, -300);
 		setGoal(1100, 550);
+
+		setBlock(50, 300, 400, 100);
+		setSwitch(1000, 250, 50, setBlock(450, 300, 400, 100)->canHit, true);
+		setBlock(850, 300, 400, 100);
 	}, -1);
 
 	// mode 3
 	mode.setMode([this]() {
 		makeStageBase();
-		setPlayer(100, -300);
-		setGoal(1100, 100);
+		setPlayer(50, 600);
+		setGoal(100, 100);
+		/*
 		for (int i = 0; i < 120; i++) {
-			setSmog();
+		setSmog();
 		}
-		setBlock(0, 500, 200, 50);
-		setSwitch(500, 0, 50, setBlock(200, 500, 50, 200)->canHit, true);
-		setWarp(100, 570, 50, 50, 1100, -100);
+		*/
+		setWind(0, 0, 900, 340, 10, 0);
+		setWind(400, 580, 700, 120, -10, 0);
+		setBlock(0, 320, 1100, 40);
+		setSwitch(1160, 220, 1, setBlock(1100, 320, 200, 40)->canHit);
+		setBlock(200, 580, 290, 220);
+
+		for (int i = 600; i < 700; i += 10) {
+			setDamage(482, i, 10);
+		}
+
+		setBlock(700, 0, 40, 210);
+		for (int i = 0; i < 200; i += 10) {
+			setDamage(692, i, 10);
+		}
+		setCoin(600, 60);
+
+		setBlock(880, 540, 220, 20);
+		setBlock(640, 540, 100, 20);
+		setDamage(780, 360, 20);
+		setBlock(1050, 360, 30, 180);
+		setCoin(500, 620);
+		setCoin(900, 460);
+		setCoin(980, 460);
+		setCoin(900, 390);
+		setCoin(980, 390);
+
 	}, -1);
 
 	// mode 4
@@ -60,6 +81,87 @@ bool PuzzleGame::onStart() {
 		setWind(650, -200, 200, 1000, 0, 3);
 		setWind(1000, 200, 100, 400, 0, -3);
 
+	}, -1);
+
+	// mode 5
+	mode.setMode([this]() {
+		makeStageBase(false);
+		setPlayer(100, 90);
+		setGoal(1000, 500);
+
+		for (int i = 0; i * 50 <= 1200; i++) {
+			setLoop(i * 50, 780, 50, 10, (i - 1) * 50, 0);
+			setLoop(i * 50, -10, 50, 10, (i - 1) * 50, 670);
+		}
+
+		setDamage(905, 450, 30);
+		setDamage(965, 450, 30);
+		setDamage(1025, 450, 30);
+		setDamage(1085, 450, 30);
+		setDamage(1145, 450, 30);
+		setDamage(900, 500, 30);
+		setDamage(900, 550, 30);
+		setDamage(900, 600, 30);
+		setDamage(900, 650, 30);
+		setDamage(900, 700, 30);
+		setDamage(1150, 500, 30);
+		setDamage(1150, 550, 30);
+		setDamage(1150, 600, 30);
+		setDamage(1150, 650, 30);
+		setDamage(1150, 700, 30);
+		setBlock(0, 200, 400, 20);
+		setBlock(200, 150, 70, 70);
+		setBlock(440, 400, 24, 240);
+		setBlock(700, 400, 24, 240);
+		setBlock(464, 400, 236, 24);
+		setBlock(464, 616, 236, 24);
+		setWarp(680, 424, 20, 20, 600, 300);
+		setWarp(1250, 680, 20, 20, 520, 500);
+		setCoin(40, 240);
+		setCoin(120, 240);
+		setCoin(200, 240);
+		setCoin(280, 240);
+		setCoin(320, 500);
+		setCoin(550, 430, 60, 500);
+
+		setWarp(-500, 1000, 2500, 600, 100, -100);
+		setBlock(-500, 1600, 2500, 600);
+
+	}, -1);
+
+	// mode 6
+	mode.setMode([this]() {
+		makeStageBase(false);
+		setPlayer(50, 200);
+		setGoal(1100, 250);
+
+		setBlock(0, 0, 450, 150, true);//hidariue
+		setBlock(0, 400, 200, 400, true);//hidarishita
+		setBlock(800, 10, 700, 140, true);//migiue
+		setBlock(1300, -500, 50, 500, true);
+
+		setBlock(300, 400, 500, 100, true);//shita
+		setBlock(650, 500, 50, 300, true);
+		setBlock(320, 660, 350, 150, true);
+
+		setBlock(900, 400, 400, 100, true);//migishita
+		setBlock(1250, 500, 300, 400, true);
+
+		setCoin(350, 590);//shita
+		setCoin(450, 590);
+		setCoin(550, 590);
+
+		setCoin(900, -58);//migiue
+		setCoin(1000, -58);
+		setCoin(1100, -58);
+
+		setSwitch(900, 550, 100, setBlock(900, 150, 50, 250, false)->canHit, true);
+		setSwitch(1150, 550, 100, setBlock(900, 150, 50, 250, false)->canHit, true);
+
+		setFuncSwitch(700, 550, 100, [this]() {funcTimer.set([this]() { setDamage(650, -150, 150, 0, 2); }, 1); });
+		setFuncSwitch(1150, 550, 100, [this]() {funcTimer.set([this]() {setDamage(-100, 150, 250, 5, 0); }, 1); });
+
+		setWarp(-1000, 1000, 3000, 100, 50, 300);//shita
 	}, -1);
 
 	// result
@@ -98,11 +200,7 @@ bool PuzzleGame::onUpdate() {
 		break;
 	}
 	case 2: {
-		if (timer % (FPS / 2) == 0) {
-			setDamage(300, -100, 100, 0, 10);
-			setDamage(600, -100, 100, 0, 11);
-			setDamage(900, -100, 100, 0, 12);
-		}
+		
 		break;
 	}
 	case 3: {
@@ -112,6 +210,19 @@ bool PuzzleGame::onUpdate() {
 		break;
 	}
 	case 4: {
+		break;
+	}
+	case 5: {
+		if (timer % (FPS * 2) == 0) {//Stage 5のギミック
+			setDamage(800, -100, 50, 0, 10);
+		}
+		break;
+	}
+	case 6: {
+		if (timer % (FPS / 2) == 0) {
+			setDamage(225, 800, 50, 0, -5);
+			setDamage(450, -100, 100, 0, 10);
+		}
 		break;
 	}
 	default: // result
