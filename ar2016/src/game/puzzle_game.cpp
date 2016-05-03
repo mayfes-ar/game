@@ -13,35 +13,36 @@ bool PuzzleGame::onStart() {
 	// mode 1
 	mode.setMode([this]() {
 		makeStageBase(false);
-		setPlayer(50, 300);
-		setGoal(1100, 350);
+		setPlayer(50, 200);
+		setGoal(1100, 250);
 
-		setBlock(0, 0, 450, 250, true);//hidariue
-		setBlock(0, 500, 200, 300, true);//hidarishita
-		setBlock(800, 10, 700, 240, true);//migiue
+		setBlock(0, 0, 450, 150, true);//hidariue
+		setBlock(0, 400, 200, 400, true);//hidarishita
+		setBlock(800, 10, 700, 140, true);//migiue
 		setBlock(1300, -500, 50, 500, true);
 
-		setBlock(300, 500, 500, 100, true);//shita
-		setBlock(650, 600, 50, 200, true);
-		setBlock(320, 710, 350, 50, true);
+		setBlock(300, 400, 500, 100, true);//shita
+		setBlock(650, 500, 50, 300, true);
+		setBlock(320, 660, 350, 150, true);
 
-		setBlock(900, 500, 400, 100, true);//migishita
-		setBlock(1250, 600, 300, 200, true);
+		setBlock(900, 400, 400, 100, true);//migishita
+		setBlock(1250, 500, 300, 400, true);
 
-		setCoin(450, 640);//shita
-		setCoin(350, 640);
+		setCoin(350, 590);//shita
+		setCoin(450, 590);
+		setCoin(550, 590);
 
-		setCoin(900, -60);//migiue
-		setCoin(1000, -60);
-		setCoin(1100, -60);
+		setCoin(900, -58);//migiue
+		setCoin(1000, -58);
+		setCoin(1100, -58);
 
-		setSwitch(700, 600, 100, setBlock(900, 250, 50, 250, false)->canHit, true);
-		setSwitch(1150, 600, 100, setBlock(900, 250, 50, 250, false)->canHit, true);
+		setSwitch(900, 550, 100, setBlock(900, 150, 50, 250, false)->canHit, true);
+		setSwitch(1150, 550, 100, setBlock(900, 150, 50, 250, false)->canHit, true);
+
+		setFuncSwitch(700, 550, 100, [this]() {setDamage(650, -200, 150, 0, 2); });
+		setFuncSwitch(1150, 550, 100, [this]() {setDamage(-100, 150, 250, 5, 0); });
 
 		setWarp(-1000, 1000, 3000, 100, 50, 300);//shita
-
-		setWarp(950, 750, 100, 100, 550, 620);
-
 		/*
 		setCoin(800, 100);
 		setCoin(900, 100);
