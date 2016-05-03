@@ -76,6 +76,9 @@ bool Object::load() {
 	isSuccess &= loadImage("s_game_wanwan", "wanwan");
 	isSuccess &= loadImage("s_game_marker", "luigi");
 	isSuccess &= loadImage("s_game_teresa", "teresa");
+	isSuccess &= loadImage("s_game_heiho", "heiho");
+	isSuccess &= loadImage("s_game_fire", "fire");
+	isSuccess &= loadImage("s_game_balloon", "balloon");
 
 	isSuccess &= loadSound("s_game_bgm", "妄想凸守旋律～補完～.mp3");
 
@@ -93,6 +96,7 @@ bool Object::load() {
 	isSuccess &= loadSound("s_game_dead", "dead.wav");
 	isSuccess &= loadSound("s_game_attack", "bomb.mp3");
 	isSuccess &= loadSound("s_game_jump", "jump.mp3");
+	isSuccess &= loadSound("s_game_shuzo", "shuzo.mp3");
 
 	// リザルト
 	isSuccess &= loadImage("s_game_result_clear", "s_game_clear");

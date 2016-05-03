@@ -2,8 +2,8 @@
 
 #include "game/game.h"
 
-class SinglePlayerGame : public Game {
 
+class SinglePlayerGame : public Game {
 	class Background : public Object {
 		int& handle;
 
@@ -143,9 +143,9 @@ class SinglePlayerGame : public Game {
 		bool isStopping1 = false;
 
 		int enemyType; // 0 : 移動しない、 1 : 左右にぴょこぴょこ
+		//int turnCounter = 100;
+		int moveDirection;//加速度 0:(0,3),1:(-3,0),2:(0,-3),3:(3,0)
 
-		int turnCounter = 100;
-		int moveDirection;
 
 
 		int damage = 0;
@@ -153,7 +153,8 @@ class SinglePlayerGame : public Game {
 
 
 	public:
-		Enemy(int x_, int y_, int width_, int height_, int enemyType_) {
+		int turnCounter = 100;
+		Enemy(int x_, int y_, int width_, int height_, int enemyType_){
 			rect.x = prevX = x_;
 			rect.y = prevY = y_;
 			rect.width = width_;
@@ -205,6 +206,14 @@ class SinglePlayerGame : public Game {
 					}
 					break;
 				}
+				case 20: {
+					prevX = rect.x + 2;
+					break;	
+				}
+				case 21: {
+					prevX = rect.x + 5;	
+					break;
+				}
 				default: {
 					moveDirection = 0;
 					break;
@@ -214,43 +223,50 @@ class SinglePlayerGame : public Game {
 
 		bool draw() {
 			switch (enemyType) {
-
-				case 3: {
-					DrawExtendGraph(left(), top(), right(), bottom(), imgHandles["s_game_teresa"], true);
-					break;
-				}
-				case 4: {
-					DrawExtendGraph(left(), top(), right(), bottom(), imgHandles["ufo"], true);
-					break;
-				}
-				case 5: {
-					DrawExtendGraph(left(), top(), right(), bottom(), imgHandles["drop"], true);
-					break;
-				}
-				case 6: {
-					DrawExtendGraph(left(), top(), right(), bottom(), imgHandles["washi"], true);
-					break;
-				}
-				case 7: {
-					DrawExtendGraph(left(), top(), right(), bottom(), imgHandles["cloud"], true);
-					break;
-				}
-				case 8: {
-					DrawExtendGraph(left(), top(), right(), bottom(), imgHandles["ray"], true);
-					break;
-				}
-				case 11: {
-					DrawExtendGraph(left(), top()-80, right(), bottom()+800, imgHandles["s_game_water"], true);
-					break;
-				}
-				case 12: {
-					DrawExtendGraph(left(), top(), right(), bottom(), imgHandles["s_game_switch"], true);
-					break;
-				}
-				default: {
-					DrawExtendGraph(left(), top(), right(), bottom(), imgHandles["s_game_wanwan"], true);
-					break;
-				}
+			case 3: {
+				DrawExtendGraph(left(), top(), right(), bottom(), imgHandles["s_game_teresa"], true);
+				break;
+			}
+			case 4: {
+				DrawExtendGraph(left(), top(), right(), bottom(), imgHandles["ufo"], true);
+				break;
+			}
+			case 5: {
+				DrawExtendGraph(left(), top(), right(), bottom(), imgHandles["drop"], true);
+				break;
+			}
+			case 6: {
+				DrawExtendGraph(left(), top(), right(), bottom(), imgHandles["washi"], true);
+				break;
+			}
+			case 7: {
+				DrawExtendGraph(left(), top(), right(), bottom(), imgHandles["cloud"], true);
+				break;
+			}
+			case 8: {
+				DrawExtendGraph(left(), top(), right(), bottom(), imgHandles["ray"], true);
+				break;
+			}
+			case 11: {
+				DrawExtendGraph(left(), top() - 80, right(), bottom() + 800, imgHandles["s_game_water"], true);
+				break;
+			}
+			case 12: {
+				DrawExtendGraph(left(), top(), right(), bottom(), imgHandles["s_game_switch"], true);
+				break;
+			}
+			case 20: {
+				DrawExtendGraph(left(), top(), right(), bottom(), imgHandles["s_game_heiho"], true);
+				break;
+			}
+			case 21: {
+				DrawExtendGraph(left(), top(), right(), bottom(), imgHandles["s_game_fire"], true);
+				break;
+			}
+			default: {
+				DrawExtendGraph(left(), top(), right(), bottom(), imgHandles["s_game_wanwan"], true);
+				break;
+			}
 			}
 			return isAlive;
 		}
@@ -366,7 +382,7 @@ class SinglePlayerGame : public Game {
 					break;
 				}
 				case 11: {
-					if (isWaterUp == false ) {
+					if (isWaterUp == false) {
 						acX = 0;
 						acY = 0.005;
 						break;
@@ -378,13 +394,27 @@ class SinglePlayerGame : public Game {
 					}
 					break;
 				}
-
 				case 12: {
 					acX = 0;
 					acY = 0;
 					break;
 				}
-
+				case 20: {
+					acX = 0;
+					acY = 0;
+					if (turnCounter == 0) {
+						PlaySoundMem(soundHandles["s_game_shuzo"], DX_PLAYTYPE_BACK, true);
+					}
+					else if(turnCounter < 0 && turnCounter > -10){
+						acX = 1;
+					}
+					turnCounter--;
+					break;
+				}
+				case 21: {
+					acX = -1;
+					acY = 0;
+				}
 				default:{
 					break;
 				}
@@ -580,6 +610,12 @@ class SinglePlayerGame : public Game {
 			return isAlive;
 		}
 
+		int getX() {
+			return prevX;
+		}
+		int getY() {
+			return prevY;
+		}
 		// ダメージが何点以上で死亡とするか。返り値は 死：false, 生：true
 		bool damageControl() {
 			int maxDamage;
@@ -615,8 +651,12 @@ class SinglePlayerGame : public Game {
 		double prevY;
 		bool isJumping = true;
 		bool isAlive = true;
+		bool isToJump = false;
+		int frameCount;
 		int damage = 0;
 		int invincibleTime = 0;
+		std::string message;
+
 
 		const int maxDamage = 6;
 
@@ -633,8 +673,28 @@ class SinglePlayerGame : public Game {
 
 		bool draw() {
 			DrawExtendGraph(left(), top(), right(), bottom(), imgHandles["s_game_player"], true);
-			//DrawString(50 , 50, std::to_string(damage).c_str(), GetColor(255, 255, 255));
+			if (isToJump) {
+				DrawExtendGraph(left()-50, top()-rect.height - 50, right()+50, bottom()-rect.height, imgHandles["s_game_balloon"], true);
+				int commentX = left() - 10;
+				int commentY = top() - rect.height - 20;
+				if (frameCount <= 60) {
+					message = "I want to\njump!!";
+					commentY = top() - rect.height - 40;
+				}
+				else if (frameCount <= 90 ) {
+					message = "3";
+				}
+				else if (frameCount <= 120) {
+					message = "2";
+				}
+				else if (frameCount <= 150) {
+					message = "1";
+				}
 
+				DrawString(commentX, commentY, message.c_str(), GetColor(0, 0, 0));
+
+			}
+			DrawString(50, 50, std::to_string(damage).c_str(), GetColor(255, 255, 255));
 			for (heart = 0; heart <= (maxDamage-damage-1); heart++) {
 				DrawExtendGraph(50 + 50 * heart, 50, 100 + 50 * heart, 100, imgHandles["s_game_heart"], true);
 			}
@@ -661,17 +721,44 @@ class SinglePlayerGame : public Game {
 			double acX = -0.5 * (1 - (diffX <= 0) - (diffX < 0));
 			double acY = 3.2;
 
-			if (key[KEY_INPUT_UP] && !isJumping) {
-				acY = -40;
-				PlaySoundMem(soundHandles["s_game_jump"] , DX_PLAYTYPE_BACK, true);
+			if (key[KEY_INPUT_LSHIFT]) {
+				isToJump = false;
+				if (key[KEY_INPUT_UP] && !isJumping) {
+					acY = -40;
+					PlaySoundMem(soundHandles["s_game_jump"], DX_PLAYTYPE_BACK, true);
+					isJumping = true;
+				}				
+				if (key[KEY_INPUT_RIGHT]) {
+					acX = 1.5 * (diffX < 15);
+				}
+				if (key[KEY_INPUT_LEFT]) {
+					acX = -1.5 * (diffX > -15);
+				}
 			}
-			isJumping = true;
+			else if (acX == 0 && !isJumping && !isToJump) {
+				if (rand() % 3 == 0) {
+					frameCount = 0;
+					isToJump = true;
+				}
+				else {
+					acX = rand() % 30 - 15;
+				}
 
-			if (key[KEY_INPUT_RIGHT]) {
-				acX = 1.5 * (diffX < 10);
 			}
-			if (key[KEY_INPUT_LEFT]) {
-				acX = -1.5 * (diffX > -10);
+
+			if (isToJump) {
+				if (frameCount >= 150) {
+					acY = -40;
+					PlaySoundMem(soundHandles["s_game_jump"], DX_PLAYTYPE_BACK, true);
+					isJumping = true;
+				}
+				else {
+					frameCount++;
+							}
+			}
+
+			if (isJumping) {
+				isToJump = false;
 			}
 
 			// verlet法
@@ -796,12 +883,13 @@ class SinglePlayerGame : public Game {
 			return !isAlive;
 		}
 	};
-
 	std::thread thread;
 	std::shared_ptr<Player> player;
 
 	std::vector<std::shared_ptr<BlockObject>> blockList;
 	std::vector<std::shared_ptr<Enemy>> enemyList;
+	std::shared_ptr<Enemy> heihos[10] = {NULL};
+
 
 	// 敵作成。enemyType については Enemy クラスを参照
 
@@ -814,6 +902,8 @@ class SinglePlayerGame : public Game {
 		drawList.push_back(enemy);
 		return enemy;
 	}
+
+	
 
 	std::shared_ptr<BGM> bgm;
 	const int MAX_TIME = 30*40;
@@ -1010,7 +1100,16 @@ public:
 					}
 
 					default: {
-
+						//int i = rand() % 10;
+						int i = 0;
+						if (heihos[i] == NULL || heihos[i]->getIsAlive() == false) {
+							if (rand() % 30 == 0) {
+								heihos[i] = makeEnemy(WIDTH-100, HEIGHT - 210, 112 * 4 / 5, 112 * 4 / 5, 20);
+							}
+						}
+						else if (heihos[i]->turnCounter == 0) {
+							makeEnemy(heihos[i]->getX(), heihos[i]->getY(), 112 * 4 / 5, 112 * 4 / 5, 21);
+						}
 						break;
 					}
 							
@@ -1082,4 +1181,5 @@ public:
 		thread.join();
 		return true;
 	}
+	
 };
