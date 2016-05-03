@@ -28,7 +28,6 @@ bool PuzzleGame::onStart() {
 		setBlock(1000, 220, 300, 20);
 		setCoin(1030, 100);
 		setCoin(1110, 100);
-
 	}, -1);
 
 	// mode 2
