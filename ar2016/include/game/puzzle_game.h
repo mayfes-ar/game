@@ -339,6 +339,40 @@ class PuzzleGame : public Game {
 		}
 	};
 
+	class FuncSwitchGimmick : public Gimmick {
+		bool isOn;
+		const std::function<void()> func;
+		void setSwitch(bool isOn_) {
+			if (isOn_ && !isOn) {
+				func();
+			}
+			isOn = isOn_;
+			
+		}
+	public:
+		FuncSwitchGimmick(int x, int y, int size, std::function<void()> func_, PuzzleGame& game_) : func(func_), Gimmick(game_) {
+			rect = Rectan(x, y, size, size);
+			layer = 50;
+			setSwitch(false);
+		}
+		bool draw() {
+			if (isOn) {
+				drawWithRect(imgHandles["p_on"]);
+			} else {
+				drawWithRect(imgHandles["p_off"]);
+			}
+			return willExist;
+		}
+		bool update() {
+			if (isContacted(game.player) || isContacted(game.markerBlock)) {
+				setSwitch(true);
+			} else {
+				setSwitch(false);
+			}
+			return willExist;
+		}
+	};
+
 	class WarpGimmick : public Gimmick {
 		const double posX;
 		const double posY;
@@ -441,6 +475,11 @@ class PuzzleGame : public Game {
 	}
 	void setSwitch(int x, int y, int size, bool& target, bool isReverse = false) {
 		auto switch_ = std::make_shared<SwitchGimmick>(x, y, size, target, isReverse, *this);
+		gimmicks.push_back(switch_);
+		drawList.push_back(switch_);
+	}
+	void setFuncSwitch(int x, int y, int size, std::function<void()> func) {
+		auto switch_ = std::make_shared<FuncSwitchGimmick>(x, y, size, func,  *this);
 		gimmicks.push_back(switch_);
 		drawList.push_back(switch_);
 	}
