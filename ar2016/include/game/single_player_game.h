@@ -673,7 +673,7 @@ class SinglePlayerGame : public Game {
 				for (auto enemy : enemyList) {
 					if (left() <= enemy->right() && top() <= enemy->bottom() &&
 						right() >= enemy->left() && bottom() >= enemy->top()) {
-						damage += 1;
+						//damage += 1;
 						invincibleTime = 50;
 						break;
 					}
@@ -857,7 +857,7 @@ public:
 					case 1: {
 
 						water = makeEnemy(0, HEIGHT + 80, 1280, 800, 11);
-						button = makeEnemy(WIDTH-100, 100, 40, 40, 12);
+						button = makeEnemy(WIDTH-80, 80, 80, 80, 12);
 
 						makeEnemy(350, 200, 435/5, 349/5, 1);
 
