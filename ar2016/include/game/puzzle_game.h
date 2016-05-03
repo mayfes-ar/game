@@ -2,6 +2,9 @@
 
 #include "game/game.h"
 
+#define _USE_MATH_DEFINES
+#include <math.h>
+
 class PuzzleGame : public Game {
 	// 指定フレーム後に、登録した関数を実行してくれる
 	class FuncTimer {
@@ -426,27 +429,31 @@ class PuzzleGame : public Game {
 	class WindGimmick : public Gimmick {
 		const double windX;
 		const double windY;
+
+		//0:up 1:right 2:up 3:down
+		const int dirwind = windX*windX>windY*windY?1+2*(windX<0):2*(windY>0);
+		
 		int counter = 0;
-		const int countMax = effectHandles["t_arrow"].size();
+		const int countMax = effectHandles["p_arrow1"].size();
 	public:
 		WindGimmick(Rectan rect_, double windX_, double windY_, PuzzleGame& game_) :windX(windX_), windY(windY_), Gimmick(game_) {
 			rect = rect_;
 			layer = 80;
 		}
 		bool draw() {
-			const int chipsize = 20;
-			const int nx = rect.width / chipsize;
-			const int ny = rect.height / chipsize;
-			const int mx = rect.width - nx * chipsize;
-			const int my = rect.height - ny * chipsize;
+			const int chipsize = 60;
+			const int nx = 1>round(rect.width  / chipsize)?1: round(rect.width / chipsize);
+			const int ny = 1>round(rect.height / chipsize)?1: round(rect.height / chipsize);
+			const int mx = (rect.width - nx * chipsize)/2;
+			const int my = (rect.height - ny * chipsize)/2;
 			for (int i = 0; i < nx; i++) {
 				for (int j = 0; j < ny; j++) {
-					DrawExtendGraph(left() + mx + chipsize*i, top() + my + chipsize*j, left() + mx + chipsize*(i + 1), top() + my + chipsize*(j + 1), effectHandles["t_arrow"][counter], true);
+					DrawRotaGraph(left() + mx + chipsize*(2*i+1)/2, top() + my + chipsize*(2*j+1)/2,1.0, dirwind*M_PI_2, effectHandles["p_arrow1"][counter], true);
 				}
 			}
 			counter++;
 			if (counter == countMax) { counter = 0; }
-			DrawBox(left(), top(), right(), bottom(), GetColor(125, 224, 227), false);
+			//DrawBox(left(), top(), right(), bottom(), GetColor(125, 224, 227), false);
 			return willExist;
 		}
 		bool update() {

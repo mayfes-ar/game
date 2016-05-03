@@ -102,7 +102,7 @@ bool Object::load() {
 	isSuccess &= loadEffect("p_smog", "dark_smog", 13, 1, 3120, 240);
 	isSuccess &= loadEffect("p_ball", "ball", 3, 10, 960, 2400);
 	isSuccess &= loadEffect("p_coin", "coin", 5, 2, 1000, 400);
-	isSuccess &= loadEffect("t_arrow", "arrow_test", 3, 1, 60, 20);
+	isSuccess &= loadEffect("p_arrow1", "arrow1",10,1,1200,120);
 
 
 	// breakout game
