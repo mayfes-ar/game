@@ -26,7 +26,7 @@ bool PuzzleGame::onStart() {
 		setBlock(320, 710, 350, 50, true);
 
 		setBlock(900, 500, 400, 100, true);//migishita
-		setBlock(1100, 600, 300, 200, true);
+		setBlock(1250, 600, 300, 200, true);
 
 		setCoin(450, 640);//shita
 		setCoin(350, 640);
@@ -36,9 +36,11 @@ bool PuzzleGame::onStart() {
 		setCoin(1100, -60);
 
 		setSwitch(700, 600, 100, setBlock(900, 250, 50, 250, false)->canHit, true);
-		setSwitch(1000, 600, 100, setBlock(900, 250, 50, 250, false)->canHit, true);
+		setSwitch(1150, 600, 100, setBlock(900, 250, 50, 250, false)->canHit, true);
 
-		setWarp(-500, 1000, 1500, 100, 50, 300);
+		setWarp(-1000, 1000, 3000, 100, 50, 300);//shita
+
+		setWarp(950, 750, 100, 100, 550, 620);
 
 		/*
 		setCoin(800, 100);
