@@ -10,50 +10,9 @@ bool PuzzleGame::onStart() {
 		drawList.push_back(std::make_shared<Explanation>());
 	}, -1);
 
-	mode.setMode([this]() {
-		makeStageBase(false);
-		setPlayer(100, 90);
-		setGoal(1000, 500);
-
-		for (int i = 0; i * 50 <= 1200; i++) {
-			setLoop(i * 50, 770, 50, 10, (i - 1) * 50, 0);
-			setLoop(i * 50, -10, 50, 10, (i - 1) * 50, 670);
-		}
-		setDamage(900, 450, 60);
-		setDamage(960, 450, 60);
-		setDamage(1020, 450, 60);
-		setDamage(1080, 450, 60);
-		setDamage(1140, 450, 60);
-		setDamage(1200, 450, 60);
-		setDamage(900, 500, 50);
-		setDamage(900, 550, 50);
-		setDamage(900, 600, 50);
-		setDamage(900, 650, 50);
-		setDamage(900, 700, 50);
-		setDamage(1150, 500, 50);
-		setDamage(1150, 550, 50);
-		setDamage(1150, 600, 50);
-		setDamage(1150, 650, 50);
-		setDamage(1150, 700, 50);
-		setBlock(0, 200, 200, 20);
-		setBlock(200, 150, 70, 70);
-		setBlock(500, 400, 24, 240);
-		setBlock(700, 400, 24, 240);
-		setBlock(524, 400, 176, 24);
-		setBlock(524, 616, 176, 24);
-		setWarp(680, 424, 20, 20, 600, 300);
-		setWarp(1220, 700, 20, 20, 530, 450);
-		
-		setWarp(-500, 1000, 2500, 600, 100, -100);
-		setBlock(-500, 1600, 2500, 600);
-		
-		
-
-	}, -1);
-
 	// mode 1
 	mode.setMode([this]() {
-		makeStageBase( );
+		makeStageBase();
 		setPlayer(100, -300);
 		setGoal(1100, 550);
 
@@ -91,34 +50,6 @@ bool PuzzleGame::onStart() {
 
 	// mode 4
 	mode.setMode([this]() {
-		makeStageBase(false);
-		setPlayer(100, -100);
-		setGoal(1100, 100);
-
-		setWarp(-500, 800, 2500, 600, 100, -100);
-		setWind(100, 200, 100, 400, 0, -3);
-		setWind(400, 200, 100, 400, 0, -3);
-		setWind(650, -200, 200, 1000, 0, 3);
-		setWind(1000, 200, 100, 400, 0, -3);
-
-	}, -1);
-
-	// mode 4
-	mode.setMode([this]() {
-		makeStageBase(false);
-		setPlayer(100, -100);
-		setGoal(1100, 100);
-
-		setWarp(-500, 800, 2500, 600, 100, -100);
-		setWind(100, 200, 100, 400, 0, -3);
-		setWind(400, 200, 100, 400, 0, -3);
-		setWind(650, -200, 200, 1000, 0, 3);
-		setWind(1000, 200, 100, 400, 0, -3);
-
-	}, -1);
-
-	// mode 6
-		mode.setMode([this]() {
 		makeStageBase(false);
 		setPlayer(100, -100);
 		setGoal(1100, 100);
@@ -201,7 +132,7 @@ bool PuzzleGame::onUpdate() {
 	allBlocks = stageBlocks;
 	
 	share.rectMutex.lock();
-	markerBlock = std::make_shared<MarkerBlock>(share.rects[0]);
+	markerBlock = std::make_shared<MarkerBlock>(share.rects[1]);
 	allBlocks.push_back(markerBlock);
 	drawList.push_back(markerBlock);
 	share.rectMutex.unlock();
