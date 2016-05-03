@@ -26,6 +26,7 @@ public:
 			DrawBox(left(), top(), right(), bottom(), GetColor(240, 117, 50), true);
 		} else {
 			DrawExtendGraph(left(), top(), right(), bottom(), imgHandles["block"], true);
+			DrawFormatString(left(), top(), GetColor(255, 255, 255), _T("%.2f"), rect.rotate);
 		}
 		return willStay;
 	}

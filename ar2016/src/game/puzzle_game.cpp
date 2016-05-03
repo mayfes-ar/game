@@ -167,7 +167,7 @@ bool PuzzleGame::onUpdate() {
 	allBlocks = stageBlocks;
 	
 	share.rectMutex.lock();
-	markerBlock = std::make_shared<MarkerBlock>(share.rects[0]);
+	markerBlock = std::make_shared<MarkerBlock>(share.rects[1]);
 	allBlocks.push_back(markerBlock);
 	drawList.push_back(markerBlock);
 	share.rectMutex.unlock();

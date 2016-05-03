@@ -3,6 +3,7 @@
 //  #include "***_game.h"
 #include "game/first_game.h"
 #include "game/single_player_game.h"
+#include "game/breakout_game.h"
 #include "game/puzzle_game.h"
 
 
@@ -36,7 +37,8 @@ class Menu : Game {
 		}
 		bool draw() {
 			SetDrawBright(40, 40, 40);
-			DrawExtendGraph(0, 0, WIDTH, HEIGHT, imgHandles["ar2016_logo"], true);
+            DrawExtendGraph(0, 0, WIDTH, HEIGHT, imgHandles["ar2016_logo"], true);
+			DrawExtendGraph(0, 0, WIDTH, HEIGHT, imgHandles["menu"], true);
 			SetDrawBright(255, 255, 255);
 			return true;
 		}

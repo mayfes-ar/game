@@ -162,6 +162,17 @@ class PuzzleGame : public Game {
 				exForceX = exForceY = 0;
 			};
 		}
+		void loop(int x, int y) {
+			updateFunc = [this, x, y]() {
+				const int diffX = x - rect.x;
+				const int diffY = y - rect.y;
+				rect.x = x; 
+				rect.y = y;
+				prevX += diffX;
+				prevY += diffY;
+				exForceX = exForceY = 0;
+			};
+		}
 		void init() {
 			updateFunc = [this]() {
 				rect.x = prevX = initX;
@@ -328,6 +339,40 @@ class PuzzleGame : public Game {
 		}
 	};
 
+	class FuncSwitchGimmick : public Gimmick {
+		bool isOn;
+		const std::function<void()> func;
+		void setSwitch(bool isOn_) {
+			if (isOn_ && !isOn) {
+				func();
+			}
+			isOn = isOn_;
+			
+		}
+	public:
+		FuncSwitchGimmick(int x, int y, int size, std::function<void()> func_, PuzzleGame& game_) : func(func_), Gimmick(game_) {
+			rect = Rectan(x, y, size, size);
+			layer = 50;
+			setSwitch(false);
+		}
+		bool draw() {
+			if (isOn) {
+				drawWithRect(imgHandles["p_on"]);
+			} else {
+				drawWithRect(imgHandles["p_off"]);
+			}
+			return willExist;
+		}
+		bool update() {
+			if (isContacted(game.player) || isContacted(game.markerBlock)) {
+				setSwitch(true);
+			} else {
+				setSwitch(false);
+			}
+			return willExist;
+		}
+	};
+
 	class WarpGimmick : public Gimmick {
 		const double posX;
 		const double posY;
@@ -344,6 +389,27 @@ class PuzzleGame : public Game {
 		bool update() {
 			if (isContacted(game.player)) {
 				game.player->warp(posX, posY);
+			}
+			return willExist;
+		}
+	};
+
+	class LoopGimmick : public Gimmick {
+		const double posX;
+		const double posY;
+
+	public:
+		LoopGimmick(Rectan rect_, double posX_, double posY_, PuzzleGame& game_) : posX(posX_), posY(posY_), Gimmick(game_) {
+			rect = rect_;
+			layer = 70;
+		}
+		bool draw() {
+			DrawBox(left(), top(), right(), bottom(), GetColor(146, 138, 213), false);
+			return willExist;
+		}
+		bool update() {
+			if (isContacted(game.player)) {
+				game.player->loop(posX, posY);
 			}
 			return willExist;
 		}
@@ -412,10 +478,20 @@ class PuzzleGame : public Game {
 		gimmicks.push_back(switch_);
 		drawList.push_back(switch_);
 	}
+	void setFuncSwitch(int x, int y, int size, std::function<void()> func) {
+		auto switch_ = std::make_shared<FuncSwitchGimmick>(x, y, size, func,  *this);
+		gimmicks.push_back(switch_);
+		drawList.push_back(switch_);
+	}
 	void setWarp(int x, int y, int width, int height, int posX, int posY) {
 		auto warp = std::make_shared<WarpGimmick>(Rectan(x, y, width, height), posX, posY, *this);
 		gimmicks.push_back(warp);
 		drawList.push_back(warp);
+	}
+	void setLoop(int x, int y, int width, int height, int posX, int posY) {
+		auto loop = std::make_shared<LoopGimmick>(Rectan(x, y, width, height), posX, posY, *this);
+		gimmicks.push_back(loop);
+		drawList.push_back(loop);
 	}
 	void setWind(int x, int y, int width, int height, double windX, double windY) {
 		auto wind = std::make_shared<WindGimmick>(Rectan(x, y, width, height), windX, windY, *this);

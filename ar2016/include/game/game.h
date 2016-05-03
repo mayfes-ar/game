@@ -45,14 +45,14 @@ protected:
 				isGoNext = false;
 				currentMode++;
 				if (currentMode < funcs.size()) {
-					funcs[currentMode]();
+					funcs.at(currentMode)();
 				} else {
 					return false;
 				}
 			}
 			
-			if (currentMode < funcs.size() && timers[currentMode] > 0) {
-				if (--timers[currentMode] == 0) {
+			if (currentMode < funcs.size() && timers.at(currentMode) > 0) {
+				if (--timers.at(currentMode) == 0) {
 					isGoNext = true;
 				}
 			}
