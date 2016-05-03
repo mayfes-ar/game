@@ -33,6 +33,11 @@ bool PuzzleGame::onStart() {
 		setBlock(50, 300, 400, 100);
 		setSwitch(1000, 250, 50, setBlock(450, 300, 400, 100)->canHit, true);
 		setBlock(850, 300, 400, 100);
+		setCoin(1000, 100);
+		setCoin(60, 420);
+		setCoin(160, 420);
+		setCoin(260, 420);
+
 	}, -1);
 
 	// mode 3
@@ -83,6 +88,11 @@ bool PuzzleGame::onStart() {
 		setWind(400, 200, 100, 400, 0, -3);
 		setWind(650, -200, 200, 1000, 0, 3);
 		setWind(1000, 200, 100, 400, 0, -3);
+
+		setCoin(420, 500);
+		setCoin(1020, 500);
+		setCoin(670, 550);
+		setCoin(770, 550);
 
 	}, -1);
 
@@ -158,11 +168,11 @@ bool PuzzleGame::onStart() {
 		setCoin(1000, -58);
 		setCoin(1100, -58);
 
-		setSwitch(900, 550, 100, setBlock(900, 150, 50, 250, false)->canHit, true);
-		setSwitch(1150, 550, 100, setBlock(900, 150, 50, 250, false)->canHit, true);
+		setSwitch(900, 550, 100, setBlock(900, 150, 25, 250, false)->canHit, true);
+		setSwitch(1150, 550, 100, setBlock(925, 150, 25, 250, false)->canHit, true);
 
-		setFuncSwitch(700, 550, 100, [this]() {funcTimer.set([this]() { setDamage(650, -150, 150, 0, 2); }, 1); });
-		setFuncSwitch(1150, 550, 100, [this]() {funcTimer.set([this]() {setDamage(-100, 150, 250, 5, 0); }, 1); });
+		setFuncSwitch(700, 550, 100, [this]() {funcTimer.set([this]() { setDamage(700, -100, 100, 0, 2); }, 1); });
+		setFuncSwitch(1150, 550, 100, [this]() {funcTimer.set([this]() {setDamage(-100, 150, 250, 3, 0); }, 1); });
 
 		setWarp(-1000, 1000, 3000, 100, 50, 300);//shita
 	}, -1);
@@ -227,7 +237,7 @@ bool PuzzleGame::onUpdate() {
 	case 6: {
 		if (timer % (FPS / 2) == 0) {
 			setDamage(225, 800, 50, 0, -5);
-			setDamage(450, -100, 100, 0, 10);
+			setDamage(450, -100, 70, 0, 10);
 		}
 		break;
 	}
