@@ -39,8 +39,8 @@ bool PuzzleGame::onStart() {
 		setSwitch(900, 550, 100, setBlock(900, 150, 50, 250, false)->canHit, true);
 		setSwitch(1150, 550, 100, setBlock(900, 150, 50, 250, false)->canHit, true);
 
-		setFuncSwitch(700, 550, 100, [this]() {setDamage(650, -200, 150, 0, 2); });
-		setFuncSwitch(1150, 550, 100, [this]() {setDamage(-100, 150, 250, 5, 0); });
+		setFuncSwitch(700, 550, 100, [this]() {funcTimer.set([this]() { setDamage(650, -150, 150, 0, 2); }, 1); });
+		setFuncSwitch(1150, 550, 100, [this]() {funcTimer.set([this]() {setDamage(-100, 150, 250, 5, 0); }, 1); });
 
 		setWarp(-1000, 1000, 3000, 100, 50, 300);//shita
 		/*
