@@ -88,7 +88,7 @@ bool Object::load() {
 	isSuccess &= loadImage("washi", "wasi");
 
 	isSuccess &= loadImage("s_game_water", "water");
-	isSuccess &= loadImage("s_game_switch", "switch");
+	isSuccess &= loadImage("s_game_switch", "switch1");
 
 	isSuccess &= loadImage("s_game_heart", "heart");
 
