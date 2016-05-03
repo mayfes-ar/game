@@ -84,6 +84,12 @@ bool Object::load() {
 	isSuccess &= loadImage("ray", "uforay");
 	isSuccess &= loadImage("cloud", "cloud");
 	isSuccess &= loadImage("washi", "wasi");
+
+	isSuccess &= loadImage("s_game_water", "water");
+	isSuccess &= loadImage("s_game_switch", "switch");
+
+	isSuccess &= loadImage("s_game_heart", "heart");
+
 	isSuccess &= loadSound("s_game_dead", "dead.wav");
 	isSuccess &= loadSound("s_game_attack", "bomb.mp3");
 	isSuccess &= loadSound("s_game_jump", "jump.mp3");
@@ -98,8 +104,12 @@ bool Object::load() {
 	// isSuccess &= loadImage("s_game_bg", "wallpaper_alpha");
 
 	// puzzle game
+	isSuccess &= loadImage("p_man", "man");
+	isSuccess &= loadImage("p_girl",  "girl");
 	isSuccess &= loadImage("p_explain", "puzzle_explanation");
 	isSuccess &= loadImage("p_goal", "goal");
+	isSuccess &= loadImage("p_on", "switch_on");
+	isSuccess &= loadImage("p_off", "switch_off");
 	isSuccess &= loadEffect("p_smog", "dark_smog", 13, 1, 3120, 240);
 	isSuccess &= loadEffect("p_ball", "ball", 3, 10, 960, 2400);
 	isSuccess &= loadEffect("p_coin", "coin", 5, 2, 1000, 400);
