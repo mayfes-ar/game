@@ -398,7 +398,7 @@ public:
 		return m_realm;
 	}
 	// if in then -1, out then 1, default is 1
-	bool isCollided(const Shape::Rectangle& parent, const int inOrOut = 1);
+	bool isCollided(const Shape::Rectangle& parent, const int inOrOut = 1, const int parentVelocity = 0);
 
 
 
@@ -435,6 +435,8 @@ public:
 		for (auto &block: m_blocks) {
 			block.start_point.x() += translation;
 		}
+		// m_velocityのセット
+		m_velocity = translation;
 		return true;
 	}
 
@@ -490,6 +492,9 @@ public:
 	int bottom() {
 		return m_start_point[1] + BLOCK_HEIGHT;
 	}
+	int getVelocity() {
+		return m_velocity;
+	}
 
     bool draw() override {
         if (m_is_disappered) {
@@ -541,6 +546,7 @@ private:
     bool m_is_disappered = false;
 	std::vector<Shape::Rectangle> m_blocks = {};
 	Eigen::Vector2i m_start_point = Eigen::Vector2i::Zero();
+	int m_velocity = 0; // マーカーを認識しているときにtranslateで渡されるもの。実際の速度的な概念とは違う。
     Life m_life = Life(); // defaultは４つ。火の玉に当たるごとに一つ減る
 };
 

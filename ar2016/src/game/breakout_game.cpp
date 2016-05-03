@@ -29,7 +29,7 @@ void BreakoutGame::updateCollisionDetection()
 
 		// Ship衝突判定
 		if (m_components->ship->isAlive())
-			if (m_components->fireball->isCollided(m_components->ship->getRealm())) {
+			if (m_components->fireball->isCollided(m_components->ship->getRealm(), 1, m_components->ship->getVelocity())) {
 				return;
 			}
 
@@ -80,6 +80,8 @@ void BreakoutGame::moveShip()
 	}
 	else if (key[KEY_INPUT_RIGHT]) {
 		m_components->ship->translate(10);
+	} else {
+		m_components->ship->translate(0);
 	}
 }
 
