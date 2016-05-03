@@ -181,6 +181,10 @@ class SinglePlayerGame : public Game {
 		const int imgHandle;
 		const int maxDamage;
 
+		int getMaxDamage() {
+			return maxDamage;
+		}
+
 		double prevX;
 		double prevY;
 		bool isJumping = true;
@@ -500,7 +504,7 @@ class SinglePlayerGame : public Game {
 
 	public:
 		Player(int x_, int y_, int width_, int height_, std::string imgHandleKey_, int maxDamage_, SinglePlayerGame& game_) : Character(x_, y_, width_, height_, imgHandleKey_, maxDamage_, game_) {
-			layer = 100;
+			layer = 100;			
 		}
 
 		bool draw() {
@@ -573,13 +577,18 @@ class SinglePlayerGame : public Game {
 			else if (invincibleTime > 0) {
 				invincibleTime--;
 			}
-			/*
-			if (damage > 5) {
-			isAlive = false;
+			
+			if (damage >= maxDamage) {
+				isAlive = false;
 			}
-			*/
+			
 			return Character::deathDecision();
 		}
+
+		int getPlayerDamage() {
+			return damage;
+		}
+
 	};
 
 	std::thread thread;
@@ -603,13 +612,14 @@ class SinglePlayerGame : public Game {
 
 	std::shared_ptr<BGM> bgm;
 	const int maxTime = 30 * 40;
+	const int maxPlayerDamage = 20;
 	int timer = maxTime;
 	bool hasPlayerWon;
 
 public:
 	SinglePlayerGame() {
 		thread = std::thread::thread(capture, std::ref(share));
-		player = std::make_shared<Player>(WIDTH / 2 - 100 / 2, HEIGHT / 2 - 150 / 2, 75, 100, "s_game_player", 5, *this);
+		player = std::make_shared<Player>(WIDTH / 2 - 100 / 2, HEIGHT / 2 - 150 / 2, 75, 100, "s_game_player", maxPlayerDamage, *this);
 		hasPlayerWon = true;
 	}
 
