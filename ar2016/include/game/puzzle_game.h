@@ -426,14 +426,27 @@ class PuzzleGame : public Game {
 	class WindGimmick : public Gimmick {
 		const double windX;
 		const double windY;
+		int counter = 0;
+		const int countMax = effectHandles["t_arrow"].size();
 	public:
 		WindGimmick(Rectan rect_, double windX_, double windY_, PuzzleGame& game_) :windX(windX_), windY(windY_), Gimmick(game_) {
 			rect = rect_;
 			layer = 80;
 		}
 		bool draw() {
+			const int chipsize = 20;
+			const int nx = rect.width / chipsize;
+			const int ny = rect.height / chipsize;
+			const int mx = rect.width - nx * chipsize;
+			const int my = rect.height - ny * chipsize;
+			for (int i = 0; i < nx; i++) {
+				for (int j = 0; j < ny; j++) {
+					DrawExtendGraph(left() + mx + chipsize*i, top() + my + chipsize*j, left() + mx + chipsize*(i + 1), top() + my + chipsize*(j + 1), effectHandles["t_arrow"][counter], true);
+				}
+			}
+			counter++;
+			if (counter == countMax) { counter = 0; }
 			DrawBox(left(), top(), right(), bottom(), GetColor(125, 224, 227), false);
-			//drawWithRect(imgHandles["p_arrow"]);
 			return willExist;
 		}
 		bool update() {
