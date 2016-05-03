@@ -687,5 +687,42 @@ private:
 	}
 };
 
+class EnemyBase {
+public:
+	EnemyBase() {}
+	virtual ~EnemyBase() {}
+	// 今はmodeだけどそのうちfireballのモードenumに置き換わるはず
+	// ここでvelocityを設定するかどうか迷う
+	virtual Fireball makeFireball(int mode) = 0;
+	// velocityは投げる方向
+	virtual void throwFireball(Eigen::Vector2i velocity) = 0;
+	// mode が enemy じゃない fireball にあたったらLifeを減らすようなメソッド
+	virtual void damageEnemy(Fireball fireball) = 0;
+	// 何かしらのアクションでLifeを回復するメソッド。実装したくない場合はreturnすればよい
+	virtual void restoreEnemy() = 0;
+	virtual void resetEnemy() = 0;
+
+	int getLifeNum() {
+		return m_life.getLifeNum();
+	}
+	bool isAlive() const {
+		return m_life.isAlive();
+	}
+	Shape::Rectangle getRealm() {
+		return m_realm;
+	}
+protected:
+	Shape::Rectangle m_realm = Shape::Rectangle();
+	Life m_life = Life();
+};
+
+class EnemyHead : public Object, public EnemyBase {
+public:
+	EnemyHead() {}
+	
+private:
+
+};
+
 
 } // namespace Breakout
