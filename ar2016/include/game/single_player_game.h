@@ -169,51 +169,51 @@ class SinglePlayerGame : public Game {
 			}
 
 			switch (enemyType) {
+			case 1: {
+				moveDirection = 1;
+				break;
+			}
+			case 2: {
+				moveDirection = rand() % 4;
+				switch (moveDirection)
+				{
+				case 0: {
+					rect.x = prevX = WIDTH / 2;
+					rect.y = prevY = 0 - 200;
+					break;
+				}
 				case 1: {
-					moveDirection = 1;
+					rect.x = prevX = WIDTH + 200;
+					rect.y = prevY = HEIGHT / 2 + 50;
 					break;
 				}
 				case 2: {
-					moveDirection = rand()%4;
-					switch (moveDirection)
-					{
-					case 0: {
-						rect.x = prevX = WIDTH / 2;
-						rect.y = prevY = 0 - 200;
-						break;
-					}
-					case 1: {
-						rect.x = prevX = WIDTH + 200;
-						rect.y = prevY = HEIGHT / 2 + 50;
-						break;
-					}
-					case 2: {
-						rect.x = prevX = WIDTH / 2;
-						rect.y = prevY = HEIGHT + 200;
-						break;
-					}
-					case 3: {
-						rect.x = prevX = 0 - 200;
-						rect.y = prevY = HEIGHT / 2 + 50;
-						break;
-					}
-					default:
-						break;
-					}
+					rect.x = prevX = WIDTH / 2;
+					rect.y = prevY = HEIGHT + 200;
 					break;
 				}
-				case 20: {
-					prevX = rect.x + 2;
-					break;	
-				}
-				case 21: {
-					prevX = rect.x + 5;	
+				case 3: {
+					rect.x = prevX = 0 - 200;
+					rect.y = prevY = HEIGHT / 2 + 50;
 					break;
 				}
-				default: {
-					moveDirection = 0;
+				default:
 					break;
 				}
+				break;
+			}
+			case 20: {
+				prevX = rect.x + 2;
+				break;
+			}
+			case 21: {
+				prevX = rect.x + 5;
+				break;
+			}
+			default: {
+				moveDirection = 0;
+				break;
+			}
 			}
 		}
 
