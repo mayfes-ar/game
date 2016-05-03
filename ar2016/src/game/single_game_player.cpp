@@ -97,26 +97,43 @@ bool SinglePlayerGame::onStart() {
 	mode.setMode([this]() {
 		class Title : public Object {
 			bool hasPlayerWon = true;
+			std::shared_ptr<SinglePlayerGame::Player> player;
+			int maxTime;
+			int timer;
+			
 		public:
-			Title(bool hasPlayerWon_) {
+			Title(bool hasPlayerWon_, std::shared_ptr<SinglePlayerGame::Player> player_, int maxTime_, int timer_) {
 				layer = 50;
 				hasPlayerWon = hasPlayerWon_;
+				player = player_;
+				maxTime = maxTime_;		
+				timer = timer_;
 			}
 
 			bool draw() {
 				if (hasPlayerWon) {
 					DrawExtendGraph(0, 0, WIDTH, HEIGHT, imgHandles["s_game_result_clear"], true);
+					std::string clearScore = "Score : " + std::to_string(maxTime + (player->getMaxDamage() - player->getPlayerDamage()) * 50);
+					DrawString(100, 150, clearScore.c_str(), GetColor(0, 0, 0));
 				}
 				else {
 					DrawExtendGraph(WIDTH / 2 - 400, 30, WIDTH / 2 + 400, 30 + 296, imgHandles["s_game_result_dead"], true);
 					DrawExtendGraph(WIDTH / 2 - 75, 400, WIDTH / 2 + 75, 400 + 150, imgHandles["s_game_dead"], true);
+					std::string deadScore = "Score : " + std::to_string(maxTime - timer);
+					std::string playTime = "Time : " + std::to_string((maxTime - timer) / 30);
+					DrawString(100, 150, deadScore.c_str(), GetColor(255, 255, 255));
+					DrawString(100, 200, playTime.c_str(), GetColor(255, 255, 255));
 				}
+				
+				std::string damage = ("Damage : " + std::to_string(player->getPlayerDamage()));
+				DrawString(100, 100, damage.c_str(), GetColor(255, 0, 0));
+				
 				return true;
 			}
 		};
 
 		drawList.clear();
-		drawList.push_back(make_shared<Title>(hasPlayerWon));
+		drawList.push_back(make_shared<Title>(hasPlayerWon, player, maxTime, timer ));
 
 		bgm->stop();
 		bgm = make_shared<BGM>(2, hasPlayerWon);
@@ -128,7 +145,6 @@ bool SinglePlayerGame::onStart() {
 
 bool SinglePlayerGame::onUpdate() {
 	bool willFinishMode = false;
-
 
 	switch (mode.getMode()) {
 	case 0: { // イントロダクション
@@ -146,7 +162,6 @@ bool SinglePlayerGame::onUpdate() {
 		if (timer <= 0) {
 			willFinishMode = true;
 		}
-
 
 		// 認識したマーカーを描画
 		share.rectMutex.lock();
