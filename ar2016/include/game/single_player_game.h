@@ -496,6 +496,140 @@ class SinglePlayerGame : public Game {
 		}
 	};
 
+	class Ufo : public Enemy {
+		static const int width = 225 / 2;
+		static const int height = 225 / 2;
+	public:
+		Ufo(int x_, int y_, SinglePlayerGame& game_, double size, int maxDamage_ = 10, std::string imgHandleKey_ = "s_game_ufo") : Enemy(x_, y_, width * size, height * size, imgHandleKey_, maxDamage_, game_) {
+		
+		};
+	};
+
+	class Cloud : public Enemy {
+		static const int width = 304 / 3;
+		static const int height = 166 / 3;
+	public:
+		Cloud(int x_, int y_, SinglePlayerGame& game_, double size, int maxDamage_ = 10, std::string imgHandleKey_ = "s_game_cloud") : Enemy(x_, y_, width * size, height * size, imgHandleKey_, maxDamage_, game_) {
+			
+		};
+
+		void updateCoordinate(double acX, double acY) {
+			double& x = rect.x;
+			double& y = rect.y;
+
+			const double diffX = 5;
+			const double diffY = 0;
+
+
+			// verlet法
+			const double tempX = x;
+			x += diffX + acX;
+			prevX = tempX;
+			const double tempY = y;
+			y += diffY + acY;
+			prevY = tempY;
+		}
+	};
+
+	class Drop : public Enemy {
+		static const int width = 200 / 8;
+		static const int height = 200 / 8;
+	public:
+		Drop(int x_, int y_, SinglePlayerGame& game_, double size, int maxDamage_ = 10, std::string imgHandleKey_ = "s_game_drop") : Enemy(x_, y_, width * size, height * size, imgHandleKey_, maxDamage_, game_) {
+		};
+		void setAc(double* acX, double* acY) {
+			*acX = 0;
+			*acY = 3;
+		}
+	};
+
+	class Eagle : public Enemy {
+		static const int width = 430 / 4;
+		static const int height = 263 / 4;
+	public:
+		Eagle(int x_, int y_, SinglePlayerGame& game_, double size, int maxDamage_ = 10, std::string imgHandleKey_ = "s_game_eagle") : Enemy(x_, y_, width * size, height * size, imgHandleKey_, maxDamage_, game_) {
+		};
+
+		void updateCoordinate(double acX, double acY) {
+			double& x = rect.x;
+			double& y = rect.y;
+
+			const double diffX = 5;
+			const double diffY = 3;
+
+
+			// verlet法
+			const double tempX = x;
+			x += diffX + acX;
+			prevX = tempX;
+			const double tempY = y;
+			y += diffY + acY;
+			prevY = tempY;
+		}
+	};
+
+	class Heiho : public Enemy {
+		static const int width = 345 / 4;
+		static const int height = 333 / 4;
+		int frameCounter = 100;
+	public:
+		Heiho(int x_, int y_, SinglePlayerGame& game_, double size, int maxDamage_ = 10, std::string imgHandleKey_ = "s_game_heiho") : Enemy(x_, y_, width * size, height * size, imgHandleKey_, maxDamage_, game_) {
+			moveDirection = LEFT;
+		}
+
+		void updateCoordinate(double acX, double acY) {
+			double& x = rect.x;
+			double& y = rect.y;
+			
+			double diffX;
+			if (frameCounter >= 0) {
+				diffX = -5;
+			}
+			else {
+				diffX = 5;
+			}
+			const double diffY = 0;
+
+
+			// verlet法
+			const double tempX = x;
+			x += diffX + acX;
+			prevX = tempX;
+			const double tempY = y;
+			y += diffY + acY;
+			prevY = tempY;
+		}
+	};
+
+	class Fire : public Enemy {
+		static const int width = 280 / 3;
+		static const int height = 194 / 3;
+	public:
+		Fire(int x_, int y_, SinglePlayerGame& game_, double size, int maxDamage_ = 10, std::string imgHandleKey_ = "s_game_fire") : Enemy(x_, y_, width * size, height * size, imgHandleKey_, maxDamage_, game_) {
+			moveDirection = LEFT;
+		}
+		void updateCoordinate(double acX, double acY) {
+			double& x = rect.x;
+			double& y = rect.y;
+
+			const double diffX = -5;
+			const double diffY = 0;
+
+
+			// verlet法
+			const double tempX = x;
+			x += diffX + acX;
+			prevX = tempX;
+			const double tempY = y;
+			y += diffY + acY;
+			prevY = tempY;
+		}
+		void setAc(double* acX, double* acY) {
+			*acX = -2;
+			*acY = 0;
+		}
+	};
+
 	class Player : public Character {
 
 	public:
@@ -600,6 +734,12 @@ class SinglePlayerGame : public Game {
 	std::shared_ptr<RocketWanwan> makeRocketWanwan(int x, int y, double size);
 	std::shared_ptr<Inundation> makeInundation();
 	std::shared_ptr<Switch> makeSwitch(int x, int y, double size);
+	std::shared_ptr<Ufo> makeUfo();
+	std::shared_ptr<Cloud> makeCloud();
+	std::shared_ptr<Drop> makeDrop();
+	std::shared_ptr<Eagle> makeEagle();
+	std::shared_ptr<Heiho> makeHeiho();
+	std::shared_ptr<Fire> makeFire();
 
 	std::shared_ptr<BGM> bgm;
 	const int maxTime = 30 * 40;
