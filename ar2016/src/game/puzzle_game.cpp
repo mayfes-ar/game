@@ -213,6 +213,9 @@ bool PuzzleGame::onUpdate() {
 		break;
 	}
 	case 2: {
+		if (timer % (FPS * 3) == 0) {
+			setSmog();
+		}
 		
 		break;
 	}

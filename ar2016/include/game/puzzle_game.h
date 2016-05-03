@@ -267,7 +267,7 @@ class PuzzleGame : public Game {
 
 	class SmogGimmick : public Gimmick {
 		int counter = 0;
-		const int countMax = effectHandles["p_smog"].size();
+		const int countMax = effectHandles["p_smog1"].size();
 	public:
 		SmogGimmick(int x, int y, int size, PuzzleGame& game_) : Gimmick(game_) {
 			rect = Rectan(x, y, size, size);
@@ -275,7 +275,7 @@ class PuzzleGame : public Game {
 		}
 		bool draw() {
 			const int margin = rect.width / 10;
-			DrawExtendGraph(left() - margin, top() - margin, right() + margin, bottom() + margin, effectHandles["p_smog"][counter], true);
+			DrawExtendGraph(left() - margin, top() - margin, right() + margin, bottom() + margin, effectHandles["p_smog1"][counter], true);
 			counter++;
 			if (counter == countMax) { counter = 0; }
 			return willExist;
@@ -315,6 +315,8 @@ class PuzzleGame : public Game {
 		bool isOn;
 		const bool isReverse;
 		bool& targetBool;
+		int counter = 0;
+		const int countMax = effectHandles["p_crystal1"].size();
 		void setSwitch(bool isOn_) {
 			isOn = isOn_;
 			if (isReverse) {
@@ -331,6 +333,7 @@ class PuzzleGame : public Game {
 		}
 		bool draw() {
 			if (isOn) {
+				const int margin = rect.width / 10;
 				drawWithRect(imgHandles["p_on"]);
 			} else {
 				drawWithRect(imgHandles["p_off"]);
