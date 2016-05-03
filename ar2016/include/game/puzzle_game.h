@@ -432,8 +432,8 @@ class PuzzleGame : public Game {
 			layer = 80;
 		}
 		bool draw() {
-			//DrawBox(left(), top(), right(), bottom(), GetColor(125, 224, 227), false);
-			drawWithRect(imgHandles["p_arrow"]);
+			DrawBox(left(), top(), right(), bottom(), GetColor(125, 224, 227), false);
+			//drawWithRect(imgHandles["p_arrow"]);
 			return willExist;
 		}
 		bool update() {
