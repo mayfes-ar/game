@@ -426,6 +426,8 @@ class PuzzleGame : public Game {
 	class WindGimmick : public Gimmick {
 		const double windX;
 		const double windY;
+		int counter = 0;
+		const int countMax = effectHandles["p_arrow1"].size();
 	public:
 		WindGimmick(Rectan rect_, double windX_, double windY_, PuzzleGame& game_) :windX(windX_), windY(windY_), Gimmick(game_) {
 			rect = rect_;
@@ -434,6 +436,10 @@ class PuzzleGame : public Game {
 		bool draw() {
 			DrawBox(left(), top(), right(), bottom(), GetColor(125, 224, 227), false);
 			//drawWithRect(imgHandles["p_arrow"]);
+			const int margin = rect.width / 10;
+			drawWithRect(effectHandles["p_arrow1"][counter], margin);
+			counter++;
+			if (counter == countMax) { counter = 0; }
 			return willExist;
 		}
 		bool update() {
