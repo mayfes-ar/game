@@ -17,7 +17,9 @@ public:
 
 	void setup();
 
+    std::shared_ptr<Breakout::Background> background = nullptr;
     std::shared_ptr<Breakout::Info> info = nullptr;
+	std::shared_ptr<Breakout::Explanation> explanation = nullptr;
     std::shared_ptr<Breakout::Result> result = nullptr;
     std::shared_ptr<Breakout::Field> field = nullptr;
 

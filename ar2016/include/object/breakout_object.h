@@ -153,21 +153,67 @@ private:
 class Background : public Object
 {
 public:
-    Background(int& handle)
-        : m_handle(handle)
+    Background()
     {
         Object::layer = PRIORITY_BACKGROUND;
     }
 
+	void init() {
+		m_is_last_phase = false;
+		m_forest_saturation = 50;
+		m_magma_saturation = 50;
+	}
+
     bool draw() override {
-        SetDrawBright(40, 40, 40);
-        DrawExtendGraph(0, 0, WIDTH, HEIGHT, 
-                imgHandles["magma"], true);
-        SetDrawBright(255, 255, 255);
-        return true;
+		if (m_is_last_phase) {
+			SetDrawBright(m_forest_saturation, m_forest_saturation, m_forest_saturation);
+			if (m_forest_saturation < m_saturation_max) {
+				m_forest_saturation++;
+			}
+
+			DrawExtendGraph(0, 0, WIDTH, HEIGHT, 
+					imgHandles["b_magma"], true);
+			SetDrawBright(255, 255, 255);
+			return true;
+		}
+		else {
+			if (m_magma_saturation < m_saturation_max) {
+				m_magma_saturation++;
+			}
+			SetDrawBright(m_magma_saturation, m_magma_saturation, m_magma_saturation);
+			DrawExtendGraph(0, 0, WIDTH, HEIGHT, 
+					imgHandles["b_forest"], true);
+			SetDrawBright(255, 255, 255);
+			return true;
+		}
     }
 
-    int& m_handle;
+	void turnLastPhase() {
+		m_is_last_phase = true;
+	}
+
+private:
+	int m_forest_saturation = 50;
+	int m_magma_saturation = 50;
+	bool m_is_last_phase = false;
+	const int m_saturation_max = 100;
+};
+
+class Explanation : public Object
+{
+public:
+	explicit Explanation(const Shape::Rectangle& realm)
+		: m_realm(realm)
+	{}
+	
+	bool draw() override {
+		DrawExtendGraph(m_realm.left(), m_realm.top(), m_realm.right(), m_realm.bottom(), 
+				imgHandles["b_explanation"], TRUE);
+		return true;
+	}
+
+private:
+	Shape::Rectangle m_realm = Shape::Rectangle();
 };
 
 // 時間やスコアを表示する
@@ -200,6 +246,11 @@ public:
 
 	bool isTimeOver() const {
 		return m_timer->isTimerEnd();
+	}
+
+	bool isLastPhase() {
+		float ratio = m_timer->getRatio();
+		return ratio < 0.3f;
 	}
 
 private:

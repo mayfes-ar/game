@@ -101,6 +101,9 @@ void BreakoutGame::updateGameState()
 	};
 	switch (kind) {
 	case Playing:
+		if (m_components->info->isLastPhase()) {
+			m_components->background->turnLastPhase();
+		}
 		if (isGameClear()) {
 			m_components->result->clearGame();
 			mode.goNext();

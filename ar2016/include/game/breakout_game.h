@@ -18,11 +18,10 @@ public:
         init();
         mode.setMode([&]() {
 
-            drawList.push_back(std::make_shared<Breakout::Background>(
-                        share.handle));
-
+            drawList.push_back(m_components->background);
 			drawList.push_back(m_components->info);
 			drawList.push_back(m_components->field);
+			drawList.push_back(m_components->explanation);
 			
 
             for (const auto& block: m_components->block_list) {

@@ -110,9 +110,10 @@ bool Object::load() {
 	isSuccess &= loadImage("block_blue", "block_blue");
 	isSuccess &= loadImage("block_red", "block_red");
 	isSuccess &= loadImage("block_green", "block_green");
-	isSuccess &= loadImage("forest", "forest");
-	isSuccess &= loadImage("magma", "magma");
+	isSuccess &= loadImage("b_forest", "breakout/forest");
+	isSuccess &= loadImage("b_magma", "breakout/magma");
 	isSuccess &= loadImage("b_game_over", "breakout/game_over");
 	isSuccess &= loadImage("b_game_clear", "breakout/game_clear");
+	isSuccess &= loadImage("b_explanation", "breakout/explanation");
 	return isSuccess;
 }

@@ -14,9 +14,9 @@ namespace Breakout {
 	const Eigen::Vector2i FIELD_START_POS = Eigen::Vector2i(INFO_WIDTH, 0);
 	const int FIELD_WIDTH = 2 * WIDTH / 4;
 	const int FIELD_HEIGHT = HEIGHT;
-	const Eigen::Vector2i DEBUG_WINDOW_START_POS = Eigen::Vector2i(INFO_WIDTH + FIELD_WIDTH, 0);
-	const int DEBUG_WINDOW_WIDTH = WIDTH / 4;
-	const int DEBUG_WINDOW_HEIGHT = HEIGHT;
+	const Eigen::Vector2i EXPLANATION_START_POS = Eigen::Vector2i(INFO_WIDTH + FIELD_WIDTH, 0);
+	const int EXPLANATION_WIDTH = WIDTH / 4;
+	const int EXPLANATION_HEIGHT = HEIGHT;
 	
 	const Eigen::Vector2i RESULT_START_POS = Eigen::Vector2i::Zero();
 	const int RESULT_WIDTH = WIDTH;

@@ -9,6 +9,8 @@ void BreakoutComponents::setup()
 {
 	// Layoutの初期化
 	{
+		background = std::make_shared<Background>();
+		background->init();
 		const auto info_realm = Shape::Rectangle(INFO_START_POS, INFO_WIDTH, INFO_HEIGHT);
 		std::shared_ptr<Timer> timer = std::make_shared<Timer>(TIMER_MAX_MIN, TIMER_MAX_SEC, TIMER_MAX_MSEC);
 		info = std::make_shared<Breakout::Info>(info_realm, timer);
@@ -16,6 +18,8 @@ void BreakoutComponents::setup()
 		const auto result_realm = Shape::Rectangle(RESULT_START_POS, RESULT_WIDTH, RESULT_HEIGHT);
 		result = std::make_shared<Breakout::Result>(result_realm);
 
+		const auto exp_realm = Shape::Rectangle(EXPLANATION_START_POS, EXPLANATION_WIDTH, EXPLANATION_HEIGHT);
+		explanation = std::make_shared<Breakout::Explanation>(exp_realm);
 
 		const auto field_realm = Shape::Rectangle(FIELD_START_POS, FIELD_WIDTH, FIELD_HEIGHT);
 		field = std::make_shared<Breakout::Field>(field_realm);
