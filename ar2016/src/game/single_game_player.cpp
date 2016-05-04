@@ -274,13 +274,12 @@ bool SinglePlayerGame::onUpdate() {
 			break;
 		}
 		default: {
-			if (heiholist[0] == NULL) {
-				makeHeiho(WIDTH-100,HEIGHT-100,1);
+			if (heiholist[0] == NULL || !heiholist[0]->getIsAlive()) {
+			heiholist[0] =	makeHeiho(WIDTH-100,HEIGHT-200,1);
 			}
 			else if (heiholist[0]->frameCounter == 0) {
-				makeFire(heiholist[0]->getRectX(), heiholist[0]->getRectX(), 1);
+				makeFire(heiholist[0]->getRectX(), heiholist[0]->getRectY(), 1);
 			}
-
 			break;
 		}
 		}

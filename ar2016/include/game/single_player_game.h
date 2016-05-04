@@ -517,6 +517,13 @@ class SinglePlayerGame : public Game {
 			
 		};
 
+		void update() {
+			double acX = 0;
+			double acY = 0;
+			setAc(&acX, &acY);
+			updateCoordinate(acX, acY);
+		}
+
 		void updateCoordinate(double acX, double acY) {
 			double& x = rect.x;
 			double& y = rect.y;
@@ -554,6 +561,13 @@ class SinglePlayerGame : public Game {
 		Eagle(int x_, int y_, SinglePlayerGame& game_, double size, int maxDamage_ = 10, std::string imgHandleKey_ = "s_game_eagle") : Enemy(x_, y_, width * size, height * size, imgHandleKey_, maxDamage_, game_) {
 		};
 
+		void update() {
+			double acX = 0;
+			double acY = 0;
+			setAc(&acX, &acY);
+			updateCoordinate(acX, acY);
+		}
+
 		void updateCoordinate(double acX, double acY) {
 			double& x = rect.x;
 			double& y = rect.y;
@@ -576,7 +590,7 @@ class SinglePlayerGame : public Game {
 		static const int width = 345 / 4;
 		static const int height = 333 / 4;
 	public:
-		int frameCounter = 100;
+		int frameCounter = 30;
 		Heiho(int x_, int y_, SinglePlayerGame& game_, double size, int maxDamage_ = 10, std::string imgHandleKey_ = "s_game_heiho") : Enemy(x_, y_, width * size, height * size, imgHandleKey_, maxDamage_, game_) {
 			moveDirection = LEFT;
 		}
@@ -586,16 +600,20 @@ class SinglePlayerGame : public Game {
 			double acY = 0;
 			setAc(&acX, &acY);
 			updateCoordinate(acX, acY);
-
 		}
 
 		void updateCoordinate(double acX, double acY) {
 			double& x = rect.x;
 			double& y = rect.y;
+			frameCounter--;
 			
 			double diffX;
-			if (frameCounter >= 0) {
+			if (frameCounter > 0) {
 				diffX = -5;
+			}
+			else if (frameCounter == 0) {
+				PlaySoundMem(soundHandles["s_game_shuzo"], DX_PLAYTYPE_BACK, true);
+				diffX = 0;
 			}
 			else {
 				diffX = 5;
@@ -614,7 +632,7 @@ class SinglePlayerGame : public Game {
 		int getRectX() {
 			return rect.x;
 		}
-		int getRextY() {
+		int getRectY() {
 			return rect.y;
 		}
 

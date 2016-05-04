@@ -78,14 +78,13 @@ bool Object::load() {
 	isSuccess &= loadImage("s_game_heiho", "heiho");
 	isSuccess &= loadImage("s_game_fire", "fire");
 	isSuccess &= loadImage("s_game_balloon", "balloon");
-	isSuccess &= loadImage("ufo", "ufo");
-	isSuccess &= loadImage("drop", "drop");
-	isSuccess &= loadImage("ray", "uforay");
-	isSuccess &= loadImage("cloud", "cloud");
-	isSuccess &= loadImage("washi", "wasi");
+	isSuccess &= loadImage("s_game_ufo", "ufo");
+	isSuccess &= loadImage("s_game_drop", "drop");
+	isSuccess &= loadImage("s_game_ray", "uforay");
+	isSuccess &= loadImage("s_game_cloud", "cloud");
+	isSuccess &= loadImage("s_game_eagle", "eagle");
 	isSuccess &= loadImage("s_game_water", "water");
 	isSuccess &= loadImage("s_game_switch", "switch");
-
 
 	isSuccess &= loadSound("s_game_bgm", "妄想凸守旋律～補完～.mp3");
 	isSuccess &= loadSound("s_game_dead", "dead.wav");
