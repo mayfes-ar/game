@@ -25,10 +25,8 @@ return enemy;
 }
 
 std::shared_ptr<SinglePlayerGame::Inundation> SinglePlayerGame::makeInundation() {
-	auto enemy = std::make_shared<Inundation>(0, HEIGHT+100, *this, 1);
-	if (player->isContacted(enemy)) {
-		enemy = std::make_shared<Inundation>(0, HEIGHT+100, *this, 1);
-	}
+	auto enemy = std::make_shared<Inundation>(0, HEIGHT+200, *this, 1);
+
 	enemyList.push_back(enemy);
 	drawList.push_back(enemy);
 	return enemy;
@@ -73,7 +71,7 @@ bool SinglePlayerGame::onStart() {
 		bgm->start();
 
 		for (int i = 0; i < 20; i++);
-	}, 150);
+	}, -1);
 
 	// mode 1
 	mode.setMode([this]() {
@@ -87,6 +85,10 @@ bool SinglePlayerGame::onStart() {
 
 		drawList.push_back(player);
 		drawList.push_back(make_shared<Background>(share.handle));
+		drawList.push_back(make_shared<Effect>("s_game_coin", 200, 200, 50, 50, true));
+		drawList.push_back(make_shared<Effect>("s_game_coin", 250, 200, 50, 50, true, 150, 1, 3));
+		drawList.push_back(make_shared<Effect>("s_game_coin", 300, 200, 50, 50, true, 150, 2));
+		drawList.push_back(make_shared<Effect>("s_game_coin", 350, 200, 50, 50, true, 150, 2, 3));
 
 		bgm = make_shared<BGM>(1);
 		bgm->start();
@@ -97,26 +99,43 @@ bool SinglePlayerGame::onStart() {
 	mode.setMode([this]() {
 		class Title : public Object {
 			bool hasPlayerWon = true;
+			std::shared_ptr<SinglePlayerGame::Player> player;
+			int maxTime;
+			int timer;
+			
 		public:
-			Title(bool hasPlayerWon_) {
+			Title(bool hasPlayerWon_, std::shared_ptr<SinglePlayerGame::Player> player_, int maxTime_, int timer_) {
 				layer = 50;
 				hasPlayerWon = hasPlayerWon_;
+				player = player_;
+				maxTime = maxTime_;		
+				timer = timer_;
 			}
 
 			bool draw() {
 				if (hasPlayerWon) {
 					DrawExtendGraph(0, 0, WIDTH, HEIGHT, imgHandles["s_game_result_clear"], true);
+					std::string clearScore = "Score : " + std::to_string(maxTime + (player->getMaxDamage() - player->getPlayerDamage()) * 50);
+					DrawString(100, 150, clearScore.c_str(), GetColor(0, 0, 0));
 				}
 				else {
 					DrawExtendGraph(WIDTH / 2 - 400, 30, WIDTH / 2 + 400, 30 + 296, imgHandles["s_game_result_dead"], true);
 					DrawExtendGraph(WIDTH / 2 - 75, 400, WIDTH / 2 + 75, 400 + 150, imgHandles["s_game_dead"], true);
+					std::string deadScore = "Score : " + std::to_string(maxTime - timer);
+					std::string playTime = "Time : " + std::to_string((maxTime - timer) / 30);
+					DrawString(100, 150, deadScore.c_str(), GetColor(255, 255, 255));
+					DrawString(100, 200, playTime.c_str(), GetColor(255, 255, 255));
 				}
+				
+				std::string damage = ("Damage : " + std::to_string(player->getPlayerDamage()));
+				DrawString(100, 100, damage.c_str(), GetColor(255, 0, 0));
+				
 				return true;
 			}
 		};
 
 		drawList.clear();
-		drawList.push_back(make_shared<Title>(hasPlayerWon));
+		drawList.push_back(make_shared<Title>(hasPlayerWon, player, maxTime, timer ));
 
 		bgm->stop();
 		bgm = make_shared<BGM>(2, hasPlayerWon);
@@ -128,7 +147,6 @@ bool SinglePlayerGame::onStart() {
 
 bool SinglePlayerGame::onUpdate() {
 	bool willFinishMode = false;
-
 
 	switch (mode.getMode()) {
 	case 0: { // イントロダクション
@@ -146,7 +164,6 @@ bool SinglePlayerGame::onUpdate() {
 		if (timer <= 0) {
 			willFinishMode = true;
 		}
-
 
 		// 認識したマーカーを描画
 		share.rectMutex.lock();
@@ -180,7 +197,7 @@ bool SinglePlayerGame::onUpdate() {
 			makeSwitch(100, 100, 1);
 		case 500:
 		case 100: {
-			makeRocketWanwan(0, HEIGHT / 2 + 50);
+			makeRocketWanwan(-RocketWanwan::width, HEIGHT / 2 + 50);
 			break;
 		}
 		default: {
