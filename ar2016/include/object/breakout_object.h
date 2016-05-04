@@ -458,6 +458,15 @@ private:
 	Color m_color = Color::Green;
 };
 
+//Fireball の Modeを決定するためのもの
+//EnemyかPlayerか、StrongかWeakかの4種類からなっている。
+//それぞれ描画時に色を変える？
+enum FireballKind {
+	EnemyWeak,
+	EnemyStrong,
+	PlayerWeak,
+	PlayerStrong
+};
 
 // Block崩しに使われるBlock
 // Firebollにぶつかると消える
@@ -472,6 +481,11 @@ public:
     {
         Object::layer = PRIORITY_DYNAMIC_OBJECT;
     }
+	Fireball(const Shape::Circle& realm, const std::shared_ptr<Moving>& moving, FireballKind mode)
+		: m_realm(realm), m_moving(moving), m_mode(mode)
+	{
+		Object::layer = PRIORITY_DYNAMIC_OBJECT;
+	}
 
     bool draw() {
         if (m_is_disappeared) {
@@ -481,7 +495,20 @@ public:
         int x = m_realm.center.x();
         int y = m_realm.center.y();
         int r = m_realm.radius;
-        DrawCircle(x, y, r, Color::RED, true);
+		switch (m_mode) {
+		case EnemyWeak:
+			DrawCircle(x, y, r, Color::RED, true);
+			break;
+		case EnemyStrong:
+			DrawCircle(x, y, r, Color::BLACK, true);
+			break;
+		case PlayerWeak:
+			DrawCircle(x, y, r, Color::BLUE, true);
+			break;
+		case PlayerStrong:
+			DrawCircle(x, y, r, Color::GREEN, true);
+			break;
+		}
 
         return true;
     }
@@ -529,14 +556,40 @@ public:
 	// if in then -1, out then 1, default is 1
 	bool isCollided(const Shape::Rectangle& parent, const int inOrOut = 1, const int parentVelocity = 0);
 
+	FireballKind getMode() {
+		return m_mode;
+	}
 
+	void setMode(FireballKind mode) {
+		m_mode = mode;
+	}
 
+	void changeModeToPlayer() {
+		switch (m_mode) {
+		case EnemyWeak:
+			m_mode = PlayerWeak;
+			break;
+		case EnemyStrong:
+			m_mode = PlayerStrong;
+			break;
+		}
+	}
+
+	bool isEnemy() {
+		switch (m_mode) {
+		case EnemyWeak:
+		case EnemyStrong:
+			return true;
+		}
+		return false;
+	}
 
 
 private:
     bool m_is_disappeared = false; // 火の玉にあったかどうか
     Shape::Circle m_realm = Shape::Circle(); // Firebollの領域
 	std::shared_ptr<Moving> m_moving = nullptr;
+	FireballKind m_mode = EnemyWeak;
 };
 
 // キャラクタがのる船
@@ -710,12 +763,14 @@ public:
 	// マーカーを認識したらis_disappearedはonにする。吸い込んでから3病後に発射。このときポットにカウントダウンを表示する。0になったとき発射不可能な場所にいた場合は発射失敗。
 
 	// fireballを吸い込む（特定のfireballのほうがいいかも？）
+	// StrongかWeakかを見たあとに、Player~にする
 	void inhareFireball(std::shared_ptr<Fireball>& fireball) {
 		m_fireball = fireball;
 		m_fireball->disappear();
 		m_fireball->setPosition(m_realm.getLeftTopPoint());
 		m_initial_fireball_speed = m_fireball->getVelocity().norm();
 		m_fireball->setVelocity(Eigen::Vector2f::Zero());
+		m_fireball->changeModeToPlayer();
 	}
 
 	// fireballを吐き出す。吸い込んでから3秒後。

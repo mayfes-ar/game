@@ -28,18 +28,24 @@ void BreakoutGame::updateCollisionDetection()
 		}
 
 		// Ship衝突判定
-		if (m_components->ship->isAlive())
+		if (m_components->ship->isAlive()) {
 			if (m_components->fireball->isCollided(m_components->ship->getRealm(), 1, m_components->ship->getVelocity())) {
+				m_components->fireball->changeModeToPlayer();
 				return;
 			}
+		}
 
 		// Block衝突判定
-		for (int block_id = 0; block_id < Breakout::BLOCK_HEIGHT_NUM * Breakout::BLOCK_WIDTH_NUM; ++block_id) {
-			if (m_components->block_list.at(block_id)->isDisappeared()) continue;
-			if (m_components->fireball->isCollided(m_components->block_list.at(block_id)->getRealm())) {
-				m_components->block_list.at(block_id)->disappear();
-				m_components->block_list.at(block_id)->detachAllItems();
-				return;
+		// EnemyModeだったらBlockと衝突させない
+		if (m_components->fireball->isEnemy()) {}
+		else {
+			for (int block_id = 0; block_id < Breakout::BLOCK_HEIGHT_NUM * Breakout::BLOCK_WIDTH_NUM; ++block_id) {
+				if (m_components->block_list.at(block_id)->isDisappeared()) continue;
+				if (m_components->fireball->isCollided(m_components->block_list.at(block_id)->getRealm())) {
+					m_components->block_list.at(block_id)->disappear();
+					m_components->block_list.at(block_id)->detachAllItems();
+					return;
+				}
 			}
 		}
 	}
