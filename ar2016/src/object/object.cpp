@@ -71,10 +71,9 @@ bool Object::load() {
 	isSuccess &= loadImage("s_game_op", "s_game/s_game_op");
 
 	//　ゲーム本編
-	isSuccess &= loadImage("s_game_player", "hime_normal");
-	isSuccess &= loadImage("s_game_player_damage", "hime_odoroki");
+	isSuccess &= loadImage("s_game_player", "s_game/hime_normal");
+	isSuccess &= loadImage("s_game_player_damage", "s_game/hime_odoroki");
 
-	isSuccess &= loadImage("s_game_player", "s_game/mario");
 	isSuccess &= loadImage("s_game_wanwan", "s_game/wolf");
 	isSuccess &= loadImage("s_game_marker", "s_game/luigi");
 	isSuccess &= loadImage("s_game_teresa", "s_game/teresa");
@@ -90,6 +89,11 @@ bool Object::load() {
 	isSuccess &= loadSound("s_game_jump", "s_game/jump.mp3");
 
 	isSuccess &= loadEffect("s_game_coin", "s_game/coin", 5, 2, 1000, 400);
+
+	isSuccess &= loadImage("s_game_piyo", "s_game/piyo");
+	isSuccess &= loadImage("s_game_sword", "s_game/sword");
+	isSuccess &= loadImage("s_game_shield", "s_game/shield");
+
 
 
 	// リザルト

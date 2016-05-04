@@ -152,7 +152,7 @@ class SinglePlayerGame : public Game {
 			counter++;
 			// TODO: willStayがfalseのとき、framePerCountでの描画がうまくいかない
 
-			return willStay || counter == maxCount;
+			return willStay || counter != maxCount;
 		}
 	};
 
@@ -190,17 +190,40 @@ class SinglePlayerGame : public Game {
 
 	// 認識したマーカーの扱い
 	class Marker : public SingleGameObject {
-		int index = 0;
-		int layer = 300;
+		SinglePlayerGame& game;
+		const int index;
+		int imgHandle;
+		Rectan prevRect;
+		enum MoveDirection {
+			LEFT,RIGHT,
+		};
+		MoveDirection moveDirection = LEFT;
 
-	public:
-		Marker(int x_, int y_, int width_, int height_, bool willStay_) {
-			rect.x = x_, rect.y = y_, rect.width = width_, rect.height = height_;
+		void setImgHandle() {
+			switch (index)
+			{
+			case 0:
+			case 1:
+			case 2: {
+				imgHandle = imgHandles["s_game_piyo"];
+				break;
+			}
+			case 3:
+			case 4:
+			case 5: {
+				imgHandle = imgHandles["s_game_sword"];
+				break;
+			}
+			case 6:
+			case 7:
+			default: {
+				imgHandle = imgHandles["s_game_shield"];
+				break;
+			}
+			}
 		}
 
-		Marker(Rectan rect_, bool willStay_, int index_) {
-			rect = rect_;
-			index = index_;
+		void modifyRect() {
 			if (rect.width > 0 || rect.height > 0) {
 				rect.width = 100;
 				rect.height = 100;
@@ -210,25 +233,63 @@ class SinglePlayerGame : public Game {
 			}
 		}
 
+	public:
+		Marker(Rectan rect_, bool willStay_, int index_, SinglePlayerGame& game_) :index(index_), game(game_){
+			rect = rect_;
+			modifyRect();
+			prevRect = rect;
+			layer = 300;
+			setImgHandle();
+		}
+
 		bool draw() {
-			switch (index)
+			switch (moveDirection)
 			{
-			case 0: {
-				drawImage(imgHandles["s_game_marker"], rect.width, rect.height);
-				// DrawExtendGraph(left(), top(), right(), bottom(), imgHandles["s_game_marker"], true);
+			case RIGHT: {
+				drawImage(imgHandle, rect.width, rect.height, 0, 0, true);
 				break;
 			}
-			case 1: {
-				drawImage(imgHandles["p_goal"], rect.width, rect.height);
-				// DrawExtendGraph(left(), top(), right(), bottom(), imgHandles["p_goal"], true);
+
+			case LEFT: {
+				drawImage(imgHandle, rect.width, rect.height);
 				break;
 			}
 			default:
-				drawImage(imgHandles["block"], rect.width, rect.height);
-				// DrawExtendGraph(left(), top(), right(), bottom(), imgHandles["block"], true);
 				break;
 			}
-			return false;
+			return true;
+		}
+
+		void setRect(Rectan rect_) {
+			prevRect = rect;
+			rect = rect_;
+			modifyRect();
+			if (rect.x - prevRect.x < -10) {
+				moveDirection = LEFT;
+			}
+			else if (rect.x - prevRect.x > 10) {
+				moveDirection = RIGHT;
+			}
+			else {
+			}
+		}
+
+		int getIndex() {
+			return index;
+		}
+
+		void effectHit() {
+			switch (moveDirection)
+			{
+			case LEFT:
+				game.makeEffect("s_game_coin", left() - 30, top()+rect.width/2, 40, 40);
+				break;
+			case RIGHT:
+				game.makeEffect("s_game_coin", right() + 30, top() + rect.width / 2, 40, 40);
+				break;
+			default:
+				break;
+			}
 		}
 	};
 
@@ -434,7 +495,6 @@ class SinglePlayerGame : public Game {
 
 		// 死亡判定。マーカーで殴られたら死ぬ。
 		bool deathDecision() {
-			// この場合、ブロックに当たったら死ぬ、的な
 
 			if (invincibleTime == 0) {
 				for (auto marker : game.markerList) {
@@ -444,6 +504,7 @@ class SinglePlayerGame : public Game {
 							PlaySoundMem(soundHandles["s_game_attack"], DX_PLAYTYPE_BACK, true);
 						}
 						isAlive = damageControl();
+						marker->effectHit();
 						invincibleTime = 15;
 
 						return !isAlive;
@@ -462,6 +523,7 @@ class SinglePlayerGame : public Game {
 		// ダメージが何点以上で死亡とするか。返り値は 死：false, 生：true
 		bool damageControl() {
 			damage++;
+			
 			if (maxDamage < 0) {
 				return true;
 			}
@@ -553,7 +615,7 @@ class SinglePlayerGame : public Game {
 		}
 
 		void update() {
-			static int inundationCounter = 600;
+			static int inundationCounter = 400;
 			if (!button->getIsAlive() || inundationCounter == 0) {
 				isWaterUp = false;
 			}
@@ -852,6 +914,10 @@ class SinglePlayerGame : public Game {
 	std::shared_ptr<Eagle> makeEagle();
 	std::shared_ptr<Heiho> makeHeiho();
 	std::shared_ptr<Fire> makeFire();
+
+	void makeEffect(std::string effectHandleKey_, int x_ = 0, int y_ = 0, int width_ = WIDTH, int height_ = HEIGHT, bool willStay_ = false, int layer_ = 150, int framePerCount_ = 1, int counter_ = 0) {
+		drawList.push_back(std::make_shared<Effect>(effectHandleKey_, x_, y_, width_, height_, willStay_, layer_, framePerCount_, counter_));
+	}
 
 	std::shared_ptr<BGM> bgm;
 	const int maxTime = 30 * 40;

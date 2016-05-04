@@ -85,10 +85,20 @@ bool SinglePlayerGame::onStart() {
 
 		drawList.push_back(player);
 		drawList.push_back(make_shared<Background>(share.handle));
-		drawList.push_back(make_shared<Effect>("s_game_coin", 200, 200, 50, 50, true));
-		drawList.push_back(make_shared<Effect>("s_game_coin", 250, 200, 50, 50, true, 150, 1, 3));
-		drawList.push_back(make_shared<Effect>("s_game_coin", 300, 200, 50, 50, true, 150, 2));
-		drawList.push_back(make_shared<Effect>("s_game_coin", 350, 200, 50, 50, true, 150, 2, 3));
+		makeEffect("s_game_coin", 200, 200, 50, 50, true);
+		makeEffect("s_game_coin", 250, 200, 50, 50, true, 150, 1, 3);
+		makeEffect("s_game_coin", 300, 200, 50, 50, true, 150, 2);
+		makeEffect("s_game_coin", 350, 200, 50, 50, true, 150, 2, 3);
+
+		share.rectMutex.lock();
+		markerList.clear();
+		markerList.shrink_to_fit();
+		for (int i = 0; i < share.rects.size(); i++) {
+			auto marker = std::make_shared<Marker>(share.rects[i], false, i, *this);
+			markerList.push_back(marker);
+			drawList.push_back(marker);
+		}
+		share.rectMutex.unlock();
 
 		bgm = make_shared<BGM>(1);
 		bgm->start();
@@ -167,12 +177,8 @@ bool SinglePlayerGame::onUpdate() {
 
 		// 認識したマーカーを描画
 		share.rectMutex.lock();
-		markerList.clear();
-		markerList.shrink_to_fit();
-		for (int i = 0; i < share.rects.size(); i++) {
-			auto marker = std::make_shared<Marker>(share.rects[i], false, i);
-			markerList.push_back(marker);
-			drawList.push_back(marker);
+		for (auto marker : markerList) {
+			marker->setRect(share.rects[marker->getIndex()]);
 		}
 		share.rectMutex.unlock();
 
@@ -213,7 +219,6 @@ bool SinglePlayerGame::onUpdate() {
 		break;
 
 	}
-
 	case 2: { // リザルト画面
 		if (key[KEY_INPUT_RETURN]) {
 			willFinishMode = true;
