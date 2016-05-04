@@ -18,9 +18,9 @@ namespace Breakout {
 	const int DEBUG_WINDOW_WIDTH = WIDTH / 4;
 	const int DEBUG_WINDOW_HEIGHT = HEIGHT;
 	
-	const Eigen::Vector2i RESULT_START_POS = Eigen::Vector2i{WIDTH / 4, HEIGHT / 3};
-	const int RESULT_WIDTH = WIDTH / 2;
-	const int RESULT_HEIGHT = HEIGHT / 3;
+	const Eigen::Vector2i RESULT_START_POS = Eigen::Vector2i::Zero();
+	const int RESULT_WIDTH = WIDTH;
+	const int RESULT_HEIGHT = HEIGHT;
 
 	// Timerのパラメータ
 	constexpr int TIMER_MAX_MIN = 0;

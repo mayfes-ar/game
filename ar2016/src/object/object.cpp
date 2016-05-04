@@ -112,7 +112,7 @@ bool Object::load() {
 	isSuccess &= loadImage("block_green", "block_green");
 	isSuccess &= loadImage("forest", "forest");
 	isSuccess &= loadImage("magma", "magma");
-	isSuccess &= loadImage("game_over", "game_over");
-
+	isSuccess &= loadImage("b_game_over", "breakout/game_over");
+	isSuccess &= loadImage("b_game_clear", "breakout/game_clear");
 	return isSuccess;
 }

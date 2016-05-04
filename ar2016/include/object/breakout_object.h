@@ -215,18 +215,29 @@ public:
 		Object::layer = PRIORITY_INFO;
 	}
 
+	void init()
+	{
+		m_cnt = 0;
+	}
+
 
 	bool draw() override {
+		if (m_cnt >= 255) {
+			m_cnt = 255;
+		}
+		SetDrawBright(m_cnt, m_cnt, m_cnt);
+		m_cnt++;
+
 		if (m_is_game_clear) {
 			DrawExtendGraph(m_realm.left(), m_realm.top(),
 				m_realm.right(), m_realm.bottom(),
-				imgHandles["s_game_result_clear"], TRUE);
+				imgHandles["b_game_clear"], TRUE);
 				return true;
 		}
 
 			DrawExtendGraph(m_realm.left(), m_realm.top(),
 				m_realm.right(), m_realm.bottom(),
-				imgHandles["game_over"], TRUE);
+				imgHandles["b_game_over"], TRUE);
 
 		return true;
 	}
@@ -239,6 +250,7 @@ public:
 private:
 	Shape::Rectangle m_realm = Shape::Rectangle();
 	bool m_is_game_clear = false;
+	int m_cnt = 0;
 };
 
 // フィールド 

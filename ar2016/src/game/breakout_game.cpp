@@ -96,8 +96,8 @@ void BreakoutGame::updateGameState()
 	int kind = mode.getMode();
 
 	enum Kind {
-		Playing = 0,
-		Result = 1
+		Playing = 0, //!< Play画面
+		Result = 1, //!< Result画面
 	};
 	switch (kind) {
 	case Playing:
