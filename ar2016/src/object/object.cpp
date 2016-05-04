@@ -114,6 +114,7 @@ bool Object::load() {
 	isSuccess &= loadEffect("p_crystal1", "puzzle/crystal1", 5, 4, 600, 480);
 	isSuccess &= loadEffect("p_crystal2", "puzzle/crystal2", 5, 4, 600, 480);
 	isSuccess &= loadEffect("p_warp", "puzzle/warp", 2, 8, 1600, 4800);
+	isSuccess &= loadEffect("p_num", "puzzle/num", 5, 2, 1000, 400);
 
 	// breakout game
 	isSuccess &= loadImage("ship_block", "shipBlock");

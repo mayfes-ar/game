@@ -55,6 +55,17 @@ protected:
 		}
 	}
 
+	void drawNumber(int x, int y, int size, int num, std::vector<int,std::allocator<int>> handle) {
+		const int digit = num?(int)log10((double)num) + 1:1;
+		int width, height;
+		GetGraphSize(handle[1], &width, &height);
+		const int ratio = width / height;
+		for (int i = digit; i > 0; i--) {
+			int n = (num % (int)pow(10, i)) / (int)pow(10, i - 1);
+			DrawExtendGraph(x+size*ratio*(digit-i), y, x + size*ratio*(digit - i) + size*ratio, y + size, handle[n], true);
+		}
+	}
+
 public:
 	int getLayer() const { return layer; }
 	double right() const { return rect.x + rect.width; }
