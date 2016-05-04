@@ -58,39 +58,42 @@ bool Object::load() {
 	isSuccess &= loadImage("block", "block");
 
 	//メニューで使う
-	isSuccess &= loadImage("monhan", "monhan");
-	isSuccess &= loadImage("rockman", "rockman");
-	isSuccess &= loadImage("ar2016_logo", "wallpaper");
-	isSuccess &= loadImage("menu_title", "menu_title");
-	isSuccess &= loadSound("menu_bgm", "welcome_to_the_Chu-2_byo_world!.mp3");
+	isSuccess &= loadImage("monhan", "menu/monhan");
+	isSuccess &= loadImage("rockman", "menu/rockman");
+	isSuccess &= loadImage("ar2016_logo", "menu/wallpaper");
+	isSuccess &= loadImage("menu_title", "menu/menu_title");
+	isSuccess &= loadSound("menu_bgm", "menu/welcome_to_the_Chu-2_byo_world!.mp3");
 	isSuccess &= loadEffect("effect1", "warp", 1, 6, 640, 2880);
 
 	// Single Player Game
 	// オープニング
-	isSuccess &= loadImage("s_game_op_title", "s_game_op_title");
-	isSuccess &= loadImage("s_game_op", "s_game_op");
+	isSuccess &= loadImage("s_game_op_title", "s_game/s_game_op_title");
+	isSuccess &= loadImage("s_game_op", "s_game/s_game_op");
 
 	//　ゲーム本編
-	isSuccess &= loadImage("s_game_player", "mario");
-	isSuccess &= loadImage("s_game_wanwan", "wanwan");
-	isSuccess &= loadImage("s_game_marker", "luigi");
-	isSuccess &= loadImage("s_game_teresa", "teresa");
+	isSuccess &= loadImage("s_game_player", "s_game/mario");
+	isSuccess &= loadImage("s_game_wanwan", "s_game/wolf");
+	isSuccess &= loadImage("s_game_marker", "s_game/luigi");
+	isSuccess &= loadImage("s_game_teresa", "s_game/teresa");
 
-	isSuccess &= loadSound("s_game_bgm", "妄想凸守旋律～補完～.mp3");
+	isSuccess &= loadSound("s_game_bgm", "s_game/bgm.mp3");
 
-	isSuccess &= loadImage("s_game_water", "water");
-	isSuccess &= loadImage("s_game_switch", "switch");
+	isSuccess &= loadImage("s_game_water", "s_game/water");
+	isSuccess &= loadImage("s_game_switch", "s_game/switch");
 
-	isSuccess &= loadSound("s_game_dead", "dead.wav");
-	isSuccess &= loadSound("s_game_attack", "bomb.mp3");
-	isSuccess &= loadSound("s_game_jump", "jump.mp3");
+	isSuccess &= loadSound("s_game_dead", "s_game/dead.wav");
+	isSuccess &= loadSound("s_game_attack", "s_game/bomb.mp3");
+	isSuccess &= loadSound("s_game_jump", "s_game/jump.mp3");
+
+	isSuccess &= loadEffect("s_game_coin", "s_game/coin", 5, 2, 1000, 400);
+
 
 	// リザルト
-	isSuccess &= loadImage("s_game_result_clear", "s_game_clear");
-	isSuccess &= loadImage("s_game_result_dead", "s_game_result");
-	isSuccess &= loadImage("s_game_dead", "dead_sample");
+	isSuccess &= loadImage("s_game_result_clear", "s_game/s_game_clear");
+	isSuccess &= loadImage("s_game_result_dead", "s_game/s_game_result");
+	isSuccess &= loadImage("s_game_dead", "s_game/dead_sample");
 
-	isSuccess &= loadSound("s_game_over", "game_over.wav");
+	isSuccess &= loadSound("s_game_over", "s_game/game_over.wav");
 
 	// isSuccess &= loadImage("s_game_bg", "wallpaper_alpha");
 
