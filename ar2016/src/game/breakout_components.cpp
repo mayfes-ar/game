@@ -80,5 +80,10 @@ void BreakoutComponents::setup()
 		}
 	}
 
+	// EnemyHeadの初期化
+	{
+		enemy_head = std::make_shared<Breakout::EnemyHead>(Shape::Rectangle(ENEMY_HEAD_POS, ENEMY_HEAD_WIDTH, ENEMY_HEAD_WIDTH));
+	}
+
 	// Todo Player
 }

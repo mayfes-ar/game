@@ -188,3 +188,7 @@ void BreakoutGame::updatePotStatus() {
 		}
 	}
 }
+
+void BreakoutGame::updateEnemy() {
+	m_components->enemy_head->updatePosition();
+}

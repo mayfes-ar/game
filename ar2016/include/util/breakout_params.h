@@ -48,4 +48,9 @@ namespace Breakout {
 
 	// Potのパラメータ
 	const Eigen::Vector2i POT_START_POS = Eigen::Vector2i{ BLOCK_OFFSET_X , HEIGHT - 200 };
+
+	// Enemyのパラメータ
+	const Eigen::Vector2f ENEMY_ACCEL{ 1, 0 };
+	const int ENEMY_HEAD_WIDTH = 50;
+	const Eigen::Vector2i ENEMY_HEAD_POS = FIELD_START_POS + Eigen::Vector2i{ FIELD_WIDTH / 2 - ENEMY_HEAD_WIDTH/2 , 0 };
 } // namespace Breakout

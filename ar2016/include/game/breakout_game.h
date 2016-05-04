@@ -35,6 +35,7 @@ public:
 			for (const auto& item : m_components->item_list) {
 				drawList.push_back(item);
 			}
+			drawList.push_back(m_components->enemy_head);
 		}, -1);
 
 		// Result画面
@@ -54,7 +55,8 @@ public:
 		moveShip();
 		updateBlockStatus();
 		updatePotStatus();
-		
+		updateEnemy();
+
 		if (key[KEY_INPUT_ESCAPE]) {
 			share.willFinish = true;
 		}
@@ -102,6 +104,9 @@ private:
 
 	// PotとFireBallの当たり判定をし、fireballを吸い込むかを決める
 	void updatePotStatus();
+
+	// EnemyとFireballの当たり判定をしたり、する
+	void updateEnemy();
 
 	// ゲームをクリアしたかどうか
 	// 現在はBlockが一つもない場合はクリアとみなす

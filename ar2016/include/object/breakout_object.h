@@ -693,23 +693,13 @@ namespace Breakout {
 		virtual ~EnemyBase() {}
 		// 今はmodeだけどそのうちfireballのモードenumに置き換わるはず
 		// ここでvelocityを設定するかどうか迷う
-		virtual std::shared_ptr<Fireball> makeFireball(int mode, Eigen::Vector2i velocity) = 0;
+		virtual std::shared_ptr<Fireball> makeFireball(int mode, Eigen::Vector2f velocity) = 0;
 		// mode が enemy じゃない fireball にあたったらLifeを減らすようなメソッド
 		virtual bool damageEnemy(std::shared_ptr<Fireball>& fireball) = 0;
 		// 何かしらのアクションでLifeを回復するメソッド。実装したくない場合はreturnすればよい
 		virtual bool restoreEnemy() = 0;
 		virtual void resetEnemy() = 0;
 
-		void updatePosition() {
-			//単振動させる
-			if (m_moving->getAccel().x() >= 0) {
-				m_moving->setAccel(m_moving->getAccel() - ENEMY_ACCEL / 10);
-			}
-			else {
-				m_moving->setAccel(m_moving->getAccel() + ENEMY_ACCEL / 10);
-			}
-			m_moving->updatePosition(m_realm.start_point);
-		}
 		int getLifeNum() {
 			return m_life.getLifeNum();
 		}
@@ -730,8 +720,10 @@ namespace Breakout {
 		EnemyHead(Shape::Rectangle realm) {
 			m_life = Life(4, 4);
 			m_realm = realm;
+			m_moving->setVelocity(Eigen::Vector2f(8, 0));
+			Object::layer = PRIORITY_DYNAMIC_OBJECT;
 		}
-		std::shared_ptr<Fireball> makeFireball(int mode, Eigen::Vector2i velocity) override {
+		std::shared_ptr<Fireball> makeFireball(int mode, Eigen::Vector2f velocity) override {
 			// TODO mode
 			auto fireball = std::make_shared<Fireball>(Shape::Circle(m_realm.getLeftBottomPoint(), FIREBALL_RADIUS), std::make_shared<Moving>());
 			fireball->setVelocity(velocity);
@@ -741,6 +733,16 @@ namespace Breakout {
 			// TODO mode (mode == プレイヤーだったら)
 			// TODO fireballはあたったら消えるからmanagerから消す
 			return m_life.damage(1);
+		}
+		void updatePosition() {
+			//単振動させる
+			/*if (m_moving->getVelocity().x() >= 0) {
+				m_moving->setAccel(m_moving->getAccel() - ENEMY_ACCEL);
+			}
+			else {
+				m_moving->setAccel(m_moving->getAccel() + ENEMY_ACCEL);
+			}*/
+			m_moving->updatePosition(m_realm.start_point);
 		}
 		// 何かしらのアクションでLifeを回復するメソッド。実装したくない場合はreturnすればよい
 		bool restoreEnemy() override {
@@ -752,6 +754,7 @@ namespace Breakout {
 
 		bool draw() override {
 			DrawExtendGraph(m_realm.left(), m_realm.top(), m_realm.right(), m_realm.bottom(), imgHandles["kuppa_head"], TRUE);
+			return true;
 		}
 	private:
 
