@@ -44,10 +44,71 @@ std::shared_ptr<SinglePlayerGame::Switch> SinglePlayerGame::makeSwitch(int x, in
 	return enemy;
 }
 
+std::shared_ptr<SinglePlayerGame::Ufo> SinglePlayerGame::makeUfo(int x, int y, double size = 1.0) {
+	auto enemy = std::make_shared<Ufo>(x, y, *this, size);
+	if (player->isContacted(enemy)) {
+		enemy = std::make_shared<Ufo>(x, y - 200, *this, size);
+	}
+	enemyList.push_back(enemy);
+	drawList.push_back(enemy);
+	return enemy;
+}
+
+std::shared_ptr<SinglePlayerGame::Cloud> SinglePlayerGame::makeCloud(int x, int y, double size = 1.0) {
+	auto enemy = std::make_shared<Cloud>(x, y, *this, size);
+	if (player->isContacted(enemy)) {
+		enemy = std::make_shared<Cloud>(x, y - 200, *this, size);
+	}
+	enemyList.push_back(enemy);
+	drawList.push_back(enemy);
+	return enemy;
+}
+
+std::shared_ptr<SinglePlayerGame::Drop> SinglePlayerGame::makeDrop(int x, int y, double size = 1.0) {
+	auto enemy = std::make_shared<Drop>(x, y, *this, size);
+	if (player->isContacted(enemy)) {
+		enemy = std::make_shared<Drop>(x, y - 200, *this, size);
+	}
+	enemyList.push_back(enemy);
+	drawList.push_back(enemy);
+	return enemy;
+}
+
+std::shared_ptr<SinglePlayerGame::Eagle> SinglePlayerGame::makeEagle(int x, int y, double size = 1.0) {
+	auto enemy = std::make_shared<Eagle>(x, y, *this, size);
+	if (player->isContacted(enemy)) {
+		enemy = std::make_shared<Eagle>(x, y - 200, *this, size);
+	}
+	enemyList.push_back(enemy);
+	drawList.push_back(enemy);
+	return enemy;
+}
+
+std::shared_ptr<SinglePlayerGame::Heiho> SinglePlayerGame::makeHeiho(int x, int y, double size = 1.0) {
+	auto enemy = std::make_shared<Heiho>(x, y, *this, size);
+	if (player->isContacted(enemy)) {
+		enemy = std::make_shared<Heiho>(x, y - 200, *this, size);
+	}
+	enemyList.push_back(enemy);
+	drawList.push_back(enemy);
+	return enemy;
+}
+
+std::shared_ptr<SinglePlayerGame::Fire> SinglePlayerGame::makeFire(int x, int y, double size = 1.0) {
+	auto enemy = std::make_shared<Fire>(x, y, *this, size);
+	if (player->isContacted(enemy)) {
+		enemy = std::make_shared<Fire>(x, y - 200, *this, size);
+	}
+	enemyList.push_back(enemy);
+	drawList.push_back(enemy);
+	return enemy;
+}
+
+
 bool SinglePlayerGame::onStart() {
 	using namespace std;
 	fps.isShow = true;
-
+	
 	srand((unsigned int)time(NULL));
 
 	// mode 0
@@ -190,15 +251,35 @@ bool SinglePlayerGame::onUpdate() {
 
 		// 敵の出現を管理する
 		switch (maxTime - timer) {
-		case 300:
+		case 200: {
+			makeCloud(0,0,1);
+			break;
+		}
+		case 180: {
+			makeEagle(0,0,1);
+			break;
+		}
+		case 150: {
+			makeUfo(WIDTH/2,200,1);
+			break;
+		}
+		case 300: {
 			makeInundation();
-			makeSwitch(100, 100, 1);
+			//makeSwitch(100, 100, 1);
+			break;
+		}
 		case 500:
 		case 100: {
 			makeRocketWanwan(0, HEIGHT / 2 + 50);
 			break;
 		}
 		default: {
+			if (heiholist[0] == NULL) {
+				makeHeiho(WIDTH-100,HEIGHT-100,1);
+			}
+			else if (heiholist[0]->frameCounter == 0) {
+				makeFire(heiholist[0]->getRectX(), heiholist[0]->getRectX(), 1);
+			}
 
 			break;
 		}

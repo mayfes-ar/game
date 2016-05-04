@@ -575,10 +575,18 @@ class SinglePlayerGame : public Game {
 	class Heiho : public Enemy {
 		static const int width = 345 / 4;
 		static const int height = 333 / 4;
-		int frameCounter = 100;
 	public:
+		int frameCounter = 100;
 		Heiho(int x_, int y_, SinglePlayerGame& game_, double size, int maxDamage_ = 10, std::string imgHandleKey_ = "s_game_heiho") : Enemy(x_, y_, width * size, height * size, imgHandleKey_, maxDamage_, game_) {
 			moveDirection = LEFT;
+		}
+
+		void update() {
+			double acX = 0;
+			double acY = 0;
+			setAc(&acX, &acY);
+			updateCoordinate(acX, acY);
+
 		}
 
 		void updateCoordinate(double acX, double acY) {
@@ -603,6 +611,13 @@ class SinglePlayerGame : public Game {
 			y += diffY + acY;
 			prevY = tempY;
 		}
+		int getRectX() {
+			return rect.x;
+		}
+		int getRextY() {
+			return rect.y;
+		}
+
 	};
 
 	class Fire : public Enemy {
@@ -633,6 +648,8 @@ class SinglePlayerGame : public Game {
 			*acY = 0;
 		}
 	};
+
+	std::shared_ptr<SinglePlayerGame::Heiho>heiholist[10] = {NULL};
 
 	class Player : public Character {
 
@@ -743,12 +760,12 @@ class SinglePlayerGame : public Game {
 	std::shared_ptr<RocketWanwan> makeRocketWanwan(int x, int y, double size);
 	std::shared_ptr<Inundation> makeInundation();
 	std::shared_ptr<Switch> makeSwitch(int x, int y, double size);
-	std::shared_ptr<Ufo> makeUfo();
-	std::shared_ptr<Cloud> makeCloud();
-	std::shared_ptr<Drop> makeDrop();
-	std::shared_ptr<Eagle> makeEagle();
-	std::shared_ptr<Heiho> makeHeiho();
-	std::shared_ptr<Fire> makeFire();
+	std::shared_ptr<Ufo> makeUfo(int x, int y, double size);
+	std::shared_ptr<Cloud> makeCloud(int x, int y, double size);
+	std::shared_ptr<Drop> makeDrop(int x, int y, double size);
+	std::shared_ptr<Eagle> makeEagle(int x, int y, double size);
+	std::shared_ptr<Heiho> makeHeiho(int x, int y, double size);
+	std::shared_ptr<Fire> makeFire(int x, int y, double size);
 
 	std::shared_ptr<BGM> bgm;
 	const int maxTime = 30 * 40;
