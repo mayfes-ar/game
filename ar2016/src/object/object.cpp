@@ -71,7 +71,8 @@ bool Object::load() {
 	isSuccess &= loadImage("s_game_op", "s_game_op");
 
 	//　ゲーム本編
-	isSuccess &= loadImage("s_game_player", "mario");
+	isSuccess &= loadImage("s_game_player", "hime_normal");
+	isSuccess &= loadImage("s_game_player_damage", "hime_odoroki");
 	isSuccess &= loadImage("s_game_wanwan", "wanwan");
 	isSuccess &= loadImage("s_game_marker", "luigi");
 	isSuccess &= loadImage("s_game_teresa", "teresa");

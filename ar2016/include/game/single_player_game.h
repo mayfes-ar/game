@@ -180,6 +180,8 @@ class SinglePlayerGame : public Game {
 	public:
 		const int imgHandle;
 		const int maxDamage;
+		std::vector<std::string> imgHandleC;
+		
 
 		double prevX;
 		double prevY;
@@ -189,7 +191,14 @@ class SinglePlayerGame : public Game {
 		{
 			LEFT, NOMOVE, RIGHT,
 		};
+		
+		enum CharacterState
+		{
+			NORMAL, DAMAGE, OVER,
+		};
+
 		MoveDirection moveDirection = NOMOVE;
+		CharacterState characterState = NORMAL;
 
 		bool isAlive = true;
 		int damage = 0;
@@ -197,12 +206,14 @@ class SinglePlayerGame : public Game {
 
 		const SinglePlayerGame& game;
 
-		Character(int x_, int y_, int width_, int height_, std::string imgHandleKey_, int maxDamage_, SinglePlayerGame& game_) :imgHandle(imgHandles[imgHandleKey_]), maxDamage(maxDamage_),game(game_) {
+		Character(int x_, int y_, int width_, int height_, std::string imgHandleKey_, int maxDamage_, SinglePlayerGame& game_) :imgHandle(imgHandles[imgHandleKey_]), maxDamage(maxDamage_), game(game_) {
 			rect.x = prevX = x_;
 			rect.y = prevY = y_;
 			rect.width = width_;
 			rect.height = height_;
 		}
+
+
 
 		virtual bool draw() {
 			switch (moveDirection)
@@ -505,7 +516,29 @@ class SinglePlayerGame : public Game {
 
 		bool draw() {
 			DrawString(50, 50, std::to_string(damage).c_str(), GetColor(255, 255, 255));
-			return Character::draw();
+			if (characterState == DAMAGE) {
+				switch (moveDirection)
+			{
+			case RIGHT: {
+				drawWithRect(imgHandles["s_game_player_damage"], 0, true);
+				break;
+			}
+
+			case NOMOVE:
+			case LEFT: {
+				drawWithRect(imgHandles["s_game_player_damage"]);
+				break;
+			}
+			default:
+				break;
+			}
+			return getIsAlive();
+
+			}
+			else {
+				return Character::draw();
+			}
+			
 		}
 
 		void update(const char key[]) {
@@ -565,16 +598,22 @@ class SinglePlayerGame : public Game {
 					if (left() <= enemy->right() && top() <= enemy->bottom() &&
 						right() >= enemy->left() && bottom() >= enemy->top()) {
 						damage += 1;
+						characterState = DAMAGE;
 						invincibleTime = 50;
 						break;
 					}
 				}
+			}
+			else if (invincibleTime == 40) {
+				characterState = NORMAL;
+				invincibleTime--;
 			}
 			else if (invincibleTime > 0) {
 				invincibleTime--;
 			}
 			/*
 			if (damage > 5) {
+			characterState = OVER;
 			isAlive = false;
 			}
 			*/
@@ -609,7 +648,10 @@ class SinglePlayerGame : public Game {
 public:
 	SinglePlayerGame() {
 		thread = std::thread::thread(capture, std::ref(share));
-		player = std::make_shared<Player>(WIDTH / 2 - 100 / 2, HEIGHT / 2 - 150 / 2, 75, 100, "s_game_player", 5, *this);
+		
+			player = std::make_shared<Player>(WIDTH / 2 - 100 / 2, HEIGHT / 2 - 150 / 2, 90, 140, "s_game_player", 5, *this);
+		
+		
 		hasPlayerWon = true;
 	}
 
