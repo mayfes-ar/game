@@ -9,7 +9,7 @@ namespace Breakout {
 
 		const auto vel = m_moving->getVelocity();
 		const float coe = 0.5;
-		const int arranged_parent_vel = (int)((float)parentVelocity * coe);
+		const float arranged_parent_vel = ((float)parentVelocity * coe);
 
 		// 四角形の上側との衝突
 		const int dist_center_top = MathUtil::distPointToLine(m_realm.center, parent.getTopLine());
@@ -36,7 +36,8 @@ namespace Breakout {
 			}
 			auto pos = Eigen::Vector2i(m_realm.center[0], inOrOut * -1 * m_realm.radius + parent.top());
 			setPosition(pos);
-			m_moving->setVelocity(Eigen::Vector2f{ vel.x() + arranged_parent_vel, -vel.y()});
+			auto new_vel = Eigen::Vector2f{ vel.x() + arranged_parent_vel, -vel.y() };
+			m_moving->setVelocity(new_vel * vel.norm() / new_vel.norm());
 			return true;
 
 		}
@@ -59,7 +60,8 @@ namespace Breakout {
 					return true;
 				}
 			}
-			m_moving->setVelocity(Eigen::Vector2f{ vel.x() + arranged_parent_vel, -vel.y()});
+			auto new_vel = Eigen::Vector2f{ vel.x() + arranged_parent_vel, -vel.y() };
+			m_moving->setVelocity(new_vel * vel.norm() / new_vel.norm());
 			auto pos = Eigen::Vector2i(m_realm.center[0], inOrOut * m_realm.radius + parent.bottom());
 			setPosition(pos);
 			return true;
