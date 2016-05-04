@@ -183,7 +183,7 @@ public:
 			}
 			SetDrawBright(m_magma_saturation, m_magma_saturation, m_magma_saturation);
 			DrawExtendGraph(0, 0, WIDTH, HEIGHT, 
-					imgHandles["b_forest"], true);
+					imgHandles["b_hill"], true);
 			SetDrawBright(255, 255, 255);
 			return true;
 		}

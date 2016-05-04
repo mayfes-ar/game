@@ -134,6 +134,7 @@ bool Object::load() {
 	isSuccess &= loadImage("b_game_over", "breakout/game_over");
 	isSuccess &= loadImage("b_game_clear", "breakout/game_clear");
 	isSuccess &= loadImage("b_explanation", "breakout/explanation");
+	isSuccess &= loadImage("b_hill", "breakout/hill");
 
 	for (int num = 0; num <= 9; ++num) {
 		for (const auto& color : { "red", "blue", "yellow", "green" }) {
