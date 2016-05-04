@@ -45,6 +45,10 @@ bool PuzzleGame::onStart() {
 		setCoin(160, 420);
 		setCoin(260, 420);
 
+		for (int i = 0; i < 80; i++){
+			setSmog();
+		}
+
 	}, -1);
 
 	// mode 3
@@ -222,6 +226,9 @@ bool PuzzleGame::onUpdate() {
 		break;
 	}
 	case 2: {
+		if (counter % (FPS * 3) == 0) {
+			setSmog();
+		}
 		
 		break;
 	}
