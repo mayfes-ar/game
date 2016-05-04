@@ -49,7 +49,7 @@ class PuzzleGame : public Game {
 		}
 		bool draw() {
 			if (canHit) {
-				DrawRectGraph(left(), top(), left(), top(), rect.width, rect.height, imgHandles["s_block"], false, false);
+				DrawRectGraph(left(), top(), left(), top(), rect.width, rect.height, imgHandles["s_brick1"], false, false);
 				//DrawBox(left(), top(), right(), bottom(), GetColor(240, 117, 50), true);
 			} else {
 				DrawBox(left(), top(), right(), bottom(), GetColor(40, 117, 50), false);
