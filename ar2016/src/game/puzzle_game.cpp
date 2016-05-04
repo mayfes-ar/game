@@ -11,7 +11,9 @@ bool PuzzleGame::onStart() {
 		setBlock(-50, -720, 100, 720 * 2, true);
 		setBlock(1230, -720, 100, 720 * 2, true);
 
-		drawList.push_back(std::make_shared<Explanation>());
+		auto explanation = std::make_shared<Explanation>();
+		drawList.push_back(explanation);
+		setSwitch(500, 550, 100, explanation->isFirst, true);
 		setPlayer(100, 600);
 		setGoal(1100, 550);
 	}, -1);
@@ -237,12 +239,12 @@ bool PuzzleGame::onUpdate() {
 		break;
 	}
 	case 3: {
-		if (counter % (FPS * 3) == 0) {
+		/*if (counter % (FPS * 3) == 0) {
 			setDamage(300, -100, 50, 5, 14);
 		}
 		if (2 * counter % (FPS * 6) == FPS * 3) {
 			setDamage(400, -100, 50, -5, 14);
-		}
+		}*/
 		break;
 	}
 	case 4: {
