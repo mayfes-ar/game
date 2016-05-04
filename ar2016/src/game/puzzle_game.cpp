@@ -20,7 +20,7 @@ bool PuzzleGame::onStart() {
 	mode.setMode([this]() {
 		makeStageBase();
 		drawList.push_back(std::make_shared<CurtainObject>(true));
-		setPlayer(100, -300);
+		setPlayer(100, -100);
 		setGoal(1100, 550);
 
 		setBlock(0, 520, 540, 200);
@@ -84,7 +84,7 @@ bool PuzzleGame::onStart() {
 		setCoin(900, 370);
 		setCoin(980, 370);
 
-		setBlock(0, 680, 1300, 20);
+		setBlock(0, 680, 1300, 200);
 
 	}, -1);
 
@@ -316,7 +316,7 @@ bool PuzzleGame::onUpdate() {
 
 
 void PuzzleGame::Player::update() {
-	if (isReached) { return; }
+	if (!isMovable) { return; }
 	updateFunc();
 	updateFunc = []() {};
 
