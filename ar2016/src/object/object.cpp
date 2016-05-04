@@ -104,6 +104,7 @@ bool Object::load() {
 	isSuccess &= loadImage("p_off", "switch_off");
 	isSuccess &= loadImage("p_arrow", "arrow");
 	isSuccess &= loadImage("p_castle", "puzzle/castle");
+	isSuccess &= loadImage("s_brick1", "puzzle/brick1");
 	isSuccess &= loadEffect("p_smog", "puzzle/smog", 5, 6, 640, 768);
 	isSuccess &= loadEffect("p_ball", "puzzle/ball", 3, 10, 960, 2400);
 	isSuccess &= loadEffect("p_coin", "puzzle/coin", 5, 2, 1000, 400);
