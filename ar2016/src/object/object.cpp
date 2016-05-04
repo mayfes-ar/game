@@ -104,17 +104,22 @@ bool Object::load() {
 	isSuccess &= loadImage("p_off", "switch_off");
 	isSuccess &= loadImage("p_arrow", "arrow");
 	isSuccess &= loadImage("p_castle", "puzzle/castle");
+	isSuccess &= loadImage("s_brick1", "puzzle/brick1");
 	isSuccess &= loadEffect("p_smog", "puzzle/smog", 5, 6, 640, 768);
 	isSuccess &= loadEffect("p_ball", "puzzle/ball", 3, 10, 960, 2400);
 	isSuccess &= loadEffect("p_coin", "puzzle/coin", 5, 2, 1000, 400);
+	isSuccess &= loadEffect("p_coins", "puzzle/coins", 5, 6, 1200, 1440);
 	isSuccess &= loadEffect("p_curtain_close", "puzzle/curtain_close", 1, 18, 640, 8640);
 	isSuccess &= loadEffect("p_curtain_open", "puzzle/curtain_open", 1, 10, 640, 4800);
 	isSuccess &= loadEffect("p_arrow1", "arrow1",10,1,1200,120);
-	isSuccess &= loadEffect("p_smog1", "smog1", 10, 1, 1200, 120);
 	isSuccess &= loadEffect("p_crystal1", "puzzle/crystal1", 5, 4, 600, 480);
 	isSuccess &= loadEffect("p_crystal2", "puzzle/crystal2", 5, 4, 600, 480);
 	isSuccess &= loadEffect("p_warp", "puzzle/warp", 2, 8, 1600, 4800);
+<<<<<<< HEAD
 	isSuccess &= loadEffect("p_num", "puzzle/num", 5, 2, 1000, 400);
+=======
+	isSuccess &= loadEffect("p_init", "puzzle/init", 14, 1, 1680, 120);
+>>>>>>> de15c07d616f03e6f88a697243e44046e7a461fe
 
 	// breakout game
 	isSuccess &= loadImage("ship_block", "shipBlock");

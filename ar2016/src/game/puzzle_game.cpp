@@ -163,12 +163,13 @@ bool PuzzleGame::onStart() {
 
 		setBlock(0, 0, 450, 150, true);//hidariue
 
-		setBlock(100, 400, 100, 400, true);//hidarishita
-		setBlock(0, 550, 200, 400, true);
+		setBlock(100, 390, 100, 400, true);//hidarishita
+		setBlock(0, 540, 200, 400, true);
 
 		setBlock(800, 10, 700, 140, true);//migiue
 		setBlock(1300, -500, 50, 500, true);
 
+		setBlock(300, 390, 220, 10, true);
 		setBlock(300, 400, 500, 100, true);//shita
 		setBlock(650, 500, 50, 300, true);
 		setBlock(320, 660, 350, 150, true);
@@ -276,6 +277,9 @@ bool PuzzleGame::onUpdate() {
 	if (goal->check(player)) {
 		if (mode.getMode() == 0 || mode.getMode() == 6) {
 			drawList.push_back(std::make_shared<CurtainObject>(false));
+		}
+		if (mode.getMode() > 0) {
+			drawList.push_back(goal->goalEffect());
 		}
 		funcTimer.set([this]() { mode.goNext(); }, FPS * 2);
 	}
