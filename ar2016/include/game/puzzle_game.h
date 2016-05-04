@@ -49,7 +49,8 @@ class PuzzleGame : public Game {
 		}
 		bool draw() {
 			if (canHit) {
-				DrawBox(left(), top(), right(), bottom(), GetColor(240, 117, 50), true);
+				DrawRectGraph(left(), top(), left(), top(), rect.width, rect.height, imgHandles["s_block"], false, false);
+				//DrawBox(left(), top(), right(), bottom(), GetColor(240, 117, 50), true);
 			} else {
 				DrawBox(left(), top(), right(), bottom(), GetColor(40, 117, 50), false);
 			}
@@ -128,7 +129,7 @@ class PuzzleGame : public Game {
 	};
 
 	class TimerObject : public Object {
-		int time = 20 * FPS;
+		int time = 300 * FPS;
 
 	public:
 		TimerObject() {
