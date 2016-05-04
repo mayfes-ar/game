@@ -78,7 +78,6 @@ void BreakoutComponents::setup()
 			block->attachItem(item);
 			item_list.push_back(item);
 		}
-
 	}
 
 	// Todo Player
