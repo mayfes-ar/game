@@ -25,10 +25,8 @@ return enemy;
 }
 
 std::shared_ptr<SinglePlayerGame::Inundation> SinglePlayerGame::makeInundation() {
-	auto enemy = std::make_shared<Inundation>(0, HEIGHT+100, *this, 1);
-	if (player->isContacted(enemy)) {
-		enemy = std::make_shared<Inundation>(0, HEIGHT+100, *this, 1);
-	}
+	auto enemy = std::make_shared<Inundation>(0, HEIGHT+200, *this, 1);
+
 	enemyList.push_back(enemy);
 	drawList.push_back(enemy);
 	return enemy;
@@ -134,7 +132,7 @@ bool SinglePlayerGame::onStart() {
 		bgm->start();
 
 		for (int i = 0; i < 20; i++);
-	}, 150);
+	}, -1);
 
 	// mode 1
 	mode.setMode([this]() {
@@ -148,6 +146,10 @@ bool SinglePlayerGame::onStart() {
 
 		drawList.push_back(player);
 		drawList.push_back(make_shared<Background>(share.handle));
+		drawList.push_back(make_shared<Effect>("s_game_coin", 200, 200, 50, 50, true));
+		drawList.push_back(make_shared<Effect>("s_game_coin", 250, 200, 50, 50, true, 150, 1, 3));
+		drawList.push_back(make_shared<Effect>("s_game_coin", 300, 200, 50, 50, true, 150, 2));
+		drawList.push_back(make_shared<Effect>("s_game_coin", 350, 200, 50, 50, true, 150, 2, 3));
 
 		bgm = make_shared<BGM>(1);
 		bgm->start();
@@ -270,7 +272,7 @@ bool SinglePlayerGame::onUpdate() {
 		}
 		case 500:
 		case 100: {
-			makeRocketWanwan(0, HEIGHT / 2 + 50);
+			makeRocketWanwan(-RocketWanwan::width, HEIGHT / 2 + 50);
 			break;
 		}
 		default: {

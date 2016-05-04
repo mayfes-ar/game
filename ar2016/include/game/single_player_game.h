@@ -3,7 +3,22 @@
 #include "game/game.h"
 
 class SinglePlayerGame : public Game {
-	
+	/* Layer の基準
+		Player : 100
+		Marker : 200
+		Enemy :
+			RocketWanWan : 165
+			Teresa : 160
+			Switch : 155
+			Inundation : 300
+		Effect : 周りの描画に影響しそうな大きなエフェクト
+			??? :
+		Block : 50
+		背景 : 0
+				
+	*/
+
+
 	class Background : public Object {
 		int& handle;
 
@@ -90,13 +105,55 @@ class SinglePlayerGame : public Game {
 
 	class SingleGameObject : public Object {
 	public:
-		bool draw() {
+		virtual bool draw() {
 			return true;
 		}
+
 		double rightHit() const { return right() - rect.width / 3; }
 		double leftHit() const { return left() + rect.width / 3; }
 		double topHit() const { return top() + rect.height / 3; }
 		double bottomHit() const { return bottom() - rect.height / 3; }
+
+		void drawImage(int handle, int imageWidth, int imageHeight, int shiftX = 0, int shiftY = 0, bool isReverse = false) const {
+			if (isReverse) {
+				DrawExtendGraph(left() - shiftX + imageWidth, top() - shiftY, left() - shiftX, top() - shiftY + imageHeight, handle, true);
+			}
+			else {
+				DrawExtendGraph(left() - shiftX, top() - shiftY, left() - shiftX + imageWidth, top() - shiftY + imageHeight, handle, true);
+			}
+		}
+	};
+
+	class Effect : public SingleGameObject {
+		const std::vector<int> effectHandle;
+		const bool willStay;
+		const int maxCount;
+		const int framePerCount;
+		int counter;
+
+	public :
+		Effect(std::string effectHandleKey_, int x_ = 0, int y_ = 0, int width_ = WIDTH, int height_ = HEIGHT, bool willStay_ = false, int layer_ = 150, int framePerCount_ = 1, int counter_ = 0) : effectHandle(effectHandles[effectHandleKey_]), willStay(willStay_), maxCount(effectHandles[effectHandleKey_].size()*(framePerCount_ > 0 ? framePerCount_ : 1)), framePerCount((framePerCount_ > 0 ? framePerCount_ : 1)) {
+			rect.x = x_;
+			rect.y = y_;
+			rect.width = width_;
+			rect.height = height_;
+			counter = counter_*(framePerCount_ > 0 ? framePerCount_ : 1);
+			layer = layer_;
+		}
+	
+		bool draw() {
+			if (willStay) {
+				if (counter == maxCount) {
+					counter = 0;
+				}
+			}
+
+			drawWithRect(effectHandle[counter/framePerCount]);
+			counter++;
+			// TODO: willStayがfalseのとき、framePerCountでの描画がうまくいかない
+
+			return willStay || counter == maxCount;
+		}
 	};
 
 	class SingleGameBlockObject : public SingleGameObject{
@@ -115,7 +172,7 @@ class SinglePlayerGame : public Game {
 		SingleGameBlockObject(Rectan rect_, bool willStay_) {
 			rect = rect_;
 			willStay = willStay_;
-			layer = 20;
+			layer = 50;
 		}
 
 		virtual bool draw() {
@@ -134,11 +191,11 @@ class SinglePlayerGame : public Game {
 	// 認識したマーカーの扱い
 	class Marker : public SingleGameObject {
 		int index = 0;
+		int layer = 300;
 
 	public:
 		Marker(int x_, int y_, int width_, int height_, bool willStay_) {
 			rect.x = x_, rect.y = y_, rect.width = width_, rect.height = height_;
-			layer = 101;
 		}
 
 		Marker(Rectan rect_, bool willStay_, int index_) {
@@ -151,24 +208,23 @@ class SinglePlayerGame : public Game {
 			else {
 				rect.x = rect.y = -300;
 			}
-			layer = 101;
 		}
 
 		bool draw() {
 			switch (index)
 			{
 			case 0: {
-				drawWithRect(imgHandles["s_game_marker"]);
+				drawImage(imgHandles["s_game_marker"], rect.width, rect.height);
 				// DrawExtendGraph(left(), top(), right(), bottom(), imgHandles["s_game_marker"], true);
 				break;
 			}
 			case 1: {
-				drawWithRect(imgHandles["p_goal"]);
+				drawImage(imgHandles["p_goal"], rect.width, rect.height);
 				// DrawExtendGraph(left(), top(), right(), bottom(), imgHandles["p_goal"], true);
 				break;
 			}
 			default:
-				drawWithRect(imgHandles["block"]);
+				drawImage(imgHandles["block"], rect.width, rect.height);
 				// DrawExtendGraph(left(), top(), right(), bottom(), imgHandles["block"], true);
 				break;
 			}
@@ -180,6 +236,8 @@ class SinglePlayerGame : public Game {
 	public:
 		const int imgHandle;
 		const int maxDamage;
+		std::vector<std::string> imgHandleC;
+		
 
 		int getMaxDamage() {
 			return maxDamage;
@@ -193,7 +251,14 @@ class SinglePlayerGame : public Game {
 		{
 			LEFT, NOMOVE, RIGHT,
 		};
+		
+		enum CharacterState
+		{
+			NORMAL, DAMAGE, OVER,
+		};
+
 		MoveDirection moveDirection = NOMOVE;
+		CharacterState characterState = NORMAL;
 
 		bool isAlive = true;
 		int damage = 0;
@@ -201,12 +266,14 @@ class SinglePlayerGame : public Game {
 
 		const SinglePlayerGame& game;
 
-		Character(int x_, int y_, int width_, int height_, std::string imgHandleKey_, int maxDamage_, SinglePlayerGame& game_) :imgHandle(imgHandles[imgHandleKey_]), maxDamage(maxDamage_),game(game_) {
+		Character(int x_, int y_, int width_, int height_, std::string imgHandleKey_, int maxDamage_, SinglePlayerGame& game_) :imgHandle(imgHandles[imgHandleKey_]), maxDamage(maxDamage_), game(game_) {
 			rect.x = prevX = x_;
 			rect.y = prevY = y_;
 			rect.width = width_;
 			rect.height = height_;
 		}
+
+
 
 		virtual bool draw() {
 			switch (moveDirection)
@@ -230,7 +297,7 @@ class SinglePlayerGame : public Game {
 		virtual void update() {
 		}
 
-		void updateCoordinate(double acX, double acY) {
+		void updateCoordinate(double& acX, double& acY) {
 			double& x = rect.x;
 			double& y = rect.y;
 			const int& width = rect.width;
@@ -349,7 +416,7 @@ class SinglePlayerGame : public Game {
 		Enemy(int x_, int y_, int width_, int height_, std::string imgHandleKey_, int maxDamage_, SinglePlayerGame& game_) : Character(x_,y_,width_,height_,imgHandleKey_,maxDamage_,game_) {
 			layer = 101;
 		}
-
+		
 		virtual void update() {
 			double acX = 0;
 			double acY = 0;
@@ -403,12 +470,12 @@ class SinglePlayerGame : public Game {
 	};
 
 	class Teresa : public Enemy {
+	public:
 		static const int width = 100;
 		static const int height = 100;
 
-	public:
 		Teresa(int x_, int y_, SinglePlayerGame& game_, double size, int maxDamage_ = 2, std::string imgHandleKey_ = "s_game_teresa") : Enemy(x_, y_, width*size, height*size, imgHandleKey_, maxDamage_, game_) {
-			layer = 101;
+			layer = 160;
 		}
 
 		void setAc(double* acX, double* acY) {
@@ -419,11 +486,12 @@ class SinglePlayerGame : public Game {
 	};
 
 	class RocketWanwan : public Enemy {
-		static const int width = 200;
-		static const int height = 200;
-	public:
+	public :
+		static const int width = 430;
+		static const int height = 275;
+
 		RocketWanwan(int x_, int y_, SinglePlayerGame& game_, double size, int maxDamage_ = 10, std::string imgHandleKey_ = "s_game_wanwan") : Enemy(x_, y_, width * size, height * size, imgHandleKey_, maxDamage_, game_) {
-			layer = 101;
+			layer = 165;
 			moveDirection = x_ < WIDTH/2 ? RIGHT : LEFT ;
 		}
 
@@ -440,11 +508,11 @@ class SinglePlayerGame : public Game {
 			*acY = -0.5 * (1 - (rect.y - prevY <= 0) - (rect.y - prevY< 0));
 			switch (moveDirection) {
 			case LEFT: {
-				*acX = -10;
+				*acX = -7;
 				break;
 			}
 			case RIGHT: {
-				*acX = 10;
+				*acX = 7;
 				break;
 			}
 			default: {
@@ -456,10 +524,10 @@ class SinglePlayerGame : public Game {
 
 	class Switch : public Enemy {
 		static const int width = 100;
-		static const int height = 100;
 	public:
+		static const int height = 100;
 		Switch(int x_, int y_, SinglePlayerGame& game_, double size, int maxDamage_ = 1, std::string imgHandleKey_ = "s_game_switch") : Enemy(x_, y_, width * size, height * size, imgHandleKey_, maxDamage_, game_) {
-			layer = 100;
+			layer = 155;
 		}
 
 		void setAc(double* acX, double* acY) {
@@ -469,13 +537,13 @@ class SinglePlayerGame : public Game {
 	};
 
 	class Inundation : public Enemy {
+		public: 
 		static const int width = 1280 + 200;
 		static const int height = 720;
 		bool isWaterUp = true;
 		std::shared_ptr<Switch> button;
-	public:
 		Inundation(int x_, int y_, SinglePlayerGame& game_, double size, int maxDamage_ = -1, std::string imgHandleKey_ = "s_game_water") : Enemy(x_, y_, width * size, height * size, imgHandleKey_, maxDamage_, game_) {
-			layer = 101;
+			layer = 300;
 			button = game_.makeSwitch(100, 100, 1);
 		}
 
@@ -485,8 +553,12 @@ class SinglePlayerGame : public Game {
 		}
 
 		void update() {
-			if (!button->getIsAlive()) {
+			static int inundationCounter = 600;
+			if (!button->getIsAlive() || inundationCounter == 0) {
 				isWaterUp = false;
+			}
+			else if (inundationCounter > 0){
+				inundationCounter--;
 			}
 			double acX = 0;
 			double acY = 0;
@@ -645,24 +717,17 @@ class SinglePlayerGame : public Game {
 		Fire(int x_, int y_, SinglePlayerGame& game_, double size, int maxDamage_ = 10, std::string imgHandleKey_ = "s_game_fire") : Enemy(x_, y_, width * size, height * size, imgHandleKey_, maxDamage_, game_) {
 			moveDirection = LEFT;
 		}
-		void updateCoordinate(double acX, double acY) {
-			double& x = rect.x;
-			double& y = rect.y;
 
-			const double diffX = -5;
-			const double diffY = 0;
-
-
-			// verlet法
-			const double tempX = x;
-			x += diffX + acX;
-			prevX = tempX;
-			const double tempY = y;
-			y += diffY + acY;
-			prevY = tempY;
+		void update() {
+			double acX = 0;
+			double acY = 0;
+			setAc(&acX, &acY);
+			updateCoordinate(acX, acY);
 		}
+
+		
 		void setAc(double* acX, double* acY) {
-			*acX = -2;
+			*acX = -10;
 			*acY = 0;
 		}
 	};
@@ -672,25 +737,49 @@ class SinglePlayerGame : public Game {
 	class Player : public Character {
 
 	public:
+		static const int width = 75;
+		static const int height = 100;
 		Player(int x_, int y_, int width_, int height_, std::string imgHandleKey_, int maxDamage_, SinglePlayerGame& game_) : Character(x_, y_, width_, height_, imgHandleKey_, maxDamage_, game_) {
 			layer = 100;			
 		}
 
 		bool draw() {
 			DrawString(50, 50, std::to_string(damage).c_str(), GetColor(255, 255, 255));
-			return Character::draw();
+			if (characterState == DAMAGE) {
+				switch (moveDirection)
+			{
+			case RIGHT: {
+				drawWithRect(imgHandles["s_game_player_damage"], 0, true);
+				break;
+			}
+
+			case NOMOVE:
+			case LEFT: {
+				drawWithRect(imgHandles["s_game_player_damage"]);
+				break;
+			}
+			default:
+				break;
+			}
+			return getIsAlive();
+
+			}
+			else {
+				return Character::draw();
+			}
+			
 		}
 
 		void update(const char key[]) {
 			double acX = 0;
 			double acY = 0;
-			setAc(&acX, &acY, key);
+			setAc(acX, acY, key);
 			updateCoordinate(acX, acY);
 			moveBecauseBlockCollision(game.blockList);
 			//moveBecauseMarkerCollision(game.markerList);
 		}
 
-		void updateCoordinate(double acX, double acY) {
+		void updateCoordinate(double& acX, double& acY) {
 			double& x = rect.x;
 			double& y = rect.y;
 			const int& width = rect.width;
@@ -710,23 +799,23 @@ class SinglePlayerGame : public Game {
 		}
 
 		// プレイヤーキャラクターの座標更新
-		void setAc(double* acX, double* acY, const char key[]) {
+		void setAc(double& acX, double& acY, const char key[]) {
 			const double diffX = rect.x - prevX;
-			*acX = -0.5 * (1 - (diffX <= 0) - (diffX < 0));
-			*acY = 4;
+			acX = -0.5 * (1 - (diffX <= 0) - (diffX < 0));
+			acY = 4;
 
 			if (key[KEY_INPUT_UP] && !isJumping) {
-				*acY = -40;
+				acY = -40;
 				PlaySoundMem(soundHandles["s_game_jump"], DX_PLAYTYPE_BACK, true);
 			}
 			isJumping = true;
 
 			if (key[KEY_INPUT_RIGHT]) {
-				*acX = 1.0 * (diffX < 10);
+				acX = 1.0 * (diffX < 10);
 				moveDirection = RIGHT;
 			}
 			if (key[KEY_INPUT_LEFT]) {
-				*acX = -1.0 * (diffX > -10);
+				acX = -1.0 * (diffX > -10);
 				moveDirection = LEFT;
 			}
 		}
@@ -738,17 +827,24 @@ class SinglePlayerGame : public Game {
 					if (left() <= enemy->right() && top() <= enemy->bottom() &&
 						right() >= enemy->left() && bottom() >= enemy->top()) {
 						damage += 1;
+						characterState = DAMAGE;
 						invincibleTime = 50;
 						break;
 					}
 				}
 			}
+			else if (invincibleTime == 40) {
+				characterState = NORMAL;
+				invincibleTime--;
+			}
 			else if (invincibleTime > 0) {
 				invincibleTime--;
 			}
+
 			
 			if (damage >= maxDamage) {
 				isAlive = false;
+
 			}
 			
 			return Character::deathDecision();
@@ -768,10 +864,10 @@ class SinglePlayerGame : public Game {
 	std::vector<std::shared_ptr<Marker>> markerList;
 
 	const std::map<std::string, int> field = {
-		{ "left", 0 - 200 },
-		{ "right", WIDTH + 200 },
-		{ "top", 0 - 200 },
-		{ "bottom", HEIGHT + 200 }
+		{ "left", 0 - 500 },
+		{ "right", WIDTH + 500 },
+		{ "top", 0 - 500 },
+		{ "bottom", HEIGHT + 500 }
 	};
 
 	std::shared_ptr<Teresa> makeTeresa(int x, int y, double size);
@@ -794,7 +890,9 @@ class SinglePlayerGame : public Game {
 public:
 	SinglePlayerGame() {
 		thread = std::thread::thread(capture, std::ref(share));
+
 		player = std::make_shared<Player>(WIDTH / 2 - 100 / 2, HEIGHT / 2 - 150 / 2, 75, 100, "s_game_player", maxPlayerDamage, *this);
+
 		hasPlayerWon = true;
 	}
 
