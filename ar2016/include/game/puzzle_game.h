@@ -360,7 +360,7 @@ class PuzzleGame : public Game {
 		const bool isReverse;
 		bool& targetBool;
 		int counter = 0;
-		const int countMax = effectHandles["p_crystal1"].size();
+		const int countMax = effectHandles["p_crystal1"].size() * 2;
 		void setSwitch(bool isOn_) {
 			isOn = isOn_;
 			if (isReverse) {
@@ -376,12 +376,16 @@ class PuzzleGame : public Game {
 			setSwitch(false);
 		}
 		bool draw() {
+			const int margin = rect.width / 4;
 			if (isOn) {
-				const int margin = rect.width / 10;
-				drawWithRect(imgHandles["p_on"]);
+				drawWithRect(effectHandles["p_crystal1"][counter/2], margin);
+				//drawWithRect(imgHandles["p_on"]);
 			} else {
-				drawWithRect(imgHandles["p_off"]);
+				drawWithRect(effectHandles["p_crystal2"][counter/2], margin);
+				//drawWithRect(imgHandles["p_off"]);
 			}
+			counter++;
+			if (counter == countMax) { counter = 0; }
 			return willExist;
 		}
 		bool update() {
