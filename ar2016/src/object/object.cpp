@@ -119,6 +119,8 @@ bool Object::load() {
 	isSuccess &= loadEffect("p_warp", "puzzle/warp", 2, 8, 1600, 4800);
 	isSuccess &= loadEffect("p_num", "puzzle/number", 10, 1, 390, 54);
 	isSuccess &= loadEffect("p_init", "puzzle/init", 14, 1, 1680, 120);
+	isSuccess &= loadSound("p_bgm1", "puzzle/otenbahime.mp3");
+	isSuccess &= loadSound("p_bgm2", "puzzle/hajimetenootsukai.mp3");
 
 	// breakout game
 	isSuccess &= loadImage("ship_block", "shipBlock");
