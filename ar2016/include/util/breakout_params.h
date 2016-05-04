@@ -23,8 +23,8 @@ namespace Breakout {
 	const int RESULT_HEIGHT = HEIGHT;
 
 	// Timerのパラメータ
-	constexpr int TIMER_MAX_MIN = 0;
-	constexpr int TIMER_MAX_SEC = 30;
+	constexpr int TIMER_MAX_MIN = 1;
+	constexpr int TIMER_MAX_SEC = 5;
 	constexpr int TIMER_MAX_MSEC = 0;
 
 	// Blockのパラメータ

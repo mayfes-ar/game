@@ -1,4 +1,5 @@
 ﻿#include "object/object.h"
+#include <sstream>
 
 using namespace std;
 
@@ -133,5 +134,15 @@ bool Object::load() {
 	isSuccess &= loadImage("b_game_over", "breakout/game_over");
 	isSuccess &= loadImage("b_game_clear", "breakout/game_clear");
 	isSuccess &= loadImage("b_explanation", "breakout/explanation");
+
+	for (int num = 0; num <= 9; ++num) {
+		for (const auto& color : { "red", "blue", "yellow", "green" }) {
+			std::ostringstream key;
+			std::ostringstream name;
+			key << color << "_" << num;
+			name << "breakout/number/" << color << "/" << num;
+			isSuccess &= loadImage(key.str(), name.str());
+		}
+	}
 	return isSuccess;
 }

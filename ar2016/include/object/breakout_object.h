@@ -6,6 +6,7 @@
 
 #include <Eigen/Core>
 #include <memory>
+#include <array>
 #include "object/object.h"
 #include "object/shape.h"
 #include "moving/moving.h"
@@ -238,8 +239,54 @@ public:
         SetDrawBright(255, 255, 255);
 		// Timer の描画
 		const auto time = m_timer->getLeftedTime();
-		DrawFormatString(m_realm.left(), m_realm.top() + 50, Color::WHITE, "%02d:%02d:%02d",
-			std::get<0>(time), std::get<1>(time), std::get<2>(time));
+		std::array<int, 6> time_num;
+		const int minute = std::get<0>(time);
+		const int sec = std::get<1>(time);
+		const int msec = std::get<2>(time);
+		if (minute < 10) {
+			time_num.at(0) = 0;
+			time_num.at(1) = minute;
+		}
+		else {
+			time_num.at(0) = minute / 10;
+			time_num.at(1) = minute - (minute / 10) * 10;
+		}
+
+		if (sec < 10) {
+			time_num.at(2) = 0;
+			time_num.at(3) = sec;
+		}
+		else {
+			time_num.at(2) = sec / 10;
+			time_num.at(3) = sec - (sec / 10) * 10;
+		}
+		if (msec < 100) {
+			time_num.at(4) = 0;
+			//time_num.at(5) = msec / 10;
+		}
+		else {
+			time_num.at(4) = msec / 100;
+			//time_num.at(5) = (msec - (msec / 100) * 100) / 10;
+		}
+
+		const int num_width = (m_realm.right() - m_realm.left()) / 8;
+		const int num_height = (m_realm.bottom() - m_realm.top()) / 8;
+		for (int i = 0; i < 5; ++i) {
+			std::ostringstream key;
+			if (i < 2) {
+				key << "red_" << time_num.at(i);
+
+			}
+			else if (i < 4) {
+				key << "blue_" << time_num.at(i);
+			}
+			else {
+				key << "green_" << time_num.at(i);
+			}
+
+			DrawExtendGraph(i * num_width, num_height, (i + 1)* num_width, 2 * num_height, 
+					imgHandles[key.str()], TRUE);
+		}
 		// Score の描画
 		return true;
 	}
