@@ -142,8 +142,23 @@ bool BreakoutGame::isGameClear() const
 void BreakoutGame::updateBlockStatus() {}
 
 void BreakoutGame::updatePotStatus() {
-	// pot が使用済みならもう更新しない。
-	if (!m_components->pot->isAvailable()) return;
+	//// pot が使用済みならもう更新しない。
+	//if (!m_components->pot->isAvailable()) return;
+
+	//if (share.lives[0] > 0) {
+	//	if (m_components->pot->getMarkerHeight() == 0) {
+	//		m_components->pot->setMarkerHeight(share.rects[0].height);
+	//	} else {
+	//		if (m_components->pot->getMarkerHeight() - share.rects[0].height > 30) {
+	//			m_components->pot->appear();
+	//		}
+	//		if (!m_components->pot->isDisappeared()) {
+	//			if(m_components->)
+	//		}
+	//	}
+	//	
+	//	
+	//}
 
 	if (share.lives[1] > 0) {
 		// potを出現させる
