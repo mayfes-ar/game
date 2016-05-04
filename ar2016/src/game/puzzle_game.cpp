@@ -13,7 +13,7 @@ bool PuzzleGame::onStart() {
 
 		auto explanation = std::make_shared<Explanation>();
 		drawList.push_back(explanation);
-		//setSwitch(500, 550, 100, explanation->isFirst, true);
+		setSwitch(500, 550, 100, explanation->isFirst, true);
 		setPlayer(100, 600);
 		setGoal(1100, 550);
 	}, -1);
