@@ -6,6 +6,7 @@ using namespace std;
 map<string, int> Object::imgHandles;
 map<string, vector<int>> Object::effectHandles;
 map<string, int> Object::soundHandles;
+std::map<std::string, int> Object::movieHandles;
 
 // 一番最初に一回だけ呼ぶ
 bool Object::load() {
@@ -48,6 +49,17 @@ bool Object::load() {
 			return false;
 		} else {
 			Object::soundHandles[key] = handle;
+			return true;
+		}
+	};
+
+	auto loadMovie = [](string key, string name) -> bool {
+		const string path = "movie/" + name;
+		const int handle = LoadGraph(path.c_str());
+		if (handle == -1) {
+			return false;
+		} else {
+			Object::movieHandles[key] = handle;
 			return true;
 		}
 	};
@@ -152,5 +164,7 @@ bool Object::load() {
 			isSuccess &= loadImage(key.str(), name.str());
 		}
 	}
+
+	//isSuccess &= loadMovie("b_mode_select", "breakout/mode_select.mp4");
 	return isSuccess;
 }
