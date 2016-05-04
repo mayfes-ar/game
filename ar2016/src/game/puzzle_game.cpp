@@ -277,6 +277,9 @@ bool PuzzleGame::onUpdate() {
 		if (mode.getMode() == 0 || mode.getMode() == 6) {
 			drawList.push_back(std::make_shared<CurtainObject>(false));
 		}
+		if (mode.getMode() > 0) {
+			drawList.push_back(goal->goalEffect());
+		}
 		funcTimer.set([this]() { mode.goNext(); }, FPS * 2);
 	}
 

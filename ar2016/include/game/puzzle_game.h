@@ -180,6 +180,22 @@ class PuzzleGame : public Game {
 	};
 
 	class Player : public Object {
+		
+		class InitEffect : public Object {
+			const int countMax = effectHandles["p_init"].size() * 2;
+			int counter = 0;
+		public:
+			InitEffect(int x, int y, int size) {
+				rect = Rectan(x, y, size, size);
+				layer = 80;
+			}
+			bool draw() {
+				drawWithRect(effectHandles["p_init"][counter / 2]);
+				counter++;
+				return counter < countMax;
+			}
+		};
+
 		PuzzleGame& game;
 
 		double prevX;
@@ -239,6 +255,8 @@ class PuzzleGame : public Game {
 		}
 		void init() {
 			if (!isMovable) { return; }
+			game.drawList.push_back(std::make_shared<InitEffect>(rect.x - 62, rect.y - 50, 200));
+
 			updateFunc = [this]() {
 				isDamaged = true;
 				isMovable = false;
@@ -264,6 +282,21 @@ class PuzzleGame : public Game {
 	};
 
 	class GoalObject : public Object {
+		class CoinsEffect : public Object {
+			const int countMax = effectHandles["p_coins"].size();
+			int counter = 0;
+		public:
+			CoinsEffect(int x, int y, int size) {
+				rect = Rectan(x, y, size, size);
+				layer = 101;
+			}
+			bool draw() {
+				drawWithRect(effectHandles["p_coins"][counter], 30);
+				counter++;
+				return counter < countMax;
+			}
+		};
+
 		bool isReached = false;
 		const int margin = 20;
 	public:
@@ -284,7 +317,9 @@ class PuzzleGame : public Game {
 				return false;
 			}
 		}
-
+		std::shared_ptr<Object> goalEffect() {
+			return std::make_shared<CoinsEffect>(rect.x, rect.y, rect.width);
+		}
 	};
 
 	// gimmicks
