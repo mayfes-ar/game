@@ -195,7 +195,7 @@ class PuzzleGame : public Game {
 		}
 
 		bool draw() {
-			drawWithRect(imgHandles["p_girl"], 0, !isRightDirection);
+			drawWithRect(imgHandles["p_hime"], 0, !isRightDirection);
 			return true;
 		}
 		void preUpdate() {
@@ -222,6 +222,7 @@ class PuzzleGame : public Game {
 		}
 		void init() {
 			updateFunc = [this]() {
+
 				rect.x = prevX = initX;
 				rect.y = prevY = initY;
 				exForceX = exForceY = 0;
@@ -309,16 +310,18 @@ class PuzzleGame : public Game {
 	};
 
 	class SmogGimmick : public Gimmick {
+
 		int counter = 0;
-		const int countMax = effectHandles["p_smog1"].size();
+		const int countMax = effectHandles["p_smog"].size();
 	public:
 		SmogGimmick(int x, int y, int size, PuzzleGame& game_) : Gimmick(game_) {
 			rect = Rectan(x, y, size, size);
 			layer = 120;
+			counter = (int)(rect.x + rect.y) % countMax;
 		}
 		bool draw() {
 			const int margin = rect.width / 10;
-			DrawExtendGraph(left() - margin, top() - margin, right() + margin, bottom() + margin, effectHandles["p_smog1"][counter], true);
+			DrawExtendGraph(left() - margin, top() - margin, right() + margin, bottom() + margin, effectHandles["p_smog"][counter], true);
 			counter++;
 			if (counter == countMax) { counter = 0; }
 			return willExist;
