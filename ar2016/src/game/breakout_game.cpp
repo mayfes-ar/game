@@ -64,14 +64,12 @@ void BreakoutGame::moveShip()
 	// マーカーから船を移動
 	// 今はキーボードの左右で移動
 	// 0晩マーカーの位置で船を制御
-	//if(share.lives[0] > 0)
-	//	m_components->ship->setLeft((int)share.rects[0].x);
 
 	// 船のライフが0のときは操作させない（させると落ちる）
 	if (m_components->ship->getLifeNum() == 0) return;
 
-	if (share.lives[0] > 0) {
-		const int diff = (int)(share.rects[0].x - m_components->ship->left());
+	if (share.lives[1] > 0) {
+		const int diff = (int)(share.rects[1].x - m_components->ship->left());
 		m_components->ship->translate(diff/10);
 	}
 
@@ -142,64 +140,56 @@ bool BreakoutGame::isGameClear() const
 void BreakoutGame::updateBlockStatus() {}
 
 void BreakoutGame::updatePotStatus() {
-	//// pot が使用済みならもう更新しない。
-	//if (!m_components->pot->isAvailable()) return;
-
-	//if (share.lives[0] > 0) {
-	//	if (m_components->pot->getMarkerHeight() == 0) {
-	//		m_components->pot->setMarkerHeight(share.rects[0].height);
-	//	} else {
-	//		if (m_components->pot->getMarkerHeight() - share.rects[0].height > 30) {
-	//			m_components->pot->appear();
-	//		}
-	//		if (!m_components->pot->isDisappeared()) {
-	//			if(m_components->)
-	//		}
-	//	}
-	//	
-	//	
-	//}
+	// pot が使用済みならもう更新しない。
+	if (!m_components->pot->isAvailable()) return;
 
 	if (share.lives[1] > 0) {
 		// potを出現させる
-		m_components->pot->appear();
+		if (share.rects[1].width < 180) {
+			m_components->pot->appear();
+		}
+		else if (!m_components->pot->isDisappeared()) {
 
-		// potをマーカーの位置に移動させる
-		const Eigen::Vector2i diff_dist = Eigen::Vector2i((int)share.rects[1].x - m_components->pot->getRealm().left(), (int)share.rects[1].y - m_components->pot->getRealm().top());
-		m_components->pot->translate(diff_dist/10);
+			// potをマーカーの位置に移動させる
+			const Eigen::Vector2i diff_dist = Eigen::Vector2i((int)share.rects[1].x - m_components->pot->getRealm().left(), (int)share.rects[1].y - m_components->pot->getRealm().top());
+			m_components->pot->translate(diff_dist / 10);
 
-		// potをマーカーの回転にあわせる
-		const float diff_rot = (float)share.rects[1].rotate - m_components->pot->getRotation();
-		m_components->pot->rotate(diff_rot / 10.0);
-		
-		if (m_components->pot->hasFireball()) {
-			//カウントを減らす
-			m_components->pot->countDown();
-			//吐き出すかどうか判断
-			if (m_components->pot->isExhared()) {
-				// 吐き出す
-				m_components->pot->exhareFireball();
+			// potをマーカーの回転にあわせる
+			const float diff_rot = (float)share.rects[1].rotate - m_components->pot->getRotation();
+			m_components->pot->rotate(diff_rot / 10.0);
+
+			if (m_components->pot->hasFireball()) {
+				//カウントを減らす
+				m_components->pot->countDown();
+				//吐き出すかどうか判断
+				if (m_components->pot->isExhared()) {
+					// 吐き出す
+					m_components->pot->exhareFireball();
+				}
+				else if (share.rects[1].width > 250) {
+					m_components->pot->exhareFireball();
+				}
 			}
-		}
 
-		// もしfireballが見えなくなっている(消えている)状態だったら衝突判定はしない
-		// すでに放出していたら衝突判定はしない
-		if (m_components->fireball->isDisappeared() || m_components->pot->isExhared()) return;
+			// もしfireballが見えなくなっている(消えている)状態だったら衝突判定はしない
+			// すでに放出していたら衝突判定はしない
+			if (m_components->fireball->isDisappeared() || m_components->pot->isExhared()) return;
 
-		auto rotatedTopLine = m_components->pot->getRealm().getTopLine().getRotatedLine(m_components->pot->getRealm().getCenterPoint(), m_components->pot->getRotation());
-		auto rotatedLeftLine = m_components->pot->getRealm().getLeftLine().getRotatedLine(m_components->pot->getRealm().getCenterPoint(), m_components->pot->getRotation());
-		auto rotatedRightLine = m_components->pot->getRealm().getRightLine().getRotatedLine(m_components->pot->getRealm().getCenterPoint(), m_components->pot->getRotation());
-		auto rotatedBottomLine = m_components->pot->getRealm().getBottomLine().getRotatedLine(m_components->pot->getRealm().getCenterPoint(), m_components->pot->getRotation());
+			auto rotatedTopLine = m_components->pot->getRealm().getTopLine().getRotatedLine(m_components->pot->getRealm().getCenterPoint(), m_components->pot->getRotation());
+			auto rotatedLeftLine = m_components->pot->getRealm().getLeftLine().getRotatedLine(m_components->pot->getRealm().getCenterPoint(), m_components->pot->getRotation());
+			auto rotatedRightLine = m_components->pot->getRealm().getRightLine().getRotatedLine(m_components->pot->getRealm().getCenterPoint(), m_components->pot->getRotation());
+			auto rotatedBottomLine = m_components->pot->getRealm().getBottomLine().getRotatedLine(m_components->pot->getRealm().getCenterPoint(), m_components->pot->getRotation());
 
-		// fireballがpotの口の辺上にあったらそれを吸い込む
-		if (CollisionDetection::isOnLine(m_components->fireball->getRealm(), rotatedTopLine)) {
-			m_components->pot->inhareFireball(m_components->fireball);
-		}
-		// ほかの辺にぶつかったらfireballを吸い込まずに消す
-		else if ((CollisionDetection::isOnLine(m_components->fireball->getRealm(), rotatedLeftLine)) ||
-			(CollisionDetection::isOnLine(m_components->fireball->getRealm(), rotatedRightLine)) ||
-			(CollisionDetection::isOnLine(m_components->fireball->getRealm(), rotatedBottomLine))) {
-			m_components->fireball->disappear();
+			// fireballがpotの口の辺上にあったらそれを吸い込む
+			if (CollisionDetection::isOnLine(m_components->fireball->getRealm(), rotatedTopLine)) {
+				m_components->pot->inhareFireball(m_components->fireball);
+			}
+			// ほかの辺にぶつかったらfireballを吸い込まずに消す
+			else if ((CollisionDetection::isOnLine(m_components->fireball->getRealm(), rotatedLeftLine)) ||
+				(CollisionDetection::isOnLine(m_components->fireball->getRealm(), rotatedRightLine)) ||
+				(CollisionDetection::isOnLine(m_components->fireball->getRealm(), rotatedBottomLine))) {
+				m_components->fireball->disappear();
+			}
 		}
 	}
 }

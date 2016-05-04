@@ -613,6 +613,7 @@ public:
 		m_fireball->setVelocity(Eigen::Vector2f(- m_initial_fireball_speed * (float)cos(m_rotation+M_PI/2.0), - m_initial_fireball_speed * (float)sin(m_rotation+M_PI/2.0)));
 		m_fireball->appear();
 		m_fireball = nullptr;
+		m_count = -1;
 	}
 	
 	Shape::Rectangle getRealm() const {
@@ -641,10 +642,6 @@ public:
 
 	bool isAvailable() {
 		return !isExhared();
-	}
-
-	bool isDisappeare() {
-		return m_is_disappered;
 	}
 
 	// 吐き出したかどうか（countをみる)
