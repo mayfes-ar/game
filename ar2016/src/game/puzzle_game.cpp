@@ -7,12 +7,19 @@ bool PuzzleGame::onStart() {
 
 	// mode 0: opening
 	mode.setMode([this]() {
+		setBlock(0, 700, 1280, 100, true);
+		setBlock(-50, -720, 100, 720 * 2, true);
+		setBlock(1230, -720, 100, 720 * 2, true);
+
 		drawList.push_back(std::make_shared<Explanation>());
+		setPlayer(100, 600);
+		setGoal(1100, 550);
 	}, -1);
 
 	// mode 1
 	mode.setMode([this]() {
 		makeStageBase();
+		drawList.push_back(std::make_shared<CurtainObject>(true));
 		setPlayer(100, -300);
 		setGoal(1100, 550);
 
@@ -21,7 +28,6 @@ bool PuzzleGame::onStart() {
 		setBlock(1000, 220, 300, 20);
 		setCoin(1030, 100);
 		setCoin(1110, 100);
-
 	}, -1);
 
 	// mode 2
@@ -184,6 +190,7 @@ bool PuzzleGame::onStart() {
 
 		score->setResultDraw();
 
+		drawList.push_back(std::make_shared<CurtainObject>(true));
 		drawList.push_back(score);
 
 	}, -1);
@@ -193,37 +200,38 @@ bool PuzzleGame::onStart() {
 
 
 bool PuzzleGame::onUpdate() {
+	if (key[KEY_INPUT_ESCAPE]) {
+		share.willFinish = true;
+	}
 	funcTimer.update();
-	timer++;
-	if (timer == 3600) {
-		timer = 0;
+	counter++;
+	if (counter == 3600) {
+		counter = 0;
 	}
 
 	// modeに応じて
 	// <---各ステージ--->
 	switch (mode.getMode()) {
 	case 0: { // explain
-		if (key[KEY_INPUT_UP]) {
-			mode.goNext();
-		}
-		return Game::onUpdate();
+		
+		break;
 	}
 	case 1: {
 		
 		break;
 	}
 	case 2: {
-		if (timer % (FPS * 3) == 0) {
+		if (counter % (FPS * 3) == 0) {
 			setSmog();
 		}
 		
 		break;
 	}
 	case 3: {
-		if (timer % (FPS * 3) == 0) {
+		if (counter % (FPS * 3) == 0) {
 			setDamage(300, -100, 50, 5, 14);
 		}
-		if (2 * timer % (FPS * 6) == FPS * 3) {
+		if (2 * counter % (FPS * 6) == FPS * 3) {
 			setDamage(400, -100, 50, -5, 14);
 		}
 		break;
@@ -232,13 +240,13 @@ bool PuzzleGame::onUpdate() {
 		break;
 	}
 	case 5: {
-		if (timer % (FPS * 2) == 0) {//Stage 5のギミック
+		if (counter % (FPS * 2) == 0) {//Stage 5のギミック
 			setDamage(800, -100, 50, 0, 10);
 		}
 		break;
 	}
 	case 6: {
-		if (timer % (FPS / 2) == 0) {
+		if (counter % (FPS / 2) == 0) {
 			setDamage(225, 800, 50, 0, -5);
 			setDamage(450, -100, 70, 0, 10);
 		}
@@ -256,8 +264,19 @@ bool PuzzleGame::onUpdate() {
 
 	// 初めてゴールに触れた時だけ
 	if (goal->check(player)) {
+		if (mode.getMode() == 0 || mode.getMode() == 6) {
+			drawList.push_back(std::make_shared<CurtainObject>(false));
+		}
 		funcTimer.set([this]() { mode.goNext(); }, FPS * 2);
 	}
+
+	if (mode.getMode()) {
+		if (timer->update()) {
+			drawList.push_back(std::make_shared<CurtainObject>(false));
+			funcTimer.set([this]() {mode.goLast();}, FPS);
+		}
+	}
+	
 
 	allBlocks = stageBlocks;
 	
@@ -283,10 +302,6 @@ bool PuzzleGame::onUpdate() {
 
 	// gimmicks作用後の位置計算
 	player->update();
-
-	if (key[KEY_INPUT_ESCAPE]) {
-		share.willFinish = true;
-	}
 
 	return Game::onUpdate();
 }
