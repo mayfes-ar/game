@@ -64,9 +64,6 @@ class PuzzleGame : public Game {
 			rect = rect_;
 			willStay = false;
 			layer = 25;
-			if (rect.width == 0) {
-				canHit = false;
-			}
 		}
 
 		bool draw() {
@@ -112,7 +109,8 @@ class PuzzleGame : public Game {
 		bool draw() {
 			if (isFirst) {
 				DrawGraph(0, 0, imgHandles["p_explain1"], false);
-			} else {
+			}
+			else {
 				DrawGraph(0, 0, imgHandles["p_explain2"], false);
 			}
 			return true;
@@ -130,7 +128,8 @@ class PuzzleGame : public Game {
 		}
 		bool draw() {
 			if (isPlaying) {
-				DrawFormatString(400, 0, GetColor(65, 205, 63), "SCORE: %d", score);
+				drawNumber(400, 0, 40, score, effectHandles["p_num"]);
+				//DrawFormatString(400, 0, GetColor(65, 205, 63), "SCORE: %d", score);
 			} else {
 				DrawFormatString(400, 400, GetColor(165, 205, 163), "SCORE: %d", score);
 			}
@@ -673,9 +672,9 @@ class PuzzleGame : public Game {
 		drawList.push_back(timer);
 
 		if (isSurrounded) {
-			setBlock(-100, 700, 1480, 200, true);
-			setBlock(-250, -720, 300, 720 * 3, true);
-			setBlock(1230, -720, 300, 720 * 3, true);
+			setBlock(0, 700, 1280, 100, true);
+			setBlock(-50, -720, 100, 720 * 2, true);
+			setBlock(1230, -720, 100, 720 * 2, true);
 			setBlock(200, -720, 100, 620, true);
 		}
 	}

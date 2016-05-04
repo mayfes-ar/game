@@ -90,7 +90,7 @@ bool PuzzleGame::onStart() {
 		setCoin(900, 370);
 		setCoin(980, 370);
 
-		setBlock(0, 680, 1300, 200);
+		//setBlock(0, 680, 1300, 200);
 
 		setWind(1070, 150, 130, 51, -2, 0);
 		setCoin(1120, 10);
@@ -124,7 +124,7 @@ bool PuzzleGame::onStart() {
 	mode.setMode([this]() {
 		makeStageBase(false);
 		setPlayer(100, 90);
-		setGoal(1000, 500);
+		setGoal(950, 500);
 
 		for (int i = 0; i * 50 <= 1200; i++) {
 			setLoop(i * 50, 780, 50, 10, (i - 1) * 50, 0);
@@ -152,8 +152,8 @@ bool PuzzleGame::onStart() {
 		setBlock(700, 400, 24, 240);
 		setBlock(464, 400, 236, 24);
 		setBlock(464, 616, 236, 24);
-		setWarp(680, 424, 20, 20, 600, 300);
-		setWarp(1250, 680, 20, 20, 520, 500);
+		setWarp(620, 424, 60, 60, 600, 300);
+		setWarp(1200, 650, 60, 60, 520, 500);
 		setCoin(40, 240);
 		setCoin(120, 240);
 		setCoin(200, 240);
