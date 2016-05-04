@@ -723,6 +723,7 @@ public:
 		m_fireball->setVelocity(Eigen::Vector2f(- m_initial_fireball_speed * (float)cos(m_rotation+M_PI/2.0), - m_initial_fireball_speed * (float)sin(m_rotation+M_PI/2.0)));
 		m_fireball->appear();
 		m_fireball = nullptr;
+		m_count = -1;
 	}
 	
 	Shape::Rectangle getRealm() const {
@@ -800,6 +801,13 @@ public:
 		return true;
 	}
 
+	int getMarkerHeight() {
+		return m_marker_height;
+	}
+	void setMarkerHeight(int h) {
+		m_marker_height = h;
+	}
+
 private:
 	bool m_is_disappered = true;
 	float m_rotation = 0;
@@ -808,6 +816,7 @@ private:
 	float m_initial_fireball_speed = 0;
 	// 吸い込んでからどのくらいで打ち出すか(基本30frames/secだから3秒くらい)
 	int m_count = 90;
+	int m_marker_height = 0;
 
 	void updateFireballPosition() {
 		if (hasFireball()) {
