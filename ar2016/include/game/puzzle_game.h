@@ -297,7 +297,7 @@ class PuzzleGame : public Game {
 					counter = 0;
 				}
 			} else {
-				drawWithRect(imgHandles["s_game_dead"], margin);
+				drawWithRect(imgHandles["p_needle"], margin);
 			}
 			
 			return willExist;

@@ -94,7 +94,7 @@ bool Object::load() {
 	isSuccess &= loadImage("p_block_x", "puzzle/block_x");
 	isSuccess &= loadImage("s_block", "Brick02");
 	isSuccess &= loadImage("p_man", "man");
-	//isSuccess &= loadImage("p_girl",  "girl");
+	isSuccess &= loadImage("p_needle", "puzzle/needle");
 	isSuccess &= loadImage("p_hime", "puzzle/hime_normal");
 	isSuccess &= loadImage("p_hime_damaged", "puzzle/hime_gameover");
 	isSuccess &= loadImage("p_explain", "puzzle_explanation");
@@ -103,7 +103,6 @@ bool Object::load() {
 	isSuccess &= loadImage("p_off", "switch_off");
 	isSuccess &= loadImage("p_arrow", "arrow");
 	isSuccess &= loadImage("p_castle", "puzzle/castle");
-	isSuccess &= loadEffect("p_smog", "dark_smog", 13, 1, 3120, 240);
 	isSuccess &= loadEffect("p_smog", "puzzle/smog", 5, 6, 640, 768);
 	isSuccess &= loadEffect("p_ball", "puzzle/ball", 3, 10, 960, 2400);
 	isSuccess &= loadEffect("p_coin", "puzzle/coin", 5, 2, 1000, 400);

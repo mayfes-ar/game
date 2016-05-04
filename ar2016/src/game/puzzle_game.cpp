@@ -84,7 +84,7 @@ bool PuzzleGame::onStart() {
 		setCoin(900, 370);
 		setCoin(980, 370);
 
-		setBlock(0, 680, 1300, 20);
+		setBlock(0, 680, 1300, 200);
 
 	}, -1);
 
