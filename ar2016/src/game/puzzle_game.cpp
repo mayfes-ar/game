@@ -160,8 +160,10 @@ bool PuzzleGame::onStart() {
 		setGoal(1100, 250);
 
 		setBlock(0, 0, 450, 150, true);//hidariue
+
 		setBlock(100, 400, 100, 400, true);//hidarishita
-		setBlock(0, 500, 200, 400, true);
+		setBlock(0, 550, 200, 400, true);
+
 		setBlock(800, 10, 700, 140, true);//migiue
 		setBlock(1300, -500, 50, 500, true);
 

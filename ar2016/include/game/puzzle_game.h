@@ -444,6 +444,8 @@ class PuzzleGame : public Game {
 	class WarpGimmick : public Gimmick {
 		const double posX;
 		const double posY;
+		int counter = 0;
+		const int countMax = effectHandles["p_warp"].size();
 
 	public:
 		WarpGimmick(Rectan rect_, double posX_, double posY_, PuzzleGame& game_) : posX(posX_), posY(posY_), Gimmick(game_) {
@@ -451,7 +453,13 @@ class PuzzleGame : public Game {
 			layer = 70;
 		}
 		bool draw() {
-			DrawBox(left(), top(), right(), bottom(), GetColor(238, 46, 213), false);
+			const int margin = rect.width / 10;
+			drawWithRect(effectHandles["p_warp"][counter], margin);
+			counter++;
+			if (counter == countMax) {
+				counter = 0;
+			}
+			//DrawBox(left(), top(), right(), bottom(), GetColor(238, 46, 213), false);
 			return willExist;
 		}
 		bool update() {
