@@ -30,7 +30,13 @@ void BreakoutGame::updateCollisionDetection()
 		// Ship衝突判定
 		if (m_components->ship->isAlive()) {
 			if (m_components->fireball->isCollided(m_components->ship->getRealm(), 1, m_components->ship->getVelocity())) {
-				m_components->fireball->changeModeToPlayer();
+				if (m_components->fireball->getMode() == Breakout::FireballKind::EnemyStrong) {
+					m_components->fireball->disappear();
+					m_components->ship->damageShip(1);
+				}
+				else {
+					m_components->fireball->changeModeToPlayer();
+				}
 				return;
 			}
 		}

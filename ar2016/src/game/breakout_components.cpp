@@ -67,7 +67,7 @@ void BreakoutComponents::setup()
 		const Eigen::Vector2f start_accel = Eigen::Vector2f::Zero();
 		auto moving = std::make_shared<Moving>(1.0, start_accel, start_vel * -1);
 
-		fireball = std::make_shared<Breakout::Fireball>(circle, moving);
+		fireball = std::make_shared<Breakout::Fireball>(circle, moving, EnemyStrong);
 	}
 
 	// shipの初期化

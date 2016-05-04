@@ -584,6 +584,15 @@ public:
 		return false;
 	}
 
+	bool isStrong() {
+		switch (m_mode) {
+		case EnemyStrong:
+		case PlayerStrong:
+			return true;
+		}
+		return false;
+	}
+
 
 private:
     bool m_is_disappeared = false; // 火の玉にあったかどうか
