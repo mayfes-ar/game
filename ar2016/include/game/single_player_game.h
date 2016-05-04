@@ -316,7 +316,7 @@ class SinglePlayerGame : public Game {
 			prevY = tempY;
 		}
 
-		virtual void setAc(double* acX, double* acY) {
+		virtual void setAc(double& acX, double& acY) {
 		}
 
 		void moveBecauseBlockCollision(const std::vector<std::shared_ptr<SingleGameBlockObject>> objectList) {
@@ -420,7 +420,7 @@ class SinglePlayerGame : public Game {
 		virtual void update() {
 			double acX = 0;
 			double acY = 0;
-			setAc(&acX, &acY);
+			setAc(acX, acY);
 			updateCoordinate(acX, acY);
 			moveBecauseBlockCollision(game.blockList);
 			moveBecauseMarkerCollision(game.markerList);
@@ -428,7 +428,7 @@ class SinglePlayerGame : public Game {
 			moveDirection = acX > 0 ? RIGHT : acX < 0 ? LEFT : NOMOVE;
 		}
 		
-		virtual void setAc(double* acX, double* acY) {
+		virtual void setAc(double& acX, double& acY) {
 			
 		}
 
@@ -478,9 +478,9 @@ class SinglePlayerGame : public Game {
 			layer = 160;
 		}
 
-		void setAc(double* acX, double* acY) {
-			*acX = rand() % 5 - 2;
-			*acY = rand() % 5 - 2;
+		void setAc(double& acX, double& acY) {
+			acX = rand() % 5 - 2;
+			acY = rand() % 5 - 2;
 		}
 		
 	};
@@ -498,21 +498,21 @@ class SinglePlayerGame : public Game {
 		void update(){
 			double acX = 0;
 			double acY = 0;
-			setAc(&acX, &acY);
+			setAc(acX, acY);
 			updateCoordinate(acX, acY);
 			//moveBecauseBlockCollision(game.blockList);
 			moveBecauseMarkerCollision(game.markerList);
 		}
 
-		void setAc(double* acX, double* acY) {
-			*acY = -0.5 * (1 - (rect.y - prevY <= 0) - (rect.y - prevY< 0));
+		void setAc(double& acX, double& acY) {
+			acY = -0.5 * (1 - (rect.y - prevY <= 0) - (rect.y - prevY< 0));
 			switch (moveDirection) {
 			case LEFT: {
-				*acX = -7;
+				acX = -7;
 				break;
 			}
 			case RIGHT: {
-				*acX = 7;
+				acX = 7;
 				break;
 			}
 			default: {
@@ -530,9 +530,9 @@ class SinglePlayerGame : public Game {
 			layer = 155;
 		}
 
-		void setAc(double* acX, double* acY) {
-			*acX = 0;
-			*acY = 0;
+		void setAc(double& acX, double& acY) {
+			acX = 0;
+			acY = 0;
 		}
 	};
 
@@ -562,13 +562,13 @@ class SinglePlayerGame : public Game {
 			}
 			double acX = 0;
 			double acY = 0;
-			setAc(&acX, &acY);
+			setAc(acX, acY);
 			updateCoordinate(acX, acY);
 		}
 
-		void setAc(double* acX, double* acY) {
-			*acX = 0;
-			*acY = isWaterUp ? -0.005 : 0.02;
+		void setAc(double& acX, double& acY) {
+			acX = 0;
+			acY = isWaterUp ? -0.005 : 0.02;
 		}
 	};
 
@@ -592,7 +592,7 @@ class SinglePlayerGame : public Game {
 		void update() {
 			double acX = 0;
 			double acY = 0;
-			setAc(&acX, &acY);
+			setAc(acX, acY);
 			updateCoordinate(acX, acY);
 		}
 
@@ -620,9 +620,9 @@ class SinglePlayerGame : public Game {
 	public:
 		Drop(int x_, int y_, SinglePlayerGame& game_, double size, int maxDamage_ = 10, std::string imgHandleKey_ = "s_game_drop") : Enemy(x_, y_, width * size, height * size, imgHandleKey_, maxDamage_, game_) {
 		};
-		void setAc(double* acX, double* acY) {
-			*acX = 0;
-			*acY = 3;
+		void setAc(double& acX, double& acY) {
+			acX = 0;
+			acY = 3;
 		}
 	};
 
@@ -636,7 +636,7 @@ class SinglePlayerGame : public Game {
 		void update() {
 			double acX = 0;
 			double acY = 0;
-			setAc(&acX, &acY);
+			setAc(acX, acY);
 			updateCoordinate(acX, acY);
 		}
 
@@ -670,7 +670,7 @@ class SinglePlayerGame : public Game {
 		void update() {
 			double acX = 0;
 			double acY = 0;
-			setAc(&acX, &acY);
+			setAc(acX, acY);
 			updateCoordinate(acX, acY);
 		}
 
@@ -721,14 +721,14 @@ class SinglePlayerGame : public Game {
 		void update() {
 			double acX = 0;
 			double acY = 0;
-			setAc(&acX, &acY);
+			setAc(acX, acY);
 			updateCoordinate(acX, acY);
 		}
 
 		
-		void setAc(double* acX, double* acY) {
-			*acX = -10;
-			*acY = 0;
+		void setAc(double& acX, double& acY) {
+			acX = -10;
+			acY = 0;
 		}
 	};
 
