@@ -67,6 +67,7 @@ class ItemReceiverBase
 {
 public:
 	ItemReceiverBase() {}
+	ItemReceiverBase(const Shape::Rectangle& realm) : m_realm(realm) {}
 	virtual ~ItemReceiverBase() {}
 	//本当は純粋仮想にしたかったけどそうするとこのクラスのインスタンスthisがつくれないからこのようにした
 	virtual void applyItems() {}
@@ -161,7 +162,7 @@ public:
     bool draw() override {
         SetDrawBright(40, 40, 40);
         DrawExtendGraph(0, 0, WIDTH, HEIGHT, 
-                imgHandles["ar2016_logo"], true);
+                imgHandles["magma"], true);
         SetDrawBright(255, 255, 255);
         return true;
     }
@@ -209,29 +210,23 @@ private:
 class Result : public Object
 {
 public:
-	explicit Result(const Shape::Point& start_point)
-		: m_start_point(start_point) {
+	explicit Result(const Shape::Rectangle& m_realm)
+		: m_realm(m_realm) {
 		Object::layer = PRIORITY_INFO;
 	}
 
-	void init() {
-		SetFontSize(80);
-		m_is_initialized = true;
-	}
 
 	bool draw() override {
-		if (!m_is_initialized) {
-			return false;
-		}
-
 		if (m_is_game_clear) {
-		DrawString(m_start_point.x(), m_start_point.y(),
-				"Game Clear", Color::BLUE);
+			DrawExtendGraph(m_realm.left(), m_realm.top(),
+				m_realm.right(), m_realm.bottom(),
+				imgHandles["s_game_result_clear"], TRUE);
 				return true;
 		}
 
-		DrawString(m_start_point.x(), m_start_point.y(),
-				"Game Over", Color::RED);
+			DrawExtendGraph(m_realm.left(), m_realm.top(),
+				m_realm.right(), m_realm.bottom(),
+				imgHandles["game_over"], TRUE);
 
 		return true;
 	}
@@ -242,8 +237,7 @@ public:
 	}
 
 private:
-	Shape::Point m_start_point = Shape::Point();
-	bool m_is_initialized = false;
+	Shape::Rectangle m_realm = Shape::Rectangle();
 	bool m_is_game_clear = false;
 };
 
@@ -284,9 +278,15 @@ private:
 class Block : public Object, public ItemReceiverBase
 {
 public:
-    explicit Block(const Shape::Rectangle& realm) 
+	enum class Color : uint8_t {
+		Green,
+		Blue,
+		Red
+	};
+
+    explicit Block(const Shape::Rectangle& realm, Color color) 
+		: m_color(color), ItemReceiverBase(realm)
     {
-		m_realm = realm;
         Object::layer = PRIORITY_STATIC_OBJECT;
     }
 
@@ -295,15 +295,34 @@ public:
             // 何も描画しない
             return true;
         }
-        DrawBox(m_realm.left(), m_realm.top(), 
-                m_realm.right(), m_realm.bottom(), 
-                Color::GREEN, false);
+
+		switch (m_color) {
+		case Color::Green:
+			DrawExtendGraph(m_realm.left(), m_realm.top(),
+				m_realm.right(), m_realm.bottom(),
+				imgHandles["block_green"], TRUE);
+			break;
+		case Color::Blue:
+			DrawExtendGraph(m_realm.left(), m_realm.top(),
+				m_realm.right(), m_realm.bottom(),
+				imgHandles["block_blue"], TRUE);
+			break;
+		case Color::Red:
+			DrawExtendGraph(m_realm.left(), m_realm.top(),
+				m_realm.right(), m_realm.bottom(),
+				imgHandles["block_red"], TRUE);
+			break;
+		}
 
         return true;
     }
 
 	const Shape::Rectangle getRealm() override {
 		return m_realm;
+	}
+
+	Color getColor() const {
+		return m_color;
 	}
 
 	void applyItems() override {
@@ -326,7 +345,7 @@ public:
     }
 private:
     bool m_is_disappeared = false; // 火の玉にあったかどうか
-    //Shape::Rectangle m_realm = Shape::Rectangle();
+	Color m_color = Color::Green;
 };
 
 

@@ -9,11 +9,12 @@ void BreakoutComponents::setup()
 {
 	// Layoutの初期化
 	{
-		auto info_realm = Shape::Rectangle(INFO_START_POS, INFO_WIDTH, INFO_HEIGHT);
+		const auto info_realm = Shape::Rectangle(INFO_START_POS, INFO_WIDTH, INFO_HEIGHT);
 		std::shared_ptr<Timer> timer = std::make_shared<Timer>(TIMER_MAX_MIN, TIMER_MAX_SEC, TIMER_MAX_MSEC);
 		info = std::make_shared<Breakout::Info>(info_realm, timer);
 
-		result = std::make_shared<Breakout::Result>(RESULT_START_POINT);
+		const auto result_realm = Shape::Rectangle(RESULT_START_POS, RESULT_WIDTH, RESULT_HEIGHT);
+		result = std::make_shared<Breakout::Result>(result_realm);
 
 
 		const auto field_realm = Shape::Rectangle(FIELD_START_POS, FIELD_WIDTH, FIELD_HEIGHT);
@@ -23,18 +24,29 @@ void BreakoutComponents::setup()
 	std::random_device rnd;
 	std::mt19937 mt(rnd());
 	std::uniform_real_distribution<> block_generator(0.0, 1.0);
-	std::uniform_real_distribution<> item_generator(0.0, 1.0);
+	std::uniform_real_distribution<> block_color_generator(0.0, 1.0);
 	// Blockの初期化
 	for (int x = 0; x < BLOCK_WIDTH_NUM; ++x) {
 		for (int y = 0; y < BLOCK_HEIGHT_NUM; ++y) {
 			const Eigen::Vector2i realm 
 				= Eigen::Vector2i{BLOCK_OFFSET_X + x * BLOCK_WIDTH, BLOCK_OFFSET_Y + y * BLOCK_HEIGHT };
 		
-			const Shape::Rectangle rec(realm,BLOCK_WIDTH, BLOCK_HEIGHT);
+			const Shape::Rectangle rec(realm, BLOCK_WIDTH, BLOCK_HEIGHT);
 
-			auto block = std::make_shared<Breakout::Block>(rec);
+			auto color = Breakout::Block::Color::Green;
+			const auto ratio = block_color_generator(mt);
 
-			if (block_generator(mt) > BLOCK_GENERATE_RATIO) {
+			if (ratio <= Breakout::BLOCK_RED_PROB) {
+				color = Breakout::Block::Color::Red;
+			}
+			else if (ratio - Breakout::BLOCK_RED_PROB < Breakout::BLOCK_BLUE_PROB) {
+				color = Breakout::Block::Color::Blue;
+			}
+
+			auto block = std::make_shared<Breakout::Block>(rec, color);
+
+			// 無駄な生成をしている(どうしよう)
+			if (block_generator(mt) > BLOCK_GENERATE_PROB) {
 				block->disappear();
 			}
 
@@ -68,15 +80,26 @@ void BreakoutComponents::setup()
 
 	// itemの初期化
 	for (auto &block : block_list) {
-		if (item_generator(mt) > 0.8) {
-			auto item = std::make_shared<Item>(Breakout::ItemKind::RestoreShip);
-			block->attachItem(item);
-			item_list.push_back(item);
-		}
-		else if(item_generator(mt) > 0.6 ) {
-			auto item = std::make_shared<Item>(Breakout::ItemKind::DamageShip);
-			block->attachItem(item);
-			item_list.push_back(item);
+		const auto color = block->getColor();
+		using Color = Breakout::Block::Color;
+
+		switch (color) {
+			case Color::Green:
+				break;
+			case Color::Blue: {
+				auto item = std::make_shared<Item>(Breakout::ItemKind::RestoreShip);
+				block->attachItem(item);
+				item_list.push_back(item);
+				break;
+			}
+			case Color::Red: {
+				auto item = std::make_shared<Item>(Breakout::ItemKind::DamageShip);
+				block->attachItem(item);
+				item_list.push_back(item);
+				break;
+			}
+			default:
+				break;
 		}
 
 	}

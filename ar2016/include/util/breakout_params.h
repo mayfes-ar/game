@@ -18,8 +18,9 @@ namespace Breakout {
 	const int DEBUG_WINDOW_WIDTH = WIDTH / 4;
 	const int DEBUG_WINDOW_HEIGHT = HEIGHT;
 	
-	const Eigen::Vector2i RESULT_START_POINT 
-		= Eigen::Vector2i(WIDTH / 4, HEIGHT / 3);
+	const Eigen::Vector2i RESULT_START_POS = Eigen::Vector2i{WIDTH / 4, HEIGHT / 3};
+	const int RESULT_WIDTH = WIDTH / 2;
+	const int RESULT_HEIGHT = HEIGHT / 3;
 
 	// Timerのパラメータ
 	constexpr int TIMER_MAX_MIN = 0;
@@ -33,7 +34,11 @@ namespace Breakout {
 	constexpr int BLOCK_HEIGHT_NUM = 5;
 	const int BLOCK_WIDTH = (WIDTH / 2) / BLOCK_WIDTH_NUM;
 	const int BLOCK_HEIGHT = (HEIGHT / 4) / BLOCK_HEIGHT_NUM;
-	constexpr double BLOCK_GENERATE_RATIO = 0.5; // Blockが生成される確率
+	constexpr double BLOCK_GENERATE_PROB = 0.1; // Blockが生成される確率
+	// BLOCKの種類
+	constexpr double BLOCK_RED_PROB = 0.2;
+	constexpr double BLOCK_BLUE_PROB = 0.3;
+	constexpr double BLOCK_GREEN_PROB = 0.5;
 
 	// Fireballのパラメータ
 	const Eigen::Vector2i FIREBALL_STARTPOS = Eigen::Vector2i{
