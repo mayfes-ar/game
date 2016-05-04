@@ -96,7 +96,7 @@ bool Object::load() {
 	isSuccess &= loadImage("p_man", "man");
 	//isSuccess &= loadImage("p_girl",  "girl");
 	isSuccess &= loadImage("p_hime", "puzzle/hime_normal");
-	isSuccess &= loadImage("p_hime_gameover", "puzzle/hime_gameover");
+	isSuccess &= loadImage("p_hime_damaged", "puzzle/hime_gameover");
 	isSuccess &= loadImage("p_explain", "puzzle_explanation");
 	isSuccess &= loadImage("p_goal", "goal");
 	isSuccess &= loadImage("p_on", "switch_on");

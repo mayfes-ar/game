@@ -169,7 +169,7 @@ class PuzzleGame : public Game {
 	};
 
 	class Player : public Object {
-		const PuzzleGame& game;
+		PuzzleGame& game;
 
 		double prevX;
 		double prevY;
@@ -178,7 +178,8 @@ class PuzzleGame : public Game {
 
 		bool isRightDirection = true;
 		bool isJumping = true;
-		bool isReached = false;
+		bool isMovable = true;
+		bool isDamaged = false;
 
 		std::function<void()> updateFunc = []() {};
 
@@ -195,7 +196,12 @@ class PuzzleGame : public Game {
 		}
 
 		bool draw() {
-			drawWithRect(imgHandles["p_hime"], 0, !isRightDirection);
+			if (isDamaged) {
+				drawWithRect(imgHandles["p_hime_damaged"], 0, !isRightDirection);
+			}
+			else {
+				drawWithRect(imgHandles["p_hime"], 0, !isRightDirection);
+			}
 			return true;
 		}
 		void preUpdate() {
@@ -221,17 +227,23 @@ class PuzzleGame : public Game {
 			};
 		}
 		void init() {
+			if (!isMovable) { return; }
 			updateFunc = [this]() {
-
-				rect.x = prevX = initX;
-				rect.y = prevY = initY;
-				exForceX = exForceY = 0;
+				isDamaged = true;
+				isMovable = false;
+				game.funcTimer.set([this]() {
+					isDamaged = false;
+					isMovable = true;
+					rect.x = prevX = initX;
+					rect.y = prevY = initY;
+					exForceX = exForceY = 0;
+				}, FPS);
 			};
 		}
 		void goal() { 
 			const int goalScore = 1000;
 			game.score->score += goalScore;
-			isReached = true;
+			isMovable = false;
 		}
 		void markerCheck(std::shared_ptr<BlockObject> block) {
 			if (top() < block->bottomHit() && bottom() > block->topHit() && right() > block->leftHit() && left() < block->rightHit()) {
