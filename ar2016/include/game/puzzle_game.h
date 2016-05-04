@@ -291,7 +291,7 @@ class PuzzleGame : public Game {
 				layer = 101;
 			}
 			bool draw() {
-				drawWithRect(effectHandles["p_coins"][counter], 30);
+				drawWithRect(effectHandles["p_coins"][counter], 50);
 				counter++;
 				return counter < countMax;
 			}
