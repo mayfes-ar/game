@@ -4,7 +4,7 @@
 bool PuzzleGame::onStart() {
 	using namespace std;
 	fps.isShow = true;
-
+	
 	// mode 0: opening
 	mode.setMode([this]() {
 		setBlock(0, 700, 1280, 100, true);
@@ -15,7 +15,7 @@ bool PuzzleGame::onStart() {
 		drawList.push_back(explanation);
 		setSwitch(500, 550, 100, explanation->isFirst, true);
 		setPlayer(100, 600);
-		setGoal(1100, 550);
+		setGoal(1100, 555);
 	}, -1);
 	
 	// mode 1
@@ -23,36 +23,40 @@ bool PuzzleGame::onStart() {
 		makeStageBase();
 		drawList.push_back(std::make_shared<CurtainObject>(true));
 		setPlayer(100, -100);
-		setGoal(1100, 550);
+		setGoal(1080, 555);
 
 		setBlock(0, 520, 540, 200);
 		setBlock(540, 200, 170, 500);
 		setBlock(1000, 220, 300, 20);
-		setCoin(1030, 100);
-		setCoin(1110, 100);
+		setCoin(1050, 130);
+		setCoin(1130, 130);
+		setCoin(1090, 50);
 
 	}, -1);
-
+	
 	// mode 2
 	mode.setMode([this]() {
 		makeStageBase();
 		setPlayer(100, -300);
-		setGoal(1100, 550);
+		setGoal(1080, 550);
 
 		setBlock(50, 300, 400, 100);
-		setSwitch(1000, 240, 50, setBlock(450, 300, 400, 100)->canHit, true);
+		setSwitch(1000, 200, 80, setBlock(450, 300, 400, 100)->canHit, true);
 		setBlock(850, 300, 400, 100);
-		setCoin(1000, 100);
+		setCoin(1010, 80);
 		setCoin(60, 420);
 		setCoin(160, 420);
 		setCoin(260, 420);
+		setCoin(340, 420);
+
+		setWarp(50, 620, 100, 100, 1150, 0);
 
 		for (int i = 0; i < 80; i++){
 			setSmog();
 		}
 
 	}, -1);
-
+	
 	// mode 3
 	mode.setMode([this]() {
 		makeStageBase();
@@ -88,8 +92,11 @@ bool PuzzleGame::onStart() {
 
 		//setBlock(0, 680, 1300, 200);
 
-	}, -1);
+		setWind(1070, 150, 130, 51, -2, 0);
+		setCoin(1120, 10);
 
+	}, -1);
+	
 	// mode 4
 	mode.setMode([this]() {
 		makeStageBase(false);
@@ -104,8 +111,12 @@ bool PuzzleGame::onStart() {
 
 		setCoin(420, 500);
 		setCoin(1020, 450);
+		setCoin(1020, 370);
+		setCoin(1020, 290);
 		setCoin(670, 550);
 		setCoin(770, 550);
+		setCoin(670, 50);
+		setCoin(770, 50);
 
 	}, -1);
 	
@@ -147,14 +158,14 @@ bool PuzzleGame::onStart() {
 		setCoin(120, 240);
 		setCoin(200, 240);
 		setCoin(280, 240);
-		setCoin(320, 500);
+		setCoin(320, 420);
 		setCoin(550, 430, 60, 500);
 
 		setWarp(-500, 1000, 2500, 600, 100, -100);
 		setBlock(-500, 1600, 2500, 600);
 
 	}, -1);
-
+	
 	// mode 6
 	mode.setMode([this]() {
 		makeStageBase(false);
@@ -185,11 +196,13 @@ bool PuzzleGame::onStart() {
 		setCoin(1000, -58);
 		setCoin(1100, -58);
 
+		setCoin(820, 420);
+
 		setSwitch(900, 550, 100, setBlock(900, 150, 25, 250, false)->canHit, true);
 		setSwitch(1150, 550, 100, setBlock(925, 150, 25, 250, false)->canHit, true);
 
 		setFuncSwitch(700, 550, 100, [this]() {funcTimer.set([this]() { setDamage(700, -100, 100, 0, 2); }, 1); });
-		setFuncSwitch(1150, 550, 100, [this]() {funcTimer.set([this]() {setDamage(-100, 150, 250, 3, 0); }, 1); });
+		setFuncSwitch(1150, 550, 100, [this]() {funcTimer.set([this]() {setDamage(-100, 150, 240, 3, 0); }, 1); });
 
 		setWarp(-1000, 1000, 3000, 100, 10, 400);//shita
 	}, -1);
