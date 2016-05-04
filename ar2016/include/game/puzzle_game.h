@@ -128,10 +128,14 @@ class PuzzleGame : public Game {
 		}
 		bool draw() {
 			if (isPlaying) {
-				drawNumber(400, 0, 40, score, effectHandles["p_num"]);
+				const int size = 40;
+				DrawExtendGraph(400, 2, 400+size, 2+size, imgHandles["p_saihu"], true);
+				drawNumber(400+size, 2, size, score, effectHandles["p_num"]);
 				//DrawFormatString(400, 0, GetColor(65, 205, 63), "SCORE: %d", score);
 			} else {
-				DrawFormatString(400, 400, GetColor(165, 205, 163), "SCORE: %d", score);
+				DrawExtendGraph(400, 400, 400+64, 64, imgHandles["p_saihu"], true);
+				drawNumber(464, 400, 64, score, effectHandles["p_num"]);
+				//DrawFormatString(400, 400, GetColor(165, 205, 163), "SCORE: %d", score);
 			}
 			return true;
 		}
@@ -146,7 +150,10 @@ class PuzzleGame : public Game {
 			layer = 200;
 		}
 		bool draw() {
-			DrawFormatString(800, 0, GetColor(165, 205, 163), "TIME: %d", time/FPS);
+			const int size = 40;
+			DrawExtendGraph(800, 2, 800 + size, 2 + size, imgHandles["p_timer"], true);
+			drawNumber(800 + size, 2, size, time/FPS, effectHandles["p_num"]);
+			//DrawFormatString(800, 0, GetColor(165, 205, 163), "TIME: %d", time/FPS);
 			return true;
 		}
 		bool update() {
