@@ -244,12 +244,11 @@ class PuzzleGame : public Game {
 		const int margin = 20;
 	public:
 		GoalObject(int x_, int y_) {
-			rect = Rectan(x_ + margin, y_ + margin, 100 - margin*2, 150 - margin*2);
+			rect = Rectan(x_ + margin, y_ + margin, 150 - margin*2, 150 - margin*2);
 			layer = 100;
 		}
 		bool draw() {
-			drawWithRect(imgHandles["p_goal"], margin
-				);
+			drawWithRect(imgHandles["p_castle"], margin);
 			return true;
 		}
 		bool check(std::shared_ptr<Player>& player) {
@@ -401,6 +400,8 @@ class PuzzleGame : public Game {
 	class FuncSwitchGimmick : public Gimmick {
 		bool isOn;
 		const std::function<void()> func;
+		int counter = 0;
+		const int countMax = effectHandles["p_crystal1"].size() * 2;
 		void setSwitch(bool isOn_) {
 			if (isOn_ && !isOn) {
 				func();
@@ -415,11 +416,16 @@ class PuzzleGame : public Game {
 			setSwitch(false);
 		}
 		bool draw() {
+			const int margin = rect.width / 4;
 			if (isOn) {
-				drawWithRect(imgHandles["p_on"]);
+				//drawWithRect(imgHandles["p_on"]);
+				drawWithRect(effectHandles["p_crystal1"][counter / 2], margin);
 			} else {
-				drawWithRect(imgHandles["p_off"]);
+				//drawWithRect(imgHandles["p_off"]);
+				drawWithRect(effectHandles["p_crystal2"][counter / 2], margin);
 			}
+			counter++;
+			if (counter == countMax) { counter = 0; }
 			return willExist;
 		}
 		bool update() {
