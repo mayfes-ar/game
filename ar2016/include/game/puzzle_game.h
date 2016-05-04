@@ -146,7 +146,7 @@ class PuzzleGame : public Game {
 	};
 
 	class TimerObject : public Object {
-		int time = 3 * FPS;
+		int time = 300 * FPS;
 
 	public:
 		TimerObject() {

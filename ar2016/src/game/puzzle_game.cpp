@@ -64,10 +64,9 @@ bool PuzzleGame::onStart() {
 		setPlayer(50, 580);
 		setGoal(100, 80);
 		
-		setWind(0, 240, 900, 80, 3, 0);
-		setWind(440, 560, 600, 120, -3, 0);
+		setWind(0, 240, 840, 80, 3, 0);
+		setWind(440, 560, 540, 120, -3, 0);
 		setBlock(0, 300, 1100, 40);
-		setSwitch(1160, 200, 1, setBlock(1100, 300, 200, 40)->canHit);
 		setBlock(200, 560, 290, 220);
 
 		for (int i = 580; i < 680; i += 10) {
