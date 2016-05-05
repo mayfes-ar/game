@@ -369,6 +369,9 @@ class SinglePlayerGame : public Game {
 		int maxInvincibleTime = FPS;
 		int invincibleTime = 0;
 
+		int overBufferMax = FPS;
+		int overBuffer = overBufferMax;
+
 		SinglePlayerGame& game;
 
 		Character(int x_, int y_, int width_, int height_, std::string imgHandleKey_, int maxDamage_, SinglePlayerGame& game_) : maxDamage(maxDamage_), game(game_) {
@@ -508,7 +511,11 @@ class SinglePlayerGame : public Game {
 			if (rect.y < game.field.at("top") || rect.y > game.field.at("bottom")) {
 				die();
 			}
-			
+
+			if (overBuffer < overBufferMax) {
+				overBuffer--;
+				die();
+			}
 			return !isAlive;
 		}
 		
@@ -517,8 +524,24 @@ class SinglePlayerGame : public Game {
 		}
 
 		virtual void die() {
-			characterState = OVER;
-			isAlive = false;
+			changeCharacterState(OVER);
+			// game.funcTimer.set([this]() {isAlive = false; }, FPS);
+			// isAlive = false;
+			if (overBuffer <= 0) isAlive = false;
+			else if (overBuffer == overBufferMax) overBuffer--;
+		}
+
+		virtual void damageContorol() {
+
+		}
+
+		void changeCharacterState(CharacterState newState) {
+			if (characterState == OVER) {
+
+			}
+			else {
+				characterState = newState;
+			}
 		}
 }	;
 
@@ -530,14 +553,19 @@ class SinglePlayerGame : public Game {
 		}
 		
 		virtual void update() {
-			double acX = 0;
-			double acY = 0;
-			setAc(acX, acY);
-			updateCoordinate(acX, acY);
-			moveBecauseBlockCollision(game.blockList);
-			moveBecauseMarkerCollision(game.markerList);
+			if (characterState == OVER) {
+				 
+			}
+			else {
+				double acX = 0;
+				double acY = 0;
+				setAc(acX, acY);
+				updateCoordinate(acX, acY);
+				moveBecauseBlockCollision(game.blockList);
+				moveBecauseMarkerCollision(game.markerList);
 
-			moveDirection = acX > 0 ? RIGHT : acX < 0 ? LEFT : NOMOVE;
+				moveDirection = acX > 0 ? RIGHT : acX < 0 ? LEFT : NOMOVE;
+			}
 		}
 		
 		virtual void setAc(double& acX, double& acY) {
@@ -546,8 +574,8 @@ class SinglePlayerGame : public Game {
 
 		// 死亡判定。マーカーで殴られたら死ぬ。
 		virtual bool deathDecision() {
-			if (invincibleTime == 0) {
-				characterState = NORMAL;
+			if (invincibleTime == 0 && characterState != OVER) {
+				changeCharacterState(NORMAL);
 				for (auto marker : game.markerList) {
 					if (marker->isEnable && left() < marker->right() && top() < marker->bottom() &&
 						right() > marker->left() && bottom() > marker->top()) {
@@ -571,7 +599,7 @@ class SinglePlayerGame : public Game {
 			return Character::deathDecision();
 		}
 
-		// ダメージが何点以上で死亡とするか。返り値は 死：false, 生：true
+		// ダメージが何点以上で死亡とするか。
 		virtual void damageControl() {
 			damage++;
 			
@@ -580,7 +608,7 @@ class SinglePlayerGame : public Game {
 			}
 			else if (damage < maxDamage) {
 				// HP残ってる
-				characterState = DAMAGE;
+				changeCharacterState(DAMAGE);
 			}
 			else {
 				die();
@@ -609,18 +637,22 @@ class SinglePlayerGame : public Game {
 		static const int width = 430;
 		static const int height = 275;
 
-		RocketWanwan(int x_, int y_, SinglePlayerGame& game_, double size, int maxDamage_ = 10, std::string imgHandleKey_ = "s_game_wanwan") : Enemy(x_, y_, width * size, height * size, imgHandleKey_, maxDamage_, game_) {
+		RocketWanwan(int x_, int y_, SinglePlayerGame& game_, double size, int maxDamage_ = 5, std::string imgHandleKey_ = "s_game_wanwan") : Enemy(x_, y_, width * size, height * size, imgHandleKey_, maxDamage_, game_) {
 			layer = 165;
 			moveDirection = x_ < WIDTH/2 ? RIGHT : LEFT ;
 		}
 
 		void update(){
-			double acX = 0;
-			double acY = 0;
-			setAc(acX, acY);
-			updateCoordinate(acX, acY);
-			//moveBecauseBlockCollision(game.blockList);
-			moveBecauseMarkerCollision(game.markerList);
+			if (characterState == OVER) {
+
+			}
+			else {
+				double acX = 0;
+				double acY = 0;
+				setAc(acX, acY);
+				updateCoordinate(acX, acY);
+				moveBecauseMarkerCollision(game.markerList);
+			}
 		}
 
 		void setAc(double& acX, double& acY) {
@@ -706,6 +738,11 @@ class SinglePlayerGame : public Game {
 
 		}
 
+		void die() {
+			// TODO
+			isAlive = false;
+		}
+
 	};
 
 	class Ufo : public Enemy {
@@ -722,29 +759,35 @@ class SinglePlayerGame : public Game {
 		};
 
 		void update() {
-			stopCount--;
-			if (stopCount == FPS * 2) {
-				ray = game.makeRay(rect.x + rect.width / 2 - Ray::width / 2, bottom(), 1);
-			} else if (stopCount < FPS*2) {
-				if (stopCount == 0) {
-					ray->die();
-					ray = nullptr;
+			if (characterState == OVER) {
 
-					stopCount = FPS * 7;
-				}
 			}
 			else {
-				double acX = 0;
-				double acY = 0;
-				setAc(acX, acY);
-				updateCoordinate(acX, acY);
+				stopCount--;
+				if (stopCount == FPS * 2) {
+					ray = game.makeRay(rect.x + rect.width / 2 - Ray::width / 2, bottom(), 1);
+				}
+				else if (stopCount < FPS * 2) {
+					if (stopCount == 0) {
+						ray->die();
+						ray = nullptr;
+
+						stopCount = FPS * 7;
+					}
+				}
+				else {
+					double acX = 0;
+					double acY = 0;
+					setAc(acX, acY);
+					updateCoordinate(acX, acY);
+				}
+				turnCounter--;
+				if (turnCounter == 0) {
+					moveDirection = rand() % 2 == 0 ? LEFT : RIGHT;
+					turnCounter = (rand() % 4 + 1) * FPS;
+				}
+				moveBecauseMarkerCollision(game.markerList);
 			}
-			turnCounter--;
-			if (turnCounter == 0) {
-				moveDirection = rand() % 2 == 0 ? LEFT : RIGHT;
-				turnCounter = (rand() % 4 + 1) * FPS;
-			}
-			moveBecauseMarkerCollision(game.markerList);
 		}
 
 		void updateCoordinate(double acX, double acY) {
@@ -840,6 +883,11 @@ class SinglePlayerGame : public Game {
 
 			return Character::deathDecision();
 		}
+
+		void die() {
+			// TODO
+			isAlive = false;
+		}
 	};
 	
 	class Cloud : public Enemy {
@@ -854,23 +902,28 @@ class SinglePlayerGame : public Game {
 		};
 
 		void update() {
-			fallDropCounter--;
-			if (fallDropCounter < 40 && fallDropCounter % 4 == 0) {
-				game.makeDrop(rect.x + rand()%(rect.width) - Drop::width/2 , bottom(), 1);
-			}
-			if (fallDropCounter == 0) {
-				fallDropCounter = rand() % 100 + FPS*2;
-			}
+			if (characterState == OVER) {
 
-			turnCounter--;
-			if (turnCounter == 0) {
-				moveDirection = rand() % 2 == 0 ? LEFT : RIGHT;
-				turnCounter = (rand() % 5 + 2) * FPS;
 			}
-			double acX = 0;
-			double acY = 0;
-			setAc(acX, acY);
-			updateCoordinate(acX, acY);
+			else {
+				fallDropCounter--;
+				if (fallDropCounter < 40 && fallDropCounter % 4 == 0) {
+					game.makeDrop(rect.x + rand() % (rect.width) - Drop::width / 2, bottom(), 1);
+				}
+				if (fallDropCounter == 0) {
+					fallDropCounter = rand() % 100 + FPS * 2;
+				}
+
+				turnCounter--;
+				if (turnCounter == 0) {
+					moveDirection = rand() % 2 == 0 ? LEFT : RIGHT;
+					turnCounter = (rand() % 5 + 2) * FPS;
+				}
+				double acX = 0;
+				double acY = 0;
+				setAc(acX, acY);
+				updateCoordinate(acX, acY);
+			}
 		}
 
 		void updateCoordinate(double acX, double acY) {
@@ -905,10 +958,16 @@ class SinglePlayerGame : public Game {
 		};
 
 		void update() {
-			double acX = 4;
-			double acY = 2;
-			setAc(acX, acY);
-			updateCoordinate(acX, acY);
+			if (characterState == OVER) {
+
+			}
+			else {
+				double acX = 4;
+				double acY = 2;
+				setAc(acX, acY);
+				updateCoordinate(acX, acY);
+				moveBecauseMarkerCollision(game.markerList);
+			}
 		}
 
 		void updateCoordinate(double acX, double acY) {
@@ -939,15 +998,20 @@ class SinglePlayerGame : public Game {
 		}
 
 		void update() {
-			if (frameCounter == 0) {
-				game.makeFire(left(), (top()+bottom())/2, 1);
+			if (characterState == OVER) {
+
 			}
-			double acX = 0;
-			double acY = 0;
-			setAc(acX, acY);
-			updateCoordinate(acX, acY);
-			moveBecauseBlockCollision(game.blockList);
-			moveBecauseMarkerCollision(game.markerList);
+			else {
+				if (frameCounter == 0) {
+					game.makeFire(left(), (top() + bottom()) / 2, 1);
+				}
+				double acX = 0;
+				double acY = 0;
+				setAc(acX, acY);
+				updateCoordinate(acX, acY);
+				moveBecauseBlockCollision(game.blockList);
+				moveBecauseMarkerCollision(game.markerList);
+			}
 		}
 
 		void setAc(double& acX, double& acY) {
@@ -992,11 +1056,16 @@ class SinglePlayerGame : public Game {
 		}
 
 		void update() {
-			double acX = 0;
-			double acY = 0;
-			setAc(acX, acY);
-			updateCoordinate(acX, acY);
-			moveBecauseMarkerCollision(game.markerList);
+			if (characterState == OVER) {
+
+			}
+			else {
+				double acX = 0;
+				double acY = 0;
+				setAc(acX, acY);
+				updateCoordinate(acX, acY);
+				moveBecauseMarkerCollision(game.markerList);
+			}
 		}
 
 		
@@ -1065,7 +1134,7 @@ class SinglePlayerGame : public Game {
 		}
 
 		void update(const char key[]) {
-			if (!isAlive) {
+			if (!isAlive || characterState == OVER) {
 
 			}
 			else {
@@ -1157,13 +1226,13 @@ class SinglePlayerGame : public Game {
 
 		// プレイヤーキャラクターの生死判定更新
 		bool deathDecision(std::vector<std::shared_ptr<Enemy>> enemyList) {
-			if (invincibleTime == 0) {
-				characterState = NORMAL;
+			if (invincibleTime == 0 && characterState != OVER) {
+				changeCharacterState(NORMAL);
 				for (auto enemy : enemyList) {
 					if (left() <= enemy->right() && top() <= enemy->bottom() &&
 						right() >= enemy->left() && bottom() >= enemy->top()) {
 						damage += 1;
-						characterState = DAMAGE;
+						changeCharacterState(DAMAGE);
 						invincibleTime = maxInvincibleTime;
 						break;
 					}
