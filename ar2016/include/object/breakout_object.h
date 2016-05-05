@@ -7,6 +7,7 @@
 #include <Eigen/Core>
 #include <memory>
 #include <array>
+#include <list>
 #include "object/object.h"
 #include "object/shape.h"
 #include "moving/moving.h"
@@ -15,6 +16,7 @@
 #include "util/util.h"
 #include "util/breakout_params.h"
 #include "util/timer.h"
+#include "util/score.h"
 #include "util/color_palette.h"
 
 
@@ -149,6 +151,88 @@ private:
 };
 
 
+// 縦方向に選択ボタンを配置するセレクト画面。
+// 一方向のみ対応
+/*
+template <typename Mode, Hash = std::hash<Mode> >
+class Select : public Object
+{
+public:
+	Select(const std::list<Mode>& mode_list, 
+		   const Shape::Rectangle& realm) 
+		:m_mode_list(mode_list), m_realm(realm)
+	{
+		Object::layer = PRIORITY_SECTION;
+		m_now_mode = m_mode_list.begin();
+	}
+
+	enum class Move : uint8_t {
+		Up,
+		Down,
+		None
+	};
+
+	bool draw() override {
+		int image_num = static_cast<int>(m_mode_list.size());
+		int image_width = m_realm.width() / 2;
+		int image_height = m_realm.height() / (2 * image_num);
+
+		int id = 1;
+		for (auto it = m_mode_list.begin(); it != m_mode_list.end(); ++it) {
+			DrawExendGraph(m_realm.left(), m_realm.top() + image_height * (2 * i - 1), m_realm.left(), m_realm.top() + image_height * (2 * i),
+				);
+			id++;
+		}
+	}
+
+
+	void move(const Move& move)
+	{
+		switch (move) {
+		case Mode::None:
+			break;
+		case Mode::Up:
+			if (m_mode_list.size() =< 1) {
+				return;
+			}
+			else if (m_now_mode == m_mode_list.begin()) {
+				return;
+			}
+			m_now_mode++;
+
+		case Mode::Down:
+			if (m_mode_list.size() = < 1) {
+				return;
+			}
+			else if (m_now_mode == m_mode_list.begin()) {
+				return;
+			}
+			m_now_mode--;
+			break;
+		}
+	}
+
+	void select() {
+		m_selected = true;
+	}
+
+	bool selected() const {
+		return m_selected;
+	}
+
+	Mode getMode() const {
+		return *m_now_mode;
+	}
+
+private:
+	std::list<Mode> m_mode_list;
+	std::list<Mode>::iterator m_now_mode;
+	Shape::Rectangle m_realm = Shape::Rectangle();
+	bool m_selected = false;
+};
+*/
+
+
 // 背景画像
 // 溶岩の絵がほしい
 class Background : public Object
@@ -225,10 +309,12 @@ public:
 		: m_realm(realm), m_timer(timer)
 	{
 		Object::layer = PRIORITY_SECTION;
+		m_score = std::make_shared<Score>();
 	}
 
 	void init() {
 		m_timer->start();
+		m_score->reset();
 	}
 
 	bool draw() {
@@ -284,7 +370,27 @@ public:
 				key << "green_" << time_num.at(i);
 			}
 
-			DrawExtendGraph(i * num_width, num_height, (i + 1)* num_width, 2 * num_height, 
+			DrawExtendGraph((i+1) * num_width, num_height, (i + 2)* num_width, 2 * num_height, 
+					imgHandles[key.str()], TRUE);
+		}
+
+		m_score->addPoint(1);
+		auto score = m_score->getPoint();
+		std::array<int, 4> score_num;
+		score_num.at(0) = score / 1000;
+		score -= (score / 1000) * 1000;
+		score_num.at(1) = score / 100;
+		score -= (score / 100) * 100;
+		score_num.at(2) = score / 10;
+		score -= (score / 10) * 10;
+		score_num.at(3) = score;
+
+		const int score_width = m_realm.width / 6;
+		const int score_height = m_realm.height / 12;
+		for (int i = 0; i < 4; ++i) {
+			std::ostringstream key;
+			key << "yellow_" << score_num.at(i);
+			DrawExtendGraph((i + 1) * score_width, 2 * num_height + 50/*きもち*/, (i + 2)* score_width, 2 * num_height + 50 + score_width,  
 					imgHandles[key.str()], TRUE);
 		}
 		// Score の描画
@@ -300,9 +406,15 @@ public:
 		return ratio < 0.3f;
 	}
 
+	// Scoreをいじるときはこの関数から直接scoreたたいてください
+	void addScore(int score) {
+		m_score->addPoint(score);
+	}
+
 private:
 	Shape::Rectangle m_realm = Shape::Rectangle();
 	std::shared_ptr<Timer> m_timer = nullptr;
+	std::shared_ptr<Score> m_score = nullptr;
 };
 
 class Result : public Object
@@ -315,7 +427,7 @@ public:
 
 	void init()
 	{
-		m_cnt = 0;
+		m_cnt = 40;
 	}
 
 
@@ -324,7 +436,7 @@ public:
 			m_cnt = 255;
 		}
 		SetDrawBright(m_cnt, m_cnt, m_cnt);
-		m_cnt++;
+		m_cnt += 2;
 
 		if (m_is_game_clear) {
 			DrawExtendGraph(m_realm.left(), m_realm.top(),
@@ -515,7 +627,7 @@ public:
     }
 
 	void updatePosition() {
-		m_moving->updatePosition(m_realm.center);
+		m_moving->updatePoistion(m_realm.center);
 	}
 
 	void setPosition(const Eigen::Vector2i& pos) {

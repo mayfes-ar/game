@@ -1,130 +1,47 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="ソース ファイル">
-      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
-      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
-    </Filter>
-    <Filter Include="ヘッダー ファイル">
-      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
-      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
-    </Filter>
-    <Filter Include="リソース ファイル">
-      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
-      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
-    </Filter>
+    <ClCompile Include="const.cpp" />
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="src\game\breakout_components.cpp" />
+    <ClCompile Include="src\game\breakout_game.cpp" />
+    <ClCompile Include="src\game\image_process.cpp" />
+    <ClCompile Include="src\game\menu.cpp" />
+    <ClCompile Include="src\game\puzzle_game.cpp" />
+    <ClCompile Include="src\math\collision_detection.cpp" />
+    <ClCompile Include="src\object\breakout_object.cpp" />
+    <ClCompile Include="src\object\object.cpp" />
+    <ClCompile Include="src\util\color_palette.cpp" />
+    <ClCompile Include="src\util\timer.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\object\object.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="src\game\image_process.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="src\game\menu.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="const.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="main.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="src\game\puzzle_game.cpp">
-    <ClCompile Include="src\game\breakout_game.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="src\moving\moving.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="src\object\breakout_object.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="src\math\collision_detection.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="src\game\breakout_components.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="src\util\timer.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="src\util\color_palette.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="include\game\first_game.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="include\game\fps.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="include\game\game.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="include\game\image_process.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="include\game\menu.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="main.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="const.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="include\game\single_player_game.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="include\math\collision_detection.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="include\input\input.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="include\moving\moving.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="include\object\block_object.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="include\object\breakout_object.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="include\object\object.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="include\object\shape.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="include\object\units.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="include\game\puzzle_game.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="include\game\breakout_components.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="include\game\breakout_game.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="include\math\math_util.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="include\util\util.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="include\util\breakout_params.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="include\util\timer.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="include\util\color_palette.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
+    <ClInclude Include="const.h" />
+    <ClInclude Include="include\game\breakout_components.h" />
+    <ClInclude Include="include\game\breakout_game.h" />
+    <ClInclude Include="include\game\first_game.h" />
+    <ClInclude Include="include\game\fps.h" />
+    <ClInclude Include="include\game\game.h" />
+    <ClInclude Include="include\game\image_process.h" />
+    <ClInclude Include="include\game\menu.h" />
+    <ClInclude Include="include\game\puzzle_game.h" />
+    <ClInclude Include="include\game\single_player_game.h" />
+    <ClInclude Include="include\input\input.h" />
+    <ClInclude Include="include\math\collision_detection.h" />
+    <ClInclude Include="include\math\math_util.h" />
+    <ClInclude Include="include\moving\moving.h" />
+    <ClInclude Include="include\object\block_object.h" />
+    <ClInclude Include="include\object\breakout_object.h" />
+    <ClInclude Include="include\object\object.h" />
+    <ClInclude Include="include\object\shape.h" />
+    <ClInclude Include="include\object\units.h" />
+    <ClInclude Include="include\util\breakout_params.h" />
+    <ClInclude Include="include\util\color_palette.h" />
+    <ClInclude Include="include\util\timer.h" />
+    <ClInclude Include="include\util\util.h" />
+    <ClInclude Include="main.h" />
+    <ClInclude Include="include\moving\moving_behavior.h" />
+    <ClInclude Include="include\moving\newton_behavior.h" />
+    <ClInclude Include="include\moving\spring_behavior.h" />
+    <ClInclude Include="include\util\score.h" />
   </ItemGroup>
 </Project>

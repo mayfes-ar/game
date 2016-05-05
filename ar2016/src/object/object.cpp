@@ -6,6 +6,7 @@ using namespace std;
 map<string, int> Object::imgHandles;
 map<string, vector<int>> Object::effectHandles;
 map<string, int> Object::soundHandles;
+std::map<std::string, int> Object::movieHandles;
 
 // 一番最初に一回だけ呼ぶ
 bool Object::load() {
@@ -48,6 +49,17 @@ bool Object::load() {
 			return false;
 		} else {
 			Object::soundHandles[key] = handle;
+			return true;
+		}
+	};
+
+	auto loadMovie = [](string key, string name) -> bool {
+		const string path = "movie/" + name;
+		const int handle = LoadGraph(path.c_str());
+		if (handle == -1) {
+			return false;
+		} else {
+			Object::movieHandles[key] = handle;
 			return true;
 		}
 	};
@@ -126,15 +138,22 @@ bool Object::load() {
 	isSuccess &= loadImage("pot", "pot");
 	isSuccess &= loadImage("restore_ship", "restore_ship");
 	isSuccess &= loadImage("damage_ship", "damage_ship");
+
 	isSuccess &= loadImage("block_blue", "block_blue");
 	isSuccess &= loadImage("block_red", "block_red");
 	isSuccess &= loadImage("block_green", "block_green");
+
 	isSuccess &= loadImage("b_forest", "breakout/forest");
 	isSuccess &= loadImage("b_magma", "breakout/magma");
+	isSuccess &= loadImage("b_hill", "breakout/hill");
+
 	isSuccess &= loadImage("b_game_over", "breakout/game_over");
 	isSuccess &= loadImage("b_game_clear", "breakout/game_clear");
 	isSuccess &= loadImage("b_explanation", "breakout/explanation");
-	isSuccess &= loadImage("b_hill", "breakout/hill");
+
+	isSuccess &= loadImage("b_easy", "breakout/easy");
+	isSuccess &= loadImage("b_normal", "breakout/normal");
+	isSuccess &= loadImage("b_hard", "breakout/hard");
 
 	for (int num = 0; num <= 9; ++num) {
 		for (const auto& color : { "red", "blue", "yellow", "green" }) {
@@ -145,5 +164,7 @@ bool Object::load() {
 			isSuccess &= loadImage(key.str(), name.str());
 		}
 	}
+
+	//isSuccess &= loadMovie("b_mode_select", "breakout/mode_select.mp4");
 	return isSuccess;
 }

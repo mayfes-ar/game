@@ -1,5 +1,7 @@
 ﻿#include "game/breakout_components.h"
 #include "util/breakout_params.h"
+#include "moving/newton_behavior.h"
+#include "moving/spring_behavior.h"
 #include <random>
 
 using namespace Breakout;
@@ -7,7 +9,11 @@ using namespace Breakout;
 
 void BreakoutComponents::setup()
 {
+	// Select画面
 	// Layoutの初期化
+	std::unordered_map<std::string, int> mode_image_store;
+	mode_image_store["easy"] = 1;
+	mode_image_store["hard"] = 1;
 	{
 		background = std::make_shared<Background>();
 		background->init();
@@ -71,7 +77,7 @@ void BreakoutComponents::setup()
 
 			const Eigen::Vector2f start_vel = Eigen::Vector2f(velocity_generator(mt), velocity_generator(mt));
 			const Eigen::Vector2f start_accel = Eigen::Vector2f::Zero();
-			auto moving = std::make_shared<Moving>(1.0, start_accel, start_vel * -1);
+			auto moving = std::make_shared<Moving>(1.0, std::make_shared<NewtonBehavior>(), start_vel * -1, start_accel);
 
 			if (fireball_mode_generator(mt) > 0.7) {
 				fireball_manager->add(std::make_shared<Breakout::Fireball>(circle, moving, EnemyStrong));
@@ -79,6 +85,15 @@ void BreakoutComponents::setup()
 				fireball_manager->add(std::make_shared<Breakout::Fireball>(circle, moving, EnemyWeak));
 			}
 		}
+		//const auto circle
+		//	= Shape::Circle(FIREBALL_STARTPOS, FIREBALL_RADIUS);
+
+		//const Eigen::Vector2f start_vel = FIREBALL_STARTVEL;
+		//const Eigen::Vector2f start_accel = Eigen::Vector2f::Zero();
+		//// time_step * frq = 1e-3 が最適
+		//auto moving = std::make_shared<Moving>(1.0f, std::make_shared<StringBehavior>(Eigen::Vector2f{200.0f, 200.0f}, 1e-3f)/*std::make_shared<NewtonBehavior>()*/, start_vel, start_accel);
+
+		//fireball = std::make_shared<Breakout::Fireball>(circle, moving);
 	}
 
 	// shipの初期化
