@@ -72,24 +72,56 @@ bool Object::load() {
 	//　ゲーム本編
 	isSuccess &= loadImage("s_game_player", "s_game/hime_normal");
 	isSuccess &= loadImage("s_game_player_damage", "s_game/hime_odoroki");
+	isSuccess &= loadImage("s_game_player_over", "s_game/hime_gameover");
 
 	isSuccess &= loadImage("s_game_wanwan", "s_game/wolf");
+	isSuccess &= loadImage("s_game_wanwan_damage", "s_game/wolf");
+	isSuccess &= loadImage("s_game_wanwan_over", "s_game/wolf");
+
 	isSuccess &= loadImage("s_game_marker", "s_game/luigi");
+
 	isSuccess &= loadImage("s_game_teresa", "s_game/teresa");
+	isSuccess &= loadImage("s_game_teresa_damage", "s_game/teresa");
+	isSuccess &= loadImage("s_game_teresa_over", "s_game/teresa");
+
 	isSuccess &= loadImage("s_game_heiho", "s_game/heiho");
+	isSuccess &= loadImage("s_game_heiho_damage", "s_game/heiho");
+	isSuccess &= loadImage("s_game_heiho_over", "s_game/heiho");
+
 	isSuccess &= loadImage("s_game_fire", "s_game/fire");
+	isSuccess &= loadImage("s_game_fire_damage", "s_game/fire");
+	isSuccess &= loadImage("s_game_fire_over", "s_game/fire");
+
 	isSuccess &= loadImage("s_game_balloon", "s_game/balloon");
+
 	isSuccess &= loadImage("s_game_ufo", "s_game/ufo");
+	isSuccess &= loadImage("s_game_ufo_damage", "s_game/eagle");
+	isSuccess &= loadImage("s_game_ufo_over", "s_game/drop");
+
 	isSuccess &= loadImage("s_game_drop", "s_game/drop");
+	isSuccess &= loadImage("s_game_drop_damage", "s_game/drop");
+	isSuccess &= loadImage("s_game_drop_over", "s_game/drop");
+
 	isSuccess &= loadImage("s_game_ray", "s_game/uforaytrans");
+	isSuccess &= loadImage("s_game_ray_damage", "s_game/uforaytrans");
+	isSuccess &= loadImage("s_game_ray_over", "s_game/uforaytrans");
+
 	isSuccess &= loadImage("s_game_cloud", "s_game/cloud");
+	isSuccess &= loadImage("s_game_cloud_damage", "s_game/cloud");
+	isSuccess &= loadImage("s_game_cloud_over", "s_game/cloud");
+
 	isSuccess &= loadImage("s_game_eagle", "s_game/eagle");
+	isSuccess &= loadImage("s_game_eagle_damage", "s_game/eagle");
+	isSuccess &= loadImage("s_game_eagle_over", "s_game/eagle");
+
 	isSuccess &= loadImage("s_game_water", "s_game/water");
+	isSuccess &= loadImage("s_game_water_damage", "s_game/water");
+	isSuccess &= loadImage("s_game_water_over", "s_game/water");
+
 	isSuccess &= loadImage("s_game_switch", "s_game/switch");
-	isSuccess &= loadImage("s_game_player", "s_game/hime_normal");
-	isSuccess &= loadImage("s_game_player_damage", "s_game/hime_odoroki");
-	isSuccess &= loadImage("s_game_water", "s_game/water");
-	isSuccess &= loadImage("s_game_switch", "s_game/switch");
+	isSuccess &= loadImage("s_game_switch_damage", "s_game/switch");
+	isSuccess &= loadImage("s_game_switch_over", "s_game/switch");
+
 	isSuccess &= loadImage("s_game_heart", "s_game/heart");
 
 	isSuccess &= loadSound("s_game_bgm", "s_game/bgm.mp3");

@@ -337,19 +337,7 @@ class SinglePlayerGame : public Game {
 	//キャラクター一般
 	class Character : public SingleGameObject {
 	public:
-		const int imgHandle;
-		const int maxDamage;
-		std::vector<std::string> imgHandleC;
 		
-
-		int getMaxDamage() {
-			return maxDamage;
-		}
-
-		double prevX;
-		double prevY;
-		bool isJumping = true;
-
 		enum MoveDirection // x軸方向のみ
 		{
 			LEFT, NOMOVE, RIGHT,
@@ -360,38 +348,56 @@ class SinglePlayerGame : public Game {
 			NORMAL, DAMAGE, OVER,
 		};
 
+		std::map<CharacterState, int> imgHandle;
+		const int maxDamage;
+		std::vector<std::string> imgHandleC;
+
+
+		int getMaxDamage() {
+			return maxDamage;
+		}
+
+		double prevX;
+		double prevY;
+		bool isJumping = true;
+
 		MoveDirection moveDirection = NOMOVE;
 		CharacterState characterState = NORMAL;
 
 		bool isAlive = true;
 		int damage = 0;
+		int maxInvincibleTime = FPS;
 		int invincibleTime = 0;
 
 		SinglePlayerGame& game;
 
-		Character(int x_, int y_, int width_, int height_, std::string imgHandleKey_, int maxDamage_, SinglePlayerGame& game_) :imgHandle(imgHandles[imgHandleKey_]), maxDamage(maxDamage_), game(game_) {
+		Character(int x_, int y_, int width_, int height_, std::string imgHandleKey_, int maxDamage_, SinglePlayerGame& game_) : maxDamage(maxDamage_), game(game_) {
 			rect.x = prevX = x_;
 			rect.y = prevY = y_;
 			rect.width = width_;
 			rect.height = height_;
+			imgHandle[NORMAL] = imgHandles[imgHandleKey_];
+			imgHandle[DAMAGE] = imgHandles[imgHandleKey_+"_damage"];
+			imgHandle[OVER] = imgHandles[imgHandleKey_+"_over"];
 		}
 
 		virtual bool draw() {
 			switch (moveDirection)
 			{
 			case RIGHT: {
-				drawWithRect(imgHandle, 0, true);
+				drawWithRect(imgHandle[characterState], 0, true);
 				break;
 			}
 
 			case NOMOVE:
 			case LEFT: {
-				drawWithRect(imgHandle);
+				drawWithRect(imgHandle[characterState]);
 				break;
 			}
 			default:
 				break;
 			}
+
 			return getIsAlive();
 		}
 
@@ -511,6 +517,7 @@ class SinglePlayerGame : public Game {
 		}
 
 		virtual void die() {
+			characterState = OVER;
 			isAlive = false;
 		}
 }	;
@@ -539,8 +546,8 @@ class SinglePlayerGame : public Game {
 
 		// 死亡判定。マーカーで殴られたら死ぬ。
 		virtual bool deathDecision() {
-
 			if (invincibleTime == 0) {
+				characterState = NORMAL;
 				for (auto marker : game.markerList) {
 					if (marker->isEnable && left() < marker->right() && top() < marker->bottom() &&
 						right() > marker->left() && bottom() > marker->top()) {
@@ -549,7 +556,7 @@ class SinglePlayerGame : public Game {
 						}
 						damageControl();
 						marker->effectHit();
-						invincibleTime = 15;
+						invincibleTime = FPS;
 
 						return !isAlive;
 
@@ -573,6 +580,7 @@ class SinglePlayerGame : public Game {
 			}
 			else if (damage < maxDamage) {
 				// HP残ってる
+				characterState = DAMAGE;
 			}
 			else {
 				die();
@@ -841,7 +849,7 @@ class SinglePlayerGame : public Game {
 		int turnCounter = FPS * 5;
 
 	public:
-		Cloud(int x_, int y_, SinglePlayerGame& game_, double size, int maxDamage_ = 10, std::string imgHandleKey_ = "s_game_cloud") : Enemy(x_, y_, width * size, height * size, imgHandleKey_, maxDamage_, game_) {
+		Cloud(int x_, int y_, SinglePlayerGame& game_, double size, int maxDamage_ = 5, std::string imgHandleKey_ = "s_game_cloud") : Enemy(x_, y_, width * size, height * size, imgHandleKey_, maxDamage_, game_) {
 			moveDirection = RIGHT;
 		};
 
@@ -1019,7 +1027,8 @@ class SinglePlayerGame : public Game {
 		static const int width = 75;
 		static const int height = 100;
 		Player(int x_, int y_, int width_, int height_, std::string imgHandleKey_, int maxDamage_, SinglePlayerGame& game_) : Character(x_, y_, width_, height_, imgHandleKey_, maxDamage_, game_) {
-			layer = 100;			
+			layer = 100;	
+			maxInvincibleTime = FPS*2;
 		}
 
 		bool draw() {
@@ -1050,28 +1059,8 @@ class SinglePlayerGame : public Game {
 
 			DrawString(50, 50, std::to_string(damage).c_str(), GetColor(255, 255, 255));
 			
-			if (characterState == DAMAGE) {
-				switch (moveDirection)
-			{
-			case RIGHT: {
-				drawWithRect(imgHandles["s_game_player_damage"], 0, true);
-				break;
-			}
-
-			case NOMOVE:
-			case LEFT: {
-				drawWithRect(imgHandles["s_game_player_damage"]);
-				break;
-			}
-			default:
-				break;
-			}
-			return getIsAlive();
-
-			}
-			else {
-				return Character::draw();
-			}
+			
+			return Character::draw();
 			
 		}
 
@@ -1169,28 +1158,23 @@ class SinglePlayerGame : public Game {
 		// プレイヤーキャラクターの生死判定更新
 		bool deathDecision(std::vector<std::shared_ptr<Enemy>> enemyList) {
 			if (invincibleTime == 0) {
+				characterState = NORMAL;
 				for (auto enemy : enemyList) {
 					if (left() <= enemy->right() && top() <= enemy->bottom() &&
 						right() >= enemy->left() && bottom() >= enemy->top()) {
 						damage += 1;
 						characterState = DAMAGE;
-						invincibleTime = 50;
+						invincibleTime = maxInvincibleTime;
 						break;
 					}
 				}
-			}
-			else if (invincibleTime == 40) {
-				characterState = NORMAL;
-				invincibleTime--;
 			}
 			else if (invincibleTime > 0) {
 				invincibleTime--;
 			}
 
-			
 			if (damage >= maxDamage) {
-				isAlive = false;
-
+				die();
 			}
 			
 			return Character::deathDecision();
