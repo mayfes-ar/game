@@ -704,7 +704,8 @@ class SinglePlayerGame : public Game {
 		static const int width = 225 / 2;
 		static const int height = 225 / 2;
 		int stopCount = FPS * 7;
-		std::shared_ptr<Ray> ray;
+		std::shared_ptr<Ray> ray = nullptr;
+		int turnCounter = FPS * 5;
 
 
 	public:
@@ -730,6 +731,11 @@ class SinglePlayerGame : public Game {
 				setAc(acX, acY);
 				updateCoordinate(acX, acY);
 			}
+			turnCounter--;
+			if (turnCounter == 0) {
+				moveDirection = rand() % 2 == 0 ? LEFT : RIGHT;
+				turnCounter = (rand() % 4 + 1) * FPS;
+			}
 			moveBecauseMarkerCollision(game.markerList);
 		}
 
@@ -737,7 +743,7 @@ class SinglePlayerGame : public Game {
 			double& x = rect.x;
 			double& y = rect.y;
 
-			const double diffX = 8;
+			const double diffX = moveDirection == RIGHT ? 8 : -8;
 			const double diffY = 0;
 
 
@@ -760,6 +766,12 @@ class SinglePlayerGame : public Game {
 			return stopCount;
 		}
 
+		void die() {
+			if (ray != nullptr) {
+				ray->die();
+			}
+			isAlive = false;
+		}
 	};
 
 	class Drop : public Enemy {
@@ -825,20 +837,27 @@ class SinglePlayerGame : public Game {
 	class Cloud : public Enemy {
 		static const int width = 304 / 3;
 		static const int height = 166 / 3;
-		int fallDropCounter = 60;
+		int fallDropCounter = FPS*2;
+		int turnCounter = FPS * 5;
 
 	public:
 		Cloud(int x_, int y_, SinglePlayerGame& game_, double size, int maxDamage_ = 10, std::string imgHandleKey_ = "s_game_cloud") : Enemy(x_, y_, width * size, height * size, imgHandleKey_, maxDamage_, game_) {
-			
+			moveDirection = RIGHT;
 		};
 
 		void update() {
 			fallDropCounter--;
-			if (fallDropCounter < 30 && fallDropCounter % 5 == 0) {
+			if (fallDropCounter < 40 && fallDropCounter % 4 == 0) {
 				game.makeDrop(rect.x + rand()%(rect.width) - Drop::width/2 , bottom(), 1);
 			}
 			if (fallDropCounter == 0) {
-				fallDropCounter = rand() % 100 + 60;
+				fallDropCounter = rand() % 100 + FPS*2;
+			}
+
+			turnCounter--;
+			if (turnCounter == 0) {
+				moveDirection = rand() % 2 == 0 ? LEFT : RIGHT;
+				turnCounter = (rand() % 5 + 2) * FPS;
 			}
 			double acX = 0;
 			double acY = 0;
@@ -850,9 +869,8 @@ class SinglePlayerGame : public Game {
 			double& x = rect.x;
 			double& y = rect.y;
 
-			const double diffX = 5;
+			const double diffX = moveDirection == RIGHT ? 3 : -3;
 			const double diffY = 0;
-
 
 			// verlet法
 			const double tempX = x;

@@ -284,6 +284,8 @@ bool SinglePlayerGame::onUpdate() {
 		}
 		case 600: {
 			makeCloud(0, 50, 1);
+			makeCloud(200, 50, 1);
+			makeCloud(800, 50, 1);
 			break;
 		}
 		case 900: {
