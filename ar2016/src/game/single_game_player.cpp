@@ -112,8 +112,9 @@ bool SinglePlayerGame::onStart() {
 	// mode 0
 	mode.setMode([this]() {
 		class Title : public Object {
+			Difficulty& difficulty;
 		public:
-			Title() {
+			Title(Difficulty& difficulty_) : difficulty(difficulty_) {
 				layer = 50;
 			}
 
@@ -121,12 +122,15 @@ bool SinglePlayerGame::onStart() {
 				DrawExtendGraph(0, 0, WIDTH, HEIGHT, imgHandles["s_game_op"], true);
 				DrawExtendGraph(WIDTH / 2 - 429 / 2, 30, WIDTH / 2 + 429 / 2, 30 + 47, imgHandles["s_game_op_title"], true);
 				// DrawExtendGraph(WIDTH/2-50, 400, WIDTH/2+50, 400+150, imgHandles["s_game_player"], true);
+				DrawString(50, 50, "EASY", difficulty == EASY ? GetColor(255,0,0) : GetColor(255, 255, 255));
+				DrawString(50, 100, "HARD", difficulty == HARD ? GetColor(255, 0, 0) : GetColor(255, 255, 255));
+				DrawString(50, 150, "NIGHTMARE", difficulty == NIGHTMARE ? GetColor(255, 0, 0) : GetColor(255, 255, 255));
 				return true;
 			}
 		};
 
 		drawList.clear();
-		drawList.push_back(make_shared<Title>());
+		drawList.push_back(make_shared<Title>(difficulty));
 
 		bgm = make_shared<BGM>(0);
 		bgm->start();
@@ -234,21 +238,33 @@ bool SinglePlayerGame::onUpdate() {
 
 	switch (mode.getMode()) {
 	case 0: { // イントロダクション
-		static int counterForWaiting = FPS;
-		if (key[KEY_INPUT_RETURN] && counterForWaiting == 0) {
-			willFinishMode = true;
+		static int counterForWait = FPS / 2;
+		if (counterForWait == 0) {
+			counterForWait = 5;
+			if (key[KEY_INPUT_RETURN]) {
+				willFinishMode = true;
+			}
+			else if (key[KEY_INPUT_1]) {
+				difficulty = EASY;
+			}
+			else if (key[KEY_INPUT_2]) {
+				difficulty = HARD;
+			}
+			else if (key[KEY_INPUT_3]) {
+				difficulty = NIGHTMARE;
+			}
+			else if (key[KEY_INPUT_UP]) {
+				difficulty = difficulty == EASY ? NIGHTMARE : difficulty == HARD ? EASY : HARD;
+			}
+			else if (key[KEY_INPUT_DOWN]) {
+				difficulty = difficulty == EASY ? HARD : difficulty == HARD ? NIGHTMARE : EASY;
+			}
+			else {
+				counterForWait = 0;
+			}
 		}
-		if (counterForWaiting > 0) {
-			counterForWaiting--;
-		}
-		if (key[KEY_INPUT_1]) {
-			difficulty = EASY;
-		}
-		else if (key[KEY_INPUT_2]) {
-			difficulty = HARD;
-		}
-		else if (key[KEY_INPUT_3]) {
-			difficulty = NIGHTMARE;
+		else if (counterForWait > 0) {
+			counterForWait--;
 		}
 
 		break;
