@@ -18,6 +18,36 @@ class SinglePlayerGame : public Game {
 				
 	*/
 
+	// 指定フレーム後に、登録した関数を実行してくれる
+	class FuncTimer {
+		std::vector<std::function<void()>> funcs;
+		std::vector<int> timers;
+	public:
+		void update() {
+			auto funcsItr = funcs.begin();
+			for (auto timersItr = timers.begin(); timersItr != timers.end();) {
+				(*timersItr)--;
+				if ((*timersItr) > 0) {
+					funcsItr++;
+					timersItr++;
+				}
+				else {
+					(*funcsItr)();
+					funcsItr = funcs.erase(funcsItr);
+					timersItr = timers.erase(timersItr);
+				}
+
+			}
+		}
+		void set(std::function<void()> func, int timer) {
+			funcs.push_back(func);
+			timers.push_back(timer);
+		}
+		void clear() {
+			funcs.clear();
+			timers.clear();
+		}
+	} funcTimer;
 
 	class Background : public Object {
 		int& handle;
@@ -99,7 +129,7 @@ class SinglePlayerGame : public Game {
 
 		// プレイヤーが死んだときの効果音
 		void playDeadSound() {
-			PlaySoundMem(soundHandles["s_game_dead"], DX_PLAYTYPE_NORMAL, true);
+			PlaySoundMem(soundHandles["s_game_dead"], DX_PLAYTYPE_BACK, true);
 		}
 	};
 
@@ -908,6 +938,9 @@ class SinglePlayerGame : public Game {
 	};
 
 	class Player : public Character {
+		bool isToJump = false;
+		int frameCount;
+		std::string message;
 
 	public:
 		static const int width = 75;
@@ -917,7 +950,39 @@ class SinglePlayerGame : public Game {
 		}
 
 		bool draw() {
+			if (isToJump) {
+				
+				if (frameCount <= FPS * 0.5){
+
+				}
+				else {
+					DrawExtendGraph(left() - 50, top() - rect.height - 50, right() + 50, bottom() - rect.height, imgHandles["s_game_balloon"], true);
+					int commentX = left() - 10;
+					int commentY = top() - rect.height - 20;
+
+					if (frameCount <= FPS * 2) {
+						message = "I want to\njump!!";
+						commentY = top() - rect.height - 40;
+					}
+					else if (frameCount <= FPS * 2 + 20) {
+						message = "3";
+					}
+					else if (frameCount <= FPS * 2 + 40) {
+						message = "2";
+					}
+					else if (frameCount <= FPS * 2 + 60) {
+						message = "1";
+					}
+
+					DrawString(commentX, commentY, message.c_str(), GetColor(0, 0, 0));
+				}
+			}
+			for (int heart = 0; heart <= (maxDamage - damage - 1); heart++) {
+				DrawExtendGraph(50 + 50 * heart, 50, 100 + 50 * heart, 100, imgHandles["s_game_heart"], true);
+			}
+
 			DrawString(50, 50, std::to_string(damage).c_str(), GetColor(255, 255, 255));
+			
 			if (characterState == DAMAGE) {
 				switch (moveDirection)
 			{
@@ -973,24 +1038,57 @@ class SinglePlayerGame : public Game {
 
 		// プレイヤーキャラクターの座標更新
 		void setAc(double& acX, double& acY, const char key[]) {
-			const double diffX = rect.x - prevX;
+			double& x = rect.x;
+			double& y = rect.y;
+			const int& width = rect.width;
+			const int& height = rect.height;
+
+			const double diffX = x - prevX;
+			const double diffY = y - prevY;
+
 			acX = -0.5 * (1 - (diffX <= 0) - (diffX < 0));
-			acY = 4;
+			acY = 3.2;
 
-			if (key[KEY_INPUT_UP] && !isJumping) {
-				acY = -40;
-				PlaySoundMem(soundHandles["s_game_jump"], DX_PLAYTYPE_BACK, true);
+			if (key[KEY_INPUT_LSHIFT]) {
+				isToJump = false;
+				if (key[KEY_INPUT_UP] && !isJumping) {
+					acY = -40;
+					PlaySoundMem(soundHandles["s_game_jump"], DX_PLAYTYPE_BACK, true);
+					isJumping = true;
+				}
+				if (key[KEY_INPUT_RIGHT]) {
+					acX = 1.5 * (diffX < 15);
+				}
+				if (key[KEY_INPUT_LEFT]) {
+					acX = -1.5 * (diffX > -15);
+				}
 			}
-			isJumping = true;
+			else if (acX == 0 && !isJumping && !isToJump) {
+				if (rand() % 10 == 0) {
+					frameCount = 0;
+					isToJump = true;
+				}
+				else {
+					acX = rand() % 30 - 15 - 5 * (1 - ( x <= WIDTH/2 ) - ( x < WIDTH/2 ));
+				}
 
-			if (key[KEY_INPUT_RIGHT]) {
-				acX = 1.0 * (diffX < 10);
-				moveDirection = RIGHT;
 			}
-			if (key[KEY_INPUT_LEFT]) {
-				acX = -1.0 * (diffX > -10);
-				moveDirection = LEFT;
+
+			if (isToJump) {
+				if (frameCount >= FPS*2 + 80) {
+					acY = -30;
+					PlaySoundMem(soundHandles["s_game_jump"], DX_PLAYTYPE_BACK, true);
+					isJumping = true;
+				}
+				else {
+					frameCount++;
+				}
 			}
+
+			if (isJumping) {
+				isToJump = false;
+			}
+
 		}
 
 		// プレイヤーキャラクターの生死判定更新
@@ -1062,7 +1160,7 @@ class SinglePlayerGame : public Game {
 
 	std::shared_ptr<BGM> bgm;
 	const int maxTime = FPS * 60;
-	const int maxPlayerDamage = 100
+	const int maxPlayerDamage = 10
 		;
 	int timer = maxTime;
 	bool hasPlayerWon;

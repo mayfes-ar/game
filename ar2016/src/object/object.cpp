@@ -90,6 +90,7 @@ bool Object::load() {
 	isSuccess &= loadImage("s_game_player_damage", "s_game/hime_odoroki");
 	isSuccess &= loadImage("s_game_water", "s_game/water");
 	isSuccess &= loadImage("s_game_switch", "s_game/switch");
+	isSuccess &= loadImage("s_game_heart", "s_game/heart");
 
 	isSuccess &= loadSound("s_game_bgm", "s_game/bgm.mp3");
 	isSuccess &= loadSound("s_game_dead", "s_game/dead.wav");

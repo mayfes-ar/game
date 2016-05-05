@@ -217,7 +217,7 @@ bool SinglePlayerGame::onStart() {
 }
 
 bool SinglePlayerGame::onUpdate() {
-	bool willFinishMode = false;
+	static bool willFinishMode = false;
 
 	switch (mode.getMode()) {
 	case 0: { // イントロダクション
@@ -255,11 +255,13 @@ bool SinglePlayerGame::onUpdate() {
 		enemySubList.clear();
 		enemySubList.shrink_to_fit();
 
-		if (player->deathDecision(enemyList)) {
+		if (hasPlayerWon && player->deathDecision(enemyList)) {
+			hasPlayerWon = false;
 			bgm->stop();
 			bgm->playDeadSound();
-			hasPlayerWon = false;
-			willFinishMode = true;
+			funcTimer.set([this]() {
+				willFinishMode = true;
+			}, FPS*4);
 		}
 
 		// 敵の出現を管理する
@@ -301,9 +303,11 @@ bool SinglePlayerGame::onUpdate() {
 		if (timer < 150 && (maxTime - timer) % 5 == 0) {
 			makeTeresa();
 		}
-		break;
 
+		willFinishMode = false;
+		break;
 	}
+
 	case 2: { // リザルト画面
 		if (key[KEY_INPUT_RETURN]) {
 			willFinishMode = true;
