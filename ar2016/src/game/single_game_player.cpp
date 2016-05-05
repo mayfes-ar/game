@@ -143,6 +143,8 @@ bool SinglePlayerGame::onStart() {
 			drawList.push_back(block);
 		};
 		makeBlock(0 - 200, 600, WIDTH + 200 + 200, 50);
+		makeBlock(0 - 400, 0, 250, HEIGHT);
+		makeBlock(WIDTH + 150, 0, 250, HEIGHT);
 
 		drawList.push_back(player);
 		drawList.push_back(make_shared<Background>(share.handle));
@@ -217,7 +219,7 @@ bool SinglePlayerGame::onStart() {
 }
 
 bool SinglePlayerGame::onUpdate() {
-	static bool willFinishMode = false;
+	bool willFinishMode = false;
 
 	switch (mode.getMode()) {
 	case 0: { // イントロダクション
@@ -231,6 +233,7 @@ bool SinglePlayerGame::onUpdate() {
 		break;
 	}
 	case 1: { // playing
+		static int endCounter = endBuffer;
 		timer -= 1;
 		if (timer <= 0) {
 			willFinishMode = true;
@@ -259,9 +262,7 @@ bool SinglePlayerGame::onUpdate() {
 			hasPlayerWon = false;
 			bgm->stop();
 			bgm->playDeadSound();
-			funcTimer.set([this]() {
-				willFinishMode = true;
-			}, FPS*4);
+			willFinishMode = true;
 		}
 
 		// 敵の出現を管理する
@@ -304,10 +305,19 @@ bool SinglePlayerGame::onUpdate() {
 			makeTeresa();
 		}
 
-		willFinishMode = false;
+		if (willFinishMode){
+			endCounter--;
+			willFinishMode = false;
+		}
+		else if (endCounter < endBuffer) {
+			endCounter--;
+		}
+		if (endCounter == 0) {
+			willFinishMode = true;
+		}
+
 		break;
 	}
-
 	case 2: { // リザルト画面
 		if (key[KEY_INPUT_RETURN]) {
 			willFinishMode = true;
@@ -339,8 +349,7 @@ bool SinglePlayerGame::onUpdate() {
 	}
 
 	if (willFinishMode) {
-
-		mode.goNext();
+			mode.goNext();
 	}
 
 	return Game::onUpdate();

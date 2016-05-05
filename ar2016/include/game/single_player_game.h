@@ -215,7 +215,10 @@ class SinglePlayerGame : public Game {
 			return willStay;
 		}
 
-
+		double rightHit() const { return right() - 20; }
+		double leftHit() const { return left() + 20; }
+		double topHit() const { return top() + rect.height / 3; }
+		double bottomHit() const { return bottom() - rect.height / 3; }
 	};
 
 	// 認識したマーカーの扱い
@@ -264,6 +267,8 @@ class SinglePlayerGame : public Game {
 		}
 
 	public:
+		bool isEnable = true;
+
 		Marker(Rectan rect_, bool willStay_, int index_, SinglePlayerGame& game_) :index(index_), game(game_){
 			rect = rect_;
 			modifyRect();
@@ -273,19 +278,24 @@ class SinglePlayerGame : public Game {
 		}
 
 		bool draw() {
-			switch (moveDirection)
-			{
-			case RIGHT: {
-				drawImage(imgHandle, rect.width, rect.height, 0, 0, true);
-				break;
-			}
+			if (isEnable) {
+				switch (moveDirection)
+				{
+				case RIGHT: {
+					drawImage(imgHandle, rect.width, rect.height, 0, 0, true);
+					break;
+				}
 
-			case LEFT: {
-				drawImage(imgHandle, rect.width, rect.height);
-				break;
+				case LEFT: {
+					drawImage(imgHandle, rect.width, rect.height);
+					break;
+				}
+				default:
+					break;
+				}
 			}
-			default:
-				break;
+			else {
+				drawImage(imgHandles["s_game_invalid"], rect.width, rect.height);
 			}
 			return true;
 		}
@@ -302,6 +312,7 @@ class SinglePlayerGame : public Game {
 			}
 			else {
 			}
+			layer = isEnable ? 300 : 30;
 		}
 
 		int getIndex() {
@@ -323,6 +334,7 @@ class SinglePlayerGame : public Game {
 		}
 	};
 
+	//キャラクター一般
 	class Character : public SingleGameObject {
 	public:
 		const int imgHandle;
@@ -364,8 +376,6 @@ class SinglePlayerGame : public Game {
 			rect.height = height_;
 		}
 
-
-
 		virtual bool draw() {
 			switch (moveDirection)
 			{
@@ -388,7 +398,7 @@ class SinglePlayerGame : public Game {
 		virtual void update() {
 		}
 
-		void updateCoordinate(double& acX, double& acY) {
+		virtual void updateCoordinate(double& acX, double& acY) {
 			double& x = rect.x;
 			double& y = rect.y;
 			const int& width = rect.width;
@@ -410,7 +420,7 @@ class SinglePlayerGame : public Game {
 		virtual void setAc(double& acX, double& acY) {
 		}
 
-		void moveBecauseBlockCollision(const std::vector<std::shared_ptr<SingleGameBlockObject>> objectList) {
+		virtual void moveBecauseBlockCollision(const std::vector<std::shared_ptr<SingleGameBlockObject>> objectList) {
 			double& x = rect.x;
 			double& y = rect.y;
 			const int& width = rect.width;
@@ -447,7 +457,7 @@ class SinglePlayerGame : public Game {
 			}
 		}
 
-		void moveBecauseMarkerCollision(const std::vector<std::shared_ptr<Marker>> objectList) {
+		virtual void moveBecauseMarkerCollision(const std::vector<std::shared_ptr<Marker>> objectList) {
 			double& x = rect.x;
 			double& y = rect.y;
 			const int& width = rect.width;
@@ -484,7 +494,7 @@ class SinglePlayerGame : public Game {
 			}
 		}
 
-		bool deathDecision() {
+		virtual bool deathDecision() {
 			
 			if (rect.x < game.field.at("left") || rect.x > game.field.at("right")) {
 				isAlive = false;
@@ -496,7 +506,7 @@ class SinglePlayerGame : public Game {
 			return !isAlive;
 		}
 		
-		bool getIsAlive() {
+		virtual bool getIsAlive() {
 			return isAlive;
 		}
 }	;
@@ -524,11 +534,11 @@ class SinglePlayerGame : public Game {
 		}
 
 		// 死亡判定。マーカーで殴られたら死ぬ。
-		bool deathDecision() {
+		virtual bool deathDecision() {
 
 			if (invincibleTime == 0) {
 				for (auto marker : game.markerList) {
-					if (left() < marker->right() && top() < marker->bottom() &&
+					if (marker->isEnable && left() < marker->right() && top() < marker->bottom() &&
 						right() > marker->left() && bottom() > marker->top()) {
 						if (isAlive) {
 							PlaySoundMem(soundHandles["s_game_attack"], DX_PLAYTYPE_BACK, true);
@@ -551,7 +561,7 @@ class SinglePlayerGame : public Game {
 		}
 
 		// ダメージが何点以上で死亡とするか。返り値は 死：false, 生：true
-		bool damageControl() {
+		virtual bool damageControl() {
 			damage++;
 			
 			if (maxDamage < 0) {
@@ -937,6 +947,7 @@ class SinglePlayerGame : public Game {
 		}
 	};
 
+	// 姫様
 	class Player : public Character {
 		bool isToJump = false;
 		int frameCount;
@@ -1009,12 +1020,17 @@ class SinglePlayerGame : public Game {
 		}
 
 		void update(const char key[]) {
-			double acX = 0;
-			double acY = 0;
-			setAc(acX, acY, key);
-			updateCoordinate(acX, acY);
-			moveBecauseBlockCollision(game.blockList);
-			//moveBecauseMarkerCollision(game.markerList);
+			if (!isAlive) {
+
+			}
+			else {
+				double acX = 0;
+				double acY = 0;
+				setAc(acX, acY, key);
+				updateCoordinate(acX, acY);
+				moveBecauseBlockCollision(game.blockList);
+				moveBecauseMarkerCollision(game.markerList);
+			}
 		}
 
 		void updateCoordinate(double& acX, double& acY) {
@@ -1058,9 +1074,11 @@ class SinglePlayerGame : public Game {
 				}
 				if (key[KEY_INPUT_RIGHT]) {
 					acX = 1.5 * (diffX < 15);
+					moveDirection = RIGHT;
 				}
 				if (key[KEY_INPUT_LEFT]) {
 					acX = -1.5 * (diffX > -15);
+					moveDirection = LEFT;
 				}
 			}
 			else if (acX == 0 && !isJumping && !isToJump) {
@@ -1070,6 +1088,7 @@ class SinglePlayerGame : public Game {
 				}
 				else {
 					acX = rand() % 30 - 15 - 5 * (1 - ( x <= WIDTH/2 ) - ( x < WIDTH/2 ));
+					moveDirection = acX > 0 ? RIGHT : acX < 0 ? LEFT : moveDirection;
 				}
 
 			}
@@ -1125,6 +1144,79 @@ class SinglePlayerGame : public Game {
 			return damage;
 		}
 
+		void moveBecauseMarkerCollision(const std::vector<std::shared_ptr<Marker>> objectList) {
+			double& x = rect.x;
+			double& y = rect.y;
+			const int& width = rect.width;
+			const int& height = rect.height;
+
+			for (auto marker : objectList) {
+				marker->isEnable = true;
+				if (left() < marker->right() && top() < marker->bottom() &&
+					right() > marker->left() && bottom() > marker->top()) {
+
+					if (prevY < marker->bottomHit() && prevY + height > marker->topHit()) {
+						if (prevX >= marker->rightHit()) {
+							x = marker->right();
+						}
+						else if (prevX + width <= marker->leftHit()) {
+							x = marker->left() - width;
+						}
+						else {
+							marker->isEnable = false;
+						}
+					}
+					else {
+						if (prevY >= marker->bottomHit()) {
+							y = marker->bottom();
+						}
+						else if (prevY + height <= marker->topHit()) {
+							y = marker->top() - height;
+							isJumping = false;
+						}
+						else {
+							marker->isEnable = false;
+						}
+					}
+					prevX = x;
+					prevY = y;
+				}
+			}
+		}
+
+		void moveBecauseBlockCollision(const std::vector<std::shared_ptr<SingleGameBlockObject>> objectList) {
+			double& x = rect.x;
+			double& y = rect.y;
+			const int& width = rect.width;
+			const int& height = rect.height;
+
+			for (auto block : objectList) {
+				if (left() < block->right() && top() < block->bottom() &&
+					right() > block->left() && bottom() > block->top()) {
+					if (top() < block->top()) {
+						y = block->top() - height;
+						prevY = y;
+						isJumping = false;
+					}
+					else if (left() < block->left()) {
+						x = block->left() - width;
+						prevX = x;
+					}
+					else if (right() > block->right()) {
+						x = block->right();
+						prevX = x;
+					}
+					else {
+						y = block->top() - height;
+						prevY = y;
+						isJumping = false;
+					}
+					
+				}
+				
+			}
+		}
+
 	};
 
 	std::thread thread;
@@ -1160,8 +1252,9 @@ class SinglePlayerGame : public Game {
 
 	std::shared_ptr<BGM> bgm;
 	const int maxTime = FPS * 60;
-	const int maxPlayerDamage = 10
-		;
+	const int maxPlayerDamage = 10;
+	const int endBuffer = FPS * 5;
+
 	int timer = maxTime;
 	bool hasPlayerWon;
 

@@ -99,10 +99,11 @@ bool Object::load() {
 	isSuccess &= loadSound("s_game_shuzo", "s_game/shuzo.mp3");
 
 	isSuccess &= loadEffect("s_game_coin", "s_game/coin", 5, 2, 1000, 400);
-
+	// マーカー
 	isSuccess &= loadImage("s_game_piyo", "s_game/piyo");
 	isSuccess &= loadImage("s_game_sword", "s_game/sword");
 	isSuccess &= loadImage("s_game_shield", "s_game/shield");
+	isSuccess &= loadImage("s_game_invalid", "s_game/dead_sample");
 	// リザルト
 	isSuccess &= loadImage("s_game_result_clear", "s_game/s_game_clear");
 	isSuccess &= loadImage("s_game_result_dead", "s_game/s_game_result");
