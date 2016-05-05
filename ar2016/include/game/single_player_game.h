@@ -207,7 +207,7 @@ class SinglePlayerGame : public Game {
 
 		virtual bool draw() {
 			if (willStay) {
-				DrawBox(left(), top(), right(), bottom(), GetColor(240, 117, 50), true);
+				drawWithRect(imgHandles["s_game_block"]);
 			}
 			else {
 				DrawExtendGraph(left(), top(), right(), bottom(), imgHandles["block"], true);
@@ -350,8 +350,6 @@ class SinglePlayerGame : public Game {
 
 		std::map<CharacterState, int> imgHandle;
 		const int maxDamage;
-		std::vector<std::string> imgHandleC;
-
 
 		int getMaxDamage() {
 			return maxDamage;
@@ -369,8 +367,8 @@ class SinglePlayerGame : public Game {
 		int maxInvincibleTime = FPS;
 		int invincibleTime = 0;
 
-		int overBufferMax = FPS;
-		int overBuffer = overBufferMax;
+		int overBufferMax;
+		int overBuffer;
 
 		SinglePlayerGame& game;
 
@@ -382,6 +380,8 @@ class SinglePlayerGame : public Game {
 			imgHandle[NORMAL] = imgHandles[imgHandleKey_];
 			imgHandle[DAMAGE] = imgHandles[imgHandleKey_+"_damage"];
 			imgHandle[OVER] = imgHandles[imgHandleKey_+"_over"];
+			overBufferMax = FPS;
+			overBuffer = overBufferMax;
 		}
 
 		virtual bool draw() {
@@ -543,7 +543,9 @@ class SinglePlayerGame : public Game {
 				characterState = newState;
 			}
 		}
-}	;
+
+		
+	};
 
 	// 敵キャラクター
 	class Enemy : public Character {
@@ -678,14 +680,14 @@ class SinglePlayerGame : public Game {
 		static const int height = 100;
 
 	public:
-		Switch(int x_, int y_, SinglePlayerGame& game_, double size, int maxDamage_ = 1, std::string imgHandleKey_ = "s_game_switch") : Enemy(x_, y_, width * size, height * size, imgHandleKey_, maxDamage_, game_) {
+		Switch(int x_, int y_, SinglePlayerGame& game_, double size, int maxDamage_ = 2, std::string imgHandleKey_ = "s_game_switch") : Enemy(x_, y_, width * size, height * size, imgHandleKey_, maxDamage_, game_) {
 			layer = 155;
+			moveDirection = RIGHT;
 		}
 
-		void setAc(double& acX, double& acY) {
-			acX = 0;
-			acY = 0;
+		void update() {
 		}
+
 	};
 
 	class Inundation : public Enemy {
@@ -1095,9 +1097,12 @@ class SinglePlayerGame : public Game {
 	public:
 		static const int width = 75;
 		static const int height = 100;
+
 		Player(int x_, int y_, int width_, int height_, std::string imgHandleKey_, int maxDamage_, SinglePlayerGame& game_) : Character(x_, y_, width_, height_, imgHandleKey_, maxDamage_, game_) {
 			layer = 100;	
 			maxInvincibleTime = FPS*2;
+			overBufferMax = 0;
+			overBuffer = overBufferMax;
 		}
 
 		bool draw() {
@@ -1128,8 +1133,9 @@ class SinglePlayerGame : public Game {
 
 			DrawString(50, 50, std::to_string(damage).c_str(), GetColor(255, 255, 255));
 			
-			
-			return Character::draw();
+			Character::draw();
+
+			return true;
 			
 		}
 

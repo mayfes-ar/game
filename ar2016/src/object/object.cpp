@@ -78,11 +78,15 @@ bool Object::load() {
 	isSuccess &= loadImage("s_game_wanwan_damage", "s_game/wolf");
 	isSuccess &= loadImage("s_game_wanwan_over", "s_game/block1");
 
-	isSuccess &= loadImage("s_game_marker", "s_game/luigi");
+	isSuccess &= loadImage("s_game_block", "s_game/block1");
 
 	isSuccess &= loadImage("s_game_teresa", "s_game/teresa");
 	isSuccess &= loadImage("s_game_teresa_damage", "s_game/teresa");
 	isSuccess &= loadImage("s_game_teresa_over", "s_game/teresa");
+	isSuccess &= loadEffect("s_game_koumori","s_game/koumori", 3, 1, 95, 22);
+	//isSuccess &= loadEffect("s_game_teresa_damage", "s_game/koumori", 1, 3, 96, 22);
+	//isSuccess &= loadEffect("s_game_teresa_over", "s_game/koumori", 1, 3, 96, 22);
+
 
 	isSuccess &= loadImage("s_game_heiho", "s_game/heiho");
 	isSuccess &= loadImage("s_game_heiho_damage", "s_game/heiho");
@@ -118,7 +122,7 @@ bool Object::load() {
 	isSuccess &= loadImage("s_game_water_damage", "s_game/water");
 	isSuccess &= loadImage("s_game_water_over", "s_game/water");
 
-	isSuccess &= loadImage("s_game_switch", "s_game/switch");
+	isSuccess &= loadImage("s_game_switch", "s_game/switch1");
 	isSuccess &= loadImage("s_game_switch_damage", "s_game/switch");
 	isSuccess &= loadImage("s_game_switch_over", "s_game/switch");
 

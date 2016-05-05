@@ -142,7 +142,15 @@ bool SinglePlayerGame::onStart() {
 			blockList.push_back(block);
 			drawList.push_back(block);
 		};
-		makeBlock(0 - 200, 600, WIDTH + 200 + 200, 50);
+		makeBlock(0 - 200, 600, 200, 200);
+		makeBlock(0, 600, 200, 200);
+		makeBlock(0 + 200, 600, 200, 200);
+		makeBlock(0 + 400, 600, 200, 200);
+		makeBlock(0 + 600, 600, 200, 200);
+		makeBlock(0 + 800, 600, 200, 200);
+		makeBlock(0 + 1000, 600, 200, 200);
+		makeBlock(0 + 1200, 600, 200, 200);
+		makeBlock(0 + 1400, 600, 200, 200);
 		makeBlock(0 - 400, 0, 250, HEIGHT);
 		makeBlock(WIDTH + 150, 0, 250, HEIGHT);
 
@@ -152,6 +160,11 @@ bool SinglePlayerGame::onStart() {
 		makeEffect("s_game_coin", 250, 200, 50, 50, true, 150, 1, 3);
 		makeEffect("s_game_coin", 300, 200, 50, 50, true, 150, 2);
 		makeEffect("s_game_coin", 350, 200, 50, 50, true, 150, 2, 3);
+		makeEffect("s_game_koumori", 400, 200, 50, 50, true);
+		makeEffect("s_game_koumori", 450, 200, 50, 50, true, 150, 2);
+		makeEffect("s_game_koumori", 500, 200, 50, 50, true, 150, 3);
+		makeEffect("s_game_koumori", 550, 200, 50, 50, true, 150, 4);
+
 
 		share.rectMutex.lock();
 		markerList.clear();
