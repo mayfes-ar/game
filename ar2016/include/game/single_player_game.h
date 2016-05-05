@@ -639,7 +639,7 @@ class SinglePlayerGame : public Game {
 		static const int width = 430;
 		static const int height = 275;
 
-		RocketWanwan(int x_, int y_, SinglePlayerGame& game_, double size, int maxDamage_ = 5, std::string imgHandleKey_ = "s_game_wanwan") : Enemy(x_, y_, width * size, height * size, imgHandleKey_, maxDamage_, game_) {
+		RocketWanwan(int x_, int y_, SinglePlayerGame& game_, double size, int maxDamage_ = 3, std::string imgHandleKey_ = "s_game_wanwan") : Enemy(x_, y_, width * size, height * size, imgHandleKey_, maxDamage_, game_) {
 			layer = 165;
 			moveDirection = x_ < WIDTH/2 ? RIGHT : LEFT ;
 		}
@@ -995,7 +995,7 @@ class SinglePlayerGame : public Game {
 		static const int height = 333 / 4;
 		int frameCounter = 30;
 	public:
-		Heiho(int x_, int y_, SinglePlayerGame& game_, double size, int maxDamage_ = 10, std::string imgHandleKey_ = "s_game_heiho") : Enemy(x_, y_, width * size, height * size, imgHandleKey_, maxDamage_, game_) {
+		Heiho(int x_, int y_, SinglePlayerGame& game_, double size, int maxDamage_ = 2, std::string imgHandleKey_ = "s_game_heiho") : Enemy(x_, y_, width * size, height * size, imgHandleKey_, maxDamage_, game_) {
 			moveDirection = LEFT;
 		}
 
@@ -1053,7 +1053,7 @@ class SinglePlayerGame : public Game {
 	public:
 		static const int width = 280 / 3;
 		static const int height = 194 / 3;
-		Fire(int x_, int y_, SinglePlayerGame& game_, double size, int maxDamage_ = 10, std::string imgHandleKey_ = "s_game_fire") : Enemy(x_, y_, width * size, height * size, imgHandleKey_, maxDamage_, game_) {
+		Fire(int x_, int y_, SinglePlayerGame& game_, double size, int maxDamage_ = 1, std::string imgHandleKey_ = "s_game_fire") : Enemy(x_, y_, width * size, height * size, imgHandleKey_, maxDamage_, game_) {
 			moveDirection = LEFT;
 		}
 
@@ -1370,8 +1370,14 @@ class SinglePlayerGame : public Game {
 	const int maxPlayerDamage = 10;
 	const int endBuffer = FPS * 5;
 
+	enum Difficulty {
+		EASY, HARD, NIGHTMARE,
+	};
+
 	int timer = maxTime;
 	bool hasPlayerWon;
+
+	Difficulty difficulty = EASY;
 
 public:
 	SinglePlayerGame() {

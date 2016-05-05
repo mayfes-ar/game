@@ -130,8 +130,6 @@ bool SinglePlayerGame::onStart() {
 
 		bgm = make_shared<BGM>(0);
 		bgm->start();
-
-		for (int i = 0; i < 20; i++);
 	}, -1);
 
 	// mode 1
@@ -243,6 +241,16 @@ bool SinglePlayerGame::onUpdate() {
 		if (counterForWaiting > 0) {
 			counterForWaiting--;
 		}
+		if (key[KEY_INPUT_1]) {
+			difficulty = EASY;
+		}
+		else if (key[KEY_INPUT_2]) {
+			difficulty = HARD;
+		}
+		else if (key[KEY_INPUT_3]) {
+			difficulty = NIGHTMARE;
+		}
+
 		break;
 	}
 	case 1: { // playing
@@ -279,45 +287,152 @@ bool SinglePlayerGame::onUpdate() {
 		}
 
 		// 敵の出現を管理する
-		switch (maxTime - timer) {
-		case 100: {
-			makeRocketWanwan(-RocketWanwan::width, HEIGHT / 2 + 50);
+		switch (difficulty) {
+		case EASY: {
+			switch (maxTime - timer) {
+			
+			case 100: {
+				makeRocketWanwan(-RocketWanwan::width, HEIGHT / 2 + 50);
+				break;
+			}
+			case 200: {
+				makeEagle(0, 0, 1);
+				break;
+			}
+			case 300: {
+				makeUfo(0, 50, 1);
+				break;
+			}
+			case 600: {
+				makeCloud(0, 50, 1);
+				break;
+			}
+			case 900: {
+				makeInundation();
+			}
+			case 1200:
+			case 1230:
+			case 1260:
+			case 1400: {
+				makeHeiho(WIDTH, 300, 1);
+				break;
+			}
+			default: {
+			}
+			}
+			// 定期的に実行する場合など
+			if (timer < 150 && (maxTime - timer) % 20 == 0) {
+				makeTeresa();
+			}
 			break;
 		}
-		case 200: {
-			makeEagle(0, 0, 1);
-			makeEagle(200, 0, 1);
-			makeEagle(400, 0, 1);
-			makeEagle(600, 0, 1);
-			break;
-		}
-		case 300: {
-			makeUfo(0,50,1);
-			break;
-		}
-		case 600: {
-			makeCloud(0, 50, 1);
-			makeCloud(200, 50, 1);
-			makeCloud(800, 50, 1);
-			break;
-		}
-		case 900: {
-			makeInundation();
-		}
-		case 1200:
-		case 1230:
-		case 1260:
-		case 1400: {
-			makeHeiho(WIDTH, 300, 1);
-			break;
-		}
-		default: {
-		}
-		}
+		case HARD: {
+			switch (maxTime - timer) {
+			case 100: {
+				makeRocketWanwan(-RocketWanwan::width, HEIGHT / 2 + 50);
+				break;
+			}
+			case 200: {
+				makeInundation();
+				makeEagle(0, 0, 1);
+				makeEagle(200, 0, 1);
+				makeEagle(400, 0, 1);
+				makeEagle(600, 0, 1);
+				break;
+			}
+			case 300: {
+				makeUfo(0, 50, 1);
+				makeRocketWanwan(WIDTH + RocketWanwan::width, HEIGHT / 2 + 50);
+				makeRocketWanwan(WIDTH + RocketWanwan::width, HEIGHT / 2 + 50 + RocketWanwan::height);
+				makeRocketWanwan(WIDTH + RocketWanwan::width, HEIGHT / 2 + 50 - RocketWanwan::height);
+				makeRocketWanwan(WIDTH+RocketWanwan::width, HEIGHT / 2 + 50 - RocketWanwan::height);
+				break;
+			}
+					  
+			case 600: {
+				makeEagle(0, 0, 1);
+				makeEagle(200, 0, 1);
+				makeEagle(400, 0, 1);
+				makeEagle(600, 0, 1);
+				makeCloud(0, 50, 1);
+				makeCloud(200, 50, 1);
+				makeCloud(800, 50, 1);
+				break;
+			}
+			case 900: {
+				makeInundation();
+			}
+			case 1410:
+				makeRocketWanwan(-RocketWanwan::width, HEIGHT / 2 + 50);
+			case 1420:
+			case 1430:
+			case 1440:
+			case 1200:
+			case 1230:
+			case 1260:
+			case 1400: {
+				makeHeiho(WIDTH, 300, 1);
+				break;
+			}
+			case 1500: {
+				makeRocketWanwan(WIDTH + RocketWanwan::width, HEIGHT / 2 + 50);
+				makeRocketWanwan(-RocketWanwan::width, HEIGHT / 2 + 50);
+				break;
+			}
 
-		// 定期的に実行する場合など
-		if (timer < 150 && (maxTime - timer) % 5 == 0) {
-			makeTeresa();
+			default: {
+			}
+			}
+
+			// 定期的に実行する場合など
+			if (timer < 150 && (maxTime - timer) % 5 == 0) {
+				makeTeresa();
+			}
+			break;
+		}
+		case NIGHTMARE: {
+			switch (maxTime - timer) {
+			case 100: {
+				makeRocketWanwan(-RocketWanwan::width, HEIGHT / 2 + 50);
+				break;
+			}
+			case 200: {
+				makeEagle(0, 0, 1);
+				makeEagle(200, 0, 1);
+				makeEagle(400, 0, 1);
+				makeEagle(600, 0, 1);
+				break;
+			}
+			case 300: {
+				makeUfo(0, 50, 1);
+				break;
+			}
+			case 600: {
+				makeCloud(0, 50, 1);
+				makeCloud(200, 50, 1);
+				makeCloud(800, 50, 1);
+				break;
+			}
+			case 900: {
+				makeInundation();
+			}
+			case 1200:
+			case 1230:
+			case 1260:
+			case 1400: {
+				makeHeiho(WIDTH, 300, 1);
+				break;
+			}
+			default: {
+			}
+			}
+
+			// 定期的に実行する場合など
+			if (timer < 150 && (maxTime - timer) % 5 == 0) {
+				makeTeresa();
+			}
+			break;
+		}
 		}
 
 		if (willFinishMode){
