@@ -458,6 +458,7 @@ private:
 	Color m_color = Color::Green;
 };
 
+
 //Fireball の Modeを決定するためのもの
 //EnemyかPlayerか、StrongかWeakかの4種類からなっている。
 //それぞれ描画時に色を変える？
@@ -600,6 +601,52 @@ private:
 	std::shared_ptr<Moving> m_moving = nullptr;
 	FireballKind m_mode = EnemyWeak;
 };
+
+class FireballManager : public Object {
+public:
+	FireballManager(int max_num) : m_max_num(max_num) {
+		Object::layer = PRIORITY_DYNAMIC_OBJECT;
+	}
+
+	bool add(std::shared_ptr<Fireball>& fireball) {
+		if (m_fireball_list.size() == m_max_num) return false;
+		m_fireball_list.push_back(fireball);
+		return true;
+	}
+	// index を渡して消す
+	bool destroy(int index) {
+		if (m_fireball_list.size() <= index + 1) return false;
+		m_fireball_list.erase(m_fireball_list.begin() + index);
+		return true;
+	}
+
+	bool destroy(std::shared_ptr<Fireball>& fireball) {
+		for (int i = 0; i < m_fireball_list.size(); i++) {
+			if (m_fireball_list[i] != fireball) continue;
+			m_fireball_list.erase(m_fireball_list.begin() + i);
+			return true;
+		}
+		return false;
+	}
+
+	std::vector<std::shared_ptr<Fireball>> getFireballList() {
+		return m_fireball_list;
+	}
+
+	bool draw() override {
+		bool isSuccess = true;
+		for (auto& fireball : m_fireball_list) {
+			isSuccess &= fireball->draw();
+		}
+		return isSuccess;
+	}
+
+private:
+	std::vector<std::shared_ptr<Fireball>> m_fireball_list = {};
+	int m_max_num = 0;
+};
+
+
 
 // キャラクタがのる船
 // ライフをもつ

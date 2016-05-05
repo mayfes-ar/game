@@ -27,8 +27,7 @@ public:
             for (const auto& block: m_components->block_list) {
                 drawList.push_back(block);
             }
-
-            drawList.push_back(m_components->fireball);
+			drawList.push_back(m_components->fireball_manager);
             drawList.push_back(m_components->ship);
 			drawList.push_back(m_components->pot);
 			for (const auto& item : m_components->item_list) {

@@ -25,7 +25,7 @@ public:
 
 	std::vector<std::shared_ptr<Breakout::Block>> block_list;
 
-    std::shared_ptr<Breakout::Fireball> fireball = nullptr;
+	std::shared_ptr<Breakout::FireballManager> fireball_manager = nullptr;
 
     std::shared_ptr<Breakout::Ship> ship = nullptr;
 

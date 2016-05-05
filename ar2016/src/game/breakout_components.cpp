@@ -60,14 +60,25 @@ void BreakoutComponents::setup()
 
 	// fireballの初期化
 	{
-		const auto circle
-			= Shape::Circle(FIREBALL_STARTPOS, FIREBALL_RADIUS);
+		fireball_manager = std::make_shared<Breakout::FireballManager>(MAX_FIREBALL_NUM);
+		std::uniform_real_distribution<> velocity_generator(2.0, 4.0);
+		std::uniform_int<> position_generator(-10, 10);
+		std::uniform_real_distribution<> fireball_mode_generator(0.0, 1.0);
 
-		const Eigen::Vector2f start_vel = FIREBALL_STARTVEL;
-		const Eigen::Vector2f start_accel = Eigen::Vector2f::Zero();
-		auto moving = std::make_shared<Moving>(1.0, start_accel, start_vel * -1);
+		for (int i = 0; i < MAX_FIREBALL_NUM; i++) {
+			const auto circle
+				= Shape::Circle(FIREBALL_STARTPOS + Eigen::Vector2i(position_generator(mt), position_generator(mt)), FIREBALL_RADIUS);
 
-		fireball = std::make_shared<Breakout::Fireball>(circle, moving, EnemyStrong);
+			const Eigen::Vector2f start_vel = Eigen::Vector2f(velocity_generator(mt), velocity_generator(mt));
+			const Eigen::Vector2f start_accel = Eigen::Vector2f::Zero();
+			auto moving = std::make_shared<Moving>(1.0, start_accel, start_vel * -1);
+
+			if (fireball_mode_generator(mt) > 0.7) {
+				fireball_manager->add(std::make_shared<Breakout::Fireball>(circle, moving, EnemyStrong));
+			} else {
+				fireball_manager->add(std::make_shared<Breakout::Fireball>(circle, moving, EnemyWeak));
+			}
+		}
 	}
 
 	// shipの初期化
