@@ -35,6 +35,7 @@ void BreakoutComponents::setup()
 	std::mt19937 mt(rnd());
 	std::uniform_real_distribution<> block_generator(0.0, 1.0);
 	std::uniform_real_distribution<> block_color_generator(0.0, 1.0);
+	std::uniform_real_distribution<> block_kind_generator(0.0, 1.0);
 	// Blockの初期化
 	for (int x = 0; x < BLOCK_WIDTH_NUM; ++x) {
 		for (int y = 0; y < BLOCK_HEIGHT_NUM; ++y) {
@@ -53,7 +54,18 @@ void BreakoutComponents::setup()
 				color = Breakout::Block::Color::Blue;
 			}
 
-			auto block = std::make_shared<Breakout::Block>(rec, color);
+			const auto kind_ratio = block_kind_generator(mt);
+			std::shared_ptr<Breakout::Block> block = nullptr;
+
+			if (kind_ratio <= Breakout::NORMAL_BLOCK_PROB) {
+				block = std::make_shared<Breakout::NormalBlock>(rec, color);
+			}
+			else if (kind_ratio - Breakout::NORMAL_BLOCK_PROB < Breakout::HARD_BLOCK_PROB) {
+				block = std::make_shared<Breakout::HardBlock>(rec, color);
+			}
+			else {
+				block = std::make_shared<Breakout::UnbreakableBlock>(rec, color);
+			}
 
 			// 無駄な生成をしている(どうしよう)
 			if (block_generator(mt) > BLOCK_GENERATE_PROB) {

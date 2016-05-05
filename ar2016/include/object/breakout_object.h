@@ -512,7 +512,7 @@ public:
         Object::layer = PRIORITY_STATIC_OBJECT;
     }
 
-    bool draw() override {
+    virtual bool draw() override {
         if (m_is_disappeared) {
             // 何も描画しない
             return true;
@@ -565,11 +565,82 @@ public:
     {
         m_is_disappeared = false;
     }
+
+	bool damageBlock(int amount) {
+		if (m_life.damage(amount)) {
+			if (!isAlive()) {
+				disappear();
+				detachAllItems();
+			}
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	void resetBlock() {
+		m_life.resetLife();
+		appear();
+	}
+
+	bool isAlive() {
+		return m_life.isAlive();
+	}
+
+protected:
+	Life m_life = Life(1, 1);
 private:
     bool m_is_disappeared = false; // 火の玉にあったかどうか
 	Color m_color = Color::Green;
 };
 
+class NormalBlock : public Block {
+public:
+	explicit NormalBlock(const Shape::Rectangle& realm, Color color)
+		: Block(realm, color)
+	{
+		Object::layer = PRIORITY_STATIC_OBJECT;
+		m_life = Life(NORMAL_BLOCK_LIFE_NUM, NORMAL_BLOCK_LIFE_NUM);
+	}
+	bool draw() override {
+		if (isDisappeared()) return true;
+		Block::draw();
+		DrawExtendGraph(m_realm.left(), m_realm.top(), m_realm.right(), m_realm.bottom(), imgHandles["hatena_block"], TRUE);
+		return true;
+	}
+};
+
+class HardBlock : public Block {
+public:
+	explicit HardBlock(const Shape::Rectangle& realm, Color color)
+		: Block(realm, color)
+	{
+		Object::layer = PRIORITY_STATIC_OBJECT;
+		m_life = Life(HARD_BLOCK_LIFE_NUM, HARD_BLOCK_LIFE_NUM);
+	}
+	bool draw() override {
+		if (isDisappeared()) return true;
+		Block::draw();
+		DrawExtendGraph(m_realm.left(), m_realm.top(), m_realm.right(), m_realm.bottom(), imgHandles["hard_block"], TRUE);
+		return true;
+	}
+};
+
+class UnbreakableBlock : public Block {
+public:
+	explicit UnbreakableBlock(const Shape::Rectangle& realm, Color color)
+		: Block(realm, color)
+	{
+		Object::layer = PRIORITY_STATIC_OBJECT;
+		m_life = Life(UNBREAKABLE_BLOCK_LIFE_NUM, UNBREAKABLE_BLOCK_LIFE_NUM);
+	}
+	bool draw() override {
+		if (isDisappeared()) return true;
+		Block::draw();
+		DrawExtendGraph(m_realm.left(), m_realm.top(), m_realm.right(), m_realm.bottom(), imgHandles["unbreakable_block"], TRUE);
+		return true;
+	}
+};
 
 //Fireball の Modeを決定するためのもの
 //EnemyかPlayerか、StrongかWeakかの4種類からなっている。
@@ -704,6 +775,17 @@ public:
 			return true;
 		}
 		return false;
+	}
+
+	int giveDamage() {
+		switch (m_mode) {
+		case PlayerStrong:
+		case EnemyStrong:
+			return 2;
+		case PlayerWeak:
+		case EnemyWeak:
+			return 1;
+		}
 	}
 
 

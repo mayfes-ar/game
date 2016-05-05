@@ -143,6 +143,10 @@ bool Object::load() {
 	isSuccess &= loadImage("block_red", "block_red");
 	isSuccess &= loadImage("block_green", "block_green");
 
+	isSuccess &= loadImage("hard_block", "breakout/hard_block");
+	isSuccess &= loadImage("hatena_block", "breakout/hatena_block");
+	isSuccess &= loadImage("unbreakable_block", "breakout/unbreakable_block");
+
 	isSuccess &= loadImage("b_forest", "breakout/forest");
 	isSuccess &= loadImage("b_magma", "breakout/magma");
 	isSuccess &= loadImage("b_hill", "breakout/hill");

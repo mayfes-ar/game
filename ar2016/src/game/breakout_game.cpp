@@ -25,7 +25,8 @@ void BreakoutGame::updateCollisionDetection()
 			if (CollisionDetection::isOnLine(fireball->getRealm(),
 				m_components->field->getRealm().getBottomLine())) {
 				fireball->disappear();
-				m_components->ship->damageShip(1);
+				//Ship へのダメージじゃなくて自分が守ってる町へのダメージというイメージ
+				//m_components->ship->damageShip(1);
 				continue;
 			}
 
@@ -49,13 +50,12 @@ void BreakoutGame::updateCollisionDetection()
 
 			// Block衝突判定
 			// EnemyModeだったらBlockと衝突させない
-			if (fireball->isEnemy()) {}
+			if (fireball->isEnemy()) { continue; }
 			else {
 				for (int block_id = 0; block_id < Breakout::BLOCK_HEIGHT_NUM * Breakout::BLOCK_WIDTH_NUM; ++block_id) {
 					if (m_components->block_list.at(block_id)->isDisappeared()) continue;
 					if (fireball->isCollided(m_components->block_list.at(block_id)->getRealm())) {
-						m_components->block_list.at(block_id)->disappear();
-						m_components->block_list.at(block_id)->detachAllItems();
+						m_components->block_list.at(block_id)->damageBlock(fireball->giveDamage());
 						break;
 					}
 				}

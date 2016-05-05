@@ -40,6 +40,14 @@ namespace Breakout {
 	constexpr double BLOCK_BLUE_PROB = 0.3;
 	constexpr double BLOCK_GREEN_PROB = 0.5;
 
+	constexpr double NORMAL_BLOCK_PROB = 0.5;
+	constexpr double HARD_BLOCK_PROB = 0.3;
+	constexpr double UNBREAKABLE_BLOCK_PROB = 0.2;
+
+	constexpr int NORMAL_BLOCK_LIFE_NUM = 1;
+	constexpr int HARD_BLOCK_LIFE_NUM = 2;
+	constexpr int UNBREAKABLE_BLOCK_LIFE_NUM = 100000;
+
 	// Fireballのパラメータ
 	const Eigen::Vector2i FIREBALL_STARTPOS = Eigen::Vector2i{
 		WIDTH / 2, HEIGHT / 2 };
