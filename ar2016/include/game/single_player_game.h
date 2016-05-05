@@ -497,10 +497,10 @@ class SinglePlayerGame : public Game {
 		virtual bool deathDecision() {
 			
 			if (rect.x < game.field.at("left") || rect.x > game.field.at("right")) {
-				isAlive = false;
+				die();
 			}
 			if (rect.y < game.field.at("top") || rect.y > game.field.at("bottom")) {
-				isAlive = false;
+				die();
 			}
 			
 			return !isAlive;
@@ -508,6 +508,10 @@ class SinglePlayerGame : public Game {
 		
 		virtual bool getIsAlive() {
 			return isAlive;
+		}
+
+		virtual void die() {
+			isAlive = false;
 		}
 }	;
 
@@ -543,7 +547,7 @@ class SinglePlayerGame : public Game {
 						if (isAlive) {
 							PlaySoundMem(soundHandles["s_game_attack"], DX_PLAYTYPE_BACK, true);
 						}
-						isAlive = damageControl();
+						damageControl();
 						marker->effectHit();
 						invincibleTime = 15;
 
@@ -561,13 +565,18 @@ class SinglePlayerGame : public Game {
 		}
 
 		// ダメージが何点以上で死亡とするか。返り値は 死：false, 生：true
-		virtual bool damageControl() {
+		virtual void damageControl() {
 			damage++;
 			
 			if (maxDamage < 0) {
-				return true;
+				// 無敵
 			}
-			return damage < maxDamage;
+			else if (damage < maxDamage) {
+				// HP残ってる
+			}
+			else {
+				die();
+			}
 		}
 	};
 
@@ -689,10 +698,6 @@ class SinglePlayerGame : public Game {
 
 		}
 
-		void die() {
-			isAlive = false;
-		}
-
 	};
 
 	class Ufo : public Enemy {
@@ -770,11 +775,50 @@ class SinglePlayerGame : public Game {
 			setAc(acX, acY);
 			updateCoordinate(acX, acY);
 			moveBecauseMarkerCollision(game.markerList);
+			moveBecauseBlockCollision(game.blockList);
 		}
 
 		void setAc(double& acX, double& acY) {
 			acX = 0;
 			acY = 10;
+		}
+
+		bool deathDecision() {
+
+			if (invincibleTime == 0) {
+				for (auto marker : game.markerList) {
+					if (marker->isEnable && left() < marker->right() && top() < marker->bottom() &&
+						right() > marker->left() && bottom() > marker->top()) {
+						if (isAlive) {
+							PlaySoundMem(soundHandles["s_game_attack"], DX_PLAYTYPE_BACK, true);
+						}
+						damageControl();
+						marker->effectHit();
+						invincibleTime = 15;
+
+						return !isAlive;
+
+					}
+				}
+				for (auto block : game.blockList) {
+					if (left() <= block->right() && top() <= block->bottom() &&
+						right() >= block->left() && bottom() >= block->top()) {
+						if (isAlive) {
+							// PlaySoundMem(soundHandles["s_game_attack"], DX_PLAYTYPE_BACK, true);
+						}
+						damageControl();
+						invincibleTime = 15;
+
+						return !isAlive;
+
+					}
+				}
+			}
+			else if (invincibleTime > 0) {
+				invincibleTime--;
+			}
+
+			return Character::deathDecision();
 		}
 	};
 	
@@ -962,31 +1006,25 @@ class SinglePlayerGame : public Game {
 
 		bool draw() {
 			if (isToJump) {
-				
-				if (frameCount <= FPS * 0.5){
+				DrawExtendGraph(left() - 50, top() - rect.height - 50, right() + 50, bottom() - rect.height, imgHandles["s_game_balloon"], true);
+				int commentX = left() - 10;
+				int commentY = top() - rect.height - 20;
 
+				if (frameCount <= FPS * 2) {
+					message = "I want to\njump!!";
+					commentY = top() - rect.height - 40;
 				}
-				else {
-					DrawExtendGraph(left() - 50, top() - rect.height - 50, right() + 50, bottom() - rect.height, imgHandles["s_game_balloon"], true);
-					int commentX = left() - 10;
-					int commentY = top() - rect.height - 20;
-
-					if (frameCount <= FPS * 2) {
-						message = "I want to\njump!!";
-						commentY = top() - rect.height - 40;
-					}
-					else if (frameCount <= FPS * 2 + 20) {
-						message = "3";
-					}
-					else if (frameCount <= FPS * 2 + 40) {
-						message = "2";
-					}
-					else if (frameCount <= FPS * 2 + 60) {
-						message = "1";
-					}
-
-					DrawString(commentX, commentY, message.c_str(), GetColor(0, 0, 0));
+				else if (frameCount <= FPS * 2 + FPS) {
+					message = "3";
 				}
+				else if (frameCount <= FPS * 2 + FPS*2) {
+					message = "2";
+				}
+				else if (frameCount <= FPS * 2 + FPS*3) {
+					message = "1";
+				}
+
+				DrawString(commentX, commentY, message.c_str(), GetColor(0, 0, 0));
 			}
 			for (int heart = 0; heart <= (maxDamage - damage - 1); heart++) {
 				DrawExtendGraph(50 + 50 * heart, 50, 100 + 50 * heart, 100, imgHandles["s_game_heart"], true);
@@ -1094,7 +1132,7 @@ class SinglePlayerGame : public Game {
 			}
 
 			if (isToJump) {
-				if (frameCount >= FPS*2 + 80) {
+				if (frameCount >= FPS*2 + FPS*3) {
 					acY = -30;
 					PlaySoundMem(soundHandles["s_game_jump"], DX_PLAYTYPE_BACK, true);
 					isJumping = true;
