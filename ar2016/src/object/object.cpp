@@ -77,33 +77,38 @@ bool Object::load() {
 	isSuccess &= loadImage("s_game_wanwan", "s_game/wolf");
 	isSuccess &= loadImage("s_game_marker", "s_game/luigi");
 	isSuccess &= loadImage("s_game_teresa", "s_game/teresa");
-
-
-	isSuccess &= loadSound("s_game_bgm", "s_game/bgm.mp3");
-
+	isSuccess &= loadImage("s_game_heiho", "s_game/heiho");
+	isSuccess &= loadImage("s_game_fire", "s_game/fire");
+	isSuccess &= loadImage("s_game_balloon", "s_game/balloon");
+	isSuccess &= loadImage("s_game_ufo", "s_game/ufo");
+	isSuccess &= loadImage("s_game_drop", "s_game/drop");
+	isSuccess &= loadImage("s_game_ray", "s_game/uforaytrans");
+	isSuccess &= loadImage("s_game_cloud", "s_game/cloud");
+	isSuccess &= loadImage("s_game_eagle", "s_game/eagle");
+	isSuccess &= loadImage("s_game_water", "s_game/water");
+	isSuccess &= loadImage("s_game_switch", "s_game/switch");
+	isSuccess &= loadImage("s_game_player", "s_game/hime_normal");
+	isSuccess &= loadImage("s_game_player_damage", "s_game/hime_odoroki");
 	isSuccess &= loadImage("s_game_water", "s_game/water");
 	isSuccess &= loadImage("s_game_switch", "s_game/switch");
 
+	isSuccess &= loadSound("s_game_bgm", "s_game/bgm.mp3");
 	isSuccess &= loadSound("s_game_dead", "s_game/dead.wav");
 	isSuccess &= loadSound("s_game_attack", "s_game/bomb.mp3");
 	isSuccess &= loadSound("s_game_jump", "s_game/jump.mp3");
+	isSuccess &= loadSound("s_game_shuzo", "s_game/shuzo.mp3");
 
 	isSuccess &= loadEffect("s_game_coin", "s_game/coin", 5, 2, 1000, 400);
 
 	isSuccess &= loadImage("s_game_piyo", "s_game/piyo");
 	isSuccess &= loadImage("s_game_sword", "s_game/sword");
 	isSuccess &= loadImage("s_game_shield", "s_game/shield");
-
-
-
 	// リザルト
 	isSuccess &= loadImage("s_game_result_clear", "s_game/s_game_clear");
 	isSuccess &= loadImage("s_game_result_dead", "s_game/s_game_result");
 	isSuccess &= loadImage("s_game_dead", "s_game/dead_sample");
-
 	isSuccess &= loadSound("s_game_over", "s_game/game_over.wav");
 
-	// isSuccess &= loadImage("s_game_bg", "wallpaper_alpha");
 
 	// puzzle game
 	isSuccess &= loadImage("p_man", "man");

@@ -325,7 +325,7 @@ class SinglePlayerGame : public Game {
 		int damage = 0;
 		int invincibleTime = 0;
 
-		const SinglePlayerGame& game;
+		SinglePlayerGame& game;
 
 		Character(int x_, int y_, int width_, int height_, std::string imgHandleKey_, int maxDamage_, SinglePlayerGame& game_) :imgHandle(imgHandles[imgHandleKey_]), maxDamage(maxDamage_), game(game_) {
 			rect.x = prevX = x_;
@@ -586,8 +586,9 @@ class SinglePlayerGame : public Game {
 
 	class Switch : public Enemy {
 		static const int width = 100;
-	public:
 		static const int height = 100;
+
+	public:
 		Switch(int x_, int y_, SinglePlayerGame& game_, double size, int maxDamage_ = 1, std::string imgHandleKey_ = "s_game_switch") : Enemy(x_, y_, width * size, height * size, imgHandleKey_, maxDamage_, game_) {
 			layer = 155;
 		}
@@ -602,6 +603,8 @@ class SinglePlayerGame : public Game {
 		public: 
 		static const int width = 1280 + 200;
 		static const int height = 720;
+		int inundationCounter = 400;
+
 		bool isWaterUp = true;
 		std::shared_ptr<Switch> button;
 		Inundation(int x_, int y_, SinglePlayerGame& game_, double size, int maxDamage_ = -1, std::string imgHandleKey_ = "s_game_water") : Enemy(x_, y_, width * size, height * size, imgHandleKey_, maxDamage_, game_) {
@@ -615,8 +618,7 @@ class SinglePlayerGame : public Game {
 		}
 
 		void update() {
-			static int inundationCounter = 400;
-			if (!button->getIsAlive() || inundationCounter == 0) {
+			if (!button->getIsAlive()) {
 				isWaterUp = false;
 			}
 			else if (inundationCounter > 0){
@@ -630,26 +632,135 @@ class SinglePlayerGame : public Game {
 
 		void setAc(double& acX, double& acY) {
 			acX = 0;
-			acY = isWaterUp ? -0.005 : 0.02;
+			acY = isWaterUp ? inundationCounter == 0 ? -0.5*(rect.y-prevY) : -0.005 : 0.02;
 		}
+	};
+
+	class Ray : public Enemy {
+	public:
+		static const int width = 150;
+		static const int height = 720;
+
+		Ray(int x_, int y_, SinglePlayerGame& game_, double size, int maxDamage_ = -1, std::string imgHandleKey_ = "s_game_ray") : Enemy(x_, y_, width * size, height * size, imgHandleKey_, maxDamage_, game_) {
+			layer = 155;
+		}
+
+		void update() {
+
+		}
+
+		void die() {
+			isAlive = false;
+		}
+
 	};
 
 	class Ufo : public Enemy {
 		static const int width = 225 / 2;
 		static const int height = 225 / 2;
+		int stopCount = FPS * 7;
+		std::shared_ptr<Ray> ray;
+
+
 	public:
-		Ufo(int x_, int y_, SinglePlayerGame& game_, double size, int maxDamage_ = 10, std::string imgHandleKey_ = "s_game_ufo") : Enemy(x_, y_, width * size, height * size, imgHandleKey_, maxDamage_, game_) {
+		Ufo(int x_, int y_, SinglePlayerGame& game_, double size, int maxDamage_ = 3, std::string imgHandleKey_ = "s_game_ufo") : Enemy(x_, y_, width * size, height * size, imgHandleKey_, maxDamage_, game_) {
 		
 		};
+
+		void update() {
+			stopCount--;
+			if (stopCount == FPS * 2) {
+				ray = game.makeRay(rect.x + rect.width / 2 - Ray::width / 2, bottom(), 1);
+			} else if (stopCount < FPS*2) {
+				if (stopCount == 0) {
+					ray->die();
+					ray = nullptr;
+
+					stopCount = FPS * 7;
+				}
+			}
+			else {
+				double acX = 0;
+				double acY = 0;
+				setAc(acX, acY);
+				updateCoordinate(acX, acY);
+			}
+			moveBecauseMarkerCollision(game.markerList);
+		}
+
+		void updateCoordinate(double acX, double acY) {
+			double& x = rect.x;
+			double& y = rect.y;
+
+			const double diffX = 8;
+			const double diffY = 0;
+
+
+			// verlet法
+			const double tempX = x;
+			x += diffX + acX;
+			prevX = tempX;
+			const double tempY = y;
+			y += diffY + acY;
+			prevY = tempY;
+			if (x < 0 - rect.width) {
+				x += WIDTH + 200;
+			}
+			if (x > WIDTH + rect.width) {
+				x -= WIDTH + 200;
+			}
+		}
+
+		int getStopCount() {
+			return stopCount;
+		}
+
 	};
 
+	class Drop : public Enemy {
+	public:
+		static const int width = 200 / 8;
+		static const int height = 200 / 8;
+		Drop(int x_, int y_, SinglePlayerGame& game_, double size, int maxDamage_ = 1, std::string imgHandleKey_ = "s_game_drop") : Enemy(x_, y_, width * size, height * size, imgHandleKey_, maxDamage_, game_) {
+		};
+		
+		void update() {
+			double acX = 0;
+			double acY = 0;
+			setAc(acX, acY);
+			updateCoordinate(acX, acY);
+			moveBecauseMarkerCollision(game.markerList);
+		}
+
+		void setAc(double& acX, double& acY) {
+			acX = 0;
+			acY = 10;
+		}
+	};
+	
 	class Cloud : public Enemy {
 		static const int width = 304 / 3;
 		static const int height = 166 / 3;
+		int fallDropCounter = 60;
+
 	public:
 		Cloud(int x_, int y_, SinglePlayerGame& game_, double size, int maxDamage_ = 10, std::string imgHandleKey_ = "s_game_cloud") : Enemy(x_, y_, width * size, height * size, imgHandleKey_, maxDamage_, game_) {
 			
 		};
+
+		void update() {
+			fallDropCounter--;
+			if (fallDropCounter < 30 && fallDropCounter % 5 == 0) {
+				game.makeDrop(rect.x + rand()%(rect.width) - Drop::width/2 , bottom(), 1);
+			}
+			if (fallDropCounter == 0) {
+				fallDropCounter = rand() % 100 + 60;
+			}
+			double acX = 0;
+			double acY = 0;
+			setAc(acX, acY);
+			updateCoordinate(acX, acY);
+		}
 
 		void updateCoordinate(double acX, double acY) {
 			double& x = rect.x;
@@ -666,18 +777,13 @@ class SinglePlayerGame : public Game {
 			const double tempY = y;
 			y += diffY + acY;
 			prevY = tempY;
-		}
-	};
 
-	class Drop : public Enemy {
-		static const int width = 200 / 8;
-		static const int height = 200 / 8;
-	public:
-		Drop(int x_, int y_, SinglePlayerGame& game_, double size, int maxDamage_ = 10, std::string imgHandleKey_ = "s_game_drop") : Enemy(x_, y_, width * size, height * size, imgHandleKey_, maxDamage_, game_) {
-		};
-		void setAc(double* acX, double* acY) {
-			*acX = 0;
-			*acY = 3;
+			if (x < 0 - rect.width) {
+				x += WIDTH + 200;
+			}
+			if (x > WIDTH + rect.width) {
+				x -= WIDTH + 200;
+			}
 		}
 	};
 
@@ -685,15 +791,22 @@ class SinglePlayerGame : public Game {
 		static const int width = 430 / 4;
 		static const int height = 263 / 4;
 	public:
-		Eagle(int x_, int y_, SinglePlayerGame& game_, double size, int maxDamage_ = 10, std::string imgHandleKey_ = "s_game_eagle") : Enemy(x_, y_, width * size, height * size, imgHandleKey_, maxDamage_, game_) {
+		Eagle(int x_, int y_, SinglePlayerGame& game_, double size, int maxDamage_ = 2, std::string imgHandleKey_ = "s_game_eagle") : Enemy(x_, y_, width * size, height * size, imgHandleKey_, maxDamage_, game_) {
 		};
+
+		void update() {
+			double acX = 4;
+			double acY = 2;
+			setAc(acX, acY);
+			updateCoordinate(acX, acY);
+		}
 
 		void updateCoordinate(double acX, double acY) {
 			double& x = rect.x;
 			double& y = rect.y;
 
-			const double diffX = 5;
-			const double diffY = 3;
+			const double diffX = x - prevX;
+			const double diffY = y - prevY;
 
 
 			// verlet法
@@ -709,19 +822,40 @@ class SinglePlayerGame : public Game {
 	class Heiho : public Enemy {
 		static const int width = 345 / 4;
 		static const int height = 333 / 4;
-		int frameCounter = 100;
+		int frameCounter = 30;
 	public:
 		Heiho(int x_, int y_, SinglePlayerGame& game_, double size, int maxDamage_ = 10, std::string imgHandleKey_ = "s_game_heiho") : Enemy(x_, y_, width * size, height * size, imgHandleKey_, maxDamage_, game_) {
 			moveDirection = LEFT;
 		}
 
+		void update() {
+			if (frameCounter == 0) {
+				game.makeFire(left(), (top()+bottom())/2, 1);
+			}
+			double acX = 0;
+			double acY = 0;
+			setAc(acX, acY);
+			updateCoordinate(acX, acY);
+			moveBecauseBlockCollision(game.blockList);
+			moveBecauseMarkerCollision(game.markerList);
+		}
+
+		void setAc(double& acX, double& acY) {
+			acY = 4;
+		}
+
 		void updateCoordinate(double acX, double acY) {
 			double& x = rect.x;
 			double& y = rect.y;
+			frameCounter--;
 			
 			double diffX;
-			if (frameCounter >= 0) {
+			if (frameCounter > 0) {
 				diffX = -5;
+			}
+			else if (frameCounter == 0) {
+				PlaySoundMem(soundHandles["s_game_shuzo"], DX_PLAYTYPE_BACK, true);
+				diffX = 0;
 			}
 			else {
 				diffX = 5;
@@ -740,31 +874,36 @@ class SinglePlayerGame : public Game {
 	};
 
 	class Fire : public Enemy {
+	public:
 		static const int width = 280 / 3;
 		static const int height = 194 / 3;
-	public:
 		Fire(int x_, int y_, SinglePlayerGame& game_, double size, int maxDamage_ = 10, std::string imgHandleKey_ = "s_game_fire") : Enemy(x_, y_, width * size, height * size, imgHandleKey_, maxDamage_, game_) {
 			moveDirection = LEFT;
 		}
-		void updateCoordinate(double acX, double acY) {
-			double& x = rect.x;
-			double& y = rect.y;
 
-			const double diffX = -5;
-			const double diffY = 0;
-
-
-			// verlet法
-			const double tempX = x;
-			x += diffX + acX;
-			prevX = tempX;
-			const double tempY = y;
-			y += diffY + acY;
-			prevY = tempY;
+		void update() {
+			double acX = 0;
+			double acY = 0;
+			setAc(acX, acY);
+			updateCoordinate(acX, acY);
+			moveBecauseMarkerCollision(game.markerList);
 		}
-		void setAc(double* acX, double* acY) {
-			*acX = -2;
-			*acY = 0;
+
+		
+		void setAc(double& acX, double& acY) {
+			switch (moveDirection)
+			{
+			case SinglePlayerGame::Character::LEFT:
+			case SinglePlayerGame::Character::NOMOVE:
+				acX = -10;
+				break;
+			case SinglePlayerGame::Character::RIGHT:
+				acX = 10;
+				break;
+			default:
+				break;
+			}
+			acY = 0;
 		}
 	};
 
@@ -895,6 +1034,7 @@ class SinglePlayerGame : public Game {
 
 	std::vector<std::shared_ptr<SingleGameBlockObject>> blockList;
 	std::vector<std::shared_ptr<Enemy>> enemyList;
+	std::vector<std::shared_ptr<Enemy>> enemySubList;
 	std::vector<std::shared_ptr<Marker>> markerList;
 
 	const std::map<std::string, int> field = {
@@ -908,20 +1048,22 @@ class SinglePlayerGame : public Game {
 	std::shared_ptr<RocketWanwan> makeRocketWanwan(int x, int y, double size);
 	std::shared_ptr<Inundation> makeInundation();
 	std::shared_ptr<Switch> makeSwitch(int x, int y, double size);
-	std::shared_ptr<Ufo> makeUfo();
-	std::shared_ptr<Cloud> makeCloud();
-	std::shared_ptr<Drop> makeDrop();
-	std::shared_ptr<Eagle> makeEagle();
-	std::shared_ptr<Heiho> makeHeiho();
-	std::shared_ptr<Fire> makeFire();
+	std::shared_ptr<Ufo> makeUfo(int x, int y, double size);
+	std::shared_ptr<Ray> makeRay(int x, int y, double size);
+	std::shared_ptr<Cloud> makeCloud(int x, int y, double size);
+	std::shared_ptr<Drop> makeDrop(int x, int y, double size);
+	std::shared_ptr<Eagle> makeEagle(int x, int y, double size);
+	std::shared_ptr<Heiho> makeHeiho(int x, int y, double size);
+	std::shared_ptr<Fire> makeFire(int x, int y, double size);
 
 	void makeEffect(std::string effectHandleKey_, int x_ = 0, int y_ = 0, int width_ = WIDTH, int height_ = HEIGHT, bool willStay_ = false, int layer_ = 150, int framePerCount_ = 1, int counter_ = 0) {
 		drawList.push_back(std::make_shared<Effect>(effectHandleKey_, x_, y_, width_, height_, willStay_, layer_, framePerCount_, counter_));
 	}
 
 	std::shared_ptr<BGM> bgm;
-	const int maxTime = 30 * 40;
-	const int maxPlayerDamage = 20;
+	const int maxTime = FPS * 60;
+	const int maxPlayerDamage = 100
+		;
 	int timer = maxTime;
 	bool hasPlayerWon;
 

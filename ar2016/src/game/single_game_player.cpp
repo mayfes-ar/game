@@ -9,7 +9,7 @@ std::shared_ptr<SinglePlayerGame::Teresa> SinglePlayerGame::makeTeresa(int x = 0
 	if (player->isContacted(enemy)) {
 		enemy = std::make_shared<Teresa>(x, y - 200, *this, size);
 	}
-	enemyList.push_back(enemy);
+	enemySubList.push_back(enemy);
 	drawList.push_back(enemy);
 	return enemy;
 }
@@ -19,7 +19,7 @@ auto enemy = std::make_shared<RocketWanwan>(x, y, *this, size);
 if (player->isContacted(enemy)) {
 enemy = std::make_shared<RocketWanwan>(x, y - 200, *this, size);
 }
-enemyList.push_back(enemy);
+enemySubList.push_back(enemy);
 drawList.push_back(enemy);
 return enemy;
 }
@@ -27,7 +27,7 @@ return enemy;
 std::shared_ptr<SinglePlayerGame::Inundation> SinglePlayerGame::makeInundation() {
 	auto enemy = std::make_shared<Inundation>(0, HEIGHT+200, *this, 1);
 
-	enemyList.push_back(enemy);
+	enemySubList.push_back(enemy);
 	drawList.push_back(enemy);
 	return enemy;
 }
@@ -37,15 +37,76 @@ std::shared_ptr<SinglePlayerGame::Switch> SinglePlayerGame::makeSwitch(int x, in
 	if (player->isContacted(enemy)) {
 		enemy = std::make_shared<Switch>(x, y - 200, *this, size);
 	}
-	enemyList.push_back(enemy);
+	enemySubList.push_back(enemy);
 	drawList.push_back(enemy);
 	return enemy;
 }
 
+std::shared_ptr<SinglePlayerGame::Ufo> SinglePlayerGame::makeUfo(int x, int y, double size = 1.0) {
+	auto enemy = std::make_shared<Ufo>(x, y, *this, size);
+	
+	enemySubList.push_back(enemy);
+	drawList.push_back(enemy);
+	return enemy;
+}
+
+std::shared_ptr<SinglePlayerGame::Ray> SinglePlayerGame::makeRay(int x, int y, double size = 1.0) {
+	auto enemy = std::make_shared<Ray>(x, y, *this, size);
+	
+	enemySubList.push_back(enemy);
+	drawList.push_back(enemy);
+	return enemy;
+}
+
+std::shared_ptr<SinglePlayerGame::Cloud> SinglePlayerGame::makeCloud(int x, int y, double size = 1.0) {
+	auto enemy = std::make_shared<Cloud>(x, y, *this, size);
+	
+	enemySubList.push_back(enemy);
+	drawList.push_back(enemy);
+	return enemy;
+}
+
+std::shared_ptr<SinglePlayerGame::Drop> SinglePlayerGame::makeDrop(int x, int y, double size = 1.0) {
+	auto enemy = std::make_shared<Drop>(x, y, *this, size);
+
+	enemySubList.push_back(enemy);
+	drawList.push_back(enemy);
+	return enemy;
+}
+
+std::shared_ptr<SinglePlayerGame::Eagle> SinglePlayerGame::makeEagle(int x, int y, double size = 1.0) {
+	auto enemy = std::make_shared<Eagle>(x, y, *this, size);
+	if (player->isContacted(enemy)) {
+		enemy = std::make_shared<Eagle>(x, y - 200, *this, size);
+	}
+	enemySubList.push_back(enemy);
+	drawList.push_back(enemy);
+	return enemy;
+}
+
+std::shared_ptr<SinglePlayerGame::Heiho> SinglePlayerGame::makeHeiho(int x, int y, double size = 1.0) {
+	auto enemy = std::make_shared<Heiho>(x, y, *this, size);
+	if (player->isContacted(enemy)) {
+		enemy = std::make_shared<Heiho>(x, y - 200, *this, size);
+	}
+	enemySubList.push_back(enemy);
+	drawList.push_back(enemy);
+	return enemy;
+}
+
+std::shared_ptr<SinglePlayerGame::Fire> SinglePlayerGame::makeFire(int x, int y, double size = 1.0) {
+	auto enemy = std::make_shared<Fire>(x, y, *this, size);
+	
+	enemySubList.push_back(enemy);
+	drawList.push_back(enemy);
+	return enemy;
+}
+
+
 bool SinglePlayerGame::onStart() {
 	using namespace std;
 	fps.isShow = true;
-
+	
 	srand((unsigned int)time(NULL));
 
 	// mode 0
@@ -160,7 +221,7 @@ bool SinglePlayerGame::onUpdate() {
 
 	switch (mode.getMode()) {
 	case 0: { // イントロダクション
-		static int counterForWaiting = 10;
+		static int counterForWaiting = FPS;
 		if (key[KEY_INPUT_RETURN] && counterForWaiting == 0) {
 			willFinishMode = true;
 		}
@@ -188,6 +249,11 @@ bool SinglePlayerGame::onUpdate() {
 			enemy->deathDecision();
 			enemy->update();
 		}
+		for (auto enemy : enemySubList) {
+			enemyList.push_back(enemy);
+		}
+		enemySubList.clear();
+		enemySubList.shrink_to_fit();
 
 		if (player->deathDecision(enemyList)) {
 			bgm->stop();
@@ -198,22 +264,41 @@ bool SinglePlayerGame::onUpdate() {
 
 		// 敵の出現を管理する
 		switch (maxTime - timer) {
-		case 300:
-			makeInundation();
-			makeSwitch(100, 100, 1);
-		case 500:
 		case 100: {
 			makeRocketWanwan(-RocketWanwan::width, HEIGHT / 2 + 50);
 			break;
 		}
-		default: {
-
+		case 200: {
+			makeEagle(0, 0, 1);
+			makeEagle(200, 0, 1);
+			makeEagle(400, 0, 1);
+			makeEagle(600, 0, 1);
 			break;
+		}
+		case 300: {
+			makeUfo(0,50,1);
+			break;
+		}
+		case 600: {
+			makeCloud(0, 50, 1);
+			break;
+		}
+		case 900: {
+			makeInundation();
+		}
+		case 1200:
+		case 1230:
+		case 1260:
+		case 1400: {
+			makeHeiho(WIDTH, 300, 1);
+			break;
+		}
+		default: {
 		}
 		}
 
 		// 定期的に実行する場合など
-		if ((maxTime - timer) % 30 == 0) {
+		if (timer < 150 && (maxTime - timer) % 5 == 0) {
 			makeTeresa();
 		}
 		break;
