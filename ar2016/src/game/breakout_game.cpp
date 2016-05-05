@@ -6,7 +6,9 @@ void BreakoutGame::updateFireball()
 	bool is_game_continuing = (!isGameClear()) && (!m_components->info->isTimeOver());
 	//吸い込んでいたら再表示させない
 	for (const auto& fireball : m_components->fireball_manager->getFireballList()) {
-		if (fireball->isDisappeared() && is_game_continuing && !m_components->pot->isInhared()) {
+		if (fireball->isDisappeared() && is_game_continuing) {
+			// もし吸い込まれているfireballだったら
+			if (fireball == m_components->pot->getInharedFireball()) continue;
 			fireball->appear(Shape::Circle{ Breakout::FIREBALL_STARTPOS, Breakout::FIREBALL_RADIUS });
 		}
 	}
@@ -183,6 +185,7 @@ void BreakoutGame::updatePotStatus() {
 				const float diff_rot = (float)share.rects[1].rotate - m_components->pot->getRotation();
 				m_components->pot->rotate(diff_rot / 10.0);
 
+				// fireball を中に持っていたら
 				if (m_components->pot->hasFireball()) {
 					//カウントを減らす
 					m_components->pot->countDown();
