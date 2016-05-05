@@ -2,6 +2,9 @@
 
 #include "game/game.h"
 
+#define _USE_MATH_DEFINES
+#include <math.h>
+
 class PuzzleGame : public Game {
 	// 指定フレーム後に、登録した関数を実行してくれる
 	class FuncTimer {
@@ -46,7 +49,8 @@ class PuzzleGame : public Game {
 		}
 		bool draw() {
 			if (canHit) {
-				DrawBox(left(), top(), right(), bottom(), GetColor(240, 117, 50), true);
+				DrawRectGraph(left(), top(), left(), top(), rect.width, rect.height, imgHandles["s_brick1"], false, false);
+				//DrawBox(left(), top(), right(), bottom(), GetColor(240, 117, 50), true);
 			} else {
 				DrawBox(left(), top(), right(), bottom(), GetColor(40, 117, 50), false);
 			}
@@ -60,13 +64,19 @@ class PuzzleGame : public Game {
 			rect = rect_;
 			willStay = false;
 			layer = 25;
+			if (rect.width == 0) {
+				canHit = false;
+			}
 		}
 
 		bool draw() {
-			drawWithRect(imgHandles["block"]);
+			if (canHit) {
+				drawWithRect(imgHandles["p_block"]);
+			} else {
+				drawWithRect(imgHandles["p_block_x"]);
+			}
 			return willStay;
 		}
-		
 	};
 
 	// gimmick共通クラス
@@ -95,8 +105,16 @@ class PuzzleGame : public Game {
 
 	class Explanation : public Object {
 	public:
+		Explanation() {
+			layer = 2;
+		}
+		bool isFirst = true;
 		bool draw() {
-			DrawGraph(0, 0, imgHandles["p_explain"], false);
+			if (isFirst) {
+				DrawGraph(0, 0, imgHandles["p_explain1"], false);
+			} else {
+				DrawGraph(0, 0, imgHandles["p_explain2"], false);
+			}
 			return true;
 		}
 	};
@@ -105,24 +123,89 @@ class PuzzleGame : public Game {
 	class ScoreObject : public Object {
 		bool isPlaying = true;
 	public:
-		int score = 0;
+		int score = -1000;
 
 		ScoreObject() {
 			layer = 200;
 		}
 		bool draw() {
+			const int size = 40;
 			if (isPlaying) {
-				DrawFormatString(400, 0, GetColor(65, 205, 63), "SCORE: %d", score);
+				
+				DrawExtendGraph(400, 2, 400+size, 2+size, imgHandles["p_saihu"], true);
+				drawNumber(400+size, 2, size, score, effectHandles["p_num"]);
+				//DrawFormatString(400, 0, GetColor(65, 205, 63), "SCORE: %d", score);
 			} else {
-				DrawFormatString(400, 400, GetColor(165, 205, 163), "SCORE: %d", score);
+				DrawExtendGraph(400, 400,400+size, 400+size, imgHandles["p_saihu"], true);
+				drawNumber(400+size, 400, size, score, effectHandles["p_num"]);
+				//DrawFormatString(400, 400, GetColor(165, 205, 163), "SCORE: %d", score);
 			}
 			return true;
 		}
 		void setResultDraw() { isPlaying = false; }
 	};
 
+	class TimerObject : public Object {
+		int time = 300 * FPS;
+
+	public:
+		TimerObject() {
+			layer = 200;
+		}
+		bool draw() {
+			const int size = 40;
+			DrawExtendGraph(800, 2, 800 + size, 2 + size, imgHandles["p_timer"], true);
+			drawNumber(800 + size, 2, size, time/FPS, effectHandles["p_num"]);
+			//DrawFormatString(800, 0, GetColor(165, 205, 163), "TIME: %d", time/FPS);
+			return true;
+		}
+		bool update() {
+			time--;
+			return time == 0;
+		}
+	};
+
+	class CurtainObject : public Object {
+		const bool isOpen;
+		int counter = 0;
+		const int openCountMax = effectHandles["p_curtain_open"].size();
+		const int closeCountMax = effectHandles["p_curtain_close"].size();
+	public:
+		CurtainObject(bool isOpen_) : isOpen(isOpen_) {
+			layer = 300;
+		}
+		bool draw() {
+			const int handle = isOpen ? effectHandles["p_curtain_open"][counter] : effectHandles["p_curtain_close"][counter];
+			DrawExtendGraph(0, 0, 1280, 720, handle, true);
+
+			if (isOpen) {
+				counter++;
+				return !(counter == openCountMax);
+			} else {
+				if (counter < closeCountMax - 1) { counter++; }
+				return true;
+			}
+		}
+	};
+
 	class Player : public Object {
-		const PuzzleGame& game;
+		
+		class InitEffect : public Object {
+			const int countMax = effectHandles["p_init"].size() * 2;
+			int counter = 0;
+		public:
+			InitEffect(int x, int y, int size) {
+				rect = Rectan(x, y, size, size);
+				layer = 80;
+			}
+			bool draw() {
+				drawWithRect(effectHandles["p_init"][counter / 2]);
+				counter++;
+				return counter < countMax;
+			}
+		};
+
+		PuzzleGame& game;
 
 		double prevX;
 		double prevY;
@@ -131,7 +214,8 @@ class PuzzleGame : public Game {
 
 		bool isRightDirection = true;
 		bool isJumping = true;
-		bool isReached = false;
+		bool isMovable = true;
+		bool isDamaged = false;
 
 		std::function<void()> updateFunc = []() {};
 
@@ -148,7 +232,12 @@ class PuzzleGame : public Game {
 		}
 
 		bool draw() {
-			drawWithRect(imgHandles["p_girl"], 0, !isRightDirection);
+			if (isDamaged) {
+				drawWithRect(imgHandles["p_hime_damaged"], 0, !isRightDirection);
+			}
+			else {
+				drawWithRect(imgHandles["p_hime"], 0, !isRightDirection);
+			}
 			return true;
 		}
 		void preUpdate() {
@@ -162,31 +251,70 @@ class PuzzleGame : public Game {
 				exForceX = exForceY = 0;
 			};
 		}
-		void init() {
-			updateFunc = [this]() {
-				rect.x = prevX = initX;
-				rect.y = prevY = initY;
+		void loop(int x, int y) {
+			updateFunc = [this, x, y]() {
+				const int diffX = x - rect.x;
+				const int diffY = y - rect.y;
+				rect.x = x; 
+				rect.y = y;
+				prevX += diffX;
+				prevY += diffY;
 				exForceX = exForceY = 0;
+			};
+		}
+		void init() {
+			if (!isMovable) { return; }
+			game.drawList.push_back(std::make_shared<InitEffect>(rect.x - 62, rect.y - 50, 200));
+
+			updateFunc = [this]() {
+				isDamaged = true;
+				isMovable = false;
+				game.funcTimer.set([this]() {
+					isDamaged = false;
+					isMovable = true;
+					rect.x = prevX = initX;
+					rect.y = prevY = initY;
+					exForceX = exForceY = 0;
+				}, FPS);
 			};
 		}
 		void goal() { 
 			const int goalScore = 1000;
 			game.score->score += goalScore;
-			isReached = true;
+			isMovable = false;
+		}
+		void markerCheck(std::shared_ptr<BlockObject> block) {
+			if (top() < block->bottomHit() && bottom() > block->topHit() && right() > block->leftHit() && left() < block->rightHit()) {
+				block->canHit = false;
+			}
 		}
 	};
 
 	class GoalObject : public Object {
+		class CoinsEffect : public Object {
+			const int countMax = effectHandles["p_coins"].size();
+			int counter = 0;
+		public:
+			CoinsEffect(int x, int y, int size) {
+				rect = Rectan(x, y, size, size);
+				layer = 101;
+			}
+			bool draw() {
+				drawWithRect(effectHandles["p_coins"][counter], 50);
+				counter++;
+				return counter < countMax;
+			}
+		};
+
 		bool isReached = false;
 		const int margin = 20;
 	public:
 		GoalObject(int x_, int y_) {
-			rect = Rectan(x_ + margin, y_ + margin, 100 - margin*2, 150 - margin*2);
+			rect = Rectan(x_ + margin, y_ + margin, 150 - margin*2, 150 - margin*2);
 			layer = 100;
 		}
 		bool draw() {
-			drawWithRect(imgHandles["p_goal"], margin
-				);
+			drawWithRect(imgHandles["p_castle"], margin);
 			return true;
 		}
 		bool check(std::shared_ptr<Player>& player) {
@@ -198,7 +326,9 @@ class PuzzleGame : public Game {
 				return false;
 			}
 		}
-
+		std::shared_ptr<Object> goalEffect() {
+			return std::make_shared<CoinsEffect>(rect.x, rect.y, rect.width);
+		}
 	};
 
 	// gimmicks
@@ -222,7 +352,7 @@ class PuzzleGame : public Game {
 					counter = 0;
 				}
 			} else {
-				drawWithRect(imgHandles["s_game_dead"], margin);
+				drawWithRect(imgHandles["p_needle"], margin);
 			}
 			
 			return willExist;
@@ -233,7 +363,7 @@ class PuzzleGame : public Game {
 				rect.y += vy;
 				
 				for (auto block : game.allBlocks) {
-					if (isContacted(block)) {
+					if (isContacted(block) && block->canHit) {
 						willExist = false;
 					}
 				}
@@ -247,12 +377,14 @@ class PuzzleGame : public Game {
 	};
 
 	class SmogGimmick : public Gimmick {
+
 		int counter = 0;
 		const int countMax = effectHandles["p_smog"].size();
 	public:
 		SmogGimmick(int x, int y, int size, PuzzleGame& game_) : Gimmick(game_) {
 			rect = Rectan(x, y, size, size);
 			layer = 120;
+			counter = (int)(rect.x + rect.y) % countMax;
 		}
 		bool draw() {
 			const int margin = rect.width / 10;
@@ -262,7 +394,7 @@ class PuzzleGame : public Game {
 			return willExist;
 		}
 		bool update() {
-			if (isContacted(game.markerBlock)) { willExist = false; }
+			if (isContacted(game.markerBlock) && game.markerBlock->canHit) { willExist = false; }
 			return willExist;
 		}
 	};
@@ -296,6 +428,8 @@ class PuzzleGame : public Game {
 		bool isOn;
 		const bool isReverse;
 		bool& targetBool;
+		int counter = 0;
+		const int countMax = effectHandles["p_crystal1"].size() * 2;
 		void setSwitch(bool isOn_) {
 			isOn = isOn_;
 			if (isReverse) {
@@ -311,11 +445,16 @@ class PuzzleGame : public Game {
 			setSwitch(false);
 		}
 		bool draw() {
+			const int margin = rect.width / 4;
 			if (isOn) {
-				drawWithRect(imgHandles["p_on"]);
+				drawWithRect(effectHandles["p_crystal1"][counter/2], margin);
+				//drawWithRect(imgHandles["p_on"]);
 			} else {
-				drawWithRect(imgHandles["p_off"]);
+				drawWithRect(effectHandles["p_crystal2"][counter/2], margin);
+				//drawWithRect(imgHandles["p_off"]);
 			}
+			counter++;
+			if (counter == countMax) { counter = 0; }
 			return willExist;
 		}
 		bool update() {
@@ -328,9 +467,52 @@ class PuzzleGame : public Game {
 		}
 	};
 
+	class FuncSwitchGimmick : public Gimmick {
+		bool isOn;
+		const std::function<void()> func;
+		int counter = 0;
+		const int countMax = effectHandles["p_crystal1"].size() * 2;
+		void setSwitch(bool isOn_) {
+			if (isOn_ && !isOn) {
+				func();
+			}
+			isOn = isOn_;
+			
+		}
+	public:
+		FuncSwitchGimmick(int x, int y, int size, std::function<void()> func_, PuzzleGame& game_) : func(func_), Gimmick(game_) {
+			rect = Rectan(x, y, size, size);
+			layer = 50;
+			setSwitch(false);
+		}
+		bool draw() {
+			const int margin = rect.width / 4;
+			if (isOn) {
+				//drawWithRect(imgHandles["p_on"]);
+				drawWithRect(effectHandles["p_crystal1"][counter / 2], margin);
+			} else {
+				//drawWithRect(imgHandles["p_off"]);
+				drawWithRect(effectHandles["p_crystal2"][counter / 2], margin);
+			}
+			counter++;
+			if (counter == countMax) { counter = 0; }
+			return willExist;
+		}
+		bool update() {
+			if (isContacted(game.player) || isContacted(game.markerBlock)) {
+				setSwitch(true);
+			} else {
+				setSwitch(false);
+			}
+			return willExist;
+		}
+	};
+
 	class WarpGimmick : public Gimmick {
 		const double posX;
 		const double posY;
+		int counter = 0;
+		const int countMax = effectHandles["p_warp"].size();
 
 	public:
 		WarpGimmick(Rectan rect_, double posX_, double posY_, PuzzleGame& game_) : posX(posX_), posY(posY_), Gimmick(game_) {
@@ -338,7 +520,13 @@ class PuzzleGame : public Game {
 			layer = 70;
 		}
 		bool draw() {
-			DrawBox(left(), top(), right(), bottom(), GetColor(238, 46, 213), false);
+			const int margin = rect.width / 10;
+			drawWithRect(effectHandles["p_warp"][counter], margin);
+			counter++;
+			if (counter == countMax) {
+				counter = 0;
+			}
+			//DrawBox(left(), top(), right(), bottom(), GetColor(238, 46, 213), false);
 			return willExist;
 		}
 		bool update() {
@@ -349,16 +537,55 @@ class PuzzleGame : public Game {
 		}
 	};
 
+	class LoopGimmick : public Gimmick {
+		const double posX;
+		const double posY;
+
+	public:
+		LoopGimmick(Rectan rect_, double posX_, double posY_, PuzzleGame& game_) : posX(posX_), posY(posY_), Gimmick(game_) {
+			rect = rect_;
+			layer = 70;
+		}
+		bool draw() {
+			DrawBox(left(), top(), right(), bottom(), GetColor(146, 138, 213), false);
+			return willExist;
+		}
+		bool update() {
+			if (isContacted(game.player)) {
+				game.player->loop(posX, posY);
+			}
+			return willExist;
+		}
+	};
+
 	class WindGimmick : public Gimmick {
 		const double windX;
 		const double windY;
+
+		//0:up 1:right 2:up 3:down
+		const int dirwind = windX*windX>windY*windY?1+2*(windX<0):2*(windY>0);
+		
+		int counter = 0;
+		const int countMax = effectHandles["p_arrow1"].size();
 	public:
 		WindGimmick(Rectan rect_, double windX_, double windY_, PuzzleGame& game_) :windX(windX_), windY(windY_), Gimmick(game_) {
 			rect = rect_;
 			layer = 80;
 		}
 		bool draw() {
-			DrawBox(left(), top(), right(), bottom(), GetColor(125, 224, 227), false);
+			const int chipsize = 60;
+			const int nx = 1>round(rect.width  / chipsize)?1: round(rect.width / chipsize);
+			const int ny = 1>round(rect.height / chipsize)?1: round(rect.height / chipsize);
+			const int mx = (rect.width - nx * chipsize)/2;
+			const int my = (rect.height - ny * chipsize)/2;
+			for (int i = 0; i < nx; i++) {
+				for (int j = 0; j < ny; j++) {
+					DrawRotaGraph(left() + mx + chipsize*(2*i+1)/2, top() + my + chipsize*(2*j+1)/2,1.0, dirwind*M_PI_2, effectHandles["p_arrow1"][counter], true);
+				}
+			}
+			counter++;
+			if (counter == countMax) { counter = 0; }
+			//DrawBox(left(), top(), right(), bottom(), GetColor(125, 224, 227), false);
 			return willExist;
 		}
 		bool update() {
@@ -374,6 +601,7 @@ class PuzzleGame : public Game {
 	std::shared_ptr<Player> player;
 	std::shared_ptr<GoalObject> goal;
 	std::shared_ptr<ScoreObject> score;
+	std::shared_ptr<TimerObject> timer;
 
 	std::vector<std::shared_ptr<BlockObject>> stageBlocks;
 	std::shared_ptr<BlockObject> markerBlock;
@@ -383,7 +611,7 @@ class PuzzleGame : public Game {
 	std::mt19937 mt;
 	std::uniform_int_distribution<> rand100 = std::uniform_int_distribution<>(0, 99);
 
-	int timer = 0;
+	int counter = 0;
 
 	std::shared_ptr<StageBlock> setBlock(int x, int y, int width, int height, bool canHit=true) {
 		auto block = std::make_shared<StageBlock>(Rectan(x, y, width, height), canHit);
@@ -412,10 +640,20 @@ class PuzzleGame : public Game {
 		gimmicks.push_back(switch_);
 		drawList.push_back(switch_);
 	}
+	void setFuncSwitch(int x, int y, int size, std::function<void()> func) {
+		auto switch_ = std::make_shared<FuncSwitchGimmick>(x, y, size, func,  *this);
+		gimmicks.push_back(switch_);
+		drawList.push_back(switch_);
+	}
 	void setWarp(int x, int y, int width, int height, int posX, int posY) {
 		auto warp = std::make_shared<WarpGimmick>(Rectan(x, y, width, height), posX, posY, *this);
 		gimmicks.push_back(warp);
 		drawList.push_back(warp);
+	}
+	void setLoop(int x, int y, int width, int height, int posX, int posY) {
+		auto loop = std::make_shared<LoopGimmick>(Rectan(x, y, width, height), posX, posY, *this);
+		gimmicks.push_back(loop);
+		drawList.push_back(loop);
 	}
 	void setWind(int x, int y, int width, int height, double windX, double windY) {
 		auto wind = std::make_shared<WindGimmick>(Rectan(x, y, width, height), windX, windY, *this);
@@ -441,11 +679,12 @@ class PuzzleGame : public Game {
 
 		drawList.push_back(std::make_shared<Background>(share.handle));
 		drawList.push_back(score);
+		drawList.push_back(timer);
 
 		if (isSurrounded) {
-			setBlock(0, 700, 1280, 100, true);
-			setBlock(-50, -720, 100, 720 * 2, true);
-			setBlock(1230, -720, 100, 720 * 2, true);
+			setBlock(-100, 700, 1480, 200, true);
+			setBlock(-250, -720, 300, 720 * 3, true);
+			setBlock(1230, -720, 300, 720 * 3, true);
 			setBlock(200, -720, 100, 620, true);
 		}
 	}
@@ -456,6 +695,7 @@ public:
 		std::random_device rnd;
 		mt = std::mt19937(rnd());
 		score = std::make_shared<ScoreObject>();
+		timer = std::make_shared<TimerObject>();
 	}
 
 	bool onStart();

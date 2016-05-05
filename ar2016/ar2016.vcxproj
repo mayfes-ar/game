@@ -125,7 +125,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>c:\DxLib_VC\プロジェクトに追加すべきファイル_VC用;C:\lib\opencv-3.1.0\build\install\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.;..\external;.\include;c:\DxLib_VC\プロジェクトに追加すべきファイル_VC用;C:\lib\opencv-3.1.0\build\install\include</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <ExceptionHandling>Async</ExceptionHandling>
       <FloatingPointModel>Fast</FloatingPointModel>
@@ -160,14 +160,23 @@
   <ItemGroup>
     <ClCompile Include="const.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="src\game\breakout_components.cpp" />
+    <ClCompile Include="src\game\breakout_game.cpp" />
     <ClCompile Include="src\game\image_process.cpp" />
     <ClCompile Include="src\game\menu.cpp" />
     <ClCompile Include="src\game\puzzle_game.cpp" />
     <ClCompile Include="src\game\single_game_player.cpp" />
+    <ClCompile Include="src\math\collision_detection.cpp" />
+    <ClCompile Include="src\moving\moving.cpp" />
+    <ClCompile Include="src\object\breakout_object.cpp" />
     <ClCompile Include="src\object\object.cpp" />
+    <ClCompile Include="src\util\color_palette.cpp" />
+    <ClCompile Include="src\util\timer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="const.h" />
+    <ClInclude Include="include\game\breakout_components.h" />
+    <ClInclude Include="include\game\breakout_game.h" />
     <ClInclude Include="include\game\first_game.h" />
     <ClInclude Include="include\game\fps.h" />
     <ClInclude Include="include\game\game.h" />
@@ -175,9 +184,19 @@
     <ClInclude Include="include\game\menu.h" />
     <ClInclude Include="include\game\puzzle_game.h" />
     <ClInclude Include="include\game\single_player_game.h" />
+    <ClInclude Include="include\input\input.h" />
+    <ClInclude Include="include\math\collision_detection.h" />
+    <ClInclude Include="include\math\math_util.h" />
+    <ClInclude Include="include\moving\moving.h" />
     <ClInclude Include="include\object\block_object.h" />
+    <ClInclude Include="include\object\breakout_object.h" />
     <ClInclude Include="include\object\object.h" />
+    <ClInclude Include="include\object\shape.h" />
     <ClInclude Include="include\object\units.h" />
+    <ClInclude Include="include\util\breakout_params.h" />
+    <ClInclude Include="include\util\color_palette.h" />
+    <ClInclude Include="include\util\timer.h" />
+    <ClInclude Include="include\util\util.h" />
     <ClInclude Include="main.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

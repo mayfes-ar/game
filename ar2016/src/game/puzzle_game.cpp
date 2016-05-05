@@ -4,50 +4,98 @@
 bool PuzzleGame::onStart() {
 	using namespace std;
 	fps.isShow = true;
-
+	
 	// mode 0: opening
 	mode.setMode([this]() {
-		drawList.push_back(std::make_shared<Explanation>());
-	}, -1);
+		setBlock(0, 700, 1280, 100, true);
+		setBlock(-50, -720, 100, 720 * 2, true);
+		setBlock(1230, -720, 100, 720 * 2, true);
 
+		auto explanation = std::make_shared<Explanation>();
+		drawList.push_back(explanation);
+		setSwitch(500, 550, 100, explanation->isFirst, true);
+		setPlayer(100, 600);
+		setGoal(1100, 555);
+	}, -1);
+	
 	// mode 1
 	mode.setMode([this]() {
 		makeStageBase();
-		setPlayer(100, -300);
-		setGoal(1100, 550);
+		drawList.push_back(std::make_shared<CurtainObject>(true));
+		setPlayer(100, -100);
+		setGoal(1080, 555);
 
-		setCoin(800, 100);
-		setCoin(900, 100);
-		setDamage(800, 300, 100);
-		setBlock(400, 300, 300, 200);
-		setBlock(450, 550, 100, 100, false);
-		setSwitch(1000, 200, 60, setBlock(650, 550, 100, 100, false)->canHit);
-		setWarp(550, 550, 50, 50, 550, -100);
-		setWind(1100, 180, 100, 300, 0, -3);
-		setWind(50, 695, 5, 5, 30, -60);
+		setBlock(0, 520, 540, 200);
+		setBlock(540, 200, 170, 500);
+		setBlock(1000, 220, 300, 20);
+		setCoin(1050, 130);
+		setCoin(1130, 130);
+		setCoin(1090, 50);
 
 	}, -1);
-
+	
 	// mode 2
 	mode.setMode([this]() {
 		makeStageBase();
 		setPlayer(100, -300);
-		setGoal(1100, 550);
-	}, -1);
+		setGoal(1080, 550);
 
+		setBlock(50, 300, 400, 100);
+		setSwitch(1000, 200, 80, setBlock(450, 300, 400, 100)->canHit, true);
+		setBlock(850, 300, 400, 100);
+		setCoin(1010, 80);
+		setCoin(60, 420);
+		setCoin(160, 420);
+		setCoin(260, 420);
+		setCoin(340, 420);
+
+		setWarp(50, 620, 100, 100, 1150, 0);
+
+		for (int i = 0; i < 80; i++){
+			setSmog();
+		}
+
+	}, -1);
+	
 	// mode 3
 	mode.setMode([this]() {
 		makeStageBase();
-		setPlayer(100, -300);
-		setGoal(1100, 100);
-		for (int i = 0; i < 120; i++) {
-			setSmog();
-		}
-		setBlock(0, 500, 200, 50);
-		setSwitch(500, 0, 50, setBlock(200, 500, 50, 200)->canHit, true);
-		setWarp(100, 570, 50, 50, 1100, -100);
-	}, -1);
 
+		setPlayer(50, 580);
+		setGoal(100, 80);
+		
+		setWind(0, 240, 840, 80, 3, 0);
+		setWind(440, 560, 540, 120, -3, 0);
+		setBlock(0, 300, 1100, 40);
+		setBlock(200, 560, 290, 220);
+
+		for (int i = 580; i < 680; i += 10) {
+			setDamage(482, i, 10);
+		}
+
+		setBlock(700, 0, 40, 190);
+		for (int i = 0; i < 180; i += 10) {
+			setDamage(692, i, 10);
+		}
+		setCoin(600, 40);
+
+		setBlock(880, 540, 240, 20);
+		setBlock(620, 540, 120, 20);
+		setDamage(780, 340, 20);
+		setBlock(1050, 340, 50, 200);
+		setCoin(500, 600);
+		setCoin(900, 440);
+		setCoin(980, 440);
+		setCoin(900, 370);
+		setCoin(980, 370);
+
+		//setBlock(0, 680, 1300, 200);
+
+		setWind(1070, 150, 130, 51, -2, 0);
+		setCoin(1120, 10);
+
+	}, -1);
+	
 	// mode 4
 	mode.setMode([this]() {
 		makeStageBase(false);
@@ -60,6 +108,102 @@ bool PuzzleGame::onStart() {
 		setWind(650, -200, 200, 1000, 0, 3);
 		setWind(1000, 200, 100, 400, 0, -3);
 
+		setCoin(420, 500);
+		setCoin(1020, 450);
+		setCoin(1020, 370);
+		setCoin(1020, 290);
+		setCoin(670, 550);
+		setCoin(770, 550);
+		setCoin(670, 50);
+		setCoin(770, 50);
+
+	}, -1);
+	
+	// mode 5
+	mode.setMode([this]() {
+		makeStageBase(false);
+		setPlayer(100, 90);
+		setGoal(950, 500);
+
+		for (int i = 0; i * 50 <= 1200; i++) {
+			setLoop(i * 50, 780, 50, 10, (i - 1) * 50, 0);
+			setLoop(i * 50, -10, 50, 10, (i - 1) * 50, 670);
+		}
+
+		setDamage(905, 450, 30);
+		setDamage(965, 450, 30);
+		setDamage(1025, 450, 30);
+		setDamage(1085, 450, 30);
+		setDamage(1145, 450, 30);
+		setDamage(900, 500, 30);
+		setDamage(900, 550, 30);
+		setDamage(900, 600, 30);
+		setDamage(900, 650, 30);
+		setDamage(900, 700, 30);
+		setDamage(1150, 500, 30);
+		setDamage(1150, 550, 30);
+		setDamage(1150, 600, 30);
+		setDamage(1150, 650, 30);
+		setDamage(1150, 700, 30);
+		setBlock(0, 200, 400, 20);
+		setBlock(200, 150, 70, 70);
+		setBlock(440, 400, 24, 240);
+		setBlock(700, 400, 24, 240);
+		setBlock(464, 400, 236, 24);
+		setBlock(464, 616, 236, 24);
+		setWarp(620, 424, 60, 60, 600, 300);
+		setWarp(1200, 650, 60, 60, 520, 500);
+		setCoin(40, 240);
+		setCoin(120, 240);
+		setCoin(200, 240);
+		setCoin(280, 240);
+		setCoin(320, 420);
+		setCoin(550, 430, 60, 500);
+
+		setWarp(-500, 1000, 2500, 600, 100, -100);
+		setBlock(-500, 1600, 2500, 600);
+
+	}, -1);
+	
+	// mode 6
+	mode.setMode([this]() {
+		makeStageBase(false);
+		setPlayer(10, 401);
+		setGoal(1100, 250);
+
+		setBlock(0, 0, 450, 150, true);//hidariue
+
+		setBlock(100, 390, 100, 400, true);//hidarishita
+		setBlock(0, 540, 200, 400, true);
+
+		setBlock(800, 10, 700, 140, true);//migiue
+		setBlock(1300, -500, 50, 500, true);
+
+		setBlock(300, 390, 220, 10, true);
+		setBlock(300, 400, 500, 100, true);//shita
+		setBlock(650, 500, 50, 300, true);
+		setBlock(320, 660, 350, 150, true);
+
+		setBlock(900, 400, 400, 100, true);//migishita
+		setBlock(1250, 500, 300, 400, true);
+
+		setCoin(350, 590);//shita
+		setCoin(450, 590);
+		setCoin(550, 590);
+
+		setCoin(900, -58);//migiue
+		setCoin(1000, -58);
+		setCoin(1100, -58);
+
+		setCoin(820, 420);
+
+		setSwitch(900, 550, 100, setBlock(900, 150, 25, 250, false)->canHit, true);
+		setSwitch(1150, 550, 100, setBlock(925, 150, 25, 250, false)->canHit, true);
+
+		setFuncSwitch(700, 550, 100, [this]() {funcTimer.set([this]() { setDamage(700, -100, 100, 0, 2); }, 1); });
+		setFuncSwitch(1150, 550, 100, [this]() {funcTimer.set([this]() {setDamage(-100, 150, 240, 3, 0); }, 1); });
+
+		setWarp(-1000, 1000, 3000, 100, 10, 400);//shita
 	}, -1);
 
 	// result
@@ -69,6 +213,7 @@ bool PuzzleGame::onStart() {
 
 		score->setResultDraw();
 
+		drawList.push_back(std::make_shared<CurtainObject>(true));
 		drawList.push_back(score);
 
 	}, -1);
@@ -78,40 +223,56 @@ bool PuzzleGame::onStart() {
 
 
 bool PuzzleGame::onUpdate() {
+	if (key[KEY_INPUT_ESCAPE]) {
+		share.willFinish = true;
+	}
 	funcTimer.update();
-	timer++;
-	if (timer == 3600) {
-		timer = 0;
+	counter++;
+	if (counter == 3600) {
+		counter = 0;
 	}
 
 	// modeに応じて
 	// <---各ステージ--->
 	switch (mode.getMode()) {
 	case 0: { // explain
-		if (key[KEY_INPUT_UP]) {
-			mode.goNext();
-		}
-		return Game::onUpdate();
+		
+		break;
 	}
 	case 1: {
-
+		
 		break;
 	}
 	case 2: {
-		if (timer % (FPS / 2) == 0) {
-			setDamage(300, -100, 100, 0, 10);
-			setDamage(600, -100, 100, 0, 11);
-			setDamage(900, -100, 100, 0, 12);
+		if (counter % (FPS * 3) == 0) {
+			setSmog();
 		}
+		
 		break;
 	}
 	case 3: {
-		if (timer % (FPS) == 0 && gimmicks.size() < 150) {
-			setSmog();
+		/*if (counter % (FPS * 3) == 0) {
+			setDamage(300, -100, 50, 5, 14);
 		}
+		if (2 * counter % (FPS * 6) == FPS * 3) {
+			setDamage(400, -100, 50, -5, 14);
+		}*/
 		break;
 	}
 	case 4: {
+		break;
+	}
+	case 5: {
+		if (counter % (FPS * 2) == 0) {//Stage 5のギミック
+			setDamage(800, -100, 50, 0, 10);
+		}
+		break;
+	}
+	case 6: {
+		if (counter % (FPS / 2) == 0) {
+			setDamage(225, 800, 50, 0, -5);
+			setDamage(450, -100, 70, 0, 10);
+		}
 		break;
 	}
 	default: // result
@@ -126,19 +287,35 @@ bool PuzzleGame::onUpdate() {
 
 	// 初めてゴールに触れた時だけ
 	if (goal->check(player)) {
+		if (mode.getMode() == 0 || mode.getMode() == 6) {
+			drawList.push_back(std::make_shared<CurtainObject>(false));
+		}
+		if (mode.getMode() > 0) {
+			drawList.push_back(goal->goalEffect());
+		}
 		funcTimer.set([this]() { mode.goNext(); }, FPS * 2);
 	}
+
+	if (mode.getMode()) {
+		if (timer->update()) {
+			drawList.push_back(std::make_shared<CurtainObject>(false));
+			funcTimer.set([this]() {mode.goLast();}, FPS);
+		}
+	}
+	
 
 	allBlocks = stageBlocks;
 	
 	share.rectMutex.lock();
-	markerBlock = std::make_shared<MarkerBlock>(share.rects[0]);
+	markerBlock = std::make_shared<MarkerBlock>(share.rects[1]);
 	allBlocks.push_back(markerBlock);
 	drawList.push_back(markerBlock);
 	share.rectMutex.unlock();
 
+
 	// gimmicks作用前の準備
 	player->preUpdate();
+	player->markerCheck(markerBlock);
 
 	// gimmick
 	for (auto& itr = gimmicks.begin(); itr != gimmicks.end();) {
@@ -152,16 +329,12 @@ bool PuzzleGame::onUpdate() {
 	// gimmicks作用後の位置計算
 	player->update();
 
-	if (key[KEY_INPUT_ESCAPE]) {
-		share.willFinish = true;
-	}
-
 	return Game::onUpdate();
 }
 
 
 void PuzzleGame::Player::update() {
-	if (isReached) { return; }
+	if (!isMovable) { return; }
 	updateFunc();
 	updateFunc = []() {};
 
