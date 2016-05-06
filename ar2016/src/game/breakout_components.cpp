@@ -7,10 +7,17 @@ using namespace Breakout;
 void BreakoutComponents::setup()
 {
 	// Select画面
+	{
+		std::unordered_map<Breakout::Mode, std::string, Breakout::ModeEnumHash> mode_image_store;
+		mode_image_store[Breakout::Mode::Easy] = "b_easy";
+		mode_image_store[Breakout::Mode::Hard] = "b_hard";
+		std::list<Breakout::Mode> mode_list;
+		mode_list.push_back(Breakout::Mode::Easy);
+		mode_list.push_back(Breakout::Mode::Hard);
+		const Shape::Rectangle select_realm = Shape::Rectangle(SELECT_START_POS, SELECT_WIDTH, SELECT_HEIGHT);
+		select = std::make_shared<Breakout::Select<Breakout::Mode, Breakout::ModeEnumHash>>(mode_list, mode_image_store, select_realm);
+	}
 	// Layoutの初期化
-	std::unordered_map<std::string, int> mode_image_store;
-	mode_image_store["easy"] = 1;
-	mode_image_store["hard"] = 1;
 	{
 		background = std::make_shared<Background>();
 		background->init();

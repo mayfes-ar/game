@@ -14,19 +14,19 @@
 #include "game/fps.h"
 #include "util/breakout_params.h"
 
-/*
-enum class Mode : uint8_t {
-	Easy = 0,
-	Hard
-};
+namespace Breakout{
+	enum class Mode : uint8_t {
+		Easy = 0,
+		Hard
+	};
 
-struct ModeEnumHash {
-	size_t operator()(Mode mode) const
-	{
-		return std::hash<uint8_t>()(static_cast<uint8_t>(mode));
-	}
-};
-*/
+	struct ModeEnumHash {
+		size_t operator()(Mode mode) const
+		{
+			return std::hash<uint8_t>()(static_cast<uint8_t>(mode));
+		}
+	};
+} // namespace Breakout
 
 
 class BreakoutComponents
@@ -36,7 +36,7 @@ public:
 
 	void setup();
 
-	//std::shared_ptr<Breakout::Select<std::string>> select = nullptr;
+	std::shared_ptr<Breakout::Select<Breakout::Mode, Breakout::ModeEnumHash>> select = nullptr;
     std::shared_ptr<Breakout::Background> background = nullptr;
     std::shared_ptr<Breakout::Info> info = nullptr;
 	std::shared_ptr<Breakout::Explanation> explanation = nullptr;

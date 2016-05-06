@@ -9,6 +9,8 @@
 #include <array>
 #include <list>
 #include <random>
+#include <unordered_map>
+#include <string>
 #include "object/object.h"
 #include "object/shape.h"
 #include "moving/moving.h"
@@ -21,220 +23,232 @@
 #include "util/color_palette.h"
 #include "moving/newton_behavior.h"
 #include "moving/spring_behavior.h"
+#include "Dxlib.h"
 
 
 namespace Breakout {
 
-// 描画の優先順位
-constexpr int PRIORITY_BACKGROUND = 0; // 背景画像
-constexpr int PRIORITY_SECTION = 1; // レイアウト（ゲームフィールド、スコア表示、デバッグ表示等）
-constexpr int PRIORITY_STATIC_OBJECT = 2; // 静的オブジェクト (Block)
-constexpr int PRIORITY_DYNAMIC_OBJECT = 3; // 動的オブジェクト(Ship, Fireball)
-constexpr int PRIORITY_CHARACTER = 4; // キャラクター(マリオ)
-constexpr int PRIORITY_INFO = 5; // インフォメーション
+	// 描画の優先順位
+	constexpr int PRIORITY_BACKGROUND = 0; // 背景画像
+	constexpr int PRIORITY_SECTION = 1; // レイアウト（ゲームフィールド、スコア表示、デバッグ表示等）
+	constexpr int PRIORITY_STATIC_OBJECT = 2; // 静的オブジェクト (Block)
+	constexpr int PRIORITY_DYNAMIC_OBJECT = 3; // 動的オブジェクト(Ship, Fireball)
+	constexpr int PRIORITY_CHARACTER = 4; // キャラクター(マリオ)
+	constexpr int PRIORITY_INFO = 5; // インフォメーション
 
-class ItemReceiverBase;
+	class ItemReceiverBase;
 
-enum ItemKind {
-	RestoreShip,
-	DamageShip
-};
+	enum ItemKind {
+		RestoreShip,
+		DamageShip
+	};
 
-//アイテムクラス
-class ItemBase
-{
-public:
-	virtual ~ItemBase() {}
-	virtual void updateStatus() = 0;
+	//アイテムクラス
+	class ItemBase
+	{
+	public:
+		virtual ~ItemBase() {}
+		virtual void updateStatus() = 0;
 
-	void attachItemReceiver(std::shared_ptr<ItemReceiverBase> item_receiver) {
-		m_item_receiver = item_receiver;
-		updateStatus();
-	}
-	void detachItemReceiver() {
-		m_item_receiver = nullptr;
-		updateStatus();
-	}
+		void attachItemReceiver(std::shared_ptr<ItemReceiverBase> item_receiver) {
+			m_item_receiver = item_receiver;
+			updateStatus();
+		}
+		void detachItemReceiver() {
+			m_item_receiver = nullptr;
+			updateStatus();
+		}
 
-	bool isAttached() {
-		return m_item_receiver == nullptr ? false : true;
-	}
+		bool isAttached() {
+			return m_item_receiver == nullptr ? false : true;
+		}
 
-	ItemKind getItemKind() {
-		return m_item_kind;
-	}
+		ItemKind getItemKind() {
+			return m_item_kind;
+		}
 
-protected:
-	std::shared_ptr<ItemReceiverBase> m_item_receiver = nullptr;
-	ItemKind m_item_kind;
-};
+	protected:
+		std::shared_ptr<ItemReceiverBase> m_item_receiver = nullptr;
+		ItemKind m_item_kind;
+	};
 
-//アイテムレシーバー基礎クラス
-class ItemReceiverBase
-{
-public:
-	ItemReceiverBase() {}
-	ItemReceiverBase(const Shape::Rectangle& realm) : m_realm(realm) {}
-	virtual ~ItemReceiverBase() {}
-	//本当は純粋仮想にしたかったけどそうするとこのクラスのインスタンスthisがつくれないからこのようにした
-	virtual void applyItems() {}
-	virtual const Shape::Rectangle getRealm() { return m_realm; }
+	//アイテムレシーバー基礎クラス
+	class ItemReceiverBase
+	{
+	public:
+		ItemReceiverBase() {}
+		ItemReceiverBase(const Shape::Rectangle& realm) : m_realm(realm) {}
+		virtual ~ItemReceiverBase() {}
+		//本当は純粋仮想にしたかったけどそうするとこのクラスのインスタンスthisがつくれないからこのようにした
+		virtual void applyItems() {}
+		virtual const Shape::Rectangle getRealm() { return m_realm; }
 
-	void detachItem(std::shared_ptr<ItemBase> item) {
-		item->detachItemReceiver();
-		deleteItem(item);
-	}
-
-	void detachAllItems() {
-		for (auto item : m_items) {
+		void detachItem(std::shared_ptr<ItemBase> item) {
 			item->detachItemReceiver();
+			deleteItem(item);
 		}
-		m_items.clear();
-	}
 
-	void attachItem(std::shared_ptr<ItemBase> item) {
-		m_items.push_back(item);
-		item->attachItemReceiver(std::make_shared<ItemReceiverBase>(*this));
-		applyItems();
-	}
+		void detachAllItems() {
+			for (auto item : m_items) {
+				item->detachItemReceiver();
+			}
+			m_items.clear();
+		}
 
-	//使用済みのアイテムを消す
-	void deleteItem(std::shared_ptr<ItemBase> item) {
-		for (int i = 0; i < m_items.size(); i++) {
-			if (m_items[i] != item) continue;
-			m_items.erase(m_items.begin() + i);
+		void attachItem(std::shared_ptr<ItemBase> item) {
+			m_items.push_back(item);
+			item->attachItemReceiver(std::make_shared<ItemReceiverBase>(*this));
+			applyItems();
+		}
+
+		//使用済みのアイテムを消す
+		void deleteItem(std::shared_ptr<ItemBase> item) {
+			for (int i = 0; i < m_items.size(); i++) {
+				if (m_items[i] != item) continue;
+				m_items.erase(m_items.begin() + i);
+			}
+		}
+
+	protected:
+		std::vector<std::shared_ptr<ItemBase>> m_items = {};
+		Shape::Rectangle m_realm = Shape::Rectangle();
+	};
+
+	class Item : public Object, public ItemBase
+	{
+	public:
+		virtual ~Item() {}
+		Item(ItemKind item_kind) {
+			m_item_kind = item_kind;
+			Object::layer = PRIORITY_DYNAMIC_OBJECT;
+		}
+
+		Shape::Rectangle getRealm() const {
+			return m_realm;
+		}
+
+		void updateStatus() override {
+			if (m_item_receiver != nullptr) {
+				m_realm.start_point = m_item_receiver->getRealm().start_point;// + Eigen::Vector2i((m_item_receiver->getRealm().width - m_realm.width) / 2, 0);
+			}
+			else {
+				m_realm.start_point += Eigen::Vector2i(0, 20);
+			}
+		}
+
+		bool draw() override {
+			//誰にかに保持されていたら描画しない
+			if (m_item_receiver != nullptr) return true;
+
+			switch (m_item_kind) {
+			case RestoreShip:
+				DrawExtendGraph(m_realm.left(), m_realm.top(), m_realm.right(), m_realm.bottom(), imgHandles["restore_ship"], TRUE);
+				break;
+			case DamageShip:
+				DrawExtendGraph(m_realm.left(), m_realm.top(), m_realm.right(), m_realm.bottom(), imgHandles["damage_ship"], TRUE);
+				break;
+			}
+
+			//DrawBox(m_realm.left(), m_realm.top(), m_realm.right(), m_realm.bottom(), GetColor(255, 255, 0), TRUE);
+			return true;
+		}
+
+	private:
+		Shape::Rectangle m_realm = Shape::Rectangle(Eigen::Vector2i(0, 0), BLOCK_WIDTH / 2, BLOCK_HEIGHT);
+	};
+
+
+	// 縦方向に選択ボタンを配置するセレクト画面。
+	// 一方向のみ対応
+
+	enum class Move : uint8_t {
+		Up,
+		Down,
+		None
+	};
+
+	template <typename Mode, typename Hash = std::hash<Mode> >
+	class Select : public Object
+	{
+	public:
+		Select(const std::list<Mode>& mode_list,
+			const Shape::Rectangle& realm)
+			:m_mode_list(mode_list), m_realm(realm)
+		{
+			Object::layer = PRIORITY_SECTION;
+			m_now_mode = m_mode_list.begin();
+		}
+
+		bool draw() override {
+			int image_num = static_cast<int>(m_mode_list.size());
+			int image_width = m_realm.width / 2;
+			int image_height = m_realm.height / (4 * image_num);
+
+			int i = 0;
+			for (auto it = m_mode_list.begin(); it != m_mode_list.end(); ++it) {
+				DrawExtendGraph(m_realm.left(), m_realm.top() + image_height * (2 * i + 1),
+					m_realm.left() + image_width, m_realm.top() + image_height * (2 * i + 2),
+					Object::imgHandles.at(m_mode_to_key.at(*it)), TRUE);
+				// 現在のモードの枠線を白色で囲む
+				if (it == m_now_mode) {
+					DrawBox(m_realm.left(), m_realm.top() + image_height * (2 * i + 1),
+						m_realm.left() + image_width, m_realm.top() + image_height * (2 * i + 2),
+						Color::WHITE, FALSE);
+				}
+				i += 1;
+
+				DrawString(m_realm.left(), m_realm.bottom(), "Press Enter to select", Color::BLUE);
+			}
+			return true;
+		}
+
+
+	void move(const Move& move)
+	{
+		switch (move) {
+		case Mode::None:
+			break;
+		case Mode::Up:
+			if (m_mode_list.size() = < 1) {
+				return;
+			}
+			else if (m_now_mode == m_mode_list.begin()) {
+				return;
+			}
+			m_now_mode++;
+
+		case Mode::Down:
+			if (m_mode_list.size() = < 1) {
+				return;
+			}
+			else if (m_now_mode == m_mode_list.begin()) {
+				return;
+			}
+			m_now_mode--;
+			break;
 		}
 	}
 
-protected:
-	std::vector<std::shared_ptr<ItemBase>> m_items = {};
+	void select() {
+		m_selected = true;
+	}
+
+	bool selected() const {
+		return m_selected;
+	}
+
+	Mode getMode() const {
+		return *m_now_mode;
+	}
+
+private:
+	Move m_move = Move::None;
+	typename std::list<Mode>::iterator m_now_mode;
+	std::list<Mode> m_mode_list;
+	modeToImageKey m_mode_to_key;
 	Shape::Rectangle m_realm = Shape::Rectangle();
+	bool m_selected = false;
 };
-
-class Item : public Object, public ItemBase
-{
-public:
-	virtual ~Item() {}
-	Item(ItemKind item_kind) {
-		m_item_kind = item_kind;
-		Object::layer = PRIORITY_DYNAMIC_OBJECT;
-	}
-
-	Shape::Rectangle getRealm() const {
-		return m_realm;
-	}
-
-	void updateStatus() override {
-		if (m_item_receiver != nullptr) {
-			m_realm.start_point = m_item_receiver->getRealm().start_point;// + Eigen::Vector2i((m_item_receiver->getRealm().width - m_realm.width) / 2, 0);
-		}
-		else {
-			m_realm.start_point += Eigen::Vector2i(0, 20);
-		}
-	}
-
-	bool draw() override {
-		//誰にかに保持されていたら描画しない
-		if (m_item_receiver != nullptr) return true;
-
-		switch (m_item_kind) {
-		case RestoreShip:
-			DrawExtendGraph(m_realm.left(), m_realm.top(), m_realm.right(), m_realm.bottom(), imgHandles["restore_ship"], TRUE);
-			break;
-		case DamageShip:
-			DrawExtendGraph(m_realm.left(), m_realm.top(), m_realm.right(), m_realm.bottom(), imgHandles["damage_ship"], TRUE);
-			break;
-		}
-
-		//DrawBox(m_realm.left(), m_realm.top(), m_realm.right(), m_realm.bottom(), GetColor(255, 255, 0), TRUE);
-		return true;
-	}
-
-private:
-	Shape::Rectangle m_realm = Shape::Rectangle(Eigen::Vector2i(0, 0), BLOCK_WIDTH / 2, BLOCK_HEIGHT);
-};
-
-
-// 縦方向に選択ボタンを配置するセレクト画面。
-// 一方向のみ対応
-/*
-template <typename Mode, Hash = std::hash<Mode> >
-class Select : public Object
-{
-public:
-Select(const std::list<Mode>& mode_list,
-const Shape::Rectangle& realm)
-:m_mode_list(mode_list), m_realm(realm)
-{
-Object::layer = PRIORITY_SECTION;
-m_now_mode = m_mode_list.begin();
-}
-
-enum class Move : uint8_t {
-Up,
-Down,
-None
-};
-
-bool draw() override {
-int image_num = static_cast<int>(m_mode_list.size());
-int image_width = m_realm.width() / 2;
-int image_height = m_realm.height() / (2 * image_num);
-
-int id = 1;
-for (auto it = m_mode_list.begin(); it != m_mode_list.end(); ++it) {
-DrawExendGraph(m_realm.left(), m_realm.top() + image_height * (2 * i - 1), m_realm.left(), m_realm.top() + image_height * (2 * i),
-);
-id++;
-}
-}
-
-
-void move(const Move& move)
-{
-switch (move) {
-case Mode::None:
-break;
-case Mode::Up:
-if (m_mode_list.size() =< 1) {
-return;
-}
-else if (m_now_mode == m_mode_list.begin()) {
-return;
-}
-m_now_mode++;
-
-case Mode::Down:
-if (m_mode_list.size() = < 1) {
-return;
-}
-else if (m_now_mode == m_mode_list.begin()) {
-return;
-}
-m_now_mode--;
-break;
-}
-}
-
-void select() {
-m_selected = true;
-}
-
-bool selected() const {
-return m_selected;
-}
-
-Mode getMode() const {
-return *m_now_mode;
-}
-
-private:
-std::list<Mode> m_mode_list;
-std::list<Mode>::iterator m_now_mode;
-Shape::Rectangle m_realm = Shape::Rectangle();
-bool m_selected = false;
-};
-*/
 
 
 // 背景画像
@@ -319,6 +333,11 @@ public:
 	void init() {
 		m_timer->start();
 		m_score->reset();
+	}
+
+	void resetTimer(int max_time) {
+		m_timer->resetMaxTime(max_time);
+		m_timer->reset();
 	}
 
 	bool draw() {
@@ -1286,7 +1305,7 @@ public:
 		Object::layer = PRIORITY_DYNAMIC_OBJECT;
 	}
 
-	EnemyHead(Shape::Rectangle realm, std::shared_ptr<Moving>& moving, Life life) 
+	EnemyHead(Shape::Rectangle realm, std::shared_ptr<Moving>& moving, Life life)
 	{
 		m_life = life;
 		m_realm = realm;
@@ -1313,7 +1332,7 @@ public:
 
 		if (fireball_mode_generator(mt) > fireball_kind_prob) kind = FireballKind::EnemyStrong;
 		else kind = FireballKind::EnemyWeak;
-			
+
 		return EnemyBase::makeFireball(base_vel, kind);
 	}
 

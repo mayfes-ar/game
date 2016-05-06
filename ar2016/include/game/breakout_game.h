@@ -18,8 +18,13 @@ public:
     bool onStart() override 
     {
         init();
-        mode.setMode([&]() {
+		mode.setMode([&] {
+            drawList.push_back(m_components->background);
+            drawList.push_back(m_components->select);
+		}, -1);
 
+        mode.setMode([&]() {
+			drawList.clear();
             drawList.push_back(m_components->background);
 			drawList.push_back(m_components->info);
 			drawList.push_back(m_components->field);

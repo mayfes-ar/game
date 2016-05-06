@@ -28,6 +28,10 @@ public:
 
 	void reset();
 
+	void resetMaxTime(int max_time) {
+		m_max_time = max_time;
+	}
+
 	bool isTimerEnd();
 
 	minSecMSec getNowTime();
