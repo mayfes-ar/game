@@ -1091,8 +1091,8 @@ class SinglePlayerGame : public Game {
 		std::string message;
 
 	public:
-		static const int width = 75;
-		static const int height = 100;
+		static const int width = 621/8;
+		static const int height = 1046/8;
 
 		Player(int x_, int y_, int width_, int height_, std::string imgHandleKey_, int maxDamage_, SinglePlayerGame& game_) : Character(x_, y_, width_, height_, imgHandleKey_, maxDamage_, game_, 0, FPS*2) {
 			layer = 100;	
@@ -1383,7 +1383,7 @@ public:
 	SinglePlayerGame() {
 		thread = std::thread::thread(capture, std::ref(share));
 
-		player = std::make_shared<Player>(WIDTH / 2 - 100 / 2, HEIGHT / 2 - 150 / 2, 75, 100, "s_game_player", maxPlayerDamage, *this);
+		player = std::make_shared<Player>(WIDTH / 2 - 100 / 2, HEIGHT / 2 - 150 / 2, Player::width, Player::height , "s_game_player", maxPlayerDamage, *this);
 
 		hasPlayerWon = true;
 	}

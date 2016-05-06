@@ -144,15 +144,15 @@ bool SinglePlayerGame::onStart() {
 			blockList.push_back(block);
 			drawList.push_back(block);
 		};
-		makeBlock(0 - 200, 600, 200, 200);
-		makeBlock(0, 600, 200, 200);
-		makeBlock(0 + 200, 600, 200, 200);
-		makeBlock(0 + 400, 600, 200, 200);
-		makeBlock(0 + 600, 600, 200, 200);
-		makeBlock(0 + 800, 600, 200, 200);
-		makeBlock(0 + 1000, 600, 200, 200);
-		makeBlock(0 + 1200, 600, 200, 200);
-		makeBlock(0 + 1400, 600, 200, 200);
+		makeBlock(0 - 200, 650, 200, 200);
+		makeBlock(0, 650, 200, 200);
+		makeBlock(0 + 200, 650, 200, 200);
+		makeBlock(0 + 400, 650, 200, 200);
+		makeBlock(0 + 600, 650, 200, 200);
+		makeBlock(0 + 800, 650, 200, 200);
+		makeBlock(0 + 1000, 650, 200, 200);
+		makeBlock(0 + 1200, 650, 200, 200);
+		makeBlock(0 + 1400, 650, 200, 200);
 		makeBlock(0 - 400, 0, 250, HEIGHT);
 		makeBlock(WIDTH + 150, 0, 250, HEIGHT);
 
