@@ -3,19 +3,31 @@
 using namespace std;
 
 map<string, int> Object::imgHandles;
+map<string, int> Object::movieHandles;
 map<string, vector<int>> Object::effectHandles;
 map<string, int> Object::soundHandles;
 
 // 一番最初に一回だけ呼ぶ
 bool Object::load() {
 
-	auto loadImage = [](string key, string name) -> bool {
-		const string path = "img/" + name + ".png";
+	auto loadImage = [](string key, string name, string extension="png") -> bool {
+		const string path = "img/" + name + "." + extension;
 		const int handle = LoadGraph(path.c_str());
 		if (handle == -1) {
 			return false;
 		} else {
 			Object::imgHandles[key] = handle;
+			return true;
+		}
+	};
+
+	auto loadMovie = [](string key, string name, string extension="mpg") -> bool {
+		const string path = "movie/" + name + "." + extension;
+		const int handle = LoadGraph(path.c_str());
+		if (handle == -1) {
+			return false;
+		} else {
+			Object::movieHandles[key] = handle;
 			return true;
 		}
 	};
@@ -113,7 +125,7 @@ bool Object::load() {
 	isSuccess &= loadEffect("p_coins", "puzzle/coins", 5, 6, 1200, 1440);
 	isSuccess &= loadEffect("p_curtain_close", "puzzle/curtain_close", 1, 18, 640, 8640);
 	isSuccess &= loadEffect("p_curtain_open", "puzzle/curtain_open", 1, 10, 640, 4800);
-	isSuccess &= loadEffect("p_arrow1", "arrow1",10,1,1200,120);
+	isSuccess &= loadEffect("p_arrow", "puzzle/arrow",10,1,1200,120);
 	isSuccess &= loadEffect("p_crystal1", "puzzle/crystal1", 5, 4, 600, 480);
 	isSuccess &= loadEffect("p_crystal2", "puzzle/crystal2", 5, 4, 600, 480);
 	isSuccess &= loadEffect("p_warp", "puzzle/warp", 2, 8, 1600, 4800);
@@ -121,6 +133,8 @@ bool Object::load() {
 	isSuccess &= loadEffect("p_init", "puzzle/init", 14, 1, 1680, 120);
 	isSuccess &= loadSound("p_bgm1", "puzzle/otenbahime.mp3");
 	isSuccess &= loadSound("p_bgm2", "puzzle/hajimetenootsukai.mp3");
+
+	isSuccess &= loadMovie("p_flower", "puzzle/flower");
 
 	// breakout game
 	isSuccess &= loadImage("ship_block", "shipBlock");

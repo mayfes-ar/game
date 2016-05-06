@@ -43,6 +43,7 @@ protected:
 	int layer;
 
 	static std::map<std::string, int> imgHandles;
+	static std::map<std::string, int> movieHandles;
 	static std::map<std::string, std::vector<int>> effectHandles;
 	static std::map<std::string, int> Object::soundHandles;
 

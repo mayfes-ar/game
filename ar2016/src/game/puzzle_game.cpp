@@ -27,7 +27,7 @@ bool PuzzleGame::onStart() {
 
 		setBlock(0, 520, 540, 200);
 		setBlock(540, 200, 170, 500);
-		setBlock(1000, 220, 300, 20);
+		setBlock(1000, 220, 300, 100);
 		setCoin(1050, 130);
 		setCoin(1130, 130);
 		setCoin(1090, 50);
@@ -214,6 +214,7 @@ bool PuzzleGame::onStart() {
 
 		drawList.push_back(std::make_shared<CurtainObject>(true));
 		drawList.push_back(score);
+		drawList.push_back(std::make_shared<ResultObject>());
 
 	}, -1);
 

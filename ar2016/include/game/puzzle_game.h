@@ -119,6 +119,22 @@ class PuzzleGame : public Game {
 		}
 	};
 
+	class ResultObject : public Object {
+		const int handle = movieHandles["p_flower"];
+	public:
+		ResultObject() {
+			layer = 0;
+			SeekMovieToGraph(handle, 0);
+			if (GetMovieStateToGraph(handle) == 0) {
+				PlayMovieToGraph(handle);
+			}
+		}
+		bool draw() {
+			DrawGraph(0, 0, handle, false);
+			return GetMovieStateToGraph(handle) == 1;
+		}
+	};
+
 	// スコアを管理・表示
 	class ScoreObject : public Object {
 		bool isPlaying = true;
@@ -129,13 +145,14 @@ class PuzzleGame : public Game {
 			layer = 200;
 		}
 		bool draw() {
-			const int size = 40;
+			
 			if (isPlaying) {
-				
+				const int size = 60;
 				DrawExtendGraph(400, 2, 400+size, 2+size, imgHandles["p_saihu"], true);
 				drawNumber(400+size, 2, size, score, effectHandles["p_num"]);
 				//DrawFormatString(400, 0, GetColor(65, 205, 63), "SCORE: %d", score);
 			} else {
+				const int size = 80;
 				DrawExtendGraph(400, 400,400+size, 400+size, imgHandles["p_saihu"], true);
 				drawNumber(400+size, 400, size, score, effectHandles["p_num"]);
 				//DrawFormatString(400, 400, GetColor(165, 205, 163), "SCORE: %d", score);
@@ -146,14 +163,14 @@ class PuzzleGame : public Game {
 	};
 
 	class TimerObject : public Object {
-		int time = 300 * FPS;
+		int time = 3 * FPS;
 
 	public:
 		TimerObject() {
 			layer = 200;
 		}
 		bool draw() {
-			const int size = 40;
+			const int size = 60;
 			DrawExtendGraph(800, 2, 800 + size, 2 + size, imgHandles["p_timer"], true);
 			drawNumber(800 + size, 2, size, time/FPS, effectHandles["p_num"]);
 			//DrawFormatString(800, 0, GetColor(165, 205, 163), "TIME: %d", time/FPS);
@@ -566,7 +583,7 @@ class PuzzleGame : public Game {
 		const int dirwind = windX*windX>windY*windY?1+2*(windX<0):2*(windY>0);
 		
 		int counter = 0;
-		const int countMax = effectHandles["p_arrow1"].size();
+		const int countMax = effectHandles["p_arrow"].size();
 	public:
 		WindGimmick(Rectan rect_, double windX_, double windY_, PuzzleGame& game_) :windX(windX_), windY(windY_), Gimmick(game_) {
 			rect = rect_;
@@ -580,7 +597,7 @@ class PuzzleGame : public Game {
 			const int my = (rect.height - ny * chipsize)/2;
 			for (int i = 0; i < nx; i++) {
 				for (int j = 0; j < ny; j++) {
-					DrawRotaGraph(left() + mx + chipsize*(2*i+1)/2, top() + my + chipsize*(2*j+1)/2,1.0, dirwind*M_PI_2, effectHandles["p_arrow1"][counter], true);
+					DrawRotaGraph(left() + mx + chipsize*(2*i+1)/2, top() + my + chipsize*(2*j+1)/2,1.0, dirwind*M_PI_2, effectHandles["p_arrow"][counter], true);
 				}
 			}
 			counter++;
