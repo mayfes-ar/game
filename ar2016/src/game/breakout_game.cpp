@@ -53,17 +53,26 @@ void BreakoutGame::updateCollisionDetection()
 			// Enemy衝突判定
 			//エネミーモードじゃなかったら
 			if (!fireball->isEnemy()) {
-				if (fireball->isCollided(m_components->enemy->getRealm())) {
-					m_components->enemy->damageEnemy(fireball->giveDamage());
-					m_components->fireball_manager->destroy(fireball);
+				if (m_components->enemy->isAlive()) {
+					if (fireball->isCollided(m_components->enemy->getRealm())) {
+						m_components->enemy->damageEnemy(fireball->giveDamage());
+						m_components->fireball_manager->destroy(fireball);
+						continue;
+					}
 				}
-				if (fireball->isCollided(m_components->enemy->getLeftHand()->getRealm())) {
-					m_components->enemy->getLeftHand()->damageEnemy(fireball->giveDamage());
-					m_components->fireball_manager->destroy(fireball);
+				if (m_components->enemy->getLeftHand()->isAlive()) {
+					if (fireball->isCollided(m_components->enemy->getLeftHand()->getRealm())) {
+						m_components->enemy->getLeftHand()->damageEnemy(fireball->giveDamage());
+						m_components->fireball_manager->destroy(fireball);
+						continue;
+					}
 				}
-				if (fireball->isCollided(m_components->enemy->getRightHand()->getRealm())) {
-					m_components->enemy->getRightHand()->damageEnemy(fireball->giveDamage());
-					m_components->fireball_manager->destroy(fireball);
+				if (m_components->enemy->getRightHand()->isAlive()) {
+					if (fireball->isCollided(m_components->enemy->getRightHand()->getRealm())) {
+						m_components->enemy->getRightHand()->damageEnemy(fireball->giveDamage());
+						m_components->fireball_manager->destroy(fireball);
+						continue;
+					}
 				}
 			}
 		}

@@ -56,7 +56,7 @@ namespace Breakout {
 	const Eigen::Vector2i FIREBALL_STARTPOS = Eigen::Vector2i{
 		WIDTH / 2, HEIGHT / 2 };
 	const Eigen::Vector2f FIREBALL_STARTVEL = Eigen::Vector2f{
-		2.0f, 4.0f};
+		5.0f, 10.0f};
 	constexpr int FIREBALL_RADIUS = 20;
 	constexpr int MAX_FIREBALL_NUM = 2;
 
