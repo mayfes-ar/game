@@ -195,6 +195,8 @@ public:
 					Color::WHITE, FALSE);
 			}
 			i += 1;
+
+			DrawString(m_realm.left(), m_realm.bottom(), "Press Enter to select", Color::BLUE);
 		}
 		return true;
 	}

@@ -7,7 +7,7 @@ namespace Breakout {
 	// Select画面
 	const Eigen::Vector2i SELECT_START_POS = Eigen::Vector2i(WIDTH / 3, 0);
 	const int SELECT_WIDTH = WIDTH / 3;
-	const int SELECT_HEIGHT = HEIGHT;
+	const int SELECT_HEIGHT = HEIGHT * 6 / 7;
 	// Layout (画面を縦に４分割し)
 	// 左　1/4 : Score, Timerを表示
 	// 真ん中 2~3/4: Game
