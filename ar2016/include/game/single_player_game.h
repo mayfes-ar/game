@@ -1096,7 +1096,7 @@ class SinglePlayerGame : public Game {
 
 		Player(int x_, int y_, int width_, int height_, std::string imgHandleKey_, int maxDamage_, SinglePlayerGame& game_) : Character(x_, y_, width_, height_, imgHandleKey_, maxDamage_, game_, 0, FPS*2) {
 			layer = 100;	
-			overBuffer = overBufferMax;
+			// overBuffer = overBufferMax;
 		}
 
 		bool draw() {
