@@ -9,7 +9,7 @@ class SinglePlayerGame : public Game {
 		Enemy 
 			RocketWanWan : 165
 			Teresa : 160
-			Switch : 155
+			Switch : 130
 			Inundation : 300
 			Cloud : 140
 			Drop : 139
@@ -251,11 +251,13 @@ class SinglePlayerGame : public Game {
 		const MarkerType markerType;
 
 		bool isEnable = true;
+		bool canGuard;
+		bool canAttack;
 
 		void modifyRect() {
 			if (rect.width > 0 || rect.height > 0) {
-				rect.width = markerType == PIYO ? 1920/14 : markerType == SWORD ? 765/4 : 256;
-				rect.height = markerType == PIYO ? 1409/14 : markerType == SWORD ? 765/4 : 256;
+				rect.width = markerType == PIYO ? 1920/14 : markerType == SWORD ? 765/3 : 256;
+				rect.height = markerType == PIYO ? 1409/14 : markerType == SWORD ? 765/3 : 256;
 			}
 			else {
 				rect.x = rect.y = -300;
@@ -269,6 +271,8 @@ class SinglePlayerGame : public Game {
 			prevRect = rect;
 			layer = 300;
 			imgHandle = markerType == PIYO ? imgHandles["s_game_piyo"] : markerType == SWORD ? imgHandles["s_game_sword"] : imgHandles["s_game_shield"];
+			canGuard = markerType == SWORD? false : true;
+			canAttack = markerType == SHIELD ? false : true;
 		}
 
 		bool draw() {
@@ -338,6 +342,14 @@ class SinglePlayerGame : public Game {
 		bool getEnable() {
 			return isEnable;
 		}
+
+		bool getCanAttack() {
+			return canAttack;
+		}
+
+		bool getCanGuard() {
+			return canGuard;
+		}
 	};
 
 	//キャラクター一般
@@ -387,7 +399,11 @@ class SinglePlayerGame : public Game {
 
 		virtual bool draw() {
 			if (characterState == DAMAGE) {
-				SetDrawBright(100, 100, 100); // DAMAGE のとき画像を暗くする
+				SetDrawBright(160, 160, 160); // DAMAGE のとき画像を暗くする
+			}
+			if (characterState == OVER) {
+				SetDrawBright(80, 80, 80); // DAMAGE のとき画像を暗くする
+				layer = 51;
 			}
 			switch (moveDirection)
 			{
@@ -477,6 +493,8 @@ class SinglePlayerGame : public Game {
 			const int& height = rect.height;
 
 			for (auto marker : objectList) {
+				if (!marker->getEnable() || !marker->getCanGuard()) { continue; }
+
 				if (left() < marker->right() && top() < marker->bottom() &&
 					right() > marker->left() && bottom() > marker->top()) {
 
@@ -577,7 +595,9 @@ class SinglePlayerGame : public Game {
 			if (invincibleTime == 0 && characterState != OVER) {
 				changeCharacterState(NORMAL);
 				for (auto marker : game.markerList) {
-					if (marker->getEnable() && left() < marker->right() && top() < marker->bottom() &&
+					if (!marker->getEnable() || !marker->getCanAttack()) { continue; }
+
+					if (left() < marker->right() && top() < marker->bottom() &&
 						right() > marker->left() && bottom() > marker->top()) {
 						if (isAlive) {
 							PlaySoundMem(soundHandles["s_game_attack"], DX_PLAYTYPE_BACK, true);
@@ -675,7 +695,7 @@ class SinglePlayerGame : public Game {
 
 	public:
 		Switch(int x_, int y_, SinglePlayerGame& game_, double size, int maxDamage_ = 2, std::string imgHandleKey_ = "s_game_switch") : Enemy(x_, y_, width * size, height * size, imgHandleKey_, maxDamage_, game_) {
-			layer = 155;
+			layer = 130;
 			moveDirection = RIGHT;
 		}
 
@@ -835,7 +855,9 @@ class SinglePlayerGame : public Game {
 		bool deathDecision() {
 			if (invincibleTime == 0) {
 				for (auto marker : game.markerList) {
-					if (marker->getEnable() && left() < marker->right() && top() < marker->bottom() &&
+					if (!marker->getEnable() || !marker->getCanAttack()) { continue; }
+
+					if (left() < marker->right() && top() < marker->bottom() &&
 						right() > marker->left() && bottom() > marker->top()) {
 						if (isAlive) {
 							PlaySoundMem(soundHandles["s_game_attack"], DX_PLAYTYPE_BACK, true);
@@ -1031,7 +1053,7 @@ class SinglePlayerGame : public Game {
 	public:
 		static const int width = 280 / 3;
 		static const int height = 194 / 3;
-		Fire(int x_, int y_, SinglePlayerGame& game_, double size, int maxDamage_ = 1, std::string imgHandleKey_ = "s_game_fire") : Enemy(x_, y_, width * size, height * size, imgHandleKey_, maxDamage_, game_) {
+		Fire(int x_, int y_, SinglePlayerGame& game_, double size, int maxDamage_ = 1, std::string imgHandleKey_ = "s_game_fire") : Enemy(x_, y_, width * size, height * size, imgHandleKey_, maxDamage_, game_, 0, 0) {
 			moveDirection = LEFT;
 			layer = 151;
 		}
