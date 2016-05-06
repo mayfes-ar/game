@@ -106,10 +106,10 @@ void BreakoutGame::moveShip()
 
 void BreakoutGame::updateGameState()
 {
-	for (auto& fireball : m_components->fireball_manager->getFireballList()) {
+	/*for (auto& fireball : m_components->fireball_manager->getFireballList()) {
 		if (fireball->isDisappeared()) continue;
 		fireball->updatePosition();
-	}
+	}*/
 
 	// 壁との衝突判定
 	int kind = mode.getMode();

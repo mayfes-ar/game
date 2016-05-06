@@ -147,7 +147,8 @@ void BreakoutComponents::setup()
 
 	// EnemyHeadの初期化
 	{
-		enemy_head = std::make_shared<Breakout::EnemyHead>(Shape::Rectangle(ENEMY_HEAD_POS, ENEMY_HEAD_WIDTH, ENEMY_HEAD_WIDTH));
+		auto moving = std::make_shared<Moving>(1.0f, std::make_shared<StringBehavior>(Eigen::Vector2f{ 200.0f, 200.0f }, 1e-3f));
+		enemy_head = std::make_shared<Breakout::EnemyHead>(Shape::Rectangle(ENEMY_HEAD_POS, ENEMY_HEAD_WIDTH, ENEMY_HEAD_WIDTH), moving);
 	}
 
 	// Todo Player
