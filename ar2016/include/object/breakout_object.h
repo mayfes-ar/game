@@ -8,6 +8,8 @@
 #include <memory>
 #include <array>
 #include <list>
+#include <unordered_map>
+#include <string>
 #include "object/object.h"
 #include "object/shape.h"
 #include "moving/moving.h"
@@ -18,6 +20,7 @@
 #include "util/timer.h"
 #include "util/score.h"
 #include "util/color_palette.h"
+#include "Dxlib.h"
 
 
 namespace Breakout {
@@ -153,58 +156,71 @@ private:
 
 // 縦方向に選択ボタンを配置するセレクト画面。
 // 一方向のみ対応
-/*
-template <typename Mode, Hash = std::hash<Mode> >
+
+enum class Move : uint8_t {
+	Up,
+	Down,
+	None
+};
+
+template <typename Mode, typename Hash = std::hash<Mode> >
 class Select : public Object
 {
 public:
+	using modeToImageKey = std::unordered_map<Mode, std::string, Hash>;
 	Select(const std::list<Mode>& mode_list, 
+		   const modeToImageKey& mode_to_key,
 		   const Shape::Rectangle& realm) 
-		:m_mode_list(mode_list), m_realm(realm)
+		:m_mode_list(mode_list), m_mode_to_key(mode_to_key), m_realm(realm)
 	{
 		Object::layer = PRIORITY_SECTION;
 		m_now_mode = m_mode_list.begin();
 	}
 
-	enum class Move : uint8_t {
-		Up,
-		Down,
-		None
-	};
 
 	bool draw() override {
 		int image_num = static_cast<int>(m_mode_list.size());
-		int image_width = m_realm.width() / 2;
-		int image_height = m_realm.height() / (2 * image_num);
+		int image_width = m_realm.width / 2;
+		int image_height = m_realm.height / (4 * image_num);
 
-		int id = 1;
+		int i = 0;
 		for (auto it = m_mode_list.begin(); it != m_mode_list.end(); ++it) {
-			DrawExendGraph(m_realm.left(), m_realm.top() + image_height * (2 * i - 1), m_realm.left(), m_realm.top() + image_height * (2 * i),
-				);
-			id++;
+			DrawExtendGraph(m_realm.left(), m_realm.top() + image_height * (2 * i + 1),
+				m_realm.left() + image_width, m_realm.top() + image_height * (2 * i + 2),
+				Object::imgHandles.at(m_mode_to_key.at(*it)), TRUE);
+			// 現在のモードの枠線を白色で囲む
+			if (it == m_now_mode) {
+				DrawBox(m_realm.left(), m_realm.top() + image_height * (2 * i + 1),
+					m_realm.left() + image_width, m_realm.top() + image_height * (2 * i + 2),
+					Color::WHITE, FALSE);
+			}
+			i += 1;
 		}
+		return true;
 	}
 
 
 	void move(const Move& move)
 	{
+		m_move = move;
 		switch (move) {
-		case Mode::None:
+		case Move::None:
 			break;
-		case Mode::Up:
-			if (m_mode_list.size() =< 1) {
+		case Move::Up:
+			if (m_mode_list.size() <= 1) {
 				return;
 			}
-			else if (m_now_mode == m_mode_list.begin()) {
+			if (m_now_mode == --m_mode_list.end()) {
 				return;
 			}
 			m_now_mode++;
+			break;
 
-		case Mode::Down:
-			if (m_mode_list.size() = < 1) {
+		case Move::Down:
+			if (m_mode_list.size() <= 1) {
 				return;
 			}
-			else if (m_now_mode == m_mode_list.begin()) {
+			if (m_now_mode == m_mode_list.begin()) {
 				return;
 			}
 			m_now_mode--;
@@ -225,12 +241,13 @@ public:
 	}
 
 private:
+	Move m_move = Move::None;
+	typename std::list<Mode>::iterator m_now_mode;
 	std::list<Mode> m_mode_list;
-	std::list<Mode>::iterator m_now_mode;
+	modeToImageKey m_mode_to_key;
 	Shape::Rectangle m_realm = Shape::Rectangle();
 	bool m_selected = false;
 };
-*/
 
 
 // 背景画像
@@ -315,6 +332,11 @@ public:
 	void init() {
 		m_timer->start();
 		m_score->reset();
+	}
+
+	void resetTimer(int max_time) {
+		m_timer->resetMaxTime(max_time);
+		m_timer->reset();
 	}
 
 	bool draw() {

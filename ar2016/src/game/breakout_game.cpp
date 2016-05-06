@@ -1,5 +1,6 @@
 ﻿#include "game/breakout_game.h"
 #include "util/breakout_params.h"
+#include "object/breakout_object.h"
 
 void BreakoutGame::updateFireball()
 {
@@ -93,10 +94,49 @@ void BreakoutGame::updateGameState()
 	int kind = mode.getMode();
 
 	enum Kind {
-		Playing = 0, //!< Play画面
-		Result = 1, //!< Result画面
+		Selecting = 0,
+		Playing = 1, //!< Play画面
+		Result = 2, //!< Result画面
 	};
 	switch (kind) {
+	case Selecting:
+	{
+		static int initilized_cnt = 0;
+		if (initilized_cnt < 10) {
+			initilized_cnt++;
+			return;
+		}
+
+		if (m_components->info->isTimeOver() || m_components->select->selected()) {
+			const auto game_mode = m_components->select->getMode();
+			switch (game_mode) {
+			case Breakout::Mode::Easy:
+				break;
+			case Breakout::Mode::Hard:
+				break;
+			}
+			m_components->info->init();
+			mode.goNext();
+			return;
+		}
+
+		static bool is_chattering = false;
+		if (key[KEY_INPUT_UP] && !is_chattering) {
+			m_components->select->move(Breakout::Move::Down);
+			is_chattering = true;
+		}
+		else if (key[KEY_INPUT_DOWN] && !is_chattering) {
+			m_components->select->move(Breakout::Move::Up);
+			is_chattering = true;
+		}
+		else if (key[KEY_INPUT_RETURN]){
+			m_components->select->select();
+		}
+		else {
+			is_chattering = false;
+		}
+		break;
+	}
 	case Playing:
 		if (m_components->info->isLastPhase()) {
 			m_components->background->turnLastPhase();
