@@ -66,8 +66,8 @@ class SinglePlayerGame : public Game {
 
 		bool draw() {
 			// DrawExtendGraph(CAP2IMG_SHIFT_X, CAP2IMG_SHIFT_Y, CAP2IMG_SHIFT_X + CAP2IMG_RATE*CAP_WIDTH, CAP2IMG_SHIFT_Y + CAP2IMG_RATE*CAP_HEIGHT, handle, FALSE);
-			SetDrawBright(40, 40, 40);
-			DrawExtendGraph(0, 0, WIDTH, HEIGHT, imgHandles["ar2016_logo"], true);
+			SetDrawBright(230, 230, 230);
+			DrawExtendGraph(0, 0, WIDTH, HEIGHT, imgHandles["background"], true);
 			SetDrawBright(255, 255, 255);
 			return true;
 		}
