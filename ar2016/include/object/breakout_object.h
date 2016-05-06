@@ -158,6 +158,7 @@ namespace Breakout {
 	};
 
 
+
 	// 縦方向に選択ボタンを配置するセレクト画面。
 	// 一方向のみ対応
 
@@ -171,13 +172,16 @@ namespace Breakout {
 	class Select : public Object
 	{
 	public:
+		using modeToImageKey = std::unordered_map<Mode, std::string, Hash>;
 		Select(const std::list<Mode>& mode_list,
+			const modeToImageKey& mode_to_key,
 			const Shape::Rectangle& realm)
-			:m_mode_list(mode_list), m_realm(realm)
+			:m_mode_list(mode_list), m_mode_to_key(mode_to_key), m_realm(realm)
 		{
 			Object::layer = PRIORITY_SECTION;
 			m_now_mode = m_mode_list.begin();
 		}
+
 
 		bool draw() override {
 			int image_num = static_cast<int>(m_mode_list.size());
@@ -203,52 +207,54 @@ namespace Breakout {
 		}
 
 
-	void move(const Move& move)
-	{
-		switch (move) {
-		case Mode::None:
-			break;
-		case Mode::Up:
-			if (m_mode_list.size() = < 1) {
-				return;
-			}
-			else if (m_now_mode == m_mode_list.begin()) {
-				return;
-			}
-			m_now_mode++;
+		void move(const Move& move)
+		{
+			m_move = move;
+			switch (move) {
+			case Move::None:
+				break;
+			case Move::Up:
+				if (m_mode_list.size() <= 1) {
+					return;
+				}
+				if (m_now_mode == --m_mode_list.end()) {
+					return;
+				}
+				m_now_mode++;
+				break;
 
-		case Mode::Down:
-			if (m_mode_list.size() = < 1) {
-				return;
+			case Move::Down:
+				if (m_mode_list.size() <= 1) {
+					return;
+				}
+				if (m_now_mode == m_mode_list.begin()) {
+					return;
+				}
+				m_now_mode--;
+				break;
 			}
-			else if (m_now_mode == m_mode_list.begin()) {
-				return;
-			}
-			m_now_mode--;
-			break;
 		}
-	}
 
-	void select() {
-		m_selected = true;
-	}
+		void select() {
+			m_selected = true;
+		}
 
-	bool selected() const {
-		return m_selected;
-	}
+		bool selected() const {
+			return m_selected;
+		}
 
-	Mode getMode() const {
-		return *m_now_mode;
-	}
+		Mode getMode() const {
+			return *m_now_mode;
+		}
 
-private:
-	Move m_move = Move::None;
-	typename std::list<Mode>::iterator m_now_mode;
-	std::list<Mode> m_mode_list;
-	modeToImageKey m_mode_to_key;
-	Shape::Rectangle m_realm = Shape::Rectangle();
-	bool m_selected = false;
-};
+	private:
+		Move m_move = Move::None;
+		typename std::list<Mode>::iterator m_now_mode;
+		std::list<Mode> m_mode_list;
+		modeToImageKey m_mode_to_key;
+		Shape::Rectangle m_realm = Shape::Rectangle();
+		bool m_selected = false;
+	};
 
 
 // 背景画像
@@ -1286,7 +1292,7 @@ public:
 
 	bool draw() override {
 		if (!isAlive()) return true;
-		DrawExtendGraph(m_realm.left(), m_realm.top(), m_realm.right(), m_realm.bottom(), imgHandles["left_hand"], TRUE);
+		DrawExtendGraph(m_realm.left(), m_realm.top(), m_realm.right(), m_realm.bottom(), imgHandles["right_hand"], TRUE);
 		return true;
 	}
 private:
