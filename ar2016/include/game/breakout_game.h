@@ -18,18 +18,16 @@ public:
         init();
         mode.setMode([&]() {
 
-            drawList.push_back(std::make_shared<Breakout::Background>(
-                        share.handle));
-
+            drawList.push_back(m_components->background);
 			drawList.push_back(m_components->info);
 			drawList.push_back(m_components->field);
+			drawList.push_back(m_components->explanation);
 			
 
             for (const auto& block: m_components->block_list) {
                 drawList.push_back(block);
             }
-
-            drawList.push_back(m_components->fireball);
+			drawList.push_back(m_components->fireball_manager);
             drawList.push_back(m_components->ship);
 			drawList.push_back(m_components->pot);
 			for (const auto& item : m_components->item_list) {
@@ -40,8 +38,8 @@ public:
 
 		// Result画面
         mode.setMode([this]() {
-            drawList.clear();
 			m_components->result->init();
+            drawList.clear();
 			drawList.push_back(m_components->result);
 		}, -1);
 

@@ -45,6 +45,7 @@ protected:
 	static std::map<std::string, int> imgHandles;
 	static std::map<std::string, std::vector<int>> effectHandles;
 	static std::map<std::string, int> Object::soundHandles;
+	static std::map<std::string, int> Object::movieHandles;
 
 	virtual ~Object(){}
 	void drawWithRect(int handle, int margin=0, bool isReverse=false) const {
@@ -52,6 +53,17 @@ protected:
 			DrawExtendGraph(right() + margin, top() - margin, left() - margin, bottom() + margin, handle, true);
 		} else {
 			DrawExtendGraph(left() - margin, top() - margin, right() + margin, bottom() + margin, handle, true);
+		}
+	}
+
+	void drawNumber(int x, int y, int size, int num, std::vector<int,std::allocator<int>> handle) {
+		const int digit = num?(int)log10((double)num) + 1:1;
+		int width, height;
+		GetGraphSize(handle[0], &width, &height);
+		const double ratio = width / (double)height;
+		for (int i = digit; i > 0; i--) {
+			int n = (num % (int)pow(10, i)) / (int)pow(10, i - 1);
+			DrawExtendGraph(x+size*ratio*(digit-i), y, x + size*ratio*(digit - i) + size*ratio, y + size, handle[n], true);
 		}
 	}
 

@@ -14,16 +14,17 @@ namespace Breakout {
 	const Eigen::Vector2i FIELD_START_POS = Eigen::Vector2i(INFO_WIDTH, 0);
 	const int FIELD_WIDTH = 2 * WIDTH / 4;
 	const int FIELD_HEIGHT = HEIGHT;
-	const Eigen::Vector2i DEBUG_WINDOW_START_POS = Eigen::Vector2i(INFO_WIDTH + FIELD_WIDTH, 0);
-	const int DEBUG_WINDOW_WIDTH = WIDTH / 4;
-	const int DEBUG_WINDOW_HEIGHT = HEIGHT;
+	const Eigen::Vector2i EXPLANATION_START_POS = Eigen::Vector2i(INFO_WIDTH + FIELD_WIDTH, 0);
+	const int EXPLANATION_WIDTH = WIDTH / 4;
+	const int EXPLANATION_HEIGHT = HEIGHT;
 	
-	const Eigen::Vector2i RESULT_START_POINT 
-		= Eigen::Vector2i(WIDTH / 4, HEIGHT / 3);
+	const Eigen::Vector2i RESULT_START_POS = Eigen::Vector2i::Zero();
+	const int RESULT_WIDTH = WIDTH;
+	const int RESULT_HEIGHT = HEIGHT;
 
 	// Timerのパラメータ
-	constexpr int TIMER_MAX_MIN = 0;
-	constexpr int TIMER_MAX_SEC = 30;
+	constexpr int TIMER_MAX_MIN = 1;
+	constexpr int TIMER_MAX_SEC = 5;
 	constexpr int TIMER_MAX_MSEC = 0;
 
 	// Blockのパラメータ
@@ -33,14 +34,27 @@ namespace Breakout {
 	constexpr int BLOCK_HEIGHT_NUM = 5;
 	const int BLOCK_WIDTH = (WIDTH / 2) / BLOCK_WIDTH_NUM;
 	const int BLOCK_HEIGHT = (HEIGHT / 4) / BLOCK_HEIGHT_NUM;
-	constexpr double BLOCK_GENERATE_RATIO = 0.5; // Blockが生成される確率
+	constexpr double BLOCK_GENERATE_PROB = 0.1; // Blockが生成される確率
+	// BLOCKの種類
+	constexpr double BLOCK_RED_PROB = 0.2;
+	constexpr double BLOCK_BLUE_PROB = 0.3;
+	constexpr double BLOCK_GREEN_PROB = 0.5;
+
+	constexpr double NORMAL_BLOCK_PROB = 0.5;
+	constexpr double HARD_BLOCK_PROB = 0.3;
+	constexpr double UNBREAKABLE_BLOCK_PROB = 0.2;
+
+	constexpr int NORMAL_BLOCK_LIFE_NUM = 1;
+	constexpr int HARD_BLOCK_LIFE_NUM = 2;
+	constexpr int UNBREAKABLE_BLOCK_LIFE_NUM = 100000;
 
 	// Fireballのパラメータ
 	const Eigen::Vector2i FIREBALL_STARTPOS = Eigen::Vector2i{
 		WIDTH / 2, HEIGHT / 2 };
 	const Eigen::Vector2f FIREBALL_STARTVEL = Eigen::Vector2f{
 		2.0f, 4.0f};
-	constexpr int FIREBALL_RADIUS = 30;
+	constexpr int FIREBALL_RADIUS = 20;
+	constexpr int MAX_FIREBALL_NUM = 2;
 
 	// Shipのパラメータ
 	const Eigen::Vector2i SHIP_START_POS = Eigen::Vector2i{ BLOCK_OFFSET_X, HEIGHT - 100 };

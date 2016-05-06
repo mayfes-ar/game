@@ -1,10 +1,12 @@
 ﻿#include "object/object.h"
+#include <sstream>
 
 using namespace std;
 
 map<string, int> Object::imgHandles;
 map<string, vector<int>> Object::effectHandles;
 map<string, int> Object::soundHandles;
+std::map<std::string, int> Object::movieHandles;
 
 // 一番最初に一回だけ呼ぶ
 bool Object::load() {
@@ -51,11 +53,21 @@ bool Object::load() {
 		}
 	};
 
+	auto loadMovie = [](string key, string name) -> bool {
+		const string path = "movie/" + name;
+		const int handle = LoadGraph(path.c_str());
+		if (handle == -1) {
+			return false;
+		} else {
+			Object::movieHandles[key] = handle;
+			return true;
+		}
+	};
+
 	// 使い方 isSuccess &= loadなんとか(登録するキー, ファイル名, ...);
 	bool isSuccess = true;
 
 	isSuccess &= loadImage("player", "mario");
-	isSuccess &= loadImage("block", "block");
 
 	//メニューで使う
 	isSuccess &= loadImage("monhan", "monhan");
@@ -91,16 +103,35 @@ bool Object::load() {
 	// isSuccess &= loadImage("s_game_bg", "wallpaper_alpha");
 
 	// puzzle game
+	isSuccess &= loadImage("p_block", "puzzle/block");
+	isSuccess &= loadImage("p_block_x", "puzzle/block_x");
+	isSuccess &= loadImage("s_block", "Brick02");
 	isSuccess &= loadImage("p_man", "man");
-	isSuccess &= loadImage("p_girl",  "girl");
-	isSuccess &= loadImage("p_explain", "puzzle_explanation");
+	isSuccess &= loadImage("p_needle", "puzzle/needle");
+	isSuccess &= loadImage("p_hime", "puzzle/hime_normal");
+	isSuccess &= loadImage("p_hime_damaged", "puzzle/hime_gameover");
+	isSuccess &= loadImage("p_explain1", "puzzle/explanation1");
+	isSuccess &= loadImage("p_explain2", "puzzle/explanation2");
 	isSuccess &= loadImage("p_goal", "goal");
 	isSuccess &= loadImage("p_on", "switch_on");
 	isSuccess &= loadImage("p_off", "switch_off");
-	isSuccess &= loadEffect("p_smog", "dark_smog", 13, 1, 3120, 240);
-	isSuccess &= loadEffect("p_ball", "ball", 3, 10, 960, 2400);
-	isSuccess &= loadEffect("p_coin", "coin", 5, 2, 1000, 400);
-
+	isSuccess &= loadImage("p_arrow", "arrow");
+	isSuccess &= loadImage("p_castle", "puzzle/castle");
+	isSuccess &= loadImage("p_saihu", "puzzle/saihu_kari");
+	isSuccess &= loadImage("p_timer", "puzzle/clock_kari");
+	isSuccess &= loadImage("s_brick1", "puzzle/brick1");
+	isSuccess &= loadEffect("p_smog", "puzzle/smog", 5, 6, 640, 768);
+	isSuccess &= loadEffect("p_ball", "puzzle/ball", 3, 10, 960, 2400);
+	isSuccess &= loadEffect("p_coin", "puzzle/coin", 5, 2, 1000, 400);
+	isSuccess &= loadEffect("p_coins", "puzzle/coins", 5, 6, 1200, 1440);
+	isSuccess &= loadEffect("p_curtain_close", "puzzle/curtain_close", 1, 18, 640, 8640);
+	isSuccess &= loadEffect("p_curtain_open", "puzzle/curtain_open", 1, 10, 640, 4800);
+	isSuccess &= loadEffect("p_arrow1", "arrow1",10,1,1200,120);
+	isSuccess &= loadEffect("p_crystal1", "puzzle/crystal1", 5, 4, 600, 480);
+	isSuccess &= loadEffect("p_crystal2", "puzzle/crystal2", 5, 4, 600, 480);
+	isSuccess &= loadEffect("p_warp", "puzzle/warp", 2, 8, 1600, 4800);
+	isSuccess &= loadEffect("p_num", "puzzle/number", 10, 1, 390, 54);
+	isSuccess &= loadEffect("p_init", "puzzle/init", 14, 1, 1680, 120);
 
 	// breakout game
 	isSuccess &= loadImage("ship_block", "shipBlock");
@@ -109,5 +140,36 @@ bool Object::load() {
 	isSuccess &= loadImage("damage_ship", "damage_ship");
 	isSuccess &= loadImage("kuppa_head", "kuppa_head");
 
+	isSuccess &= loadImage("block_blue", "block_blue");
+	isSuccess &= loadImage("block_red", "block_red");
+	isSuccess &= loadImage("block_green", "block_green");
+
+	isSuccess &= loadImage("hard_block", "breakout/hard_block");
+	isSuccess &= loadImage("hatena_block", "breakout/hatena_block");
+	isSuccess &= loadImage("unbreakable_block", "breakout/unbreakable_block");
+
+	isSuccess &= loadImage("b_forest", "breakout/forest");
+	isSuccess &= loadImage("b_magma", "breakout/magma");
+	isSuccess &= loadImage("b_hill", "breakout/hill");
+
+	isSuccess &= loadImage("b_game_over", "breakout/game_over");
+	isSuccess &= loadImage("b_game_clear", "breakout/game_clear");
+	isSuccess &= loadImage("b_explanation", "breakout/explanation");
+
+	isSuccess &= loadImage("b_easy", "breakout/easy");
+	isSuccess &= loadImage("b_normal", "breakout/normal");
+	isSuccess &= loadImage("b_hard", "breakout/hard");
+
+	for (int num = 0; num <= 9; ++num) {
+		for (const auto& color : { "red", "blue", "yellow", "green" }) {
+			std::ostringstream key;
+			std::ostringstream name;
+			key << color << "_" << num;
+			name << "breakout/number/" << color << "/" << num;
+			isSuccess &= loadImage(key.str(), name.str());
+		}
+	}
+
+	//isSuccess &= loadMovie("b_mode_select", "breakout/mode_select.mp4");
 	return isSuccess;
 }
