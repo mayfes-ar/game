@@ -1,30 +1,17 @@
 ﻿#include "game/breakout_game.h"
 #include "util/breakout_params.h"
 
-void BreakoutGame::updateFireball()
-{
-	bool is_game_continuing = (!isGameClear()) && (!m_components->info->isTimeOver());
-	//吸い込んでいたら再表示させない
-	for (const auto& fireball : m_components->fireball_manager->getFireballList()) {
-		if (fireball->isDisappeared() && is_game_continuing) {
-			// もし吸い込まれているfireballだったら
-			if (fireball == m_components->pot->getInharedFireball()) continue;
-			fireball->appear(Shape::Circle{ Breakout::FIREBALL_STARTPOS, Breakout::FIREBALL_RADIUS });
-		}
-	}
-}
-
 void BreakoutGame::updateCollisionDetection()
 {
 	// FireBallの衝突判定
 	{
 		for (auto& fireball : m_components->fireball_manager->getFireballList()) {
 
-			fireball->updatePosition();
-			// 壁との衝突判定
+			// 下壁との衝突判定
 			if (CollisionDetection::isOnLine(fireball->getRealm(),
 				m_components->field->getRealm().getBottomLine())) {
-				fireball->disappear();
+				//fireballを消す
+				m_components->fireball_manager->destroy(fireball);
 				//Ship へのダメージじゃなくて自分が守ってる町へのダメージというイメージ
 				//m_components->ship->damageShip(1);
 				continue;
@@ -38,7 +25,8 @@ void BreakoutGame::updateCollisionDetection()
 			if (m_components->ship->isAlive()) {
 				if (fireball->isCollided(m_components->ship->getRealm(), 1, m_components->ship->getVelocity())) {
 					if (fireball->getMode() == Breakout::FireballKind::EnemyStrong) {
-						fireball->disappear();
+						//fireballを消す
+						m_components->fireball_manager->destroy(fireball);
 						m_components->ship->damageShip(1);
 					}
 					else {
@@ -58,6 +46,23 @@ void BreakoutGame::updateCollisionDetection()
 						m_components->block_list.at(block_id)->damageBlock(fireball->giveDamage());
 						break;
 					}
+				}
+			}
+
+			// Enemy衝突判定
+			//エネミーモードじゃなかったら
+			if (!fireball->isEnemy()) {
+				if (fireball->isCollided(m_components->enemy->getRealm())) {
+					m_components->enemy->damageEnemy(fireball->giveDamage());
+					m_components->fireball_manager->destroy(fireball);
+				}
+				if (fireball->isCollided(m_components->enemy->getLeftHand()->getRealm())) {
+					m_components->enemy->getLeftHand()->damageEnemy(fireball->giveDamage());
+					m_components->fireball_manager->destroy(fireball);
+				}
+				if (fireball->isCollided(m_components->enemy->getRightHand()->getRealm())) {
+					m_components->enemy->getRightHand()->damageEnemy(fireball->giveDamage());
+					m_components->fireball_manager->destroy(fireball);
 				}
 			}
 		}
@@ -106,10 +111,10 @@ void BreakoutGame::moveShip()
 
 void BreakoutGame::updateGameState()
 {
-	/*for (auto& fireball : m_components->fireball_manager->getFireballList()) {
+	for (auto& fireball : m_components->fireball_manager->getFireballList()) {
 		if (fireball->isDisappeared()) continue;
 		fireball->updatePosition();
-	}*/
+	}
 
 	// 壁との衝突判定
 	int kind = mode.getMode();
@@ -152,7 +157,11 @@ void BreakoutGame::updateGameState()
 
 bool BreakoutGame::isGameClear() const
 {
+	if (m_components->enemy->isAlive()) return false;
+
 	for (const auto& block : m_components->block_list) {
+		//壊せないブロックだったら勘定に入れない
+		if (block->getBlockKind() == "UnbreakableBlock") continue;
 		if (!block->isDisappeared()) {
 			return false;
 		}
@@ -221,8 +230,7 @@ void BreakoutGame::updatePotStatus() {
 				else if ((CollisionDetection::isOnLine(fireball->getRealm(), rotatedLeftLine)) ||
 					(CollisionDetection::isOnLine(fireball->getRealm(), rotatedRightLine)) ||
 					(CollisionDetection::isOnLine(fireball->getRealm(), rotatedBottomLine))) {
-					fireball->disappear();
-					//
+
 					m_components->fireball_manager->destroy(fireball);
 				}
 			}
@@ -231,5 +239,10 @@ void BreakoutGame::updatePotStatus() {
 }
 
 void BreakoutGame::updateEnemy() {
-	m_components->enemy_head->updatePosition();
+	m_components->enemy->updatePosition();
+
+	while (!m_components->fireball_manager->isMax()) {
+		m_components->fireball_manager->add(m_components->enemy->makeFireball());
+	}
+
 }

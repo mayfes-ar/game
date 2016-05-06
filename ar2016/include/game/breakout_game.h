@@ -5,6 +5,8 @@
 #include "game/image_process.h"
 #include "object/breakout_object.h"
 #include "game/breakout_components.h"
+#include <random>
+#include <typeinfo>
 
 
 class BreakoutGame : public Game
@@ -33,7 +35,7 @@ public:
 			for (const auto& item : m_components->item_list) {
 				drawList.push_back(item);
 			}
-			drawList.push_back(m_components->enemy_head);
+			drawList.push_back(m_components->enemy);
 		}, -1);
 
 		// Result画面
@@ -48,7 +50,6 @@ public:
 
     bool onUpdate() override
     {
-		updateFireball();
 		updateCollisionDetection();
 		moveShip();
 		updateBlockStatus();
@@ -83,9 +84,6 @@ private:
         m_components->setup();
 		m_components->info->init();
     }
-
-	// FireBallが消えていて、ゲームがまだ続いている場合は再びFireBallを復活させる
-	void updateFireball();
 
 	// すべての衝突判定
 	// Fireball, Itemなど

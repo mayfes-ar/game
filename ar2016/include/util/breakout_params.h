@@ -65,6 +65,8 @@ namespace Breakout {
 
 	// Enemyのパラメータ
 	const Eigen::Vector2f ENEMY_ACCEL{ 1, 0 };
-	const int ENEMY_HEAD_WIDTH = 50;
-	const Eigen::Vector2i ENEMY_HEAD_POS = FIELD_START_POS + Eigen::Vector2i{ FIELD_WIDTH / 2 - ENEMY_HEAD_WIDTH/2 , 0 };
+	const int ENEMY_HEAD_WIDTH = 80;
+	const Eigen::Vector2i ENEMY_HEAD_POS = FIELD_START_POS + Eigen::Vector2i{ FIELD_WIDTH / 2 - ENEMY_HEAD_WIDTH / 2 , 0 };
+
+	const int ENEMY_HEAD_LIFE = 2;
 } // namespace Breakout

@@ -9,6 +9,10 @@
 #include "object/breakout_object.h"
 #include "const.h"
 #include <Eigen/Core>
+#include "moving/newton_behavior.h"
+#include "moving/spring_behavior.h"
+#include "game/fps.h"
+#include "util/breakout_params.h"
 
 /*
 enum class Mode : uint8_t {
@@ -49,5 +53,5 @@ public:
 
 	std::vector<std::shared_ptr<Breakout::Item>> item_list;
 
-	std::shared_ptr<Breakout::EnemyHead> enemy_head = nullptr;
+	std::shared_ptr<Breakout::EnemyHead> enemy = nullptr;
 };

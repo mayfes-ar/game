@@ -1,7 +1,4 @@
 ﻿#include "game/breakout_components.h"
-#include "util/breakout_params.h"
-#include "moving/newton_behavior.h"
-#include "moving/spring_behavior.h"
 #include <random>
 
 using namespace Breakout;
@@ -97,15 +94,6 @@ void BreakoutComponents::setup()
 				fireball_manager->add(std::make_shared<Breakout::Fireball>(circle, moving, EnemyWeak));
 			}
 		}
-		//const auto circle
-		//	= Shape::Circle(FIREBALL_STARTPOS, FIREBALL_RADIUS);
-
-		//const Eigen::Vector2f start_vel = FIREBALL_STARTVEL;
-		//const Eigen::Vector2f start_accel = Eigen::Vector2f::Zero();
-		//// time_step * frq = 1e-3 が最適
-		//auto moving = std::make_shared<Moving>(1.0f, std::make_shared<StringBehavior>(Eigen::Vector2f{200.0f, 200.0f}, 1e-3f)/*std::make_shared<NewtonBehavior>()*/, start_vel, start_accel);
-
-		//fireball = std::make_shared<Breakout::Fireball>(circle, moving);
 	}
 
 	// shipの初期化
@@ -147,8 +135,14 @@ void BreakoutComponents::setup()
 
 	// EnemyHeadの初期化
 	{
-		auto moving = std::make_shared<Moving>(1.0f, std::make_shared<StringBehavior>(Eigen::Vector2f{ 200.0f, 200.0f }, 1e-3f));
-		enemy_head = std::make_shared<Breakout::EnemyHead>(Shape::Rectangle(ENEMY_HEAD_POS, ENEMY_HEAD_WIDTH, ENEMY_HEAD_WIDTH), moving);
+		auto moving = std::make_shared<Moving>(1.0f/30.0f, std::make_shared<StringBehavior>(Eigen::Vector2f{ 100.0f, 0.0f }, 0.03f));
+		auto moving2 = std::make_shared<Moving>(1.0f / 30.0f, std::make_shared<StringBehavior>(Eigen::Vector2f{ 100.0f, 0.0f }, 0.03f));
+		auto moving3 = std::make_shared<Moving>(1.0f / 30.0f, std::make_shared<StringBehavior>(Eigen::Vector2f{ 100.0f, 0.0f }, 0.03f));
+		auto life = Life(ENEMY_HEAD_LIFE, ENEMY_HEAD_LIFE);
+
+		auto enemy_left_hand = std::make_shared<Breakout::EnemyLeftHand>(Shape::Rectangle(ENEMY_HEAD_POS - Eigen::Vector2i(100, 0), ENEMY_HEAD_WIDTH, ENEMY_HEAD_WIDTH), moving, life);
+		auto enemy_right_hand = std::make_shared<Breakout::EnemyRightHand>(Shape::Rectangle(ENEMY_HEAD_POS + Eigen::Vector2i(100, 0), ENEMY_HEAD_WIDTH, ENEMY_HEAD_WIDTH), moving2, life);
+		enemy = std::make_shared<Breakout::EnemyHead>(Shape::Rectangle(ENEMY_HEAD_POS, ENEMY_HEAD_WIDTH, ENEMY_HEAD_WIDTH), moving3, life, enemy_left_hand, enemy_right_hand);
 	}
 
 	// Todo Player

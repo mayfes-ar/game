@@ -138,7 +138,10 @@ bool Object::load() {
 	isSuccess &= loadImage("pot", "pot");
 	isSuccess &= loadImage("restore_ship", "restore_ship");
 	isSuccess &= loadImage("damage_ship", "damage_ship");
-	isSuccess &= loadImage("kuppa_head", "kuppa_head");
+
+	isSuccess &= loadImage("donald", "breakout/donald");
+	isSuccess &= loadImage("right_hand", "breakout/right_hand");
+	isSuccess &= loadImage("left_hand", "breakout/left_hand");
 
 	isSuccess &= loadImage("block_blue", "block_blue");
 	isSuccess &= loadImage("block_red", "block_red");
