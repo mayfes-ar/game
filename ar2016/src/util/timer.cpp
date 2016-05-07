@@ -27,7 +27,10 @@ bool Timer::isTimerEnd()
 	return false;
 }
 
-
+void Timer::increaseStartTime(int minute, int second) {
+	m_start_time += (minute * 60 + second) * 1000;
+	if (GetNowCount() - m_start_time < 0) m_start_time = GetNowCount();
+}
 
 Timer::minSecMSec Timer::getNowTime()
 {

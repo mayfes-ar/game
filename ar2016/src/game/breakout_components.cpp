@@ -104,11 +104,6 @@ void BreakoutComponents::setup()
 		}
 	}
 
-	// shipの初期化
-	{
-		const Life life = Life{ SHIP_LIFE_NUM, SHIP_LIFE_NUM, SHIP_LIFE_NUM };
-		ship = std::make_shared<Breakout::Ship>(SHIP_START_POS, life);
-	}
 
 	// potの初期化
 	{
@@ -116,32 +111,51 @@ void BreakoutComponents::setup()
 		pot = std::make_shared<Breakout::Pot>(realm);
 	}
 
-	// itemの初期化
-	for (auto &block : block_list) {
-		const auto color = block->getColor();
-		using Color = Breakout::Block::Color;
+	// shipの初期化
+	{
+		const Life life = Life{ SHIP_LIFE_NUM, SHIP_LIFE_NUM, SHIP_LIFE_NUM };
+		ship = std::make_shared<Breakout::Ship>(SHIP_START_POS, life, pot, info);
+	}
 
-		switch (color) {
-		case Color::Green: {
-			auto item = std::make_shared<Item>(Breakout::ItemKind::EnhanceShip);
-			block->attachItem(item);
-			item_list.push_back(item);
-			break;
-		}
-		case Color::Blue: {
-			auto item = std::make_shared<Item>(Breakout::ItemKind::RestoreShip);
-			block->attachItem(item);
-			item_list.push_back(item);
-			break;
-		}
-		case Color::Red: {
-			auto item = std::make_shared<Item>(Breakout::ItemKind::DamageShip);
-			block->attachItem(item);
-			item_list.push_back(item);
-			break;
-		}
-		default:
-			break;
+	// itemの初期化
+	{
+		std::uniform_real_distribution<> item_kind_generator(0.0, 1.0);
+
+		for (auto &block : block_list) {
+			const auto color = block->getColor();
+			using Color = Breakout::Block::Color;
+
+			switch (color) {
+			case Color::Green: {
+				std::shared_ptr<Breakout::Item> item;
+				auto ratio = item_kind_generator(mt);
+				if (ratio > 0.7) {
+					item = std::make_shared<Item>(Breakout::ItemKind::RestoreTime);
+				}
+				else if (ratio > 0.4) {
+					item = std::make_shared<Item>(Breakout::ItemKind::RestorePot);
+				} else {
+					item = std::make_shared<Item>(Breakout::ItemKind::EnhanceShip);
+				}
+				block->attachItem(item);
+				item_list.push_back(item);
+				break;
+			}
+			case Color::Blue: {
+				auto item = std::make_shared<Item>(Breakout::ItemKind::RestoreShip);
+				block->attachItem(item);
+				item_list.push_back(item);
+				break;
+			}
+			case Color::Red: {
+				auto item = std::make_shared<Item>(Breakout::ItemKind::DamageShip);
+				block->attachItem(item);
+				item_list.push_back(item);
+				break;
+			}
+			default:
+				break;
+			}
 		}
 	}
 
