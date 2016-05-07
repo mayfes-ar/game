@@ -43,9 +43,9 @@ void BreakoutComponents::setup()
 	// Blockの初期化
 	for (int x = 0; x < BLOCK_WIDTH_NUM; ++x) {
 		for (int y = 0; y < BLOCK_HEIGHT_NUM; ++y) {
-			const Eigen::Vector2i realm 
-				= Eigen::Vector2i{BLOCK_OFFSET_X + x * BLOCK_WIDTH, BLOCK_OFFSET_Y + y * BLOCK_HEIGHT };
-		
+			const Eigen::Vector2i realm
+				= Eigen::Vector2i{ BLOCK_OFFSET_X + x * BLOCK_WIDTH, BLOCK_OFFSET_Y + y * BLOCK_HEIGHT };
+
 			const Shape::Rectangle rec(realm, BLOCK_WIDTH, BLOCK_HEIGHT);
 
 			auto color = Breakout::Block::Color::Green;
@@ -97,7 +97,8 @@ void BreakoutComponents::setup()
 
 			if (fireball_mode_generator(mt) > 0.7) {
 				fireball_manager->add(std::make_shared<Breakout::Fireball>(circle, moving, EnemyStrong));
-			} else {
+			}
+			else {
 				fireball_manager->add(std::make_shared<Breakout::Fireball>(circle, moving, EnemyWeak));
 			}
 		}
@@ -105,7 +106,7 @@ void BreakoutComponents::setup()
 
 	// shipの初期化
 	{
-		const Life life = Life{SHIP_LIFE_NUM, SHIP_LIFE_NUM, SHIP_LIFE_NUM};
+		const Life life = Life{ SHIP_LIFE_NUM, SHIP_LIFE_NUM, SHIP_LIFE_NUM };
 		ship = std::make_shared<Breakout::Ship>(SHIP_START_POS, life);
 	}
 
@@ -121,28 +122,32 @@ void BreakoutComponents::setup()
 		using Color = Breakout::Block::Color;
 
 		switch (color) {
-			case Color::Green:
-				break;
-			case Color::Blue: {
-				auto item = std::make_shared<Item>(Breakout::ItemKind::RestoreShip);
-				block->attachItem(item);
-				item_list.push_back(item);
-				break;
-			}
-			case Color::Red: {
-				auto item = std::make_shared<Item>(Breakout::ItemKind::DamageShip);
-				block->attachItem(item);
-				item_list.push_back(item);
-				break;
-			}
-			default:
-				break;
+		case Color::Green: {
+			auto item = std::make_shared<Item>(Breakout::ItemKind::EnhanceShip);
+			block->attachItem(item);
+			item_list.push_back(item);
+			break;
+		}
+		case Color::Blue: {
+			auto item = std::make_shared<Item>(Breakout::ItemKind::RestoreShip);
+			block->attachItem(item);
+			item_list.push_back(item);
+			break;
+		}
+		case Color::Red: {
+			auto item = std::make_shared<Item>(Breakout::ItemKind::DamageShip);
+			block->attachItem(item);
+			item_list.push_back(item);
+			break;
+		}
+		default:
+			break;
 		}
 	}
 
 	// EnemyHeadの初期化
 	{
-		auto moving = std::make_shared<Moving>(1.0f/30.0f, std::make_shared<StringBehavior>(Eigen::Vector2f{ 100.0f, 0.0f }, 0.03f));
+		auto moving = std::make_shared<Moving>(1.0f / 30.0f, std::make_shared<StringBehavior>(Eigen::Vector2f{ 100.0f, 0.0f }, 0.03f));
 		auto moving2 = std::make_shared<Moving>(1.0f / 30.0f, std::make_shared<StringBehavior>(Eigen::Vector2f{ 100.0f, 0.0f }, 0.03f));
 		auto moving3 = std::make_shared<Moving>(1.0f / 30.0f, std::make_shared<StringBehavior>(Eigen::Vector2f{ 100.0f, 0.0f }, 0.03f));
 		auto life = Life(ENEMY_HEAD_LIFE, ENEMY_HEAD_LIFE);

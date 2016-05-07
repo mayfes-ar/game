@@ -25,7 +25,8 @@ void BreakoutGame::updateCollisionDetection()
 			// Ship衝突判定
 			if (m_components->ship->isAlive()) {
 				if (fireball->isCollided(m_components->ship->getRealm(), 1, m_components->ship->getVelocity())) {
-					if (fireball->getMode() == Breakout::FireballKind::EnemyStrong) {
+					// EnemyStrongであり かつ 無敵状態じゃなかったら
+					if (fireball->getMode() == Breakout::FireballKind::EnemyStrong && !m_components->ship->isEnhanced()) {
 						//fireballを消す
 						m_components->fireball_manager->destroy(fireball);
 						m_components->ship->damageShip(1);
@@ -59,19 +60,20 @@ void BreakoutGame::updateCollisionDetection()
 						m_components->fireball_manager->destroy(fireball);
 						continue;
 					}
-				}
-				if (m_components->enemy->getLeftHand()->isAlive()) {
-					if (fireball->isCollided(m_components->enemy->getLeftHand()->getRealm())) {
-						m_components->enemy->getLeftHand()->damageEnemy(fireball->giveDamage());
-						m_components->fireball_manager->destroy(fireball);
-						continue;
+
+					if (m_components->enemy->getLeftHand()->isAlive()) {
+						if (fireball->isCollided(m_components->enemy->getLeftHand()->getRealm())) {
+							m_components->enemy->getLeftHand()->damageEnemy(fireball->giveDamage());
+							m_components->fireball_manager->destroy(fireball);
+							continue;
+						}
 					}
-				}
-				if (m_components->enemy->getRightHand()->isAlive()) {
-					if (fireball->isCollided(m_components->enemy->getRightHand()->getRealm())) {
-						m_components->enemy->getRightHand()->damageEnemy(fireball->giveDamage());
-						m_components->fireball_manager->destroy(fireball);
-						continue;
+					if (m_components->enemy->getRightHand()->isAlive()) {
+						if (fireball->isCollided(m_components->enemy->getRightHand()->getRealm())) {
+							m_components->enemy->getRightHand()->damageEnemy(fireball->giveDamage());
+							m_components->fireball_manager->destroy(fireball);
+							continue;
+						}
 					}
 				}
 			}

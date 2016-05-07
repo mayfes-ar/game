@@ -36,11 +36,40 @@ namespace Breakout {
 	constexpr int PRIORITY_CHARACTER = 4; // キャラクター(マリオ)
 	constexpr int PRIORITY_INFO = 5; // インフォメーション
 
+	class Effect : public Object {
+	public:
+		Effect(std::vector<int>& effectHandle, const int priority) {
+			m_effectHandles = effectHandle;
+			m_count_max = m_effectHandles.size();
+			Object::layer = priority;
+		}
+
+		void drawWithRealm(Shape::Rectangle realm) {
+			DrawExtendGraph(realm.left(), realm.top(),
+				realm.right(), realm.bottom(),
+				m_effectHandles[m_counter], TRUE);
+		}
+
+		bool draw() override { return true; };
+
+		void incrementCounter() {
+			m_counter++;
+			if (m_counter == m_count_max) m_counter = 0;
+		}
+	private:
+		std::vector<int> m_effectHandles;
+		int m_count_max = 0;
+		int m_counter = 0;
+	};
+
 	class ItemReceiverBase;
 
 	enum ItemKind {
 		RestoreShip,
-		DamageShip
+		DamageShip,
+		EnhanceShip,
+		RestorePot,
+		RestoreTime
 	};
 
 	//アイテムクラス
@@ -80,6 +109,7 @@ namespace Breakout {
 		ItemReceiverBase(const Shape::Rectangle& realm) : m_realm(realm) {}
 		virtual ~ItemReceiverBase() {}
 		//本当は純粋仮想にしたかったけどそうするとこのクラスのインスタンスthisがつくれないからこのようにした
+		// applyItems は毎ループ呼ぶためにdraw()の中に入れるようにする。
 		virtual void applyItems() {}
 		virtual const Shape::Rectangle getRealm() { return m_realm; }
 
@@ -98,7 +128,7 @@ namespace Breakout {
 		void attachItem(std::shared_ptr<ItemBase> item) {
 			m_items.push_back(item);
 			item->attachItemReceiver(std::make_shared<ItemReceiverBase>(*this));
-			applyItems();
+			//applyItems();
 		}
 
 		//使用済みのアイテムを消す
@@ -147,6 +177,8 @@ namespace Breakout {
 			case DamageShip:
 				DrawExtendGraph(m_realm.left(), m_realm.top(), m_realm.right(), m_realm.bottom(), imgHandles["damage_ship"], TRUE);
 				break;
+			case EnhanceShip:
+				DrawExtendGraph(m_realm.left(), m_realm.top(), m_realm.right(), m_realm.bottom(), imgHandles["enhance_ship"], TRUE);
 			}
 
 			//DrawBox(m_realm.left(), m_realm.top(), m_realm.right(), m_realm.bottom(), GetColor(255, 255, 0), TRUE);
@@ -972,22 +1004,6 @@ public:
 		return m_velocity;
 	}
 
-	bool draw() override {
-		if (m_is_disappered) {
-			// 何も描画しない
-			return true;
-		}
-
-		for (auto block : m_blocks) {
-			DrawExtendGraph(block.left(), block.top(),
-				block.right(), block.bottom(),
-				imgHandles["ship_block"], TRUE);
-		}
-
-		return true;
-	}
-
-
 	// Blockの消滅
 	void disapper()
 	{
@@ -996,6 +1012,10 @@ public:
 
 	const Shape::Rectangle getRealm() override {
 		return Shape::Rectangle(m_start_point, m_blocks.size() * BLOCK_WIDTH, BLOCK_HEIGHT);
+	}
+
+	bool isEnhanced() {
+		return m_is_enhanced;
 	}
 
 	void applyItems() override {
@@ -1014,8 +1034,56 @@ public:
 				deleteItem(m_items[i]);
 				i--;
 				break;
+			case EnhanceShip:
+				if (!m_is_enhanced) m_is_enhanced = true;
+				else {
+					m_enhanced_count--;
+				}
+
+				// 強化時間を越えたら
+				if (m_enhanced_count < 0) {
+					m_is_enhanced = false;
+					m_enhanced_count = 150;
+					deleteItem(m_items[i]);
+					i--;
+				}
+				break;
+			case RestorePot:
+				break;
+			default:
+				break;
 			}
 		}
+	}
+
+	bool draw() override {
+		// drawは毎ループ呼ばれるからここに書く
+		applyItems();
+
+		if (m_is_disappered) {
+			// 何も描画しない
+			return true;
+		}
+
+		if (isEnhanced()) {
+			for (auto block : m_blocks) {
+				DrawExtendGraph(block.left(), block.top(),
+					block.right(), block.bottom(),
+					imgHandles["ship_block"], TRUE);
+				m_muteki_effect.drawWithRealm(block);
+			}
+		} else {
+			for (auto block : m_blocks) {
+				DrawExtendGraph(block.left(), block.top(),
+					block.right(), block.bottom(),
+					imgHandles["ship_block"], TRUE);
+			}
+		}
+		
+		if (isEnhanced()) {
+			m_muteki_effect.incrementCounter();
+		}
+		return true;
 	}
 
 private:
@@ -1024,6 +1092,9 @@ private:
 	Eigen::Vector2i m_start_point = Eigen::Vector2i::Zero();
 	int m_velocity = 0; // マーカーを認識しているときにtranslateで渡されるもの。実際の速度的な概念とは違う。
 	Life m_life = Life(); // defaultは４つ。火の玉に当たるごとに一つ減る
+	bool m_is_enhanced = false;
+	int m_enhanced_count = 150;
+	Effect m_muteki_effect = Effect(effectHandles["muteki"], PRIORITY_DYNAMIC_OBJECT);
 };
 
 
