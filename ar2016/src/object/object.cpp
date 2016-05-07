@@ -134,10 +134,13 @@ bool Object::load() {
 	isSuccess &= loadEffect("p_init", "puzzle/init", 14, 1, 1680, 120);
 
 	// breakout game
+
 	isSuccess &= loadImage("ship_block", "shipBlock");
 	isSuccess &= loadImage("pot", "pot");
 	isSuccess &= loadImage("restore_ship", "restore_ship");
 	isSuccess &= loadImage("damage_ship", "damage_ship");
+	isSuccess &= loadImage("enhance_ship", "breakout/star");
+	isSuccess &= loadImage("restore_time", "breakout/clock");
 
 	isSuccess &= loadImage("donald", "breakout/donald");
 	isSuccess &= loadImage("right_hand", "breakout/right_hand");
@@ -162,6 +165,8 @@ bool Object::load() {
 	isSuccess &= loadImage("b_easy", "breakout/easy");
 	isSuccess &= loadImage("b_normal", "breakout/normal");
 	isSuccess &= loadImage("b_hard", "breakout/hard");
+
+	isSuccess &= loadEffect("muteki", "breakout/muteki", 1, 6, 320, 1440);
 
 	for (int num = 0; num <= 9; ++num) {
 		for (const auto& color : { "red", "blue", "yellow", "green" }) {

@@ -36,11 +36,47 @@ namespace Breakout {
 	constexpr int PRIORITY_CHARACTER = 4; // キャラクター(マリオ)
 	constexpr int PRIORITY_INFO = 5; // インフォメーション
 
+	class Effect : public Object {
+	public:
+		Effect(std::vector<int>& effectHandle, const int priority) {
+			m_effectHandles = effectHandle;
+			m_count_max = m_effectHandles.size();
+			Object::layer = priority;
+		}
+
+		void drawWithRealm(Shape::Rectangle realm) {
+			DrawExtendGraph(realm.left(), realm.top(),
+				realm.right(), realm.bottom(),
+				m_effectHandles[m_counter], TRUE);
+		}
+
+		void incrementCounterWhenDrawWithRealm(Shape::Rectangle realm) {
+			DrawExtendGraph(realm.left(), realm.top(),
+				realm.right(), realm.bottom(),
+				m_effectHandles[m_counter], TRUE);
+			incrementCounter();
+		}
+
+		bool draw() override { return true; };
+
+		void incrementCounter() {
+			m_counter++;
+			if (m_counter == m_count_max) m_counter = 0;
+		}
+	private:
+		std::vector<int> m_effectHandles;
+		int m_count_max = 0;
+		int m_counter = 0;
+	};
+
 	class ItemReceiverBase;
 
 	enum ItemKind {
 		RestoreShip,
-		DamageShip
+		DamageShip,
+		EnhanceShip,
+		RestorePot,
+		RestoreTime
 	};
 
 	//アイテムクラス
@@ -80,6 +116,7 @@ namespace Breakout {
 		ItemReceiverBase(const Shape::Rectangle& realm) : m_realm(realm) {}
 		virtual ~ItemReceiverBase() {}
 		//本当は純粋仮想にしたかったけどそうするとこのクラスのインスタンスthisがつくれないからこのようにした
+		// applyItems は毎ループ呼ぶためにdraw()の中に入れるようにする。
 		virtual void applyItems() {}
 		virtual const Shape::Rectangle getRealm() { return m_realm; }
 
@@ -98,7 +135,7 @@ namespace Breakout {
 		void attachItem(std::shared_ptr<ItemBase> item) {
 			m_items.push_back(item);
 			item->attachItemReceiver(std::make_shared<ItemReceiverBase>(*this));
-			applyItems();
+			//applyItems();
 		}
 
 		//使用済みのアイテムを消す
@@ -132,7 +169,7 @@ namespace Breakout {
 				m_realm.start_point = m_item_receiver->getRealm().start_point;// + Eigen::Vector2i((m_item_receiver->getRealm().width - m_realm.width) / 2, 0);
 			}
 			else {
-				m_realm.start_point += Eigen::Vector2i(0, 20);
+				m_realm.start_point += Eigen::Vector2i(0, 10);
 			}
 		}
 
@@ -146,6 +183,15 @@ namespace Breakout {
 				break;
 			case DamageShip:
 				DrawExtendGraph(m_realm.left(), m_realm.top(), m_realm.right(), m_realm.bottom(), imgHandles["damage_ship"], TRUE);
+				break;
+			case EnhanceShip:
+				DrawExtendGraph(m_realm.left(), m_realm.top(), m_realm.right(), m_realm.bottom(), imgHandles["enhance_ship"], TRUE);
+				break;
+			case RestorePot:
+				DrawExtendGraph(m_realm.left(), m_realm.top(), m_realm.right(), m_realm.bottom(), imgHandles["pot"], TRUE);
+				break;
+			case RestoreTime:
+				DrawExtendGraph(m_realm.left(), m_realm.top(), m_realm.right(), m_realm.bottom(), imgHandles["restore_time"], TRUE);
 				break;
 			}
 
@@ -344,6 +390,10 @@ public:
 	void resetTimer(int max_time) {
 		m_timer->resetMaxTime(max_time);
 		m_timer->reset();
+	}
+
+	void restoreTimer(int minute, int second) {
+		m_timer->increaseStartTime(minute, second);
 	}
 
 	bool draw() {
@@ -885,148 +935,6 @@ private:
 };
 
 
-
-// キャラクタがのる船
-// ライフをもつ
-class Ship : public Object, public ItemReceiverBase
-{
-public:
-	explicit Ship(const Eigen::Vector2i& start_point, const Life& life)
-		: m_start_point(start_point), m_life(life)
-	{
-		Object::layer = PRIORITY_DYNAMIC_OBJECT;
-		for (int i = 0; i < m_life.getLifeNum(); i++) {
-			m_blocks.push_back(Shape::Rectangle(start_point + Eigen::Vector2i{ BLOCK_WIDTH, 0 } *i, BLOCK_WIDTH, BLOCK_HEIGHT));
-		}
-	}
-
-	//! @brief 舟を動かす
-	bool translate(int translation) {
-		//範囲外なら移動させない
-		//start_pointの更新
-		m_start_point = m_blocks[0].getLeftTopPoint();
-		if (m_blocks[m_blocks.size() - 1].right() + translation > FIELD_START_POS.x() + FIELD_WIDTH ||
-			m_blocks[0].left() + translation < FIELD_START_POS.x()) return false;
-
-		for (auto &block : m_blocks) {
-			block.start_point.x() += translation;
-		}
-		// m_velocityのセット
-		m_velocity = translation;
-		return true;
-	}
-
-	bool restoreShip(int amount) {
-		if (!m_life.restore(amount)) return false;
-		if (m_blocks.empty()) {
-			m_blocks.push_back(Shape::Rectangle(m_start_point, BLOCK_WIDTH, BLOCK_HEIGHT));
-			return true;
-		}
-		for (int i = 0; i < amount; i++) {
-			if (m_blocks[m_blocks.size() - 1].getRightBottomPoint().x() + BLOCK_WIDTH > FIELD_START_POS.x() + FIELD_WIDTH) {
-				m_blocks.insert(m_blocks.begin(), Shape::Rectangle(m_blocks[0].getLeftTopPoint() - Eigen::Vector2i(BLOCK_WIDTH, 0), BLOCK_WIDTH, BLOCK_HEIGHT));
-			}
-			else
-				m_blocks.push_back(Shape::Rectangle(m_blocks[m_blocks.size() - 1].getRightTopPoint(), BLOCK_WIDTH, BLOCK_HEIGHT));
-		}
-		return true;
-	}
-
-	bool damageShip(int amount) {
-		if (!m_life.damage(amount)) return false;
-		for (int i = 0; i < amount; i++) {
-			m_blocks.pop_back();
-		}
-		return true;
-	}
-
-	void resetShip() {
-		m_blocks.clear();
-		m_life.resetLife();
-		for (int i = 0; i < m_life.getLifeNum(); i++) {
-			m_blocks.push_back(Shape::Rectangle(m_start_point + Eigen::Vector2i{ BLOCK_WIDTH, 0 } *i, BLOCK_WIDTH, BLOCK_HEIGHT));
-		}
-	}
-
-	int getLifeNum() {
-		return m_life.getLifeNum();
-	}
-
-	bool isAlive() const {
-		return m_life.isAlive();
-	}
-
-	int left() {
-		return m_start_point[0];
-	}
-	int right() {
-		return m_start_point[0] + m_blocks.size() * BLOCK_WIDTH;
-	}
-	int top() {
-		return m_start_point[1];
-	}
-	int bottom() {
-		return m_start_point[1] + BLOCK_HEIGHT;
-	}
-	int getVelocity() {
-		return m_velocity;
-	}
-
-	bool draw() override {
-		if (m_is_disappered) {
-			// 何も描画しない
-			return true;
-		}
-
-		for (auto block : m_blocks) {
-			DrawExtendGraph(block.left(), block.top(),
-				block.right(), block.bottom(),
-				imgHandles["ship_block"], TRUE);
-		}
-
-		return true;
-	}
-
-
-	// Blockの消滅
-	void disapper()
-	{
-		m_is_disappered = true;
-	}
-
-	const Shape::Rectangle getRealm() override {
-		return Shape::Rectangle(m_start_point, m_blocks.size() * BLOCK_WIDTH, BLOCK_HEIGHT);
-	}
-
-	void applyItems() override {
-		for (int i = 0; i < m_items.size(); i++) {
-
-			switch (m_items[i]->getItemKind()) {
-				//継続的な効果を持たないものは適用したら消す
-			case RestoreShip:
-				restoreShip(1);
-				deleteItem(m_items[i]);
-				//消したのでその分indexを減らす
-				i--;
-				break;
-			case DamageShip:
-				damageShip(1);
-				deleteItem(m_items[i]);
-				i--;
-				break;
-			}
-		}
-	}
-
-private:
-	bool m_is_disappered = false;
-	std::vector<Shape::Rectangle> m_blocks = {};
-	Eigen::Vector2i m_start_point = Eigen::Vector2i::Zero();
-	int m_velocity = 0; // マーカーを認識しているときにtranslateで渡されるもの。実際の速度的な概念とは違う。
-	Life m_life = Life(); // defaultは４つ。火の玉に当たるごとに一つ減る
-};
-
-
 class Pot : public Object
 {
 public:
@@ -1120,6 +1028,14 @@ public:
 		return m_fireball;
 	}
 
+	void resetStatus() {
+		m_is_disappered = true;
+		m_rotation = 0;
+		m_fireball = nullptr;
+		m_initial_fireball_speed = 0;
+		m_count = 90;
+	}
+
 	bool draw() override {
 		if (m_is_disappered || !isAvailable()) {
 			// 何も描画しない
@@ -1169,6 +1085,202 @@ private:
 		}
 	}
 };
+
+// キャラクタがのる船
+// ライフをもつ
+class Ship : public Object, public ItemReceiverBase
+{
+public:
+	explicit Ship(const Eigen::Vector2i& start_point, const Life& life, std::shared_ptr<Pot>& pot, std::shared_ptr<Info>& info)
+		: m_start_point(start_point), m_life(life), m_pot(pot), m_info(info)
+	{
+		Object::layer = PRIORITY_DYNAMIC_OBJECT;
+		for (int i = 0; i < m_life.getLifeNum(); i++) {
+			m_blocks.push_back(Shape::Rectangle(start_point + Eigen::Vector2i{ BLOCK_WIDTH, 0 } *i, BLOCK_WIDTH, BLOCK_HEIGHT));
+		}
+	}
+
+	//! @brief 舟を動かす
+	bool translate(int translation) {
+		//範囲外なら移動させない
+		//start_pointの更新
+		m_start_point = m_blocks[0].getLeftTopPoint();
+		if (m_blocks[m_blocks.size() - 1].right() + translation > FIELD_START_POS.x() + FIELD_WIDTH ||
+			m_blocks[0].left() + translation < FIELD_START_POS.x()) return false;
+
+		for (auto &block : m_blocks) {
+			block.start_point.x() += translation;
+		}
+		// m_velocityのセット
+		m_velocity = translation;
+		return true;
+	}
+
+	bool restoreShip(int amount) {
+		if (!m_life.restore(amount)) return false;
+		if (m_blocks.empty()) {
+			m_blocks.push_back(Shape::Rectangle(m_start_point, BLOCK_WIDTH, BLOCK_HEIGHT));
+			return true;
+		}
+		for (int i = 0; i < amount; i++) {
+			if (m_blocks[m_blocks.size() - 1].getRightBottomPoint().x() + BLOCK_WIDTH > FIELD_START_POS.x() + FIELD_WIDTH) {
+				m_blocks.insert(m_blocks.begin(), Shape::Rectangle(m_blocks[0].getLeftTopPoint() - Eigen::Vector2i(BLOCK_WIDTH, 0), BLOCK_WIDTH, BLOCK_HEIGHT));
+			}
+			else
+				m_blocks.push_back(Shape::Rectangle(m_blocks[m_blocks.size() - 1].getRightTopPoint(), BLOCK_WIDTH, BLOCK_HEIGHT));
+		}
+		return true;
+	}
+
+	bool damageShip(int amount) {
+		if (!m_life.damage(amount)) return false;
+		for (int i = 0; i < amount; i++) {
+			m_blocks.pop_back();
+		}
+		return true;
+	}
+
+	void resetShip() {
+		m_blocks.clear();
+		m_life.resetLife();
+		for (int i = 0; i < m_life.getLifeNum(); i++) {
+			m_blocks.push_back(Shape::Rectangle(m_start_point + Eigen::Vector2i{ BLOCK_WIDTH, 0 } *i, BLOCK_WIDTH, BLOCK_HEIGHT));
+		}
+	}
+
+	int getLifeNum() {
+		return m_life.getLifeNum();
+	}
+
+	bool isAlive() const {
+		return m_life.isAlive();
+	}
+
+	int left() {
+		return m_start_point[0];
+	}
+	int right() {
+		return m_start_point[0] + m_blocks.size() * BLOCK_WIDTH;
+	}
+	int top() {
+		return m_start_point[1];
+	}
+	int bottom() {
+		return m_start_point[1] + BLOCK_HEIGHT;
+	}
+	int getVelocity() {
+		return m_velocity;
+	}
+
+	// Blockの消滅
+	void disapper()
+	{
+		m_is_disappered = true;
+	}
+
+	const Shape::Rectangle getRealm() override {
+		return Shape::Rectangle(m_start_point, m_blocks.size() * BLOCK_WIDTH, BLOCK_HEIGHT);
+	}
+
+	bool isEnhanced() {
+		return m_is_enhanced;
+	}
+
+	void applyItems() override {
+		for (int i = 0; i < m_items.size(); i++) {
+
+			switch (m_items[i]->getItemKind()) {
+				//継続的な効果を持たないものは適用したら消す
+			case RestoreShip:
+				restoreShip(1);
+				deleteItem(m_items[i]);
+				//消したのでその分indexを減らす
+				i--;
+				break;
+			case DamageShip:
+				damageShip(1);
+				deleteItem(m_items[i]);
+				i--;
+				break;
+			case EnhanceShip:
+				if (!m_is_enhanced) m_is_enhanced = true;
+				else {
+					m_enhanced_count--;
+				}
+
+				// 強化時間を越えたら
+				if (m_enhanced_count < 0) {
+					m_is_enhanced = false;
+					m_enhanced_count = 150;
+					deleteItem(m_items[i]);
+					i--;
+				}
+				break;
+			case RestorePot:
+				// available じゃなかったら適用せず保持しておく。
+				if (!m_pot->isAvailable()) {
+					m_pot->resetStatus();
+					deleteItem(m_items[i]);
+					i--;
+				}
+				break;
+			case RestoreTime:
+				m_info->restoreTimer(0, 10);
+				deleteItem(m_items[i]);
+				i--;
+			default:
+				break;
+			}
+		}
+	}
+
+	bool draw() override {
+		// drawは毎ループ呼ばれるからここに書く
+		applyItems();
+
+		if (m_is_disappered) {
+			// 何も描画しない
+			return true;
+		}
+
+		if (isEnhanced()) {
+			for (auto block : m_blocks) {
+				DrawExtendGraph(block.left(), block.top(),
+					block.right(), block.bottom(),
+					imgHandles["ship_block"], TRUE);
+				m_muteki_effect.drawWithRealm(block);
+			}
+		}
+		else {
+			for (auto block : m_blocks) {
+				DrawExtendGraph(block.left(), block.top(),
+					block.right(), block.bottom(),
+					imgHandles["ship_block"], TRUE);
+			}
+		}
+
+		if (isEnhanced()) {
+			m_muteki_effect.incrementCounter();
+		}
+		return true;
+	}
+
+private:
+	bool m_is_disappered = false;
+	std::vector<Shape::Rectangle> m_blocks = {};
+	Eigen::Vector2i m_start_point = Eigen::Vector2i::Zero();
+	int m_velocity = 0; // マーカーを認識しているときにtranslateで渡されるもの。実際の速度的な概念とは違う。
+	Life m_life = Life(); // defaultは４つ。火の玉に当たるごとに一つ減る
+	bool m_is_enhanced = false;
+	int m_enhanced_count = 150;
+	Effect m_muteki_effect = Effect(effectHandles["muteki"], PRIORITY_DYNAMIC_OBJECT);
+	// item を pot に適用させるため
+	std::shared_ptr<Pot> m_pot = nullptr;
+	// item を　info に適用させるため
+	std::shared_ptr<Info> m_info = nullptr;
+};
+
+
 
 class EnemyBase {
 public:
