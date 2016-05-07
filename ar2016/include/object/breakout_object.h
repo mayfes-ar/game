@@ -50,6 +50,13 @@ namespace Breakout {
 				m_effectHandles[m_counter], TRUE);
 		}
 
+		void incrementCounterWhenDrawWithRealm(Shape::Rectangle realm) {
+			DrawExtendGraph(realm.left(), realm.top(),
+				realm.right(), realm.bottom(),
+				m_effectHandles[m_counter], TRUE);
+			incrementCounter();
+		}
+
 		bool draw() override { return true; };
 
 		void incrementCounter() {
