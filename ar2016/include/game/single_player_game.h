@@ -575,6 +575,10 @@ class SinglePlayerGame : public Game {
 			layer = 101;
 		}
 		
+		std::string overEffectKey = "s_game_enemy_over";
+		std::string damageSoundKey = "s_game_attack";
+		std::string attackEffectKey = "s_game_sword";
+
 		virtual void update() {
 			if (characterState == OVER) { return; }
 			double acX = 0;
@@ -627,13 +631,13 @@ class SinglePlayerGame : public Game {
 			}
 			else if (damage < maxDamage) {
 				// HP残ってる
-				PlaySoundMem(soundHandles["s_game_attack"], DX_PLAYTYPE_BACK, true);
-				game.makeEffect("s_game_sword", left(), top(), rect.width, rect.height, false, layer+1);
+				PlaySoundMem(soundHandles[damageSoundKey], DX_PLAYTYPE_BACK, true);
+				game.makeEffect(attackEffectKey, left(), top(), rect.width, rect.height, false, layer+1);
 				changeCharacterState(DAMAGE);
 			}
 			else {
-				PlaySoundMem(soundHandles["s_game_attack"], DX_PLAYTYPE_BACK, true);
-				game.makeEffect("s_game_sword", left(), top(), rect.width, rect.height, false, layer+1);
+				PlaySoundMem(soundHandles[damageSoundKey], DX_PLAYTYPE_BACK, true);
+				game.makeEffect(attackEffectKey, left(), top(), rect.width, rect.height, false, layer+1);
 				die();
 			}
 		}
@@ -641,7 +645,7 @@ class SinglePlayerGame : public Game {
 		virtual void die() {
 			changeCharacterState(OVER);
 			if (overBuffer <= 0) {
-				game.makeEffect("s_game_enemy_over", left(), top(), rect.width, rect.height, false, layer+1);
+				game.makeEffect(overEffectKey, left(), top(), rect.width, rect.height, false, layer+1);
 				isAlive = false;
 			}
 			overBuffer--;
@@ -872,11 +876,7 @@ class SinglePlayerGame : public Game {
 
 					if (left() < marker->right() && top() < marker->bottom() &&
 						right() > marker->left() && bottom() > marker->top()) {
-						if (isAlive) {
-							PlaySoundMem(soundHandles["s_game_attack"], DX_PLAYTYPE_BACK, true);
-						}
 						damageControl();
-						marker->effectHit();
 						invincibleTime = maxInvincibleTime;
 
 						return !isAlive;
@@ -886,11 +886,8 @@ class SinglePlayerGame : public Game {
 				for (auto block : game.blockList) {
 					if (left() <= block->right() && top() <= block->bottom() &&
 						right() >= block->left() && bottom() >= block->top()) {
-						if (isAlive) {
-							// PlaySoundMem(soundHandles["s_game_attack"], DX_PLAYTYPE_BACK, true);
-						}
-						damageControl();
 						invincibleTime = maxInvincibleTime;
+						damageControl();
 
 						return !isAlive;
 
@@ -903,11 +900,6 @@ class SinglePlayerGame : public Game {
 
 			return Character::deathDecision();
 		}
-		/*
-		void die() {
-			// TODO
-			isAlive = false;
-		}*/
 	};
 	
 	class Cloud : public Enemy {
