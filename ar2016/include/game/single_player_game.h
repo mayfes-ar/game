@@ -65,10 +65,12 @@ class SinglePlayerGame : public Game {
 		}
 
 		bool draw() {
-			// DrawExtendGraph(CAP2IMG_SHIFT_X, CAP2IMG_SHIFT_Y, CAP2IMG_SHIFT_X + CAP2IMG_RATE*CAP_WIDTH, CAP2IMG_SHIFT_Y + CAP2IMG_RATE*CAP_HEIGHT, handle, FALSE);
-			SetDrawBright(230, 230, 230);
+			DrawExtendGraph(CAP2IMG_SHIFT_X, CAP2IMG_SHIFT_Y, CAP2IMG_SHIFT_X + CAP2IMG_RATE*CAP_WIDTH, CAP2IMG_SHIFT_Y + CAP2IMG_RATE*CAP_HEIGHT, handle, FALSE);
+			// SetDrawBright(230, 230, 230);
+			SetDrawBlendMode(DX_BLENDMODE_ALPHA, 200);
 			DrawExtendGraph(0, 0, WIDTH, HEIGHT, imgHandles["background"], true);
-			SetDrawBright(255, 255, 255);
+			SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 100);
+			// SetDrawBright(255, 255, 255);
 			return true;
 		}
 	};
@@ -568,11 +570,17 @@ class SinglePlayerGame : public Game {
 
 	// 敵キャラクター
 	class Enemy : public Character {
+		std::string imgHandleKey;
 	public:
 		Enemy(int x_, int y_, int width_, int height_, std::string imgHandleKey_, int maxDamage_, SinglePlayerGame& game_, int overBufferMax_ = FPS, int maxInvincibleTime_ = FPS) : Character(x_,y_,width_,height_,imgHandleKey_,maxDamage_,game_, overBufferMax_, maxInvincibleTime_) {
 			layer = 101;
+			imgHandleKey = imgHandleKey_;
 		}
 		
+		std::string overEffectKey = "s_game_enemy_over";
+		std::string damageSoundKey = "s_game_attack";
+		std::string attackEffectKey = "s_game_sword";
+
 		virtual void update() {
 			if (characterState == OVER) { return; }
 			double acX = 0;
@@ -599,11 +607,8 @@ class SinglePlayerGame : public Game {
 
 					if (left() < marker->right() && top() < marker->bottom() &&
 						right() > marker->left() && bottom() > marker->top()) {
-						if (isAlive) {
-							PlaySoundMem(soundHandles["s_game_attack"], DX_PLAYTYPE_BACK, true);
-						}
 						damageControl();
-						marker->effectHit();
+						// if (maxDamage > 0) { marker->effectHit(); }
 						invincibleTime = FPS;
 
 						return !isAlive;
@@ -628,31 +633,52 @@ class SinglePlayerGame : public Game {
 			}
 			else if (damage < maxDamage) {
 				// HP残ってる
+				PlaySoundMem(soundHandles[damageSoundKey], DX_PLAYTYPE_BACK, true);
+				game.makeEffect(attackEffectKey, left(), top(), rect.width, rect.height, false, layer+1);
 				changeCharacterState(DAMAGE);
 			}
 			else {
+				PlaySoundMem(soundHandles[damageSoundKey], DX_PLAYTYPE_BACK, true);
+				game.makeEffect(attackEffectKey, left(), top(), rect.width, rect.height, false, layer+1);
 				die();
 			}
+		}
+
+		virtual void die() {
+			changeCharacterState(OVER);
+			if (overBuffer <= 0) {
+				game.makeEffect(overEffectKey, left(), top(), rect.width, rect.height, false, layer+1);
+				isAlive = false;
+			}
+			overBuffer--;
+
+		}
+
+		std::string getEnemyType() {
+			return imgHandleKey;
 		}
 	};
 
 	class Teresa : public Enemy {
+		
 	public:
-		static const int width = 100;
-		static const int height = 100;
+		static const int width = 80;
+		static const int height = 32;
+		
 
-		Teresa(int x_, int y_, SinglePlayerGame& game_, double size, int maxDamage_ = 2, std::string imgHandleKey_ = "s_game_teresa") : Enemy(x_, y_, width*size, height*size, imgHandleKey_, maxDamage_, game_) {
+		Teresa(int x_, int y_, SinglePlayerGame& game_, double size, int maxDamage_ = 1, std::string imgHandleKey_ = "s_game_bat") : Enemy(x_, y_, width*size, height*size, imgHandleKey_, maxDamage_, game_) {
 			layer = 160;
 		}
 
 		void setAc(double& acX, double& acY) {
-			acX = rand() % 5 - 2;
-			acY = rand() % 5 - 2;
+			acX = rand() % 3 - 1;
+			acY = rand() % 3 - 1;
 		}
 		
 	};
 
 	class RocketWanwan : public Enemy {
+		int stayCount = FPS * 2;
 	public :
 		static const int width = 430;
 		static const int height = 275;
@@ -673,18 +699,23 @@ class SinglePlayerGame : public Game {
 
 		void setAc(double& acX, double& acY) {
 			acY = -0.5 * (1 - (rect.y - prevY <= 0) - (rect.y - prevY< 0));
-			switch (moveDirection) {
-			case LEFT: {
-				acX = -7;
-				break;
+			if (stayCount == 0) {
+				switch (moveDirection) {
+				case LEFT: {
+					acX = -7;
+					break;
+				}
+				case RIGHT: {
+					acX = 7;
+					break;
+				}
+				default: {
+					break;
+				}
+				}
 			}
-			case RIGHT: {
-				acX = 7;
-				break;
-			}
-			default: {
-				break;
-			}
+			else if (stayCount > 0) {
+				stayCount--;
 			}
 		}
 	};
@@ -694,7 +725,7 @@ class SinglePlayerGame : public Game {
 		static const int height = 100;
 
 	public:
-		Switch(int x_, int y_, SinglePlayerGame& game_, double size, int maxDamage_ = 2, std::string imgHandleKey_ = "s_game_switch") : Enemy(x_, y_, width * size, height * size, imgHandleKey_, maxDamage_, game_) {
+		Switch(int x_, int y_, SinglePlayerGame& game_, double size, int maxDamage_ = 1, std::string imgHandleKey_ = "s_game_switch") : Enemy(x_, y_, width * size, height * size, imgHandleKey_, maxDamage_, game_) {
 			layer = 130;
 			moveDirection = RIGHT;
 		}
@@ -764,7 +795,7 @@ class SinglePlayerGame : public Game {
 		std::shared_ptr<Ray> ray = nullptr;
 
 	public:
-		Ufo(int x_, int y_, SinglePlayerGame& game_, double size, int maxDamage_ = 3, std::string imgHandleKey_ = "s_game_ufo") : Enemy(x_, y_, width * size, height * size, imgHandleKey_, maxDamage_, game_) {
+		Ufo(int x_, int y_, SinglePlayerGame& game_, double size, int maxDamage_ = 2, std::string imgHandleKey_ = "s_game_ufo") : Enemy(x_, y_, width * size, height * size, imgHandleKey_, maxDamage_, game_) {
 			layer = 150;
 		};
 
@@ -826,7 +857,7 @@ class SinglePlayerGame : public Game {
 			if (ray != nullptr) {
 				ray->die();
 			}
-			isAlive = false;
+			Enemy::die();
 		}
 	};
 
@@ -849,7 +880,7 @@ class SinglePlayerGame : public Game {
 
 		void setAc(double& acX, double& acY) {
 			acX = 0;
-			acY = 10;
+			acY = 1;
 		}
 
 		bool deathDecision() {
@@ -859,11 +890,7 @@ class SinglePlayerGame : public Game {
 
 					if (left() < marker->right() && top() < marker->bottom() &&
 						right() > marker->left() && bottom() > marker->top()) {
-						if (isAlive) {
-							PlaySoundMem(soundHandles["s_game_attack"], DX_PLAYTYPE_BACK, true);
-						}
 						damageControl();
-						marker->effectHit();
 						invincibleTime = maxInvincibleTime;
 
 						return !isAlive;
@@ -873,11 +900,8 @@ class SinglePlayerGame : public Game {
 				for (auto block : game.blockList) {
 					if (left() <= block->right() && top() <= block->bottom() &&
 						right() >= block->left() && bottom() >= block->top()) {
-						if (isAlive) {
-							// PlaySoundMem(soundHandles["s_game_attack"], DX_PLAYTYPE_BACK, true);
-						}
-						damageControl();
 						invincibleTime = maxInvincibleTime;
+						damageControl();
 
 						return !isAlive;
 
@@ -890,11 +914,6 @@ class SinglePlayerGame : public Game {
 
 			return Character::deathDecision();
 		}
-		/*
-		void die() {
-			// TODO
-			isAlive = false;
-		}*/
 	};
 	
 	class Cloud : public Enemy {
@@ -955,9 +974,10 @@ class SinglePlayerGame : public Game {
 	};
 
 	class Eagle : public Enemy {
+		int stayCount = FPS * 3;
+	public:
 		static const int width = 430 / 4;
 		static const int height = 263 / 4;
-	public:
 		Eagle(int x_, int y_, SinglePlayerGame& game_, double size, int maxDamage_ = 2, std::string imgHandleKey_ = "s_game_eagle") : Enemy(x_, y_, width * size, height * size, imgHandleKey_, maxDamage_, game_) {
 		};
 
@@ -971,34 +991,24 @@ class SinglePlayerGame : public Game {
 		}
 
 		void setAc(double& acX, double& acY) {
-			acX = 4;
-			acY = 2;
-		}
-
-		void updateCoordinate(double acX, double acY) {
-			double& x = rect.x;
-			double& y = rect.y;
-
-			const double diffX = x - prevX;
-			const double diffY = y - prevY;
-
-
-			// verlet法
-			const double tempX = x;
-			x += diffX + acX;
-			prevX = tempX;
-			const double tempY = y;
-			y += diffY + acY;
-			prevY = tempY;
+			if (stayCount == 0) {
+				acX = 3;
+				acY = 3;
+			}
+			else if (stayCount > 0) {
+				stayCount--;
+				acY = 0;
+				acX = pow(-1, stayCount/20);
+			}
 		}
 	};
 
 	class Heiho : public Enemy {
 		static const int width = 345 / 4;
 		static const int height = 333 / 4;
-		int frameCounter = 30;
+		int frameCounter = FPS*3;
 	public:
-		Heiho(int x_, int y_, SinglePlayerGame& game_, double size, int maxDamage_ = 2, std::string imgHandleKey_ = "s_game_heiho") : Enemy(x_, y_, width * size, height * size, imgHandleKey_, maxDamage_, game_) {
+		Heiho(int x_, int y_, SinglePlayerGame& game_, double size, int maxDamage_ = 2, std::string imgHandleKey_ = "s_game_ghorst") : Enemy(x_, y_, width * size, height * size, imgHandleKey_, maxDamage_, game_) {
 			moveDirection = LEFT;
 			layer = 152;
 		}
@@ -1012,12 +1022,12 @@ class SinglePlayerGame : public Game {
 			double acY = 0;
 			setAc(acX, acY);
 			updateCoordinate(acX, acY);
-			moveBecauseBlockCollision(game.blockList);
+			// moveBecauseBlockCollision(game.blockList);
 			moveBecauseMarkerCollision(game.markerList);
 		}
 
 		void setAc(double& acX, double& acY) {
-			acY = 4;
+			acY = 2;
 		}
 
 		void updateCoordinate(double acX, double acY) {
@@ -1027,14 +1037,14 @@ class SinglePlayerGame : public Game {
 			
 			double diffX;
 			if (frameCounter > 0) {
-				diffX = -5;
+				diffX = -2;
 			}
 			else if (frameCounter == 0) {
-				PlaySoundMem(soundHandles["s_game_shuzo"], DX_PLAYTYPE_BACK, true);
+				PlaySoundMem(soundHandles["s_game_fireshot"], DX_PLAYTYPE_BACK, true);
 				diffX = 0;
 			}
 			else {
-				diffX = 5;
+				diffX = 2;
 			}
 			const double diffY = 0;
 
@@ -1072,10 +1082,10 @@ class SinglePlayerGame : public Game {
 			{
 			case SinglePlayerGame::Character::LEFT:
 			case SinglePlayerGame::Character::NOMOVE:
-				acX = -10;
+				acX = -1;
 				break;
 			case SinglePlayerGame::Character::RIGHT:
-				acX = 10;
+				acX = 1;
 				break;
 			default:
 				break;
@@ -1089,6 +1099,7 @@ class SinglePlayerGame : public Game {
 		bool isToJump = false;
 		int frameCount;
 		std::string message;
+		bool isDrowned = false;
 
 	public:
 		static const int width = 621/8;
@@ -1125,8 +1136,9 @@ class SinglePlayerGame : public Game {
 				DrawExtendGraph(50 + 50 * heart, 50, 100 + 50 * heart, 100, imgHandles["s_game_heart"], true);
 			}
 
-			DrawString(50, 50, std::to_string(damage).c_str(), GetColor(255, 255, 255));
-			
+			if (isDrowned) { imgHandle[DAMAGE] = imgHandles["s_game_player_drowned"]; }
+			else { imgHandle[DAMAGE] = imgHandles["s_game_player_damage"]; }
+
 			Character::draw();
 
 			return true;
@@ -1237,6 +1249,16 @@ class SinglePlayerGame : public Game {
 				invincibleTime--;
 			}
 
+			isDrowned = false;
+			for (auto enemy : enemyList) {
+				if (enemy->getEnemyType() != "s_game_water") { continue; }
+				if (left() <= enemy->right() && top() <= enemy->bottom() &&
+					right() >= enemy->left() && bottom() >= enemy->top()) {
+					isDrowned = true;
+					break;
+				}
+			}
+
 			if (damage >= maxDamage) {
 				die();
 			}
@@ -1323,6 +1345,7 @@ class SinglePlayerGame : public Game {
 
 		void damageControl() {
 			damage++;
+			game.makeEffect("s_game_hit", left(), top(), rect.width, rect.width, false, layer + 1, 2);
 
 			if (damage < maxDamage) {
 				// HP残ってる
@@ -1367,8 +1390,10 @@ class SinglePlayerGame : public Game {
 
 	std::shared_ptr<BGM> bgm;
 	const int maxTime = FPS * 60;
+
 	const int maxPlayerDamage = 1;
 	const int endBuffer = FPS * 5;
+
 
 	enum Difficulty {
 		EASY, HARD, NIGHTMARE,

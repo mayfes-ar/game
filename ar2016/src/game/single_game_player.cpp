@@ -102,6 +102,7 @@ std::shared_ptr<SinglePlayerGame::Fire> SinglePlayerGame::makeFire(int x, int y,
 	return enemy;
 }
 
+bool willFinishMode = false;
 
 bool SinglePlayerGame::onStart() {
 	using namespace std;
@@ -158,6 +159,7 @@ bool SinglePlayerGame::onStart() {
 
 		drawList.push_back(player);
 		drawList.push_back(make_shared<Background>(share.handle));
+		/*
 		makeEffect("s_game_coin", 200, 200, 50, 50, true);
 		makeEffect("s_game_coin", 250, 200, 50, 50, true, 150, 1, 3);
 		makeEffect("s_game_coin", 300, 200, 50, 50, true, 150, 2);
@@ -167,8 +169,9 @@ bool SinglePlayerGame::onStart() {
 		makeEffect("s_game_koumori", 500, 200, 50, 50, true, 150, 3);
 		makeEffect("s_game_koumori", 550, 200, 50, 50, true, 150, 4);
 		makeEffect("s_game_hit", 600, 200, 50, 50, true, 150, 2);
-		makeEffect("s_game_enemy", 650, 200, 50, 50, true, 150, 3);
-		makeEffect("s_game_sord", 700, 200, 50, 50, true, 150, 2);
+		makeEffect("s_game_enemy_over", 650, 200, 50, 50, true, 150, 3);
+		makeEffect("s_game_sword", 700, 200, 50, 50, true, 150, 2);
+		*/
 
 		share.rectMutex.lock();
 		markerList.clear();
@@ -227,14 +230,12 @@ bool SinglePlayerGame::onStart() {
 			}
 		};
 
-		
-
 		//yu
 		drawList.clear();
 		drawList.push_back(make_shared<Title>(hasPlayerWon, player, maxTime, timer));
 
 		makeEffect("s_game_over_hanabi", 250, 250, 512, 512, true,150 ,1,4);
-		makeEffect("s_game_over_hanabi", 450, 250, 400, 400, true, 150, 1,3);
+		makeEffect("s_game_over_hanabi", 400, 250, 400, 400, true, 150, 1,3);
 		makeEffect("s_game_coin", 250, 200, 50, 50, true, 150, 1, 3);
 		makeEffect("s_game_coin", 300, 200, 50, 50, true, 150, 2);
 		makeEffect("s_game_coin", 350, 200, 50, 50, true, 150, 2, 3);
@@ -249,11 +250,12 @@ bool SinglePlayerGame::onStart() {
 }
 
 bool SinglePlayerGame::onUpdate() {
-	bool willFinishMode = false;
+	willFinishMode = false;
+	funcTimer.update();
 
 	switch (mode.getMode()) {
 	case 0: { // イントロダクション
-		static int counterForWait = FPS / 2;
+		static int counterForWait = 5;
 		if (counterForWait == 0) {
 			counterForWait = 5;
 			if (key[KEY_INPUT_RETURN]) {
@@ -285,7 +287,6 @@ bool SinglePlayerGame::onUpdate() {
 		break;
 	}
 	case 1: { // playing
-		static int endCounter = endBuffer;
 		timer -= 1;
 		if (timer <= 0) {
 			willFinishMode = true;
@@ -314,7 +315,9 @@ bool SinglePlayerGame::onUpdate() {
 			hasPlayerWon = false;
 			bgm->stop();
 			bgm->playDeadSound();
-			willFinishMode = true;
+			funcTimer.set([this]() {
+				willFinishMode = true;
+			}, FPS*5);
 		}
 
 		// 敵の出現を管理する
@@ -323,7 +326,7 @@ bool SinglePlayerGame::onUpdate() {
 			switch (maxTime - timer) {
 			
 			case 100: {
-				makeRocketWanwan(-RocketWanwan::width, HEIGHT / 2 + 50);
+				makeRocketWanwan(-RocketWanwan::width/2, HEIGHT / 2 + 50);
 				break;
 			}
 			case 200: {
@@ -471,18 +474,7 @@ bool SinglePlayerGame::onUpdate() {
 			break;
 		}
 		}
-
-		if (willFinishMode){
-			endCounter--;
-			willFinishMode = false;
-		}
-		else if (endCounter < endBuffer) {
-			endCounter--;
-		}
-		if (endCounter == 0) {
-			willFinishMode = true;
-		}
-
+		
 		break;
 	}
 	case 2: { // リザルト画面
