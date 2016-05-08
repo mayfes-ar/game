@@ -58,22 +58,19 @@ void BreakoutGame::updateCollisionDetection()
 			if (!fireball->isEnemy()) {
 				if (m_components->enemy->isAlive()) {
 					if (fireball->isCollided(m_components->enemy->getRealm())) {
-						m_components->enemy->damageEnemy(fireball->giveDamage());
-						m_components->fireball_manager->destroy(fireball);
+						m_components->enemy->damageByPlayerFireball(fireball, m_components->fireball_manager);
 						continue;
 					}
 
 					if (m_components->enemy->getLeftHand()->isAlive()) {
 						if (fireball->isCollided(m_components->enemy->getLeftHand()->getRealm())) {
-							m_components->enemy->getLeftHand()->damageEnemy(fireball->giveDamage());
-							m_components->fireball_manager->destroy(fireball);
+							m_components->enemy->getLeftHand()->damageByPlayerFireball(fireball, m_components->fireball_manager);
 							continue;
 						}
 					}
 					if (m_components->enemy->getRightHand()->isAlive()) {
 						if (fireball->isCollided(m_components->enemy->getRightHand()->getRealm())) {
-							m_components->enemy->getRightHand()->damageEnemy(fireball->giveDamage());
-							m_components->fireball_manager->destroy(fireball);
+							m_components->enemy->getRightHand()->damageByPlayerFireball(fireball, m_components->fireball_manager);
 							continue;
 						}
 					}
@@ -211,7 +208,9 @@ void BreakoutGame::updateGameState()
 		}
 
 		if (m_components->info->isTimeOver() ||
-			!m_components->ship->isAlive()) {
+			!m_components->ship->isAlive() ||
+			(m_components->house_list.size() == 0 &&
+				m_components->resident_list.size() == 0)) {
 			mode.goNext();
 			return;
 		}
@@ -324,11 +323,23 @@ void BreakoutGame::updateEnemy() {
 }
 
 void BreakoutGame::updateTown() {
-	for (auto& house : m_components->house_list) {
-		house->updatePosition();
+	for (auto& itr = m_components->house_list.begin(); itr != m_components->house_list.end();) {
+		if ((*itr)->isEffectContinuing()) {
+			(*itr)->updatePosition();
+			++itr;
+		}
+		else {
+			itr = m_components->house_list.erase(itr);
+		}
 	}
 
-	for (auto& resident : m_components->resident_list) {
-		resident->updatePosition();
+	for (auto& itr = m_components->resident_list.begin(); itr != m_components->resident_list.end();) {
+		if ((*itr)->isEffectContinuing()) {
+			(*itr)->updatePosition();
+			++itr;
+		}
+		else {
+			itr = m_components->resident_list.erase(itr);
+		}
 	}
 }

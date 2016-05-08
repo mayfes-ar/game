@@ -171,7 +171,8 @@ bool Object::load() {
 	isSuccess &= loadImage("b_hime_damaged", "puzzle/hime_gameover");
 
 	isSuccess &= loadEffect("b_muteki", "breakout/muteki", 1, 6, 320, 1440);
-	isSuccess &= loadEffect("b_burning", "breakout/burning", 1, 4, 240, 900);
+	isSuccess &= loadEffect("b_burning", "breakout/burning", 1, 5, 240, 900);
+	isSuccess &= loadEffect("b_explosion", "breakout/explosion", 7, 1, 840, 120);
 
 	for (int num = 0; num <= 9; ++num) {
 		for (const auto& color : { "red", "blue", "yellow", "green" }) {

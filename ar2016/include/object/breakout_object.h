@@ -39,6 +39,12 @@ namespace Breakout {
 
 	class Effect : public Object {
 	public:
+		Effect(std::vector<int>& effectHandle, int frames_per_scene, const int priority) {
+			m_effectHandles = effectHandle;
+			m_count_max = m_effectHandles.size();
+			m_frames_per_scene = frames_per_scene;
+			Object::layer = priority;
+		}
 		Effect(std::vector<int>& effectHandle, const int priority) {
 			m_effectHandles = effectHandle;
 			m_count_max = m_effectHandles.size();
@@ -48,13 +54,13 @@ namespace Breakout {
 		void drawWithRealm(Shape::Rectangle realm) {
 			DrawExtendGraph(realm.left(), realm.top(),
 				realm.right(), realm.bottom(),
-				m_effectHandles[m_counter], TRUE);
+				m_effectHandles[m_counter / m_frames_per_scene], TRUE);
 		}
 
 		void incrementCounterWhenDrawWithRealm(Shape::Rectangle realm) {
 			DrawExtendGraph(realm.left(), realm.top(),
 				realm.right(), realm.bottom(),
-				m_effectHandles[m_counter], TRUE);
+				m_effectHandles[m_counter / m_frames_per_scene], TRUE);
 			incrementCounter();
 		}
 
@@ -62,12 +68,14 @@ namespace Breakout {
 
 		void incrementCounter() {
 			m_counter++;
-			if (m_counter == m_count_max) m_counter = 0;
+			if (m_counter == m_count_max * m_frames_per_scene) m_counter = 0;
 		}
 	private:
 		std::vector<int> m_effectHandles;
 		int m_count_max = 0;
 		int m_counter = 0;
+		// 1つの差分を連続で何フレーム映すか
+		int m_frames_per_scene = 1;
 	};
 
 	class ItemReceiverBase;
@@ -1336,7 +1344,7 @@ protected:
 
 private:
 	int m_burning_count = 60;
-	Effect m_burning_effect = Effect(effectHandles["b_burning"], PRIORITY_DYNAMIC_OBJECT);
+	Effect m_burning_effect = Effect(effectHandles["b_burning"], 5, PRIORITY_DYNAMIC_OBJECT);
 };
 
 class House : public Town
