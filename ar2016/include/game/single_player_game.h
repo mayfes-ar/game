@@ -601,11 +601,8 @@ class SinglePlayerGame : public Game {
 
 					if (left() < marker->right() && top() < marker->bottom() &&
 						right() > marker->left() && bottom() > marker->top()) {
-						if (isAlive) {
-							PlaySoundMem(soundHandles["s_game_attack"], DX_PLAYTYPE_BACK, true);
-						}
 						damageControl();
-						marker->effectHit();
+						// if (maxDamage > 0) { marker->effectHit(); }
 						invincibleTime = FPS;
 
 						return !isAlive;
@@ -630,11 +627,25 @@ class SinglePlayerGame : public Game {
 			}
 			else if (damage < maxDamage) {
 				// HP残ってる
+				PlaySoundMem(soundHandles["s_game_attack"], DX_PLAYTYPE_BACK, true);
+				game.makeEffect("s_game_sword", left(), top(), rect.width, rect.height, false, layer+1);
 				changeCharacterState(DAMAGE);
 			}
 			else {
+				PlaySoundMem(soundHandles["s_game_attack"], DX_PLAYTYPE_BACK, true);
+				game.makeEffect("s_game_sword", left(), top(), rect.width, rect.height, false, layer+1);
 				die();
 			}
+		}
+
+		virtual void die() {
+			changeCharacterState(OVER);
+			if (overBuffer <= 0) {
+				game.makeEffect("s_game_enemy_over", left(), top(), rect.width, rect.height, false, layer+1);
+				isAlive = false;
+			}
+			overBuffer--;
+
 		}
 	};
 
@@ -828,7 +839,7 @@ class SinglePlayerGame : public Game {
 			if (ray != nullptr) {
 				ray->die();
 			}
-			isAlive = false;
+			Enemy::die();
 		}
 	};
 
@@ -1325,6 +1336,7 @@ class SinglePlayerGame : public Game {
 
 		void damageControl() {
 			damage++;
+			game.makeEffect("s_game_hit", left(), top(), rect.width, rect.width, false, layer + 1, 2);
 
 			if (damage < maxDamage) {
 				// HP残ってる

@@ -168,8 +168,8 @@ bool SinglePlayerGame::onStart() {
 		makeEffect("s_game_koumori", 500, 200, 50, 50, true, 150, 3);
 		makeEffect("s_game_koumori", 550, 200, 50, 50, true, 150, 4);
 		makeEffect("s_game_hit", 600, 200, 50, 50, true, 150, 2);
-		makeEffect("s_game_enemy", 650, 200, 50, 50, true, 150, 3);
-		makeEffect("s_game_sord", 700, 200, 50, 50, true, 150, 2);
+		makeEffect("s_game_enemy_over", 650, 200, 50, 50, true, 150, 3);
+		makeEffect("s_game_sword", 700, 200, 50, 50, true, 150, 2);
 
 		share.rectMutex.lock();
 		markerList.clear();
@@ -274,7 +274,6 @@ bool SinglePlayerGame::onUpdate() {
 		break;
 	}
 	case 1: { // playing
-		static int endCounter = endBuffer;
 		timer -= 1;
 		if (timer <= 0) {
 			willFinishMode = true;
