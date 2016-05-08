@@ -51,6 +51,17 @@ bool Object::load() {
 		}
 	};
 
+	auto loadMovie = [](string key, string name) -> bool {
+		const string path = "movie/" + name + ".mpg";
+		const int handle = LoadGraph(path.c_str());
+		if (handle == -1) {
+			return false;
+		} else {
+			Object::movieHandles[key] = handle;
+			return true;
+		}
+	};
+	
 	// 使い方 isSuccess &= loadなんとか(登録するキー, ファイル名, ...);
 	bool isSuccess = true;
 
@@ -151,7 +162,7 @@ bool Object::load() {
 	isSuccess &= loadImage("s_game_result_dead", "s_game/s_game_result");
 	isSuccess &= loadImage("s_game_dead", "s_game/dead_sample");
 	isSuccess &= loadSound("s_game_over", "s_game/game_over.wav");
-
+	isSuccess &= loadMovie("s_game_over_hanabi", "hanabi");
 
 	// puzzle game
 	isSuccess &= loadImage("p_block", "puzzle/block");

@@ -1367,7 +1367,7 @@ class SinglePlayerGame : public Game {
 
 	std::shared_ptr<BGM> bgm;
 	const int maxTime = FPS * 60;
-	const int maxPlayerDamage = 10;
+	const int maxPlayerDamage = 1;
 	const int endBuffer = FPS * 5;
 
 	enum Difficulty {
