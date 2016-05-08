@@ -7,6 +7,7 @@
 #include <vector>
 #include <unordered_map>
 #include "object/breakout_object.h"
+#include "object/breakout_enemy.h"
 #include "const.h"
 #include <Eigen/Core>
 #include "moving/newton_behavior.h"
@@ -14,6 +15,7 @@
 #include "moving/random_behavior.h"
 #include "game/fps.h"
 #include "util/breakout_params.h"
+
 
 namespace Breakout{
 	enum class Mode : uint8_t {

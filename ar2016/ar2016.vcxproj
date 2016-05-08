@@ -191,6 +191,7 @@
     <ClInclude Include="include\moving\random_behavior.h" />
     <ClInclude Include="include\moving\spring_behavior.h" />
     <ClInclude Include="include\object\block_object.h" />
+    <ClInclude Include="include\object\breakout_enemy.h" />
     <ClInclude Include="include\object\breakout_object.h" />
     <ClInclude Include="include\object\object.h" />
     <ClInclude Include="include\object\shape.h" />

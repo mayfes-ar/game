@@ -44,5 +44,6 @@
     <ClInclude Include="include\util\score.h" />
     <ClInclude Include="include\moving\random_behavior.h" />
     <ClInclude Include="include\object\breakout_object.h" />
+    <ClInclude Include="include\object\breakout_enemy.h" />
   </ItemGroup>
 </Project>
