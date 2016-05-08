@@ -82,7 +82,7 @@ namespace Breakout {
 	constexpr int HOUSE_WIDTH = 100;
 	const int HOUSE_OFFSET_X = WIDTH / 4;
 	const int HOUSE_OFFSET_Y = HEIGHT - HOUSE_HEIGHT;
-	const Eigen::Vector2i HOUSE_START_POS = FIELD_START_POS + Eigen::Vector2i{ HOUSE_OFFSET_X, HOUSE_OFFSET_Y };
+	const Eigen::Vector2i HOUSE_START_POS = Eigen::Vector2i{ HOUSE_OFFSET_X, HOUSE_OFFSET_Y };
 	const int HOUSE_LIFE = 1;
 
 	// Resident のパラメータ
@@ -91,7 +91,7 @@ namespace Breakout {
 	constexpr int RESIDENT_WIDTH = 80;
 	const int RESIDENT_OFFSET_X = WIDTH / 4;
 	const int RESIDENT_OFFSET_Y = HEIGHT - RESIDENT_HEIGHT;
-	const Eigen::Vector2i RESIDENT_START_POS = FIELD_START_POS + Eigen::Vector2i{ RESIDENT_OFFSET_X, RESIDENT_OFFSET_Y };
+	const Eigen::Vector2i RESIDENT_START_POS = Eigen::Vector2i{ RESIDENT_OFFSET_X, RESIDENT_OFFSET_Y };
 	const int RESIDENT_LIFE = 1;
 
 } // namespace Breakout

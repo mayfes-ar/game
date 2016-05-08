@@ -174,14 +174,14 @@ void BreakoutComponents::setup()
 	// Townの初期化　
 	{
 		for (int i = 0; i < HOUSE_NUM; i++) {
-			auto realm = Shape::Rectangle(HOUSE_START_POS + Eigen::Vector2i(FIELD_WIDTH / HOUSE_NUM, 0), HOUSE_WIDTH, HOUSE_HEIGHT);
+			auto realm = Shape::Rectangle(HOUSE_START_POS + Eigen::Vector2i(FIELD_WIDTH * i / HOUSE_NUM, 0), HOUSE_WIDTH, HOUSE_HEIGHT);
 			auto life = Life(HOUSE_LIFE, HOUSE_LIFE);
 			auto house = std::make_shared<Breakout::House>(realm, life);
 			house_list.push_back(house);
 		}
 
 		for (int i = 0; i < RESIDENT_NUM; i++) {
-			auto realm = Shape::Rectangle(RESIDENT_START_POS + Eigen::Vector2i(FIELD_WIDTH / RESIDENT_NUM, 0), RESIDENT_WIDTH, RESIDENT_HEIGHT);
+			auto realm = Shape::Rectangle(RESIDENT_START_POS + Eigen::Vector2i(FIELD_WIDTH * i / RESIDENT_NUM, 0), RESIDENT_WIDTH, RESIDENT_HEIGHT);
 			auto life = Life(RESIDENT_LIFE, RESIDENT_LIFE);
 			std::shared_ptr<MovingBehavior> rnd_behavior = std::make_shared<RandomBehavior>(FIELD_START_POS.x(),
 				FIELD_START_POS.x() + FIELD_WIDTH - RESIDENT_WIDTH,

@@ -4,10 +4,10 @@
 
 void BreakoutGame::updateCollisionDetection()
 {
-	bool continue_loop = false;
 	// FireBallの衝突判定
 	{
 		for (auto& fireball : m_components->fireball_manager->getFireballList()) {
+			bool continue_loop = false;
 
 			// 下壁との衝突判定
 			if (CollisionDetection::isOnLine(fireball->getRealm(),
@@ -41,8 +41,7 @@ void BreakoutGame::updateCollisionDetection()
 
 			// Block衝突判定
 			// EnemyModeだったらBlockと衝突させない
-			if (fireball->isEnemy()) { continue; }
-			else {
+			if (!fireball->isEnemy()) {
 				for (int block_id = 0; block_id < Breakout::BLOCK_HEIGHT_NUM * Breakout::BLOCK_WIDTH_NUM; ++block_id) {
 					if (m_components->block_list.at(block_id)->isDisappeared()) continue;
 					if (fireball->isCollided(m_components->block_list.at(block_id)->getRealm())) {
