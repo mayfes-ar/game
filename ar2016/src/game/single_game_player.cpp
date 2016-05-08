@@ -315,7 +315,7 @@ bool SinglePlayerGame::onUpdate() {
 			switch (maxTime - timer) {
 			
 			case 100: {
-				makeRocketWanwan(-RocketWanwan::width, HEIGHT / 2 + 50);
+				makeRocketWanwan(-RocketWanwan::width/2, HEIGHT / 2 + 50);
 				break;
 			}
 			case 200: {

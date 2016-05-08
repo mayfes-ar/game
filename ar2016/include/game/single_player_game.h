@@ -660,7 +660,7 @@ class SinglePlayerGame : public Game {
 		static const int height = 32;
 		
 
-		Teresa(int x_, int y_, SinglePlayerGame& game_, double size, int maxDamage_ = 2, std::string imgHandleKey_ = "s_game_bat") : Enemy(x_, y_, width*size, height*size, imgHandleKey_, maxDamage_, game_) {
+		Teresa(int x_, int y_, SinglePlayerGame& game_, double size, int maxDamage_ = 1, std::string imgHandleKey_ = "s_game_bat") : Enemy(x_, y_, width*size, height*size, imgHandleKey_, maxDamage_, game_) {
 			layer = 160;
 		}
 
@@ -672,6 +672,7 @@ class SinglePlayerGame : public Game {
 	};
 
 	class RocketWanwan : public Enemy {
+		int stayCount = FPS * 2;
 	public :
 		static const int width = 430;
 		static const int height = 275;
@@ -692,18 +693,23 @@ class SinglePlayerGame : public Game {
 
 		void setAc(double& acX, double& acY) {
 			acY = -0.5 * (1 - (rect.y - prevY <= 0) - (rect.y - prevY< 0));
-			switch (moveDirection) {
-			case LEFT: {
-				acX = -7;
-				break;
+			if (stayCount == 0) {
+				switch (moveDirection) {
+				case LEFT: {
+					acX = -7;
+					break;
+				}
+				case RIGHT: {
+					acX = 7;
+					break;
+				}
+				default: {
+					break;
+				}
+				}
 			}
-			case RIGHT: {
-				acX = 7;
-				break;
-			}
-			default: {
-				break;
-			}
+			else if (stayCount > 0) {
+				stayCount--;
 			}
 		}
 	};
@@ -713,7 +719,7 @@ class SinglePlayerGame : public Game {
 		static const int height = 100;
 
 	public:
-		Switch(int x_, int y_, SinglePlayerGame& game_, double size, int maxDamage_ = 2, std::string imgHandleKey_ = "s_game_switch") : Enemy(x_, y_, width * size, height * size, imgHandleKey_, maxDamage_, game_) {
+		Switch(int x_, int y_, SinglePlayerGame& game_, double size, int maxDamage_ = 1, std::string imgHandleKey_ = "s_game_switch") : Enemy(x_, y_, width * size, height * size, imgHandleKey_, maxDamage_, game_) {
 			layer = 130;
 			moveDirection = RIGHT;
 		}
@@ -783,7 +789,7 @@ class SinglePlayerGame : public Game {
 		std::shared_ptr<Ray> ray = nullptr;
 
 	public:
-		Ufo(int x_, int y_, SinglePlayerGame& game_, double size, int maxDamage_ = 3, std::string imgHandleKey_ = "s_game_ufo") : Enemy(x_, y_, width * size, height * size, imgHandleKey_, maxDamage_, game_) {
+		Ufo(int x_, int y_, SinglePlayerGame& game_, double size, int maxDamage_ = 2, std::string imgHandleKey_ = "s_game_ufo") : Enemy(x_, y_, width * size, height * size, imgHandleKey_, maxDamage_, game_) {
 			layer = 150;
 		};
 
@@ -868,7 +874,7 @@ class SinglePlayerGame : public Game {
 
 		void setAc(double& acX, double& acY) {
 			acX = 0;
-			acY = 10;
+			acY = 1;
 		}
 
 		bool deathDecision() {
@@ -962,9 +968,10 @@ class SinglePlayerGame : public Game {
 	};
 
 	class Eagle : public Enemy {
+		int stayCount = FPS * 3;
+	public:
 		static const int width = 430 / 4;
 		static const int height = 263 / 4;
-	public:
 		Eagle(int x_, int y_, SinglePlayerGame& game_, double size, int maxDamage_ = 2, std::string imgHandleKey_ = "s_game_eagle") : Enemy(x_, y_, width * size, height * size, imgHandleKey_, maxDamage_, game_) {
 		};
 
@@ -978,32 +985,22 @@ class SinglePlayerGame : public Game {
 		}
 
 		void setAc(double& acX, double& acY) {
-			acX = 4;
-			acY = 2;
-		}
-
-		void updateCoordinate(double acX, double acY) {
-			double& x = rect.x;
-			double& y = rect.y;
-
-			const double diffX = x - prevX;
-			const double diffY = y - prevY;
-
-
-			// verlet法
-			const double tempX = x;
-			x += diffX + acX;
-			prevX = tempX;
-			const double tempY = y;
-			y += diffY + acY;
-			prevY = tempY;
+			if (stayCount == 0) {
+				acX = 3;
+				acY = 3;
+			}
+			else if (stayCount > 0) {
+				stayCount--;
+				acY = 0;
+				acX = pow(-1, stayCount/20);
+			}
 		}
 	};
 
 	class Heiho : public Enemy {
 		static const int width = 345 / 4;
 		static const int height = 333 / 4;
-		int frameCounter = 30;
+		int frameCounter = FPS*3;
 	public:
 		Heiho(int x_, int y_, SinglePlayerGame& game_, double size, int maxDamage_ = 2, std::string imgHandleKey_ = "s_game_ghorst") : Enemy(x_, y_, width * size, height * size, imgHandleKey_, maxDamage_, game_) {
 			moveDirection = LEFT;
@@ -1019,12 +1016,12 @@ class SinglePlayerGame : public Game {
 			double acY = 0;
 			setAc(acX, acY);
 			updateCoordinate(acX, acY);
-			moveBecauseBlockCollision(game.blockList);
+			// moveBecauseBlockCollision(game.blockList);
 			moveBecauseMarkerCollision(game.markerList);
 		}
 
 		void setAc(double& acX, double& acY) {
-			acY = 4;
+			acY = 2;
 		}
 
 		void updateCoordinate(double acX, double acY) {
@@ -1034,14 +1031,14 @@ class SinglePlayerGame : public Game {
 			
 			double diffX;
 			if (frameCounter > 0) {
-				diffX = -5;
+				diffX = -2;
 			}
 			else if (frameCounter == 0) {
 				PlaySoundMem(soundHandles["s_game_shuzo"], DX_PLAYTYPE_BACK, true);
 				diffX = 0;
 			}
 			else {
-				diffX = 5;
+				diffX = 2;
 			}
 			const double diffY = 0;
 
@@ -1079,10 +1076,10 @@ class SinglePlayerGame : public Game {
 			{
 			case SinglePlayerGame::Character::LEFT:
 			case SinglePlayerGame::Character::NOMOVE:
-				acX = -10;
+				acX = -1;
 				break;
 			case SinglePlayerGame::Character::RIGHT:
-				acX = 10;
+				acX = 1;
 				break;
 			default:
 				break;
