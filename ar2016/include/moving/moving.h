@@ -32,6 +32,10 @@ public:
 		m_vel = velocity;
 	}
 
+	void setBehavior(std::shared_ptr<MovingBehavior>& behavior) {
+		m_moving_behavior = behavior;
+	}
+
 	Eigen::Vector2f getAccel() const
 	{
 		return m_accel;
