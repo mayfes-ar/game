@@ -136,7 +136,8 @@ bool Object::load() {
 	isSuccess &= loadSound("s_game_dead", "s_game/dead.wav");
 	isSuccess &= loadSound("s_game_attack", "s_game/bomb.mp3");
 	isSuccess &= loadSound("s_game_jump", "s_game/jump.mp3");
-	isSuccess &= loadSound("s_game_shuzo", "s_game/shuzo.mp3");
+	isSuccess &= loadSound("s_game_shuzo", "s_game/shuzo.mp3"); 
+	isSuccess &= loadSound("s_game_fireshot", "s_game/fireshot_kurage.mp3");
 
 	isSuccess &= loadEffect("s_game_hit", "s_game/hit", 5, 2, 1200, 400);
 	isSuccess &= loadEffect("s_game_enemy_over", "s_game/enemy", 10, 1, 1200, 200);

@@ -1040,7 +1040,7 @@ class SinglePlayerGame : public Game {
 				diffX = -2;
 			}
 			else if (frameCounter == 0) {
-				PlaySoundMem(soundHandles["s_game_shuzo"], DX_PLAYTYPE_BACK, true);
+				PlaySoundMem(soundHandles["s_game_fireshot"], DX_PLAYTYPE_BACK, true);
 				diffX = 0;
 			}
 			else {
