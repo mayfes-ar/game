@@ -23,6 +23,7 @@
 #include "util/color_palette.h"
 #include "moving/newton_behavior.h"
 #include "moving/spring_behavior.h"
+#include "moving/random_behavior.h"
 #include "Dxlib.h"
 
 
@@ -179,19 +180,19 @@ namespace Breakout {
 
 			switch (m_item_kind) {
 			case RestoreShip:
-				DrawExtendGraph(m_realm.left(), m_realm.top(), m_realm.right(), m_realm.bottom(), imgHandles["restore_ship"], TRUE);
+				DrawExtendGraph(m_realm.left(), m_realm.top(), m_realm.right(), m_realm.bottom(), imgHandles["b_restore_ship"], TRUE);
 				break;
 			case DamageShip:
-				DrawExtendGraph(m_realm.left(), m_realm.top(), m_realm.right(), m_realm.bottom(), imgHandles["damage_ship"], TRUE);
+				DrawExtendGraph(m_realm.left(), m_realm.top(), m_realm.right(), m_realm.bottom(), imgHandles["b_damage_ship"], TRUE);
 				break;
 			case EnhanceShip:
-				DrawExtendGraph(m_realm.left(), m_realm.top(), m_realm.right(), m_realm.bottom(), imgHandles["enhance_ship"], TRUE);
+				DrawExtendGraph(m_realm.left(), m_realm.top(), m_realm.right(), m_realm.bottom(), imgHandles["b_enhance_ship"], TRUE);
 				break;
 			case RestorePot:
-				DrawExtendGraph(m_realm.left(), m_realm.top(), m_realm.right(), m_realm.bottom(), imgHandles["pot"], TRUE);
+				DrawExtendGraph(m_realm.left(), m_realm.top(), m_realm.right(), m_realm.bottom(), imgHandles["b_pot"], TRUE);
 				break;
 			case RestoreTime:
-				DrawExtendGraph(m_realm.left(), m_realm.top(), m_realm.right(), m_realm.bottom(), imgHandles["restore_time"], TRUE);
+				DrawExtendGraph(m_realm.left(), m_realm.top(), m_realm.right(), m_realm.bottom(), imgHandles["b_restore_time"], TRUE);
 				break;
 			}
 
@@ -601,17 +602,17 @@ public:
 		case Color::Green:
 			DrawExtendGraph(m_realm.left(), m_realm.top(),
 				m_realm.right(), m_realm.bottom(),
-				imgHandles["block_green"], TRUE);
+				imgHandles["b_block_green"], TRUE);
 			break;
 		case Color::Blue:
 			DrawExtendGraph(m_realm.left(), m_realm.top(),
 				m_realm.right(), m_realm.bottom(),
-				imgHandles["block_blue"], TRUE);
+				imgHandles["b_block_blue"], TRUE);
 			break;
 		case Color::Red:
 			DrawExtendGraph(m_realm.left(), m_realm.top(),
 				m_realm.right(), m_realm.bottom(),
-				imgHandles["block_red"], TRUE);
+				imgHandles["b_block_red"], TRUE);
 			break;
 		}
 
@@ -686,7 +687,7 @@ public:
 	bool draw() override {
 		if (isDisappeared()) return true;
 		Block::draw();
-		DrawExtendGraph(m_realm.left(), m_realm.top(), m_realm.right(), m_realm.bottom(), imgHandles["hatena_block"], TRUE);
+		DrawExtendGraph(m_realm.left(), m_realm.top(), m_realm.right(), m_realm.bottom(), imgHandles["b_hatena_block"], TRUE);
 		return true;
 	}
 	std::string getBlockKind() override {
@@ -705,7 +706,7 @@ public:
 	bool draw() override {
 		if (isDisappeared()) return true;
 		Block::draw();
-		DrawExtendGraph(m_realm.left(), m_realm.top(), m_realm.right(), m_realm.bottom(), imgHandles["hard_block"], TRUE);
+		DrawExtendGraph(m_realm.left(), m_realm.top(), m_realm.right(), m_realm.bottom(), imgHandles["b_hard_block"], TRUE);
 		return true;
 	}
 	std::string getBlockKind() override {
@@ -724,7 +725,7 @@ public:
 	bool draw() override {
 		if (isDisappeared()) return true;
 		Block::draw();
-		DrawExtendGraph(m_realm.left(), m_realm.top(), m_realm.right(), m_realm.bottom(), imgHandles["unbreakable_block"], TRUE);
+		DrawExtendGraph(m_realm.left(), m_realm.top(), m_realm.right(), m_realm.bottom(), imgHandles["b_unbreakable_block"], TRUE);
 		return true;
 	}
 	std::string getBlockKind() override {
@@ -1060,7 +1061,7 @@ public:
 
 		DrawRotaGraph(m_realm.getCenterPoint().x(), m_realm.getCenterPoint().y(),
 			(double)m_realm.width / 150.0, m_rotation,
-			imgHandles["pot"], TRUE, FALSE);
+			imgHandles["b_pot"], TRUE, FALSE);
 
 
 		DrawBox(m_realm.left(), m_realm.top(),
@@ -1247,7 +1248,7 @@ public:
 			for (auto block : m_blocks) {
 				DrawExtendGraph(block.left(), block.top(),
 					block.right(), block.bottom(),
-					imgHandles["ship_block"], TRUE);
+					imgHandles["b_ship_block"], TRUE);
 				m_muteki_effect.drawWithRealm(block);
 			}
 		}
@@ -1255,7 +1256,7 @@ public:
 			for (auto block : m_blocks) {
 				DrawExtendGraph(block.left(), block.top(),
 					block.right(), block.bottom(),
-					imgHandles["ship_block"], TRUE);
+					imgHandles["b_ship_block"], TRUE);
 			}
 		}
 
@@ -1273,7 +1274,7 @@ private:
 	Life m_life = Life(); // defaultは４つ。火の玉に当たるごとに一つ減る
 	bool m_is_enhanced = false;
 	int m_enhanced_count = 150;
-	Effect m_muteki_effect = Effect(effectHandles["muteki"], PRIORITY_DYNAMIC_OBJECT);
+	Effect m_muteki_effect = Effect(effectHandles["b_muteki"], PRIORITY_DYNAMIC_OBJECT);
 	// item を pot に適用させるため
 	std::shared_ptr<Pot> m_pot = nullptr;
 	// item を　info に適用させるため
@@ -1359,7 +1360,7 @@ public:
 
 	bool draw() override {
 		if (!isAlive()) return true;
-		DrawExtendGraph(m_realm.left(), m_realm.top(), m_realm.right(), m_realm.bottom(), imgHandles["left_hand"], TRUE);
+		DrawExtendGraph(m_realm.left(), m_realm.top(), m_realm.right(), m_realm.bottom(), imgHandles["b_left_hand"], TRUE);
 		return true;
 	}
 private:
@@ -1404,7 +1405,7 @@ public:
 
 	bool draw() override {
 		if (!isAlive()) return true;
-		DrawExtendGraph(m_realm.left(), m_realm.top(), m_realm.right(), m_realm.bottom(), imgHandles["right_hand"], TRUE);
+		DrawExtendGraph(m_realm.left(), m_realm.top(), m_realm.right(), m_realm.bottom(), imgHandles["b_right_hand"], TRUE);
 		return true;
 	}
 private:
@@ -1476,7 +1477,7 @@ public:
 
 	bool draw() override {
 		if (!isAlive()) return true;
-		DrawExtendGraph(m_realm.left(), m_realm.top(), m_realm.right(), m_realm.bottom(), imgHandles["donald"], TRUE);
+		DrawExtendGraph(m_realm.left(), m_realm.top(), m_realm.right(), m_realm.bottom(), imgHandles["b_donald"], TRUE);
 		if (hasLeft()) m_left_hand->draw();
 		if (hasRight()) m_right_hand->draw();
 		return true;
@@ -1499,6 +1500,130 @@ public:
 private:
 	std::shared_ptr<EnemyLeftHand> m_left_hand = nullptr;
 	std::shared_ptr<EnemyRightHand> m_right_hand = nullptr;
+};
+
+class Town : public Object
+{
+public:
+	Town() {}
+	virtual ~Town() {}
+	bool isFixed() {
+		if (m_moving->getVelocity() == Eigen::Vector2f::Zero(), m_moving->getAccel() == Eigen::Vector2f::Zero()) return true;
+		else return false;
+	}
+	virtual void changeBehavior(std::shared_ptr<MovingBehavior>& behavior) {
+		m_moving->setBehavior(behavior);
+	}
+	virtual void updatePosition() {
+		m_moving->updatePoistion(m_realm.start_point);
+	}
+	virtual void damageByFireball(std::shared_ptr<Fireball>& fireball, std::shared_ptr<FireballManager>& manager) {
+		// もし敵のfireballだったら。（ここらへんどうしようか）
+		if (fireball->isEnemy()) {
+			m_life.damage(fireball->giveDamage());
+		}
+		//触れたら消える
+		manager->destroy(fireball);
+	}
+	bool isAlive() {
+		return m_life.isAlive();
+	}
+	Shape::Rectangle getRealm() {
+		return m_realm;
+	}
+
+	// 子クラスで呼んでもらう
+	virtual bool draw() override {
+		//死んでいて
+		if (!isAlive()) {
+			//燃える処理が終わってないなら
+			if (m_burning_count >= 0) {
+				m_burning_effect.incrementCounterWhenDrawWithRealm(m_realm);
+				m_burning_count--;
+			}
+		}
+		return true;
+	}
+
+	bool isEffectContinuing() {
+		return m_burning_count >= 0;
+	}
+	
+protected:
+	Shape::Rectangle m_realm = Shape::Rectangle();
+	Life m_life;
+	std::shared_ptr<Moving> m_moving = std::make_shared<Moving>(1.0f/30.0f, std::make_shared<NewtonBehavior>());
+
+private:
+	int m_burning_count = 60;
+	Effect m_burning_effect = Effect(effectHandles["b_burning"], PRIORITY_DYNAMIC_OBJECT);
+};
+
+class House : public Town
+{
+public:
+	House(Shape::Rectangle realm, Life life) {
+		m_realm = realm;
+		m_life = life;
+		Object::layer = PRIORITY_STATIC_OBJECT;
+	}
+	House(Shape::Rectangle realm, Life life, int img_handle) {
+		m_realm = realm;
+		m_life = life;
+		m_img_handle = img_handle;
+		Object::layer = PRIORITY_STATIC_OBJECT;
+	}
+	bool draw() override {
+		if (m_life.isAlive() || isEffectContinuing()) {
+			DrawExtendGraph(m_realm.left(), m_realm.top(), m_realm.right(), m_realm.bottom(), m_img_handle, TRUE);
+		}
+		Town::draw();
+		return true;
+	}
+private:
+	int m_img_handle = imgHandles["b_house01"];
+};
+
+class Resident : public Town
+{
+public:
+	Resident(Shape::Rectangle realm, Life life, std::shared_ptr<MovingBehavior>& behavior) {
+		m_realm = realm;
+		m_life = life;
+		m_moving->setBehavior(behavior);
+		Object::layer = PRIORITY_DYNAMIC_OBJECT;
+	}
+	Resident(Shape::Rectangle realm, Life life, std::shared_ptr<MovingBehavior>& behavior, int img_handle) {
+		m_realm = realm;
+		m_life = life;
+		m_moving->setBehavior(behavior);
+		m_img_handle = img_handle;
+		Object::layer = PRIORITY_DYNAMIC_OBJECT;
+	}
+	Resident(Shape::Rectangle realm, Life life, std::shared_ptr<MovingBehavior>& behavior, int img_handle, int img_handle_damaged) {
+		m_realm = realm;
+		m_life = life;
+		m_moving->setBehavior(behavior);
+		m_img_handle = img_handle;
+		m_img_handle_damaged = img_handle_damaged;
+		Object::layer = PRIORITY_DYNAMIC_OBJECT;
+	}
+
+	bool draw() override {
+		if (m_life.isAlive()) {
+			DrawExtendGraph(m_realm.left(), m_realm.top(), m_realm.right(), m_realm.bottom(), m_img_handle, TRUE);
+		}
+		else {
+			if (isEffectContinuing()) {
+				DrawExtendGraph(m_realm.left(), m_realm.top(), m_realm.right(), m_realm.bottom(), m_img_handle_damaged, TRUE);
+			}
+		}
+		Town::draw();
+		return true;
+	}
+private:
+	int m_img_handle = imgHandles["b_hime"];
+	int m_img_handle_damaged = imgHandles["b_hime_damaged"];
 };
 
 } // namespace Breakout

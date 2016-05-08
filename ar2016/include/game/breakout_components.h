@@ -11,6 +11,7 @@
 #include <Eigen/Core>
 #include "moving/newton_behavior.h"
 #include "moving/spring_behavior.h"
+#include "moving/random_behavior.h"
 #include "game/fps.h"
 #include "util/breakout_params.h"
 
@@ -54,4 +55,8 @@ public:
 	std::vector<std::shared_ptr<Breakout::Item>> item_list;
 
 	std::shared_ptr<Breakout::EnemyHead> enemy = nullptr;
+
+	std::vector<std::shared_ptr<Breakout::House>> house_list;
+
+	std::vector<std::shared_ptr<Breakout::Resident>> resident_list;
 };

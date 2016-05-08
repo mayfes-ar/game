@@ -4,6 +4,7 @@
 
 void BreakoutGame::updateCollisionDetection()
 {
+	bool continue_loop = false;
 	// FireBallの衝突判定
 	{
 		for (auto& fireball : m_components->fireball_manager->getFireballList()) {
@@ -46,10 +47,12 @@ void BreakoutGame::updateCollisionDetection()
 					if (m_components->block_list.at(block_id)->isDisappeared()) continue;
 					if (fireball->isCollided(m_components->block_list.at(block_id)->getRealm())) {
 						m_components->block_list.at(block_id)->damageBlock(fireball->giveDamage());
+						continue_loop = true;
 						break;
 					}
 				}
 			}
+			if (continue_loop) continue;
 
 			// Enemy衝突判定
 			//エネミーモードじゃなかったら
@@ -77,6 +80,29 @@ void BreakoutGame::updateCollisionDetection()
 					}
 				}
 			}
+
+			// Town の衝突判定
+			for (auto& house : m_components->house_list) {
+				if (house->isAlive()) {
+					if (fireball->isCollided(house->getRealm())) {
+						house->damageByFireball(fireball, m_components->fireball_manager);
+						continue_loop = true;
+						break;
+					}
+				}
+			}
+			if (continue_loop) continue;
+
+			for (auto& resident : m_components->resident_list) {
+				if (resident->isAlive()) {
+					if (fireball->isCollided(resident->getRealm())) {
+						resident->damageByFireball(fireball, m_components->fireball_manager);
+						continue_loop = true;
+						break;
+					}
+				}
+			}
+			if (continue_loop) continue;
 		}
 	}
 	//Itemの衝突判定
@@ -296,4 +322,14 @@ void BreakoutGame::updateEnemy() {
 		m_components->fireball_manager->add(m_components->enemy->makeFireball());
 	}
 
+}
+
+void BreakoutGame::updateTown() {
+	for (auto& house : m_components->house_list) {
+		house->updatePosition();
+	}
+
+	for (auto& resident : m_components->resident_list) {
+		resident->updatePosition();
+	}
 }
