@@ -638,10 +638,10 @@ class SinglePlayerGame : public Game {
 
 	class Teresa : public Enemy {
 	public:
-		static const int width = 100;
-		static const int height = 100;
+		static const int width = 80;
+		static const int height = 32;
 
-		Teresa(int x_, int y_, SinglePlayerGame& game_, double size, int maxDamage_ = 2, std::string imgHandleKey_ = "s_game_teresa") : Enemy(x_, y_, width*size, height*size, imgHandleKey_, maxDamage_, game_) {
+		Teresa(int x_, int y_, SinglePlayerGame& game_, double size, int maxDamage_ = 2, std::string imgHandleKey_ = "s_game_bat") : Enemy(x_, y_, width*size, height*size, imgHandleKey_, maxDamage_, game_) {
 			layer = 160;
 		}
 
@@ -998,7 +998,7 @@ class SinglePlayerGame : public Game {
 		static const int height = 333 / 4;
 		int frameCounter = 30;
 	public:
-		Heiho(int x_, int y_, SinglePlayerGame& game_, double size, int maxDamage_ = 2, std::string imgHandleKey_ = "s_game_heiho") : Enemy(x_, y_, width * size, height * size, imgHandleKey_, maxDamage_, game_) {
+		Heiho(int x_, int y_, SinglePlayerGame& game_, double size, int maxDamage_ = 2, std::string imgHandleKey_ = "s_game_ghorst") : Enemy(x_, y_, width * size, height * size, imgHandleKey_, maxDamage_, game_) {
 			moveDirection = LEFT;
 			layer = 152;
 		}
