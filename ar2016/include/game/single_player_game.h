@@ -65,10 +65,12 @@ class SinglePlayerGame : public Game {
 		}
 
 		bool draw() {
-			// DrawExtendGraph(CAP2IMG_SHIFT_X, CAP2IMG_SHIFT_Y, CAP2IMG_SHIFT_X + CAP2IMG_RATE*CAP_WIDTH, CAP2IMG_SHIFT_Y + CAP2IMG_RATE*CAP_HEIGHT, handle, FALSE);
-			SetDrawBright(230, 230, 230);
+			DrawExtendGraph(CAP2IMG_SHIFT_X, CAP2IMG_SHIFT_Y, CAP2IMG_SHIFT_X + CAP2IMG_RATE*CAP_WIDTH, CAP2IMG_SHIFT_Y + CAP2IMG_RATE*CAP_HEIGHT, handle, FALSE);
+			// SetDrawBright(230, 230, 230);
+			SetDrawBlendMode(DX_BLENDMODE_ALPHA, 200);
 			DrawExtendGraph(0, 0, WIDTH, HEIGHT, imgHandles["background"], true);
-			SetDrawBright(255, 255, 255);
+			SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 100);
+			// SetDrawBright(255, 255, 255);
 			return true;
 		}
 	};
@@ -1368,7 +1370,6 @@ class SinglePlayerGame : public Game {
 	std::shared_ptr<BGM> bgm;
 	const int maxTime = FPS * 60;
 	const int maxPlayerDamage = 10;
-	const int endBuffer = FPS * 5;
 
 	enum Difficulty {
 		EASY, HARD, NIGHTMARE,

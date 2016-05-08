@@ -102,6 +102,7 @@ std::shared_ptr<SinglePlayerGame::Fire> SinglePlayerGame::makeFire(int x, int y,
 	return enemy;
 }
 
+bool willFinishMode = false;
 
 bool SinglePlayerGame::onStart() {
 	using namespace std;
@@ -236,11 +237,12 @@ bool SinglePlayerGame::onStart() {
 }
 
 bool SinglePlayerGame::onUpdate() {
-	bool willFinishMode = false;
+	willFinishMode = false;
+	funcTimer.update();
 
 	switch (mode.getMode()) {
 	case 0: { // イントロダクション
-		static int counterForWait = FPS / 2;
+		static int counterForWait = 5;
 		if (counterForWait == 0) {
 			counterForWait = 5;
 			if (key[KEY_INPUT_RETURN]) {
@@ -301,7 +303,9 @@ bool SinglePlayerGame::onUpdate() {
 			hasPlayerWon = false;
 			bgm->stop();
 			bgm->playDeadSound();
-			willFinishMode = true;
+			funcTimer.set([this]() {
+				willFinishMode = true;
+			}, FPS*5);
 		}
 
 		// 敵の出現を管理する
@@ -458,18 +462,7 @@ bool SinglePlayerGame::onUpdate() {
 			break;
 		}
 		}
-
-		if (willFinishMode){
-			endCounter--;
-			willFinishMode = false;
-		}
-		else if (endCounter < endBuffer) {
-			endCounter--;
-		}
-		if (endCounter == 0) {
-			willFinishMode = true;
-		}
-
+		
 		break;
 	}
 	case 2: { // リザルト画面
