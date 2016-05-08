@@ -570,9 +570,11 @@ class SinglePlayerGame : public Game {
 
 	// 敵キャラクター
 	class Enemy : public Character {
+		std::string imgHandleKey;
 	public:
 		Enemy(int x_, int y_, int width_, int height_, std::string imgHandleKey_, int maxDamage_, SinglePlayerGame& game_, int overBufferMax_ = FPS, int maxInvincibleTime_ = FPS) : Character(x_,y_,width_,height_,imgHandleKey_,maxDamage_,game_, overBufferMax_, maxInvincibleTime_) {
 			layer = 101;
+			imgHandleKey = imgHandleKey_;
 		}
 		
 		std::string overEffectKey = "s_game_enemy_over";
@@ -650,6 +652,10 @@ class SinglePlayerGame : public Game {
 			}
 			overBuffer--;
 
+		}
+
+		std::string getEnemyType() {
+			return imgHandleKey;
 		}
 	};
 
@@ -1093,6 +1099,7 @@ class SinglePlayerGame : public Game {
 		bool isToJump = false;
 		int frameCount;
 		std::string message;
+		bool isDrowned = false;
 
 	public:
 		static const int width = 621/8;
@@ -1129,8 +1136,9 @@ class SinglePlayerGame : public Game {
 				DrawExtendGraph(50 + 50 * heart, 50, 100 + 50 * heart, 100, imgHandles["s_game_heart"], true);
 			}
 
-			DrawString(50, 50, std::to_string(damage).c_str(), GetColor(255, 255, 255));
-			
+			if (isDrowned) { imgHandle[DAMAGE] = imgHandles["s_game_player_drowned"]; }
+			else { imgHandle[DAMAGE] = imgHandles["s_game_player_damage"]; }
+
 			Character::draw();
 
 			return true;
@@ -1239,6 +1247,16 @@ class SinglePlayerGame : public Game {
 			}
 			else if (invincibleTime > 0) {
 				invincibleTime--;
+			}
+
+			isDrowned = false;
+			for (auto enemy : enemyList) {
+				if (enemy->getEnemyType() != "s_game_water") { continue; }
+				if (left() <= enemy->right() && top() <= enemy->bottom() &&
+					right() >= enemy->left() && bottom() >= enemy->top()) {
+					isDrowned = true;
+					break;
+				}
 			}
 
 			if (damage >= maxDamage) {

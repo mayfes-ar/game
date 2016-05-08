@@ -75,6 +75,7 @@ bool Object::load() {
 	isSuccess &= loadImage("s_game_player", "s_game/hime_normal");
 	isSuccess &= loadImage("s_game_player_damage", "s_game/hime_odoroki");
 	isSuccess &= loadImage("s_game_player_over", "s_game/hime_gameover");
+	isSuccess &= loadImage("s_game_player_drowned", "s_game/hime_obore");
 
 	isSuccess &= loadImage("s_game_wanwan", "s_game/wolf");
 	isSuccess &= loadImage("s_game_wanwan_damage", "s_game/wolf");
