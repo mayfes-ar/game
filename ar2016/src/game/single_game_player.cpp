@@ -187,6 +187,7 @@ bool SinglePlayerGame::onStart() {
 
 	// mode 2
 	mode.setMode([this]() {
+
 		class Title : public Object {
 			bool hasPlayerWon = true;
 			std::shared_ptr<SinglePlayerGame::Player> player;
@@ -209,37 +210,13 @@ bool SinglePlayerGame::onStart() {
 					DrawString(100, 150, clearScore.c_str(), GetColor(0, 0, 0));
 				}
 				else {
-					DrawExtendGraph(WIDTH / 2 - 400, 30, WIDTH / 2 + 400, 30 + 296, imgHandles["s_game_result_dead"], true);
-					DrawExtendGraph(WIDTH / 2 - 75, 400, WIDTH / 2 + 75, 400 + 150, imgHandles["s_game_dead"], true);
+					//DrawExtendGraph(WIDTH / 2 - 400, 30, WIDTH / 2 + 400, 30 + 296, imgHandles["s_game_result_dead"], true);
+					//DrawExtendGraph(WIDTH / 2 - 75, 400, WIDTH / 2 + 75, 400 + 150, imgHandles["s_game_dead"], true);
 					std::string deadScore = "Score : " + std::to_string(maxTime - timer);
 					std::string playTime = "Time : " + std::to_string((maxTime - timer) / 30);
 					DrawString(100, 150, deadScore.c_str(), GetColor(255, 255, 255));
 					DrawString(100, 200, playTime.c_str(), GetColor(255, 255, 255));
 
-					//Movie入れるテスト
-					int MovieGraphHandle;
-
-					if (DxLib_Init() == -1)    // ＤＸライブラリ初期化処理
-					{
-						return -1;    // エラーが発生したら終了
-					}
-
-					// ムービーファイルをロードします。
-					MovieGraphHandle = LoadGraph("s_game_over_hanabi");
-
-					// ムービーを再生状態にします
-					PlayMovieToGraph(MovieGraphHandle);
-
-					// ループ、GetMovieStateToGraph 関数はムービーの再生状態を得る関数です
-					// 戻り値が１の間は再生状態ですのでループを続けます
-					while (ProcessMessage() == 0 && GetMovieStateToGraph(MovieGraphHandle) == 1)
-					{
-						// ムービー映像を画面いっぱいに描画します
-						DrawExtendGraph(0, 0, 640, 480, MovieGraphHandle, FALSE);
-
-						// ウエイトをかけます、あまり速く描画すると画面がちらつくからです
-						WaitTimer(17);
-					}
 				}
 				
 				std::string damage = ("Damage : " + std::to_string(player->getPlayerDamage()));
@@ -250,8 +227,18 @@ bool SinglePlayerGame::onStart() {
 			}
 		};
 
+		
+
+		//yu
 		drawList.clear();
-		drawList.push_back(make_shared<Title>(hasPlayerWon, player, maxTime, timer ));
+		drawList.push_back(make_shared<Title>(hasPlayerWon, player, maxTime, timer));
+
+		makeEffect("s_game_over_hanabi", 250, 250, 512, 512, true,150 ,1,4);
+		makeEffect("s_game_over_hanabi", 450, 250, 400, 400, true, 150, 1,3);
+		makeEffect("s_game_coin", 250, 200, 50, 50, true, 150, 1, 3);
+		makeEffect("s_game_coin", 300, 200, 50, 50, true, 150, 2);
+		makeEffect("s_game_coin", 350, 200, 50, 50, true, 150, 2, 3);
+
 
 		bgm->stop();
 		bgm = make_shared<BGM>(2, hasPlayerWon);
