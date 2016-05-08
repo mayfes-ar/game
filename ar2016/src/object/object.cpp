@@ -78,7 +78,7 @@ bool Object::load() {
 
 	isSuccess &= loadImage("s_game_wanwan", "s_game/wolf");
 	isSuccess &= loadImage("s_game_wanwan_damage", "s_game/wolf");
-	isSuccess &= loadImage("s_game_wanwan_over", "s_game/block1");
+	isSuccess &= loadImage("s_game_wanwan_over", "s_game/wolf");
 
 	isSuccess &= loadImage("s_game_block", "s_game/block1");
 
@@ -103,8 +103,9 @@ bool Object::load() {
 	isSuccess &= loadImage("s_game_drop", "s_game/drop");
 	isSuccess &= loadImage("s_game_drop_damage", "s_game/drop");
 	isSuccess &= loadImage("s_game_drop_over", "s_game/drop");
+
 	isSuccess &= loadImage("s_game_ufo", "s_game/ufo");
-	isSuccess &= loadImage("s_game_ufo_damage", "s_game/eagle");
+	isSuccess &= loadImage("s_game_ufo_damage", "s_game/ufo");
 	isSuccess &= loadImage("s_game_ufo_over", "s_game/drop");
 
 

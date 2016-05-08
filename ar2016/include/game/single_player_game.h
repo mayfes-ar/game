@@ -654,17 +654,19 @@ class SinglePlayerGame : public Game {
 	};
 
 	class Teresa : public Enemy {
+		
 	public:
 		static const int width = 80;
 		static const int height = 32;
+		
 
 		Teresa(int x_, int y_, SinglePlayerGame& game_, double size, int maxDamage_ = 2, std::string imgHandleKey_ = "s_game_bat") : Enemy(x_, y_, width*size, height*size, imgHandleKey_, maxDamage_, game_) {
 			layer = 160;
 		}
 
 		void setAc(double& acX, double& acY) {
-			acX = rand() % 5 - 2;
-			acY = rand() % 5 - 2;
+			acX = rand() % 3 - 1;
+			acY = rand() % 3 - 1;
 		}
 		
 	};

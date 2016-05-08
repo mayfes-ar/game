@@ -159,6 +159,7 @@ bool SinglePlayerGame::onStart() {
 
 		drawList.push_back(player);
 		drawList.push_back(make_shared<Background>(share.handle));
+		/*
 		makeEffect("s_game_coin", 200, 200, 50, 50, true);
 		makeEffect("s_game_coin", 250, 200, 50, 50, true, 150, 1, 3);
 		makeEffect("s_game_coin", 300, 200, 50, 50, true, 150, 2);
@@ -170,6 +171,7 @@ bool SinglePlayerGame::onStart() {
 		makeEffect("s_game_hit", 600, 200, 50, 50, true, 150, 2);
 		makeEffect("s_game_enemy_over", 650, 200, 50, 50, true, 150, 3);
 		makeEffect("s_game_sword", 700, 200, 50, 50, true, 150, 2);
+		*/
 
 		share.rectMutex.lock();
 		markerList.clear();
