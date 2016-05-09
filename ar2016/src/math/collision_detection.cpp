@@ -6,16 +6,16 @@
 namespace CollisionDetection {
 
 	// 円が線分に触れているか
-	bool isOnLine(const Shape::Circle& child, const Shape::Line& parent) {
+	bool isOnLine(const Shape::Circle& child, const Shape::Line& parent, const float speed) {
 		const auto dist = MathUtil::distPointToLine(child.center, parent);
-		if (dist < child.radius) { 
-			const Eigen::Vector2i vector_a_to_center = child.center - parent.point;
-			const Eigen::Vector2i vector_b_to_center = child.center - (parent.point + parent.dir);
-			const int a_dot_p = vector_a_to_center.dot(parent.dir);
-			const int b_dot_p = vector_b_to_center.dot(parent.dir);
+		if (dist < child.radius + (int)speed) { 
+			const Eigen::Vector2f vector_a_to_center = (child.center - parent.point).cast<float>();
+			const Eigen::Vector2f vector_b_to_center = (child.center - (parent.point + parent.dir)).cast<float>();
+			const float a_dot_p = vector_a_to_center.dot(parent.dir.cast<float>());
+			const float b_dot_p = vector_b_to_center.dot(parent.dir.cast<float>());
 			if ((a_dot_p >= 0 && b_dot_p <= 0) || (a_dot_p <= 0 && b_dot_p >=0)) 
 				return true;
-			else if (child.radius > vector_a_to_center.norm() || child.radius > vector_b_to_center.norm())
+			else if ((float)child.radius > vector_a_to_center.norm() || (float)child.radius > vector_b_to_center.norm())
 				return true;
 		}
 		return false;

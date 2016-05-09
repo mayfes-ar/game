@@ -28,11 +28,21 @@ public:
 
 	void reset();
 
+	void resetMaxTime(int max_time) {
+		m_max_time = max_time;
+	}
+
+	void increaseStartTime(int minute, int second);
+
 	bool isTimerEnd();
 
 	minSecMSec getNowTime();
 
 	minSecMSec getLeftedTime();
+
+	float getRatio() {
+		return static_cast<float>(m_max_time - m_now_time) / static_cast<float>(m_max_time);
+	}
 
 private:
 	int m_start_time = 0;

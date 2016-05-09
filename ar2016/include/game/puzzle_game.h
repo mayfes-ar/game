@@ -171,7 +171,7 @@ class PuzzleGame : public Game {
 	};
 
 	class TimerObject : public Object {
-		int time = 3 * FPS;
+		int time = 300 * FPS;
 
 	public:
 		TimerObject() {
@@ -459,15 +459,21 @@ class PuzzleGame : public Game {
 		bool isOn;
 		const bool isReverse;
 		bool& targetBool;
+		int pusheffect = 0;
 		int counter = 0;
 		const int countMax = effectHandles["p_crystal1"].size() * 2;
+		const int effectMax = effectHandles["p_push_switch"].size();
 		void setSwitch(bool isOn_) {
+			if (isOn == false && isOn_ == true) {
+				pusheffect = 1;
+			}
 			isOn = isOn_;
 			if (isReverse) {
 				targetBool = !isOn_;
 			} else {
 				targetBool = isOn_;
 			}
+
 		}
 	public:
 		SwitchGimmick(int x, int y, int size, bool& target, bool isReverse_, PuzzleGame& game_) : targetBool(target), isReverse(isReverse_), Gimmick(game_) {
@@ -477,6 +483,11 @@ class PuzzleGame : public Game {
 		}
 		bool draw() {
 			const int margin = rect.width / 4;
+			if (pusheffect) {
+				drawWithRect(effectHandles["p_push_switch"][pusheffect], margin);
+				pusheffect++;
+				if (pusheffect == effectMax) { pusheffect = 0; }
+			}
 			if (isOn) {
 				drawWithRect(effectHandles["p_crystal1"][counter/2], margin);
 				//drawWithRect(imgHandles["p_on"]);
@@ -484,14 +495,17 @@ class PuzzleGame : public Game {
 				drawWithRect(effectHandles["p_crystal2"][counter/2], margin);
 				//drawWithRect(imgHandles["p_off"]);
 			}
+			
 			counter++;
 			if (counter == countMax) { counter = 0; }
 			return willExist;
 		}
 		bool update() {
-			setSwitch(false);
 			if (isContacted(game.player) || isContacted(game.markerBlock)) {
 				setSwitch(true);
+			}
+			else {
+				setSwitch(false);
 			}
 
 			return willExist;
@@ -502,8 +516,13 @@ class PuzzleGame : public Game {
 		bool isOn;
 		const std::function<void()> func;
 		int counter = 0;
+		int pusheffect = 0;
 		const int countMax = effectHandles["p_crystal1"].size() * 2;
+		const int effectMax = effectHandles["p_sush_switch"].size();
 		void setSwitch(bool isOn_) {
+			if (isOn == false && isOn_ == true) {
+				pusheffect = 1;
+			}
 			if (isOn_ && !isOn) {
 				func();
 			}
@@ -518,6 +537,11 @@ class PuzzleGame : public Game {
 		}
 		bool draw() {
 			const int margin = rect.width / 4;
+			if (pusheffect) {
+				drawWithRect(effectHandles["p_push_switch"][pusheffect], margin);
+				pusheffect++;
+				if (pusheffect == effectMax) { pusheffect = 0; }
+			}
 			if (isOn) {
 				//drawWithRect(imgHandles["p_on"]);
 				drawWithRect(effectHandles["p_crystal1"][counter / 2], margin);

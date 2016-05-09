@@ -3,7 +3,59 @@
 #include "game/game.h"
 
 class SinglePlayerGame : public Game {
+	/* Layer の基準
+		Player : 100
+		Marker : 200
+		Enemy 
+			RocketWanWan : 165
+			Teresa : 160
+			Switch : 130
+			Inundation : 300
+			Cloud : 140
+			Drop : 139
+			Ufo :  150
+			Ray :  180 TODO: 半透明
+			Heiho :	152
+			Fire : 151
+		Effect : 周りの描画に影響しそうな大きなエフェクト
+			??? :
+		Block : 50
+		背景 : 0
+				
+	*/
 
+	// 指定フレーム後に、登録した関数を実行してくれる
+	class FuncTimer {
+		std::vector<std::function<void()>> funcs;
+		std::vector<int> timers;
+	public:
+		void update() {
+			auto funcsItr = funcs.begin();
+			for (auto timersItr = timers.begin(); timersItr != timers.end();) {
+				(*timersItr)--;
+				if ((*timersItr) > 0) {
+					funcsItr++;
+					timersItr++;
+				}
+				else {
+					(*funcsItr)();
+					funcsItr = funcs.erase(funcsItr);
+					timersItr = timers.erase(timersItr);
+				}
+
+			}
+		}
+		void set(std::function<void()> func, int timer) {
+			funcs.push_back(func);
+			timers.push_back(timer);
+		}
+		void clear() {
+			funcs.clear();
+			timers.clear();
+		}
+	} funcTimer;
+
+	//背景
 	class Background : public Object {
 		int& handle;
 
@@ -13,10 +65,12 @@ class SinglePlayerGame : public Game {
 		}
 
 		bool draw() {
-			// DrawExtendGraph(CAP2IMG_SHIFT_X, CAP2IMG_SHIFT_Y, CAP2IMG_SHIFT_X + CAP2IMG_RATE*CAP_WIDTH, CAP2IMG_SHIFT_Y + CAP2IMG_RATE*CAP_HEIGHT, handle, FALSE);
-			SetDrawBright(40, 40, 40);
-			DrawExtendGraph(0, 0, WIDTH, HEIGHT, imgHandles["ar2016_logo"], true);
-			SetDrawBright(255, 255, 255);
+			DrawExtendGraph(CAP2IMG_SHIFT_X, CAP2IMG_SHIFT_Y, CAP2IMG_SHIFT_X + CAP2IMG_RATE*CAP_WIDTH, CAP2IMG_SHIFT_Y + CAP2IMG_RATE*CAP_HEIGHT, handle, FALSE);
+			// SetDrawBright(230, 230, 230);
+			SetDrawBlendMode(DX_BLENDMODE_ALPHA, 200);
+			DrawExtendGraph(0, 0, WIDTH, HEIGHT, imgHandles["background"], true);
+			SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 100);
+			// SetDrawBright(255, 255, 255);
 			return true;
 		}
 	};
@@ -41,264 +95,349 @@ class SinglePlayerGame : public Game {
 
 		void start() {
 			switch (mode) {
-				case 0: {
-					break;
-				}
-				case 1: {
-					PlaySoundMem(soundHandles["s_game_bgm"] , DX_PLAYTYPE_LOOP, true);
-					break;
-				}
-				case 2: {
-					if (hasPlayerWon) {
+			case 0: {
+				break;
+			}
+			case 1: {
+				PlaySoundMem(soundHandles["s_game_bgm"], DX_PLAYTYPE_LOOP, true);
+				break;
+			}
+			case 2: {
+				if (hasPlayerWon) {
 
-					} else {
-						PlaySoundMem(soundHandles["s_game_over"] , DX_PLAYTYPE_BACK, true);
-					}
-					break;
 				}
-				default: {
-					break;
+				else {
+					PlaySoundMem(soundHandles["s_game_over"], DX_PLAYTYPE_BACK, true);
 				}
+				break;
+			}
+			default: {
+				break;
+			}
 			}
 		}
 
 		void stop() {
 			switch (mode) {
-				case 0: {
-					break;
-				}
-				case 1: {
-					StopSoundMem(soundHandles["s_game_bgm"]);
-					break;
-				}
-				case 2: {
-					StopSoundMem(soundHandles["s_game_over"]);
-					break;
-				}
-				default: {
-					break;
-				}
+			case 0: {
+				break;
+			}
+			case 1: {
+				StopSoundMem(soundHandles["s_game_bgm"]);
+				break;
+			}
+			case 2: {
+				StopSoundMem(soundHandles["s_game_over"]);
+				break;
+			}
+			default: {
+				break;
+			}
 			}
 		}
 
 		// プレイヤーが死んだときの効果音
 		void playDeadSound() {
-			PlaySoundMem(soundHandles["s_game_dead"] , DX_PLAYTYPE_NORMAL, true);
+			PlaySoundMem(soundHandles["s_game_dead"], DX_PLAYTYPE_BACK, true);
 		}
 	};
 
-	// 認識したマーカーの扱い
-	class Marker : public Object {
-		int index = 0;
-
+	class SingleGameObject : public Object {
 	public:
-		Marker(int x_, int y_, int width_, int height_, bool willStay_) {
-			rect.x = x_, rect.y = y_, rect.width = width_, rect.height = height_;
-			layer = 101;
+		/*virtual bool draw() {
+			return true;
+		}*/
+
+		double rightHit() const { return right() - rect.width / 3; }
+		double leftHit() const { return left() + rect.width / 3; }
+		double topHit() const { return top() + rect.height / 3; }
+		double bottomHit() const { return bottom() - rect.height / 3; }
+
+		void drawImage(int handle, int imageWidth, int imageHeight, int shiftX = 0, int shiftY = 0, bool isReverse = false) const {
+			if (isReverse) {
+				DrawExtendGraph(left() - shiftX + imageWidth, top() - shiftY, left() - shiftX, top() - shiftY + imageHeight, handle, true);
+			}
+			else {
+				DrawExtendGraph(left() - shiftX, top() - shiftY, left() - shiftX + imageWidth, top() - shiftY + imageHeight, handle, true);
+			}
 		}
-		
-		Marker(Rectan rect_, bool willStay_, int index_) {
+
+		void drawDark(std::function<void()> func) {
+			SetDrawBright(100, 100, 100);
+			func();
+			SetDrawBright(255, 255, 255);
+		}
+	};
+
+	// エフェクトクラス
+	// 実際のエフェクトの作成はmakeEffect関数から行う
+	// effectHandleKey:ハンドルキー, x, y, width, height, willStay:持続するか, layer, framePerCount:エフェクトの速度, counter:何カウント目からエフェクトを始めるか
+	class Effect : public SingleGameObject {
+		const std::vector<int> effectHandle;
+		const bool willStay;
+		const int maxCount;
+		const int framePerCount;
+		int counter;
+
+	public :
+		Effect(std::string effectHandleKey_, int x_ = 0, int y_ = 0, int width_ = WIDTH, int height_ = HEIGHT, bool willStay_ = false, int layer_ = 150, int framePerCount_ = 1, int counter_ = 0) : effectHandle(effectHandles[effectHandleKey_]), willStay(willStay_), maxCount(effectHandles[effectHandleKey_].size()*(framePerCount_ > 0 ? framePerCount_ : 1)), framePerCount((framePerCount_ > 0 ? framePerCount_ : 1)) {
+			rect.x = x_;
+			rect.y = y_;
+			rect.width = width_;
+			rect.height = height_;
+			counter = counter_*(framePerCount_ > 0 ? framePerCount_ : 1);
+			layer = layer_;
+		}
+	
+		bool draw() {
+			if (willStay) {
+				if (counter == maxCount) {
+					counter = 0;
+				}
+			}
+
+			drawWithRect(effectHandle[counter/framePerCount]);
+			counter++;
+
+			return willStay || counter != maxCount;
+		}
+	};
+
+	// ブロックの描画
+	// 現在、姫様の足場でしか使っていない
+	class SingleGameBlockObject : public SingleGameObject{
+	protected:
+		bool willStay;
+	public:
+		bool canHit = true;
+
+		SingleGameBlockObject() {}
+		SingleGameBlockObject(int x_, int y_, int width_, int height_, bool willStay_) {
+			rect.x = x_, rect.y = y_, rect.width = width_, rect.height = height_;
+			willStay = willStay_;
+			layer = 50;
+		}
+
+		SingleGameBlockObject(Rectan rect_, bool willStay_) {
 			rect = rect_;
-			index = index_;
+			willStay = willStay_;
+			layer = 50;
+		}
+
+		virtual bool draw() {
+			if (willStay) {
+				drawWithRect(imgHandles["s_game_block"]);
+			}
+			else {
+				DrawExtendGraph(left(), top(), right(), bottom(), imgHandles["block"], true);
+			}
+			return willStay;
+		}
+	};
+
+	// マーカー
+	class Marker : public SingleGameObject {
+		SinglePlayerGame& game;
+		const int index;
+		int imgHandle;
+		Rectan prevRect;
+
+		enum MoveDirection {
+			LEFT,RIGHT,
+		};
+		MoveDirection moveDirection = LEFT;
+
+		enum MarkerType {
+			PIYO, SWORD, SHIELD,
+		};
+		const MarkerType markerType;
+
+		bool isEnable = true;
+		bool canGuard;
+		bool canAttack;
+
+		void modifyRect() {
 			if (rect.width > 0 || rect.height > 0) {
-				rect.width = 100;
-				rect.height = 100;
+				rect.width = markerType == PIYO ? 1920/14 : markerType == SWORD ? 765/3 : 256;
+				rect.height = markerType == PIYO ? 1409/14 : markerType == SWORD ? 765/3 : 256;
 			}
 			else {
 				rect.x = rect.y = -300;
 			}
-			layer = 101;
+		}
+
+	public:
+		Marker(Rectan rect_, bool willStay_, int index_, SinglePlayerGame& game_) :index(index_), game(game_), markerType(index_ < 3 ? PIYO : index_ < 6 ? SWORD : SHIELD){
+			rect = rect_;
+			modifyRect();
+			prevRect = rect;
+			layer = 300;
+			imgHandle = markerType == PIYO ? imgHandles["s_game_piyo"] : markerType == SWORD ? imgHandles["s_game_sword"] : imgHandles["s_game_shield"];
+			canGuard = markerType == SWORD? false : true;
+			canAttack = markerType == SHIELD ? false : true;
 		}
 
 		bool draw() {
-			switch (index)
-			{
-			case 0: {
-				DrawExtendGraph(left(), top(), right(), bottom(), imgHandles["s_game_marker"], true);
-				break;
+			if (isEnable) {
+				switch (moveDirection)
+				{
+				case RIGHT: {
+					drawImage(imgHandle, rect.width, rect.height, 0, 0, true);
+					break;
+				}
+
+				case LEFT: {
+					drawImage(imgHandle, rect.width, rect.height);
+					break;
+				}
+				default:
+					break;
+				}
 			}
-			case 1: {
-				DrawExtendGraph(left(), top(), right(), bottom(), imgHandles["p_goal"], true);
-				break;
+			else {
+				drawDark([this]() {drawImage(imgHandles["s_game_invalid"], rect.width, rect.height); });
 			}
-			default:
-				DrawExtendGraph(left(), top(), right(), bottom(), imgHandles["block"], true);
-				break;
-			}
-			return false;
+			return true;
 		}
 
-		double rightHit() const { return right() - rect.width / 3; }
-		double leftHit() const { return left() + rect.width / 3; }
-		double topHit() const { return top() + rect.height / 3; }
-		double bottomHit() const { return bottom() - rect.height / 3; }
+		void setRect(Rectan rect_) {
+			prevRect = rect;
+			rect = rect_;
+			modifyRect();
+			if (rect.x - prevRect.x < -10) {
+				moveDirection = LEFT;
+			}
+			else if (rect.x - prevRect.x > 10) {
+				moveDirection = RIGHT;
+			}
+			else {
+			}
+			layer = isEnable ? 300 : 30;
+		}
+
+		int getIndex() {
+			return index;
+		}
+
+		void effectHit() {
+			switch (moveDirection)
+			{
+			case LEFT:
+				game.makeEffect("s_game_coin", left() - 30, top()+rect.width/2, 40, 40);
+				break;
+			case RIGHT:
+				game.makeEffect("s_game_coin", right() + 30, top() + rect.width / 2, 40, 40);
+				break;
+			default:
+				break;
+			}
+		}
+
+		void on() {
+			isEnable = true;
+		}
+
+		void off() {
+			isEnable = false;
+		}
+
+		bool getEnable() {
+			return isEnable;
+		}
+
+		bool getCanAttack() {
+			return canAttack;
+		}
+
+		bool getCanGuard() {
+			return canGuard;
+		}
 	};
 
-	// 敵キャラクター
-	class Enemy : public Object {
+	//キャラクター一般
+	class Character : public SingleGameObject {
+	public:
+		
+		enum MoveDirection // x軸方向のみ
+		{
+			LEFT, NOMOVE, RIGHT,
+		};
+		MoveDirection moveDirection = NOMOVE;
+
+		enum CharacterState
+		{
+			NORMAL, DAMAGE, OVER,
+		};
+		CharacterState characterState = NORMAL;
+
+		std::map<CharacterState, int> imgHandle;
+		const int maxDamage;
+
 		double prevX;
 		double prevY;
 		bool isJumping = true;
+
 		bool isAlive = true;
-
-		int enemyType; // 0 : 移動しない、 1 : 左右にぴょこぴょこ
-		int turnCounter = 100;
-		int moveDirection;
-
 		int damage = 0;
+
+		const int maxInvincibleTime;
 		int invincibleTime = 0;
 
-	public:
-		Enemy(int x_, int y_, int width_, int height_, int enemyType_){
+		const int overBufferMax;
+		int overBuffer;
+
+		SinglePlayerGame& game;
+
+		Character(const int x_, const int y_, const int width_, const int height_, const std::string imgHandleKey_, const int maxDamage_, SinglePlayerGame& game_, const int overBufferMax_, int const maxInvincibleTime_) : maxDamage(maxDamage_), game(game_), overBufferMax(overBufferMax_), maxInvincibleTime(maxInvincibleTime_) {
 			rect.x = prevX = x_;
 			rect.y = prevY = y_;
 			rect.width = width_;
 			rect.height = height_;
-			enemyType = enemyType_;
-			layer = 100;
-			switch (enemyType) {
-				case 1: {
-					moveDirection = 1;
-					break;
-				}
-				case 2: {
-					moveDirection = rand()%4;
-					switch (moveDirection)
-					{
-					case 0: {
-						rect.x = prevX = WIDTH / 2;
-						rect.y = prevY = 0 - 200;
-						break;
-					}
-					case 1: {
-						rect.x = prevX = WIDTH + 200;
-						rect.y = prevY = HEIGHT / 2 + 50;
-						break;
-					}
-					case 2: {
-						rect.x = prevX = WIDTH / 2;
-						rect.y = prevY = HEIGHT + 200;
-						break;
-					}
-					case 3: {
-						rect.x = prevX = 0 - 200;
-						rect.y = prevY = HEIGHT / 2 + 50;
-						break;
-					}
-					default:
-						break;
-					}
-					break;
-				}
-				default: {
-					moveDirection = 0;
-					break;
-				}
+			imgHandle[NORMAL] = imgHandles[imgHandleKey_];
+			imgHandle[DAMAGE] = imgHandles[imgHandleKey_+"_damage"];
+			imgHandle[OVER] = imgHandles[imgHandleKey_+"_over"];
+			overBuffer = overBufferMax;
+		}
+
+		virtual bool draw() {
+			if (characterState == DAMAGE) {
+				SetDrawBright(160, 160, 160); // DAMAGE のとき画像を暗くする
 			}
-		}
-
-		bool draw() {
-			switch (enemyType) {
-				case 3: {
-					DrawExtendGraph(left(), top(), right(), bottom(), imgHandles["s_game_teresa"], true);
-					break;
-				}
-				default: {
-					DrawExtendGraph(left(), top(), right(), bottom(), imgHandles["s_game_wanwan"], true);
-					break;
-				}
+			if (characterState == OVER) {
+				SetDrawBright(80, 80, 80); // DAMAGE のとき画像を暗くする
+				layer = 51;
 			}
-			return isAlive;
+			switch (moveDirection)
+			{
+			case RIGHT: {
+				
+				drawWithRect(imgHandle[characterState], 0, true);
+				break;
+			}
+
+			case NOMOVE:
+			case LEFT: {
+				drawWithRect(imgHandle[characterState]);
+				break;
+			}
+			default:
+				break;
+			}
+			SetDrawBright(255, 255, 255);
+
+			return getIsAlive();
 		}
 
-		double rightHit() const { return right() - rect.width / 3; }
-		double leftHit() const { return left() + rect.width / 3; }
-		double topHit() const { return top() + rect.height / 3; }
-		double bottomHit() const { return bottom() - rect.height / 3; }
+		virtual void update() {};
 
-		void update(const std::vector<std::shared_ptr<BlockObject>> blockList, const std::vector<std::shared_ptr<Marker>> markerList) {
-			// 座標更新以外にも状態の更新を扱う？
-
-			updateCoordinate(blockList, markerList);
-		}
-
-		// 座標の更新
-		void updateCoordinate(const std::vector<std::shared_ptr<BlockObject>> blockList, const std::vector<std::shared_ptr<Marker>> markerList) {
+		virtual void updateCoordinate(double& acX, double& acY) {
 			double& x = rect.x;
 			double& y = rect.y;
 			const int& width = rect.width;
 			const int& height = rect.height;
 
-			//const double diffX = x - prevX > 25 ? 15 : x - prevX < -25 ? -15 : x - prevX;
-			//const double diffY = y - prevY > 25 ? 15 : y - prevY < -25 ? -15 : y - prevY;
 			const double diffX = 40 * tanh((x - prevX) / 40);
 			const double diffY = 40 * tanh((y - prevY) / 40);
-
-			double acX = 0;
-			double acY = 0;
-
-			switch (enemyType) {
-				case 0:{
-					acX = -0.5 * (1 - (diffX <= 0) - (diffX < 0));
-					acY = 4;
-					break;
-				}
-				case 1:{
-					acY = 2;
-					// turnCounter : 方向転換するまでの残りカウンタ数
-					// moveDirection とあわせて、方向転換の制御に用いる。
-					// moveDirection は x軸方向の正とわざわざ対応付けてはいません。
-					if (turnCounter <= 0 && !isJumping) {
-						moveDirection *= -1;
-						turnCounter = 100;
-					} else {
-						acX = moveDirection*0.2 * (moveDirection*diffX <= 2);
-						turnCounter--;
-					}
-					if (!isJumping) {
-						acY = -15;
-					}
-					isJumping = true;
-					break;
-				}
-				case 2:{
-					//moveDirection = 1;
-					switch(moveDirection) {
-						case 0:{
-							acX = 0;
-							acY = 10;
-							break;
-						}
-						case 1:{
-							acX = -10;
-							acY = 0;
-							break;
-						}
-						case 2:{
-							acX = 0;
-							acY = -10;
-							break;
-						}
-						case 3:{
-							acX = 10;
-							acY = 0;
-							break;
-						}
-						default:{
-							break;
-						}
-					}
-					break;
-				}
-				case 3:{
-					acX = rand() % 5 -2;
-					acY = rand() % 5 -2;
-					break;
-				}
-				default:{
-					break;
-				}
-			}
 
 
 			// verlet法
@@ -308,39 +447,56 @@ class SinglePlayerGame : public Game {
 			const double tempY = y;
 			y += diffY + acY;
 			prevY = tempY;
+		}
 
-			if (enemyType == 2) {
+		virtual void setAc(double& acX, double& acY) {};
 
-			} else {
-				// ブロックとの当たり判定
-				for (auto block : blockList) {
-					if (left() < block->right() && top() < block->bottom() &&
-						right() > block->left() && bottom() > block->top()) {
+		virtual void moveBecauseBlockCollision(const std::vector<std::shared_ptr<SingleGameBlockObject>> objectList) {
+			double& x = rect.x;
+			double& y = rect.y;
+			const int& width = rect.width;
+			const int& height = rect.height;
 
-						if (prevY < block->bottomHit() && prevY + height > block->topHit()) {
-							if (prevX >= block->rightHit()) {
-								x = block->right();
-							} else if (prevX + width <= block->leftHit()) {
-								x = block->left() - width;
-							} else {
-								// TODO
-							}
-						} else {
-							if (prevY >= block->bottomHit()) {
-								y = block->bottom();
-							} else if (prevY + height <= block->topHit()) {
-								y = block->top() - height;
-								isJumping = false;
-							} else {
-								// TODO
-							}
+			for (auto block : objectList) {
+				if (left() < block->right() && top() < block->bottom() &&
+					right() > block->left() && bottom() > block->top()) {
+
+					if (prevY < block->bottomHit() && prevY + height > block->topHit()) {
+						if (prevX >= block->rightHit()) {
+							x = block->right();
+						}
+						else if (prevX + width <= block->leftHit()) {
+							x = block->left() - width;
+						}
+						else {
+							// TODO
+						}
+					}
+					else {
+						if (prevY >= block->bottomHit()) {
+							y = block->bottom();
+						}
+						else if (prevY + height <= block->topHit()) {
+							y = block->top() - height;
+							isJumping = false;
+						}
+						else {
+							// TODO
 						}
 					}
 				}
 			}
+		}
 
-			// マーカーとの当たり判定
-			for (auto marker : markerList) {
+		virtual void moveBecauseMarkerCollision(const std::vector<std::shared_ptr<Marker>> objectList) {
+			double& x = rect.x;
+			double& y = rect.y;
+			const int& width = rect.width;
+			const int& height = rect.height;
+
+			for (auto marker : objectList) {
+				if (!marker->getEnable() || !marker->getCanGuard()) { continue; }
+
 				if (left() < marker->right() && top() < marker->bottom() &&
 					right() > marker->left() && bottom() > marker->top()) {
 
@@ -371,37 +527,384 @@ class SinglePlayerGame : public Game {
 			}
 		}
 
+		virtual bool deathDecision() {
+			
+			if (rect.x < game.field.at("left") || rect.x > game.field.at("right")) {
+				die();
+			}
+			else if (rect.y < game.field.at("top") || rect.y > game.field.at("bottom")) {
+				die();
+			}
+			else if (overBuffer < overBufferMax) {
+				die();
+			}
+			return !isAlive;
+		}
+		
+		virtual bool getIsAlive() {
+			return isAlive;
+		}
+
+		virtual void die() {
+			changeCharacterState(OVER);
+			if (overBuffer <= 0) isAlive = false;
+			overBuffer--;
+		}
+
+		virtual void damagecontrol() {};
+
+		void changeCharacterState(CharacterState newState) {
+			if (characterState == OVER) {
+
+			}
+			else {
+				characterState = newState;
+			}
+		}
+
+		int getMaxDamage() {
+			return maxDamage;
+		}
+		
+	};
+
+	// 敵キャラクター
+	class Enemy : public Character {
+		std::string imgHandleKey;
+	public:
+		Enemy(int x_, int y_, int width_, int height_, std::string imgHandleKey_, int maxDamage_, SinglePlayerGame& game_, int overBufferMax_ = FPS, int maxInvincibleTime_ = FPS) : Character(x_,y_,width_,height_,imgHandleKey_,maxDamage_,game_, overBufferMax_, maxInvincibleTime_) {
+			layer = 101;
+			imgHandleKey = imgHandleKey_;
+		}
+		
+		std::string overEffectKey = "s_game_enemy_over";
+		std::string damageSoundKey = "s_game_attack";
+		std::string attackEffectKey = "s_game_sword";
+
+		virtual void update() {
+			if (characterState == OVER) { return; }
+			double acX = 0;
+			double acY = 0;
+			setAc(acX, acY);
+			updateCoordinate(acX, acY);
+			moveBecauseBlockCollision(game.blockList);
+			moveBecauseMarkerCollision(game.markerList);
+
+			moveDirection = acX > 0 ? RIGHT : acX < 0 ? LEFT : NOMOVE;
+		}
+		
+		virtual void setAc(double& acX, double& acY) {
+			acX = 0;
+			acY = 0;
+		}
+
 		// 死亡判定。マーカーで殴られたら死ぬ。
-		bool deathDecision(const std::vector<std::shared_ptr<Marker>> markerList){
-			// 生死判定
+		virtual bool deathDecision() {
+			if (invincibleTime == 0 && characterState != OVER) {
+				changeCharacterState(NORMAL);
+				for (auto marker : game.markerList) {
+					if (!marker->getEnable() || !marker->getCanAttack()) { continue; }
 
-			std::map<std::string, int> field = {
-				{"left", 0 - 200},
-				{"right", WIDTH + 200},
-				{"top", 0 - 200},
-				{"bottom", HEIGHT + 200}
-			};
-
-			if (prevX < field["left"] || prevX > field["right"]) {
-				isAlive = false;
-			}
-			if (prevY < field["top"] || prevY > field["bottom"]) {
-				isAlive = false;
-			}
-
-			// この場合、ブロックに当たったら死ぬ、的な
-			if (invincibleTime == 0) {
-				for (auto marker : markerList) {
 					if (left() < marker->right() && top() < marker->bottom() &&
 						right() > marker->left() && bottom() > marker->top()) {
-						if (isAlive) {
-							PlaySoundMem(soundHandles["s_game_attack"], DX_PLAYTYPE_BACK, true);
-						}
-						damage++;
-						isAlive = damageControl();
-						invincibleTime = 15;
+						damageControl();
+						// if (maxDamage > 0) { marker->effectHit(); }
+						invincibleTime = FPS;
 
 						return !isAlive;
+
+					}
+				}
+
+			}
+			else if (invincibleTime > 0) {
+				invincibleTime--;
+			}
+
+			return Character::deathDecision();
+		}
+
+		// ダメージが何点以上で死亡とするか。
+		virtual void damageControl() {
+			damage++;
+			
+			if (maxDamage < 0) {
+				// 無敵
+			}
+			else if (damage < maxDamage) {
+				// HP残ってる
+				PlaySoundMem(soundHandles[damageSoundKey], DX_PLAYTYPE_BACK, true);
+				game.makeEffect(attackEffectKey, left(), top(), rect.width, rect.height, false, layer+1);
+				changeCharacterState(DAMAGE);
+			}
+			else {
+				PlaySoundMem(soundHandles[damageSoundKey], DX_PLAYTYPE_BACK, true);
+				game.makeEffect(attackEffectKey, left(), top(), rect.width, rect.height, false, layer+1);
+				die();
+			}
+		}
+
+		virtual void die() {
+			changeCharacterState(OVER);
+			if (overBuffer <= 0) {
+				game.makeEffect(overEffectKey, left(), top(), rect.width, rect.height, false, layer+1);
+				isAlive = false;
+			}
+			overBuffer--;
+
+		}
+
+		std::string getEnemyType() {
+			return imgHandleKey;
+		}
+	};
+
+	class Teresa : public Enemy {
+		
+	public:
+		static const int width = 80;
+		static const int height = 32;
+		
+
+		Teresa(int x_, int y_, SinglePlayerGame& game_, double size, int maxDamage_ = 1, std::string imgHandleKey_ = "s_game_bat") : Enemy(x_, y_, width*size, height*size, imgHandleKey_, maxDamage_, game_) {
+			layer = 160;
+		}
+
+		void setAc(double& acX, double& acY) {
+			acX = rand() % 3 - 1;
+			acY = rand() % 3 - 1;
+		}
+		
+	};
+
+	class RocketWanwan : public Enemy {
+		int stayCount = FPS * 2;
+	public :
+		static const int width = 430;
+		static const int height = 275;
+
+		RocketWanwan(int x_, int y_, SinglePlayerGame& game_, double size, int maxDamage_ = 3, std::string imgHandleKey_ = "s_game_wanwan") : Enemy(x_, y_, width * size, height * size, imgHandleKey_, maxDamage_, game_) {
+			layer = 165;
+			moveDirection = x_ < WIDTH/2 ? RIGHT : LEFT ;
+		}
+
+		void update(){
+			if (characterState == OVER) { return; }
+			double acX = 0;
+			double acY = 0;
+			setAc(acX, acY);
+			updateCoordinate(acX, acY);
+			moveBecauseMarkerCollision(game.markerList);
+		}
+
+		void setAc(double& acX, double& acY) {
+			acY = -0.5 * (1 - (rect.y - prevY <= 0) - (rect.y - prevY< 0));
+			if (stayCount == 0) {
+				switch (moveDirection) {
+				case LEFT: {
+					acX = -7;
+					break;
+				}
+				case RIGHT: {
+					acX = 7;
+					break;
+				}
+				default: {
+					break;
+				}
+				}
+			}
+			else if (stayCount > 0) {
+				stayCount--;
+			}
+		}
+	};
+
+	class Switch : public Enemy {
+		static const int width = 100;
+		static const int height = 100;
+
+	public:
+		Switch(int x_, int y_, SinglePlayerGame& game_, double size, int maxDamage_ = 1, std::string imgHandleKey_ = "s_game_switch") : Enemy(x_, y_, width * size, height * size, imgHandleKey_, maxDamage_, game_) {
+			layer = 130;
+			moveDirection = RIGHT;
+		}
+
+		void update() {}
+
+	};
+
+	class Inundation : public Enemy {
+		public: 
+		static const int width = 1280 + 200;
+		static const int height = 720;
+		int inundationCounter = 400;
+
+		bool isWaterUp = true;
+		std::shared_ptr<Switch> button;
+		Inundation(int x_, int y_, SinglePlayerGame& game_, double size, int maxDamage_ = -1, std::string imgHandleKey_ = "s_game_water") : Enemy(x_, y_, width * size, height * size, imgHandleKey_, maxDamage_, game_) {
+			layer = 300;
+			button = game_.makeSwitch(100, 100, 1);
+		}
+
+		bool draw() {
+			DrawExtendGraph(left(), top() - 150, right(), bottom() + 800, imgHandles["s_game_water"], true);
+			return getIsAlive();
+		}
+
+		void update() {
+			if (!button->getIsAlive()) {
+				isWaterUp = false;
+			}
+			else if (inundationCounter > 0){
+				inundationCounter--;
+			}
+			double acX = 0;
+			double acY = 0;
+			setAc(acX, acY);
+			updateCoordinate(acX, acY);
+		}
+
+		void setAc(double& acX, double& acY) {
+			acX = 0;
+			acY = isWaterUp ? inundationCounter == 0 ? -0.5*(rect.y-prevY) : -0.005 : 0.02;
+		}
+	};
+
+	class Ray : public Enemy {
+	public:
+		static const int width = 150;
+		static const int height = 720;
+
+		Ray(int x_, int y_, SinglePlayerGame& game_, double size, int maxDamage_ = -1, std::string imgHandleKey_ = "s_game_ray") : Enemy(x_, y_, width * size, height * size, imgHandleKey_, maxDamage_, game_, 0) {
+			layer = 180;
+		}
+
+		void update() {}
+
+		void die() {
+			isAlive = false;
+		}
+	};
+
+	class Ufo : public Enemy {
+		static const int width = 225 / 2;
+		static const int height = 225 / 2;
+		int stopCount = FPS * 7;
+		int turnCounter = FPS * 5;
+		std::shared_ptr<Ray> ray = nullptr;
+
+	public:
+		Ufo(int x_, int y_, SinglePlayerGame& game_, double size, int maxDamage_ = 2, std::string imgHandleKey_ = "s_game_ufo") : Enemy(x_, y_, width * size, height * size, imgHandleKey_, maxDamage_, game_) {
+			layer = 150;
+		};
+
+		void update() {
+			if (characterState == OVER) { return; }
+			stopCount--;
+			if (stopCount == FPS * 2) {
+				ray = game.makeRay(rect.x + rect.width / 2 - Ray::width / 2, bottom(), 1);
+			}
+			else if (stopCount < FPS * 2) {
+				if (stopCount == 0) {
+					ray->die();
+					ray = nullptr;
+
+					stopCount = FPS * 7;
+				}
+			}
+			else {
+				double acX = 0;
+				double acY = 0;
+				setAc(acX, acY);
+				updateCoordinate(acX, acY);
+			}
+			turnCounter--;
+			if (turnCounter == 0) {
+				moveDirection = rand() % 2 == 0 ? LEFT : RIGHT;
+				turnCounter = (rand() % 4 + 1) * FPS;
+			}
+			moveBecauseMarkerCollision(game.markerList);
+		}
+
+		void updateCoordinate(double acX, double acY) {
+			double& x = rect.x;
+			double& y = rect.y;
+
+			const double diffX = moveDirection == RIGHT ? 8 : -8;
+			const double diffY = 0;
+
+			// verlet法
+			const double tempX = x;
+			x += diffX + acX;
+			prevX = tempX;
+			const double tempY = y;
+			y += diffY + acY;
+			prevY = tempY;
+			if (x < 0 - rect.width) {
+				x += WIDTH + 200;
+			}
+			if (x > WIDTH + rect.width) {
+				x -= WIDTH + 200;
+			}
+		}
+
+		int getStopCount() {
+			return stopCount;
+		}
+
+		void die() {
+			if (ray != nullptr) {
+				ray->die();
+			}
+			Enemy::die();
+		}
+	};
+
+	class Drop : public Enemy {
+	public:
+		static const int width = 200 / 8;
+		static const int height = 200 / 8;
+		Drop(int x_, int y_, SinglePlayerGame& game_, double size, int maxDamage_ = 1, std::string imgHandleKey_ = "s_game_drop") : Enemy(x_, y_, width * size, height * size, imgHandleKey_, maxDamage_, game_, 0, 0) {
+			layer = 139;
+		};
+		
+		void update() {
+			double acX = 0;
+			double acY = 0;
+			setAc(acX, acY);
+			updateCoordinate(acX, acY);
+			moveBecauseMarkerCollision(game.markerList);
+			moveBecauseBlockCollision(game.blockList);
+		}
+
+		void setAc(double& acX, double& acY) {
+			acX = 0;
+			acY = 1;
+		}
+
+		bool deathDecision() {
+			if (invincibleTime == 0) {
+				for (auto marker : game.markerList) {
+					if (!marker->getEnable() || !marker->getCanAttack()) { continue; }
+
+					if (left() < marker->right() && top() < marker->bottom() &&
+						right() > marker->left() && bottom() > marker->top()) {
+						damageControl();
+						invincibleTime = maxInvincibleTime;
+
+						return !isAlive;
+
+					}
+				}
+				for (auto block : game.blockList) {
+					if (left() <= block->right() && top() <= block->bottom() &&
+						right() >= block->left() && bottom() >= block->top()) {
+						invincibleTime = maxInvincibleTime;
+						damageControl();
+
+						return !isAlive;
+
 					}
 				}
 			}
@@ -409,94 +912,49 @@ class SinglePlayerGame : public Game {
 				invincibleTime--;
 			}
 
-
-			return !isAlive;
-		}
-
-		bool getIsAlive() {
-			return isAlive;
-		}
-
-		// ダメージが何点以上で死亡とするか。返り値は 死：false, 生：true
-		bool damageControl() {
-			int maxDamage;
-			switch (enemyType)
-			{
-			case 1: {
-				maxDamage = 2;
-				break;
-			}
-			case 2: {
-				maxDamage = 5;
-				break;
-			}
-			case 3: {
-				maxDamage = 2;
-				break;
-			}
-			default:
-				maxDamage = 1;
-				break;
-			}
-
-			return damage < maxDamage;
+			return Character::deathDecision();
 		}
 	};
-
-	class Player : public Object {
-		double prevX;
-		double prevY;
-		bool isJumping = true;
-		bool isAlive = true;
-		int damage = 0;
-		int invincibleTime = 0;
+	
+	class Cloud : public Enemy {
+		static const int width = 304 / 3;
+		static const int height = 166 / 3;
+		int fallDropCounter = FPS*2;
+		int turnCounter = FPS * 5;
 
 	public:
-		Player(int x_, int y_, int width_, int height_) {
-			rect.x = prevX = x_;
-			rect.y = prevY = y_;
-			rect.width = width_;
-			rect.height = height_;
-			layer = 100;
+		Cloud(int x_, int y_, SinglePlayerGame& game_, double size, int maxDamage_ = 5, std::string imgHandleKey_ = "s_game_cloud") : Enemy(x_, y_, width * size, height * size, imgHandleKey_, maxDamage_, game_) {
+			moveDirection = RIGHT;
+			layer = 140;
+		};
+
+		void update() {
+			if (characterState == OVER) { return; }
+			fallDropCounter--;
+			if (fallDropCounter < 40 && fallDropCounter % 4 == 0) {
+				game.makeDrop(rect.x + rand() % (rect.width) - Drop::width / 2, bottom(), 1);
+			}
+			if (fallDropCounter == 0) {
+				fallDropCounter = rand() % 100 + FPS * 2;
+			}
+
+			turnCounter--;
+			if (turnCounter == 0) {
+				moveDirection = rand() % 2 == 0 ? LEFT : RIGHT;
+				turnCounter = (rand() % 5 + 2) * FPS;
+			}
+			double acX = 0;
+			double acY = 0;
+			setAc(acX, acY);
+			updateCoordinate(acX, acY);
 		}
 
-		bool draw() {
-			DrawExtendGraph(left(), top(), right(), bottom(), imgHandles["s_game_player"], true);
-			DrawString(50 , 50, std::to_string(damage).c_str(), GetColor(255, 255, 255));
-			return true;
-		}
-
-		void update(const char key[], const std::vector<std::shared_ptr<BlockObject>> blockList, const std::vector<std::shared_ptr<Marker>> markerList, const std::vector<std::shared_ptr<Enemy>> enemyList) {
-
-			updateCoordinate(key, blockList, markerList, enemyList);
-
-		}
-
-		// プレイヤーキャラクターの座標更新
-		void updateCoordinate(const char key[], const std::vector<std::shared_ptr<BlockObject>> blockList, const std::vector<std::shared_ptr<Marker>> markerList, const std::vector<std::shared_ptr<Enemy>> enemyList) {
+		void updateCoordinate(double acX, double acY) {
 			double& x = rect.x;
 			double& y = rect.y;
-			const int& width = rect.width;
-			const int& height = rect.height;
 
-			const double diffX = x - prevX;
-			const double diffY = y - prevY;
-
-			double acX = -0.5 * (1 - (diffX <= 0) - (diffX < 0));
-			double acY = 3.2;
-
-			if (key[KEY_INPUT_UP] && !isJumping) {
-				acY = -40;
-				PlaySoundMem(soundHandles["s_game_jump"] , DX_PLAYTYPE_BACK, true);
-			}
-			isJumping = true;
-
-			if (key[KEY_INPUT_RIGHT]) {
-				acX = 1.5 * (diffX < 10);
-			}
-			if (key[KEY_INPUT_LEFT]) {
-				acX = -1.5 * (diffX > -10);
-			}
+			const double diffX = moveDirection == RIGHT ? 3 : -3;
+			const double diffY = 0;
 
 			// verlet法
 			const double tempX = x;
@@ -506,357 +964,453 @@ class SinglePlayerGame : public Game {
 			y += diffY + acY;
 			prevY = tempY;
 
-			// ブロックとの当たり判定
-			for (auto block : blockList) {
-				if (left() < block->right() && top() < block->bottom() &&
-					right() > block->left() && bottom() > block->top()) {
+			if (x < 0 - rect.width) {
+				x += WIDTH + 200;
+			}
+			if (x > WIDTH + rect.width) {
+				x -= WIDTH + 200;
+			}
+		}
+	};
 
-					if (prevY < block->bottomHit() && prevY + height > block->topHit()) {
-						if (prevX >= block->rightHit()) {
-							x = block->right();
-						} else if (prevX + width <= block->leftHit()) {
-							x = block->left() - width;
-						} else {
-							// TODO
-						}
-					} else {
-						if (prevY >= block->bottomHit()) {
-							y = block->bottom();
-						} else if (prevY + height <= block->topHit()) {
-							y = block->top() - height;
-							isJumping = false;
-						} else {
-							// TODO
-						}
+	class Eagle : public Enemy {
+		int stayCount = FPS * 3;
+	public:
+		static const int width = 430 / 4;
+		static const int height = 263 / 4;
+		Eagle(int x_, int y_, SinglePlayerGame& game_, double size, int maxDamage_ = 2, std::string imgHandleKey_ = "s_game_eagle") : Enemy(x_, y_, width * size, height * size, imgHandleKey_, maxDamage_, game_) {
+		};
+
+		void update() {
+			if (characterState == OVER) { return; }
+			double acX = 0;
+			double acY = 0;
+			setAc(acX, acY);
+			updateCoordinate(acX, acY);
+			moveBecauseMarkerCollision(game.markerList);
+		}
+
+		void setAc(double& acX, double& acY) {
+			if (stayCount == 0) {
+				acX = 3;
+				acY = 3;
+			}
+			else if (stayCount > 0) {
+				stayCount--;
+				acY = 0;
+				acX = pow(-1, stayCount/20);
+			}
+		}
+	};
+
+	class Heiho : public Enemy {
+		static const int width = 345 / 4;
+		static const int height = 333 / 4;
+		int frameCounter = FPS*3;
+	public:
+		Heiho(int x_, int y_, SinglePlayerGame& game_, double size, int maxDamage_ = 2, std::string imgHandleKey_ = "s_game_ghorst") : Enemy(x_, y_, width * size, height * size, imgHandleKey_, maxDamage_, game_) {
+			moveDirection = LEFT;
+			layer = 152;
+		}
+
+		void update() {
+			if (characterState == OVER) { return; }
+			if (frameCounter == 0) {
+				game.makeFire(left(), (top() + bottom()) / 2, 1);
+			}
+			double acX = 0;
+			double acY = 0;
+			setAc(acX, acY);
+			updateCoordinate(acX, acY);
+			// moveBecauseBlockCollision(game.blockList);
+			moveBecauseMarkerCollision(game.markerList);
+		}
+
+		void setAc(double& acX, double& acY) {
+			acY = 2;
+		}
+
+		void updateCoordinate(double acX, double acY) {
+			double& x = rect.x;
+			double& y = rect.y;
+			frameCounter--;
+			
+			double diffX;
+			if (frameCounter > 0) {
+				diffX = -2;
+			}
+			else if (frameCounter == 0) {
+				PlaySoundMem(soundHandles["s_game_fireshot"], DX_PLAYTYPE_BACK, true);
+				diffX = 0;
+			}
+			else {
+				diffX = 2;
+			}
+			const double diffY = 0;
+
+
+			// verlet法
+			const double tempX = x;
+			x += diffX + acX;
+			prevX = tempX;
+			const double tempY = y;
+			y += diffY + acY;
+			prevY = tempY;
+		}
+	};
+
+	class Fire : public Enemy {
+	public:
+		static const int width = 280 / 3;
+		static const int height = 194 / 3;
+		Fire(int x_, int y_, SinglePlayerGame& game_, double size, int maxDamage_ = 1, std::string imgHandleKey_ = "s_game_fire") : Enemy(x_, y_, width * size, height * size, imgHandleKey_, maxDamage_, game_, 0, 0) {
+			moveDirection = LEFT;
+			layer = 151;
+		}
+
+		void update() {
+			if (characterState == OVER) { return; }
+			double acX = 0;
+			double acY = 0;
+			setAc(acX, acY);
+			updateCoordinate(acX, acY);
+			moveBecauseMarkerCollision(game.markerList);
+		}
+		
+		void setAc(double& acX, double& acY) {
+			switch (moveDirection)
+			{
+			case SinglePlayerGame::Character::LEFT:
+			case SinglePlayerGame::Character::NOMOVE:
+				acX = -1;
+				break;
+			case SinglePlayerGame::Character::RIGHT:
+				acX = 1;
+				break;
+			default:
+				break;
+			}
+			acY = 0;
+		}
+	};
+
+	// 姫様
+	class Player : public Character {
+		bool isToJump = false;
+		int frameCount;
+		std::string message;
+		bool isDrowned = false;
+
+	public:
+		static const int width = 621/8;
+		static const int height = 1046/8;
+
+		Player(int x_, int y_, int width_, int height_, std::string imgHandleKey_, int maxDamage_, SinglePlayerGame& game_) : Character(x_, y_, width_, height_, imgHandleKey_, maxDamage_, game_, 0, FPS*2) {
+			layer = 100;	
+			// overBuffer = overBufferMax;
+		}
+
+		bool draw() {
+			if (isToJump) {
+				DrawExtendGraph(left() - 50, top() - rect.height - 50, right() + 50, bottom() - rect.height, imgHandles["s_game_balloon"], true);
+				int commentX = left() - 10;
+				int commentY = top() - rect.height - 20;
+
+				if (frameCount <= FPS * 2) {
+					message = "I want to\njump!!";
+					commentY = top() - rect.height - 40;
+				}
+				else if (frameCount <= FPS * 2 + FPS) {
+					message = "3";
+				}
+				else if (frameCount <= FPS * 2 + FPS*2) {
+					message = "2";
+				}
+				else if (frameCount <= FPS * 2 + FPS*3) {
+					message = "1";
+				}
+
+				DrawString(commentX, commentY, message.c_str(), GetColor(0, 0, 0));
+			}
+			for (int heart = 0; heart <= (maxDamage - damage - 1); heart++) {
+				DrawExtendGraph(50 + 50 * heart, 50, 100 + 50 * heart, 100, imgHandles["s_game_heart"], true);
+			}
+
+			if (isDrowned) { imgHandle[DAMAGE] = imgHandles["s_game_player_drowned"]; }
+			else { imgHandle[DAMAGE] = imgHandles["s_game_player_damage"]; }
+
+			Character::draw();
+
+			return true;
+			
+		}
+
+		void update(const char key[]) {
+			if (!isAlive || characterState == OVER) { return; }
+			double acX = 0;
+			double acY = 0;
+			setAc(acX, acY, key);
+			updateCoordinate(acX, acY);
+			moveBecauseBlockCollision(game.blockList);
+			moveBecauseMarkerCollision(game.markerList);
+		}
+
+		void updateCoordinate(double& acX, double& acY) {
+			double& x = rect.x;
+			double& y = rect.y;
+			const int& width = rect.width;
+			const int& height = rect.height;
+
+			const double diffX = x - prevX;
+			const double diffY = y - prevY;
+
+
+			// verlet法
+			const double tempX = x;
+			x += diffX + acX;
+			prevX = tempX;
+			const double tempY = y;
+			y += diffY + acY;
+			prevY = tempY;
+		}
+
+		// プレイヤーキャラクターの座標更新
+		void setAc(double& acX, double& acY, const char key[]) {
+			double& x = rect.x;
+			double& y = rect.y;
+			const int& width = rect.width;
+			const int& height = rect.height;
+
+			const double diffX = x - prevX;
+			const double diffY = y - prevY;
+
+			acX = -0.5 * (1 - (diffX <= 0) - (diffX < 0));
+			acY = 3.2;
+
+			if (key[KEY_INPUT_LSHIFT]) {
+				isToJump = false;
+				if (key[KEY_INPUT_UP] && !isJumping) {
+					acY = -40;
+					PlaySoundMem(soundHandles["s_game_jump"], DX_PLAYTYPE_BACK, true);
+					isJumping = true;
+				}
+				if (key[KEY_INPUT_RIGHT]) {
+					acX = 1.5 * (diffX < 15);
+					moveDirection = RIGHT;
+				}
+				if (key[KEY_INPUT_LEFT]) {
+					acX = -1.5 * (diffX > -15);
+					moveDirection = LEFT;
+				}
+			}
+			else if (acX == 0 && !isJumping && !isToJump) {
+				if (rand() % 10 == 0) {
+					frameCount = 0;
+					isToJump = true;
+				}
+				else {
+					acX = rand() % 30 - 15 - 5 * (1 - ( x <= WIDTH/2 ) - ( x < WIDTH/2 ));
+					moveDirection = acX > 0 ? RIGHT : acX < 0 ? LEFT : moveDirection;
+				}
+
+			}
+
+			if (isToJump) {
+				if (frameCount >= FPS*2 + FPS*3) {
+					acY = -30;
+					PlaySoundMem(soundHandles["s_game_jump"], DX_PLAYTYPE_BACK, true);
+					isJumping = true;
+				}
+				else {
+					frameCount++;
+				}
+			}
+
+			if (isJumping) {
+				isToJump = false;
+			}
+
+		}
+
+		// プレイヤーキャラクターの生死判定更新
+		bool deathDecision(std::vector<std::shared_ptr<Enemy>> enemyList) {
+			if (invincibleTime == 0 && characterState != OVER) {
+				changeCharacterState(NORMAL);
+				for (auto enemy : enemyList) {
+					if (left() <= enemy->right() && top() <= enemy->bottom() &&
+						right() >= enemy->left() && bottom() >= enemy->top()) {
+						damageControl();
+						invincibleTime = maxInvincibleTime;
+						break;
 					}
 				}
 			}
-			// マーカーとの当たり判定
-			/*for (auto marker : markerList) {
+			else if (invincibleTime > 0) {
+				invincibleTime--;
+			}
+
+			isDrowned = false;
+			for (auto enemy : enemyList) {
+				if (enemy->getEnemyType() != "s_game_water") { continue; }
+				if (left() <= enemy->right() && top() <= enemy->bottom() &&
+					right() >= enemy->left() && bottom() >= enemy->top()) {
+					isDrowned = true;
+					break;
+				}
+			}
+
+			if (damage >= maxDamage) {
+				die();
+			}
+			
+			return Character::deathDecision();
+		}
+
+		int getPlayerDamage() {
+			return damage;
+		}
+
+		void moveBecauseMarkerCollision(const std::vector<std::shared_ptr<Marker>> objectList) {
+			double& x = rect.x;
+			double& y = rect.y;
+			const int& width = rect.width;
+			const int& height = rect.height;
+
+			for (auto marker : objectList) {
+				marker->on();
 				if (left() < marker->right() && top() < marker->bottom() &&
 					right() > marker->left() && bottom() > marker->top()) {
 
 					if (prevY < marker->bottomHit() && prevY + height > marker->topHit()) {
 						if (prevX >= marker->rightHit()) {
 							x = marker->right();
-						} else if (prevX + width <= marker->leftHit()) {
-							x = marker->left() - width;
-						} else {
-							// TODO
 						}
-					} else {
+						else if (prevX + width <= marker->leftHit()) {
+							x = marker->left() - width;
+						}
+						else {
+							marker->off();
+						}
+					}
+					else {
 						if (prevY >= marker->bottomHit()) {
 							y = marker->bottom();
-						} else if (prevY + height <= marker->topHit()) {
+						}
+						else if (prevY + height <= marker->topHit()) {
 							y = marker->top() - height;
 							isJumping = false;
-						} else {
-							// TODO
+						}
+						else {
+							marker->off();
 						}
 					}
+					prevX = x;
+					prevY = y;
 				}
-			}*/
-			// 敵との当たり判定
-			// for (auto enemy : enemyList) {
-			// 	if (left() < enemy->right() && top() < enemy->bottom() &&
-			// 		right() > enemy->left() && bottom() > enemy->top()) {
-			//
-			// 		if (prevY < enemy->bottomHit() && prevY + height > enemy->topHit()) {
-			// 			if (prevX >= enemy->rightHit()) {
-			// 				x = enemy->right();
-			// 			} else if (prevX + width <= enemy->leftHit()) {
-			// 				x = enemy->left() - width;
-			// 			} else {
-			// 				// TODO
-			// 			}
-			// 		} else {
-			// 			if (prevY >= enemy->bottomHit()) {
-			// 				y = enemy->bottom();
-			// 			} else if (prevY + height <= enemy->topHit()) {
-			// 				y = enemy->top() - height;
-			// 				isJumping = false;
-			// 			} else {
-			// 				// TODO
-			// 			}
-			// 		}
-			// 	}
-			// }
+			}
 		}
 
-		// プレイヤーキャラクターの生死判定更新
-		bool deathDecision(std::vector<std::shared_ptr<Enemy>> enemyList) {
+		void moveBecauseBlockCollision(const std::vector<std::shared_ptr<SingleGameBlockObject>> objectList) {
+			double& x = rect.x;
+			double& y = rect.y;
+			const int& width = rect.width;
+			const int& height = rect.height;
 
-			std::map<std::string, int> field = {
-				{"left", 0 - 200},
-				{"right", WIDTH + 200},
-				{"top", 0 - 200},
-				{"bottom", HEIGHT + 200}
-			};
-
-			if (prevX < field["left"] || prevX > field["right"]) {
-				isAlive = false;
-			}
-			if (prevY < field["top"] || prevY > field["bottom"]) {
-				isAlive = false;
-			}
-
-			if (invincibleTime == 0) {
-				for (auto enemy : enemyList) {
-					if (left() <= enemy->right() && top() <= enemy->bottom() &&
-						right() >= enemy->left() && bottom() >= enemy->top()) {
-						damage += 1;
-						invincibleTime = 50;
-						break;
+			for (auto block : objectList) {
+				if (left() < block->right() && top() < block->bottom() &&
+					right() > block->left() && bottom() > block->top()) {
+					if (top() < block->top()) {
+						y = block->top() - height;
+						prevY = y;
+						isJumping = false;
 					}
+					else if (left() < block->left()) {
+						x = block->left() - width;
+						prevX = x;
+					}
+					else if (right() > block->right()) {
+						x = block->right();
+						prevX = x;
+					}
+					else {
+						y = block->top() - height;
+						prevY = y;
+						isJumping = false;
+					}
+					
 				}
-			} else if (invincibleTime > 0){
-				invincibleTime--;
+				
 			}
+		}
 
-			if (damage > 5) {
-				isAlive = false;
+		void damageControl() {
+			damage++;
+			game.makeEffect("s_game_hit", left(), top(), rect.width, rect.width, false, layer + 1, 2);
+
+			if (damage < maxDamage) {
+				// HP残ってる
+				changeCharacterState(DAMAGE);
 			}
-
-			return !isAlive;
+			else {
+				die();
+			}
 		}
 	};
 
 	std::thread thread;
 	std::shared_ptr<Player> player;
 
-	std::vector<std::shared_ptr<BlockObject>> blockList;
+	std::vector<std::shared_ptr<SingleGameBlockObject>> blockList;
 	std::vector<std::shared_ptr<Enemy>> enemyList;
+	std::vector<std::shared_ptr<Enemy>> enemySubList;
+	std::vector<std::shared_ptr<Marker>> markerList;
 
-	// 敵作成。enemyType については Enemy クラスを参照
-	std::shared_ptr<Enemy> makeEnemy(int x, int y, int width, int height, int enemyType) {
-		auto enemy = std::make_shared<Enemy>(x, y, width, height, enemyType);
-		if (player->isContacted(enemy)) {
-			enemy = std::make_shared<Enemy>(x, y-100, width, height, enemyType);
-		}
-		enemyList.push_back(enemy);
-		drawList.push_back(enemy);
-		return enemy;
+	const std::map<std::string, int> field = {
+		{ "left", 0 - 500 },
+		{ "right", WIDTH + 500 },
+		{ "top", 0 - 500 },
+		{ "bottom", HEIGHT + 500 }
+	};
+
+	std::shared_ptr<Teresa> makeTeresa(int x, int y, double size);
+	std::shared_ptr<RocketWanwan> makeRocketWanwan(int x, int y, double size);
+	std::shared_ptr<Inundation> makeInundation();
+	std::shared_ptr<Switch> makeSwitch(int x, int y, double size);
+	std::shared_ptr<Ufo> makeUfo(int x, int y, double size);
+	std::shared_ptr<Ray> makeRay(int x, int y, double size);
+	std::shared_ptr<Cloud> makeCloud(int x, int y, double size);
+	std::shared_ptr<Drop> makeDrop(int x, int y, double size);
+	std::shared_ptr<Eagle> makeEagle(int x, int y, double size);
+	std::shared_ptr<Heiho> makeHeiho(int x, int y, double size);
+	std::shared_ptr<Fire> makeFire(int x, int y, double size);
+
+	void makeEffect(std::string effectHandleKey_, int x_ = 0, int y_ = 0, int width_ = WIDTH, int height_ = HEIGHT, bool willStay_ = false, int layer_ = 150, int framePerCount_ = 1, int counter_ = 0) {
+		drawList.push_back(std::make_shared<Effect>(effectHandleKey_, x_, y_, width_, height_, willStay_, layer_, framePerCount_, counter_));
 	}
 
 	std::shared_ptr<BGM> bgm;
-	const int MAX_TIME = 30*40;
-	int timer = MAX_TIME;
+	const int maxTime = FPS * 60;
+	const int maxPlayerDamage = 10;
+
+	enum Difficulty {
+		EASY, HARD, NIGHTMARE,
+	};
+
+	int timer = maxTime;
 	bool hasPlayerWon;
+
+	Difficulty difficulty = EASY;
 
 public:
 	SinglePlayerGame() {
 		thread = std::thread::thread(capture, std::ref(share));
-		player = std::make_shared<Player>(WIDTH/2 - 100/2, HEIGHT/2-150/2, 75, 100);
+
+		player = std::make_shared<Player>(WIDTH / 2 - 100 / 2, HEIGHT / 2 - 150 / 2, Player::width, Player::height , "s_game_player", maxPlayerDamage, *this);
+
 		hasPlayerWon = true;
 	}
 
-	bool onStart() {
-		using namespace std;
-		fps.isShow = true;
-
-		srand((unsigned int)time(NULL));
-
-		// mode 0
-		mode.setMode([this]() {
-			class Title : public Object {
-			public:
-				Title() {
-					layer = 50;
-				}
-
-				bool draw() {
-					DrawExtendGraph(0, 0, WIDTH, HEIGHT, imgHandles["s_game_op"], true);
-					DrawExtendGraph(WIDTH/2-429/2, 30, WIDTH/2+429/2, 30+47, imgHandles["s_game_op_title"], true);
-					// DrawExtendGraph(WIDTH/2-50, 400, WIDTH/2+50, 400+150, imgHandles["s_game_player"], true);
-					return true;
-				}
-			};
-
-			drawList.clear();
-			drawList.push_back(make_shared<Title>());
-
-			bgm = make_shared<BGM>(0);
-			bgm->start();
-
-			for(int i = 0; i < 20; i++);
-		}, 150);
-
-		// mode 1
-		mode.setMode([this]() {
-			drawList.clear();
-			auto makeBlock = [this](int x, int y, int width, int height) {
-				auto block = make_shared<BlockObject>(x, y, width, height, true);
-				blockList.push_back(block);
-				drawList.push_back(block);
-			};
-			makeBlock(0-200, 600, WIDTH+200+200, 50);
-
-			drawList.push_back(player);
-			drawList.push_back(make_shared<Background>(share.handle));
-
-			bgm = make_shared<BGM>(1);
-			bgm->start();
-
-		}, MAX_TIME);
-
-		// mode 2
-		mode.setMode([this]() {
-			class Title : public Object {
-				bool hasPlayerWon = true;
-			public:
-				Title(bool hasPlayerWon_) {
-					layer = 50;
-					hasPlayerWon = hasPlayerWon_;
-				}
-
-				bool draw() {
-					if (hasPlayerWon) {
-						DrawExtendGraph(0, 0, WIDTH, HEIGHT, imgHandles["s_game_result_clear"], true);
-					} else {
-						DrawExtendGraph(WIDTH/2-400, 30, WIDTH/2+400, 30+296, imgHandles["s_game_result_dead"], true);
-						DrawExtendGraph(WIDTH/2-75, 400, WIDTH/2+75, 400+150, imgHandles["s_game_dead"], true);
-					}
-					return true;
-				}
-			};
-
-			drawList.clear();
-			drawList.push_back(make_shared<Title>(hasPlayerWon));
-
-			bgm->stop();
-			bgm = make_shared<BGM>(2, hasPlayerWon);
-			bgm->start();
-		}, -1);
-
-		return Game::onStart();
-	}
-
-	bool onUpdate() {
-		bool willFinishMode = false;
-
-		switch (mode.getMode())	{
-			case 0:{ // イントロダクション
-				static int counterForWaiting = 10;
-				if (key[KEY_INPUT_RETURN] && counterForWaiting == 0) {
-					willFinishMode = true;
-				}
-				if (counterForWaiting > 0) {
-					counterForWaiting--;
-				}
-				break;
-			}
-			case 1: { // playing
-				timer -= 1;
-				if (timer <= 0) {
-					willFinishMode = true;
-				}
-
-				std::vector<std::shared_ptr<Marker>> markerList;
-
-				// 認識したマーカーを描画
-				share.rectMutex.lock();
-				for (int i = 0; i < share.rects.size(); i++) {
-					auto marker = std::make_shared<Marker>(share.rects[i], false, i);
-					markerList.push_back(marker);
-					drawList.push_back(marker);
-				}
-				share.rectMutex.unlock();
-
-				player->update(key, blockList, markerList, enemyList);
-
-				for (auto enemy : enemyList) {
-					enemy->deathDecision(markerList);
-					enemy->update(blockList, markerList);
-				}
-
-				if(player->deathDecision(enemyList)){
-					bgm->stop();
-					bgm->playDeadSound();
-					hasPlayerWon = false;
-					willFinishMode = true;
-				}
-
-				// 敵の出現を管理する
-				switch(MAX_TIME-timer) {
-					case 1: {
-						makeEnemy(350, 200, 435/5, 349/5, 1);
-						break;
-						}
-					case 1000:
-					case 150: {
-						//makeEnemy(WIDTH, HEIGHT / 2, 435 / 2, 349 / 2, 2);
-						makeEnemy(200, 0, 435 / 3, 349 / 3, 1);
-						makeEnemy(900, 0, 435/3, 349/3, 1);
-						//makeEnemy(WIDTH/2, 200, 435 / 5, 349 / 5, 1);
-
-						break;
-						}
-					case 300: {
-						makeEnemy(WIDTH, HEIGHT/2, 435/2, 349/2, 2);
-						makeEnemy(WIDTH / 2, 200, 435 / 5, 349 / 5, 1);
-
-						break;
-					}
-					case 500:
-					case 700:
-					case 900:
-					case 1100: {
-						makeEnemy(WIDTH, HEIGHT / 2, 435 / 2, 349 / 2, 2);
-						break;
-					}
-
-					default: {
-						break;
-					}
-				}
-				// 定期的に実行する場合など
-				if (MAX_TIME - timer > 400 && (MAX_TIME - timer) % 10 == 0) {
-					makeEnemy(rand() % (WIDTH - 200) + 100, rand() % (HEIGHT - 100), 112 * 4 / 5, 112 * 4 / 5, 3);
-				}
-				else if ((MAX_TIME - timer) % 30 == 0) {
-					makeEnemy(rand() % (WIDTH - 200) + 100, rand() % (HEIGHT - 100), 112 * 4 / 5, 112 * 4 / 5, 3);
-				}
-
-				break;
-			}
-			case 2:{ // リザルト画面
-				if (key[KEY_INPUT_RETURN]) {
-					willFinishMode = true;
-				}
-				break;
-			}
-
-			default:
-				break;
-			}
-
-		if (key[KEY_INPUT_ESCAPE]) {
-			share.willFinish = true;
-		}
-		if (key[KEY_INPUT_N]) {
-			willFinishMode = true;
-		}
-
-		for ( auto& itr = enemyList.begin(); itr != enemyList.end();) {
-			if ((*itr)->getIsAlive()) {
-				++itr;
-			} else {
-				itr = enemyList.erase(itr);
-			}
-		}
-
-		if (willFinishMode) {
-
-			mode.goNext();
-		}
-
-		return Game::onUpdate();
-	}
-
-	bool onFinish() {
-		bgm->stop();
-
-		thread.join();
-		return true;
-	}
+	bool onStart();
+	bool onUpdate();
+	bool onFinish();
 };
