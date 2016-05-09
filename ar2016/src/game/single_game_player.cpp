@@ -333,10 +333,22 @@ bool SinglePlayerGame::onUpdate() {
 			case 900: {
 				makeInundation();
 			}
-			case 1200:
-			case 1230:
-			case 1260:
+			case 950: {
+				makeCloud(0, 50, 1);
+				break;
+			}
+			case 1100: {
+				makeUfo(0, 50, 1);
+				break;
+			}
+			case 1260: {
+				makeEagle(0, 0, 1);
+				break;
+			}
 			case 1400: {
+				makeInundation();
+			}
+			case 1600: {
 				makeHeiho(WIDTH, 300, 1);
 				break;
 			}
