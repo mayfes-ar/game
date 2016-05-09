@@ -1481,7 +1481,7 @@ class SinglePlayerGame : public Game {
 
 	std::shared_ptr<BGM> bgm;
 	const int maxTime = FPS * 60;
-	const int maxPlayerDamage = 5;
+	int maxPlayerDamage;
 
 	enum Difficulty {
 		EASY, HARD, NIGHTMARE,
@@ -1496,7 +1496,6 @@ public:
 	SinglePlayerGame() {
 		thread = std::thread::thread(capture, std::ref(share));
 
-		player = std::make_shared<Player>(WIDTH / 2 - 100 / 2, HEIGHT / 2 - 150 / 2, Player::width, Player::height , "s_game_player", maxPlayerDamage, *this);
 
 		hasPlayerWon = true;
 	}

@@ -139,6 +139,9 @@ bool SinglePlayerGame::onStart() {
 
 	// mode 1
 	mode.setMode([this]() {
+		maxPlayerDamage = difficulty == EASY ? 5 : difficulty == HARD ? 10 : 20;
+		player = std::make_shared<Player>(WIDTH / 2 - 100 / 2, HEIGHT / 2 - 150 / 2, Player::width, Player::height, "s_game_player", maxPlayerDamage, *this);
+
 		drawList.clear();
 		auto makeBlock = [this](int x, int y, int width, int height) {
 			auto block = make_shared<SingleGameBlockObject>(x, y, width, height, true);

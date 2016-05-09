@@ -122,7 +122,7 @@ bool Object::load() {
 
 	isSuccess &= loadImage("s_game_ufo", "s_game/ufo");
 	isSuccess &= loadImage("s_game_ufo_damage", "s_game/ufo");
-	isSuccess &= loadImage("s_game_ufo_over", "s_game/drop");
+	isSuccess &= loadImage("s_game_ufo_over", "s_game/ufo");
 
 
 	isSuccess &= loadImage("s_game_ray", "s_game/uforay");
