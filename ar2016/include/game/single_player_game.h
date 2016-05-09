@@ -138,16 +138,9 @@ class SinglePlayerGame : public Game {
 	};
 
 	class SingleGameObject : public Object {
-	public:
-		/*virtual bool draw() {
-			return true;
-		}*/
+		int phase = 0;
 
-		double rightHit() const { return right() - rect.width / 3; }
-		double leftHit() const { return left() + rect.width / 3; }
-		double topHit() const { return top() + rect.height / 3; }
-		double bottomHit() const { return bottom() - rect.height / 3; }
-
+	protected:
 		void drawImage(int handle, int imageWidth, int imageHeight, int shiftX = 0, int shiftY = 0, bool isReverse = false) const {
 			if (isReverse) {
 				DrawExtendGraph(left() - shiftX + imageWidth, top() - shiftY, left() - shiftX, top() - shiftY + imageHeight, handle, true);
@@ -163,15 +156,52 @@ class SinglePlayerGame : public Game {
 			SetDrawBright(255, 255, 255);
 		}
 
-		void drawWithRotation(int imgHandle, double angle, bool turnFlag = false) {
+		void drawWithRotation(int imgHandle, double angle, bool turnFlag = false, double size = 1.0) {
 			int imageWidth = 0;
 			int imageHeight = 0;
 			GetGraphSize(imgHandle, &imageWidth, &imageHeight);
 			imageWidth = imageWidth > 0 ? imageWidth : 1;
-			imageHeight= imageHeight> 0 ? imageHeight: 1;
-			DrawRotaGraph3((left() + right()) / 2, (top() + bottom()) / 2, imageWidth / 2, imageHeight / 2, rect.width / (double)imageWidth, rect.height / (double)imageHeight, angle, imgHandle, true, turnFlag);
-			//DrawRotaGraph3((left() + right()) / 2, (top() + bottom()) / 2, (left() + right()) / 2, (top() + bottom()) / 2, 0.125, 0.125, angle, imgHandle, true, turnFlag);
+			imageHeight = imageHeight > 0 ? imageHeight : 1;
+			DrawRotaGraph3((left() + right()) / 2, (top() + bottom()) / 2, imageWidth / 2, imageHeight / 2, rect.width / (double)imageWidth *size, rect.height / (double)imageHeight*size, angle, imgHandle, true, turnFlag);
 		}
+
+		class PendulumCounter {
+			const int amplitude;
+			int phase;
+			int step;
+		public:
+			PendulumCounter(int amplitude_, int phase_ = 0) : amplitude(amplitude_ > 0 ? amplitude_ : amplitude_ * -1) {
+				phase = phase_;
+				step = 1;
+			}
+
+			int get() {
+				int nowPhase = phase;
+				if (phase == amplitude) {
+					step = -1;
+				}
+				if (phase == -amplitude) {
+					step = 1;
+				}
+				phase += step;
+
+				return nowPhase;
+			}
+
+			double getAngle(bool increment = true) {
+				return increment ? M_PI / 180 * get() : M_PI / 180 * phase;
+			}
+		};
+
+		std::shared_ptr<PendulumCounter> makePendulum(int amplitude, int phase = 0) {
+			return std::make_shared<PendulumCounter>(amplitude, phase);
+		}
+
+	public:
+		double rightHit() const { return right() - rect.width / 3; }
+		double leftHit() const { return left() + rect.width / 3; }
+		double topHit() const { return top() + rect.height / 3; }
+		double bottomHit() const { return bottom() - rect.height / 3; }
 	};
 
 	// エフェクトクラス
@@ -323,21 +353,7 @@ class SinglePlayerGame : public Game {
 		int getIndex() {
 			return index;
 		}
-
-		void effectHit() {
-			switch (moveDirection)
-			{
-			case LEFT:
-				game.makeEffect("s_game_coin", left() - 30, top()+rect.width/2, 40, 40);
-				break;
-			case RIGHT:
-				game.makeEffect("s_game_coin", right() + 30, top() + rect.width / 2, 40, 40);
-				break;
-			default:
-				break;
-			}
-		}
-
+		
 		void on() {
 			isEnable = true;
 		}
@@ -393,6 +409,8 @@ class SinglePlayerGame : public Game {
 
 		double angle = 0;
 
+		double imageSize = 1.0;
+
 		SinglePlayerGame& game;
 
 		Character(const int x_, const int y_, const int width_, const int height_, const std::string imgHandleKey_, const int maxDamage_, SinglePlayerGame& game_, const int overBufferMax_, int const maxInvincibleTime_) : maxDamage(maxDamage_), game(game_), overBufferMax(overBufferMax_), maxInvincibleTime(maxInvincibleTime_) {
@@ -418,14 +436,14 @@ class SinglePlayerGame : public Game {
 			{
 			case RIGHT: {
 				//drawWithRect(imgHandle[characterState], 0, true);
-				drawWithRotation(imgHandle[characterState], angle, true);
+				drawWithRotation(imgHandle[characterState], angle, true, imageSize);
 				break;
 			}
 
 			case NOMOVE:
 			case LEFT: {
 				//drawWithRect(imgHandle[characterState]);
-				drawWithRotation(imgHandle[characterState], angle);
+				drawWithRotation(imgHandle[characterState], angle, false, imageSize);
 				break;
 			}
 			default:
@@ -681,6 +699,7 @@ class SinglePlayerGame : public Game {
 		void setAc(double& acX, double& acY) {
 			acX = rand() % 3 - 1;
 			acY = rand() % 3 - 1;
+			angle = (rand() % 5 - 2) * M_PI / 180;
 		}
 		
 	};
@@ -708,6 +727,7 @@ class SinglePlayerGame : public Game {
 		void setAc(double& acX, double& acY) {
 			acY = -0.5 * (1 - (rect.y - prevY <= 0) - (rect.y - prevY< 0));
 			if (stayCount == 0) {
+				angle = 0;
 				switch (moveDirection) {
 				case LEFT: {
 					acX = -7;
@@ -723,6 +743,9 @@ class SinglePlayerGame : public Game {
 				}
 			}
 			else if (stayCount > 0) {
+				if (stayCount % 3 == 0) {
+					angle = ( rand() % 20 - 9 ) * 2 * M_PI / 360;
+				}
 				stayCount--;
 			}
 		}
@@ -798,8 +821,9 @@ class SinglePlayerGame : public Game {
 	class Ufo : public Enemy {
 		static const int width = 225 / 2;
 		static const int height = 225 / 2;
-		int stopCount = FPS * 7;
-		int turnCounter = FPS * 5;
+		int stopCount = FPS * 6;
+		int turnCounter = FPS * 4;
+		int swingCounter = 0;
 		std::shared_ptr<Ray> ray = nullptr;
 
 	public:
@@ -811,6 +835,10 @@ class SinglePlayerGame : public Game {
 			if (characterState == OVER) { return; }
 			stopCount--;
 			if (stopCount == FPS * 2) {
+				angle = 0;
+				swingCounter = 0;
+			}
+			else if (stopCount == FPS * 2 - 15) {
 				ray = game.makeRay(rect.x + rect.width / 2 - Ray::width / 2, bottom(), 1);
 			}
 			else if (stopCount < FPS * 2) {
@@ -818,7 +846,7 @@ class SinglePlayerGame : public Game {
 					ray->die();
 					ray = nullptr;
 
-					stopCount = FPS * 7;
+					stopCount = FPS * 6;
 				}
 			}
 			else {
@@ -826,6 +854,14 @@ class SinglePlayerGame : public Game {
 				double acY = 0;
 				setAc(acX, acY);
 				updateCoordinate(acX, acY);
+				swingCounter = swingCounter == FPS*4 ? 0 : swingCounter + 1;
+				if (swingCounter < FPS || swingCounter > FPS*3) {
+					angle += M_PI /180 / 2;
+				}
+				else {
+					angle -= M_PI / 180 / 2;
+				}
+
 			}
 			turnCounter--;
 			if (turnCounter == 0) {
@@ -884,6 +920,7 @@ class SinglePlayerGame : public Game {
 			updateCoordinate(acX, acY);
 			moveBecauseMarkerCollision(game.markerList);
 			moveBecauseBlockCollision(game.blockList);
+			angle = M_PI / 180 * (rand() % 3 - 1);
 		}
 
 		void setAc(double& acX, double& acY) {
@@ -929,6 +966,7 @@ class SinglePlayerGame : public Game {
 		static const int height = 166 / 3;
 		int fallDropCounter = FPS*2;
 		int turnCounter = FPS * 5;
+		std::shared_ptr<PendulumCounter> sizeCounter = makePendulum(10);
 
 	public:
 		Cloud(int x_, int y_, SinglePlayerGame& game_, double size, int maxDamage_ = 5, std::string imgHandleKey_ = "s_game_cloud") : Enemy(x_, y_, width * size, height * size, imgHandleKey_, maxDamage_, game_) {
@@ -955,6 +993,7 @@ class SinglePlayerGame : public Game {
 			double acY = 0;
 			setAc(acX, acY);
 			updateCoordinate(acX, acY);
+			imageSize = 1 + 0.01 * sizeCounter->get();
 		}
 
 		void updateCoordinate(double acX, double acY) {
@@ -1023,9 +1062,6 @@ class SinglePlayerGame : public Game {
 
 		void update() {
 			if (characterState == OVER) { return; }
-			if (frameCounter == 0) {
-				game.makeFire(left(), (top() + bottom()) / 2, 1);
-			}
 			double acX = 0;
 			double acY = 0;
 			setAc(acX, acY);
@@ -1048,8 +1084,19 @@ class SinglePlayerGame : public Game {
 				diffX = -2;
 			}
 			else if (frameCounter == 0) {
-				PlaySoundMem(soundHandles["s_game_fireshot"], DX_PLAYTYPE_BACK, true);
+				game.makeEffect("s_game_fireshot", left(), top(), rect.width, rect.width, false, layer+1, 3);
 				diffX = 0;
+				acY = 0;
+			}
+			else if (frameCounter == -FPS) {
+				PlaySoundMem(soundHandles["s_game_fireshot"], DX_PLAYTYPE_BACK, true);
+				game.makeFire(left(), (top() + bottom()) / 2, 1);
+				diffX = 0;
+				acY = 0;
+			}
+			else if (frameCounter < 0 && frameCounter > -FPS) {
+				diffX = 0;
+				acY = 0;
 			}
 			else {
 				diffX = 2;
@@ -1083,6 +1130,7 @@ class SinglePlayerGame : public Game {
 			setAc(acX, acY);
 			updateCoordinate(acX, acY);
 			moveBecauseMarkerCollision(game.markerList);
+			angle = M_PI / 180 * (rand() % 3 - 1);
 		}
 		
 		void setAc(double& acX, double& acY) {

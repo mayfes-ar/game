@@ -157,6 +157,7 @@ bool Object::load() {
 	isSuccess &= loadEffect("s_game_hit", "s_game/hit", 5, 2, 1200, 400);
 	isSuccess &= loadEffect("s_game_enemy_over", "s_game/enemy", 10, 1, 1200, 200);
 	isSuccess &= loadEffect("s_game_sword", "s_game/sword", 9, 1, 1080, 120);
+	isSuccess &= loadEffect("s_game_fireshot", "s_game/ghorst_", 10, 1, 2400, 240);
 
 
 	isSuccess &= loadEffect("s_game_coin", "s_game/coin", 5, 2, 1000, 400);
