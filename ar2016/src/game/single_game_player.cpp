@@ -276,7 +276,38 @@ bool SinglePlayerGame::onUpdate() {
 		break;
 	}
 	case 1: { // playing
-		timer -= 1;
+		if (tutorial == 0) {
+			timer -= 1;
+		}
+		else{
+			switch (tutorial) {
+			case 1: {
+				tutoenemy = makeHeiho(WIDTH,300,1);
+				//tutoenemy = makeTeresa(WIDTH-200,HEIGHT-300,2);
+				tutorial = 2;
+			}
+			case 2: {
+				if (heihoFreezeTimeRemain >= 0) {
+					heihoFreezeTimeRemain--;
+				}
+				else {
+					if (!tutoenemy->childfire->getIsAlive()) {
+						tutoenemy->setIsAlive();
+					}
+
+					if (!tutoenemy->childfire->getIsAlive() && !tutoenemy->getIsAlive()) {
+						tutorial = 0;
+					}
+				}
+				if (heihoFreezeTimeRemain == 0) {
+					tutoenemy->freeze();
+					tutoenemy->childfire->freeze();
+				}
+				
+			}
+			}
+		}
+		
 		if (timer <= 0) {
 			willFinishMode = true;
 		}

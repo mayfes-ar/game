@@ -545,6 +545,10 @@ class SinglePlayerGame : public Game {
 			return isAlive;
 		}
 
+		virtual void setIsAlive() {
+			isAlive = true;
+		}
+
 		virtual void die() {
 			changeCharacterState(OVER);
 			if (overBuffer <= 0) isAlive = false;
@@ -1003,26 +1007,87 @@ class SinglePlayerGame : public Game {
 		}
 	};
 
+	
+	int tutorial = 1;
+
+	class Fire : public Enemy {
+		double acX = 0;
+		double acY = 0;
+		bool freezed = false;
+		int freezetime = 30;
+		int tutorial;
+	public:
+		static const int width = 280 / 3;
+		static const int height = 194 / 3;
+		Fire(int x_, int y_, SinglePlayerGame& game_, double size, int maxDamage_ = 1, std::string imgHandleKey_ = "s_game_fire") : Enemy(x_, y_, width * size, height * size, imgHandleKey_, maxDamage_, game_, 0, 0) {
+			moveDirection = LEFT;
+			layer = 151;
+			tutorial = game_.tutorial;
+		}
+
+		void update() {
+			if (characterState == OVER) { return; }
+			if (freezed) {
+				if (freezetime == 0) {
+					acX = prevX - rect.x;
+				}
+				else {
+					freezetime--;
+				}
+			}
+			else {
+				setAc(acX, acY);
+			}
+			updateCoordinate(acX, acY);
+			moveBecauseMarkerCollision(game.markerList);
+		}
+
+		void setAc(double& acX, double& acY) {
+			switch (moveDirection)
+			{
+			case SinglePlayerGame::Character::LEFT:
+			case SinglePlayerGame::Character::NOMOVE:
+				acX = -1;
+				break;
+			case SinglePlayerGame::Character::RIGHT:
+				acX = 1;
+				break;
+			default:
+				break;
+			}
+			acY = 0;
+		}
+		
+		void freeze() {
+			freezed = true;
+		}
+	};
+	
+
 	class Heiho : public Enemy {
 		static const int width = 345 / 4;
 		static const int height = 333 / 4;
 		int frameCounter = FPS*3;
+		double acX = 0;
+		double acY = 2;
+		int tutorial;
 	public:
+		std::shared_ptr<SinglePlayerGame::Fire> childfire = NULL;
 		Heiho(int x_, int y_, SinglePlayerGame& game_, double size, int maxDamage_ = 2, std::string imgHandleKey_ = "s_game_ghorst") : Enemy(x_, y_, width * size, height * size, imgHandleKey_, maxDamage_, game_) {
 			moveDirection = LEFT;
 			layer = 152;
+			tutorial = game_.tutorial;
 		}
 
 		void update() {
 			if (characterState == OVER) { return; }
 			if (frameCounter == 0) {
-				game.makeFire(left(), (top() + bottom()) / 2, 1);
+				childfire = game.makeFire(left(), (top() + bottom()) / 2, 1);
 			}
-			double acX = 0;
-			double acY = 0;
-			setAc(acX, acY);
+			//setAc(acX, acY);
 			updateCoordinate(acX, acY);
 			// moveBecauseBlockCollision(game.blockList);
+		
 			moveBecauseMarkerCollision(game.markerList);
 		}
 
@@ -1057,49 +1122,21 @@ class SinglePlayerGame : public Game {
 			y += diffY + acY;
 			prevY = tempY;
 		}
-	};
 
-	class Fire : public Enemy {
-	public:
-		static const int width = 280 / 3;
-		static const int height = 194 / 3;
-		Fire(int x_, int y_, SinglePlayerGame& game_, double size, int maxDamage_ = 1, std::string imgHandleKey_ = "s_game_fire") : Enemy(x_, y_, width * size, height * size, imgHandleKey_, maxDamage_, game_, 0, 0) {
-			moveDirection = LEFT;
-			layer = 151;
-		}
-
-		void update() {
-			if (characterState == OVER) { return; }
-			double acX = 0;
-			double acY = 0;
-			setAc(acX, acY);
-			updateCoordinate(acX, acY);
-			moveBecauseMarkerCollision(game.markerList);
-		}
-		
-		void setAc(double& acX, double& acY) {
-			switch (moveDirection)
-			{
-			case SinglePlayerGame::Character::LEFT:
-			case SinglePlayerGame::Character::NOMOVE:
-				acX = -1;
-				break;
-			case SinglePlayerGame::Character::RIGHT:
-				acX = 1;
-				break;
-			default:
-				break;
-			}
+		void freeze() {
 			acY = 0;
+			acX = -2;
 		}
 	};
 
+	
 	// 姫様
 	class Player : public Character {
 		bool isToJump = false;
 		int frameCount;
 		std::string message;
 		bool isDrowned = false;
+		int tutorial;
 
 	public:
 		static const int width = 621/8;
@@ -1108,6 +1145,7 @@ class SinglePlayerGame : public Game {
 		Player(int x_, int y_, int width_, int height_, std::string imgHandleKey_, int maxDamage_, SinglePlayerGame& game_) : Character(x_, y_, width_, height_, imgHandleKey_, maxDamage_, game_, 0, FPS*2) {
 			layer = 100;	
 			// overBuffer = overBufferMax;
+			tutorial = game_.tutorial;
 		}
 
 		bool draw() {
@@ -1174,6 +1212,8 @@ class SinglePlayerGame : public Game {
 			prevY = tempY;
 		}
 
+
+	
 		// プレイヤーキャラクターの座標更新
 		void setAc(double& acX, double& acY, const char key[]) {
 			double& x = rect.x;
@@ -1202,6 +1242,9 @@ class SinglePlayerGame : public Game {
 					acX = -1.5 * (diffX > -15);
 					moveDirection = LEFT;
 				}
+			}
+			else if (tutorial != 0) {
+
 			}
 			else if (acX == 0 && !isJumping && !isToJump) {
 				if (rand() % 10 == 0) {
@@ -1413,4 +1456,7 @@ public:
 	bool onStart();
 	bool onUpdate();
 	bool onFinish();
+
+	std::shared_ptr<SinglePlayerGame::Heiho> tutoenemy;
+	int heihoFreezeTimeRemain = FPS*3 + 5;
 };
