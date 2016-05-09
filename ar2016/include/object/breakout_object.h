@@ -462,7 +462,6 @@ public:
 				imgHandles[key.str()], TRUE);
 		}
 
-		m_score->addPoint(1);
 		auto score = m_score->getPoint();
 		std::array<int, 4> score_num;
 		score_num.at(0) = score / 1000;

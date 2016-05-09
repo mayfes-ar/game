@@ -77,7 +77,7 @@ namespace Breakout {
 	const int ENEMY_HEAD_LIFE = 2;
 	const int SNAKE_ENEMY_LIFE = 1;
 
-	constexpr int MAX_ENEMY_NUM = 3;
+	constexpr int MAX_ENEMY_NUM = 1;
 	constexpr int SNAKE_WIDTH = 60;
 	constexpr int SNAKE_HEIGHT = 60;
 
