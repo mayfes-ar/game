@@ -167,7 +167,6 @@
     <ClCompile Include="src\game\puzzle_game.cpp" />
     <ClCompile Include="src\game\single_game_player.cpp" />
     <ClCompile Include="src\math\collision_detection.cpp" />
-    <ClCompile Include="src\moving\moving.cpp" />
     <ClCompile Include="src\object\breakout_object.cpp" />
     <ClCompile Include="src\object\object.cpp" />
     <ClCompile Include="src\util\color_palette.cpp" />
@@ -188,13 +187,19 @@
     <ClInclude Include="include\math\collision_detection.h" />
     <ClInclude Include="include\math\math_util.h" />
     <ClInclude Include="include\moving\moving.h" />
+    <ClInclude Include="include\moving\moving_behavior.h" />
+    <ClInclude Include="include\moving\newton_behavior.h" />
+    <ClInclude Include="include\moving\random_behavior.h" />
+    <ClInclude Include="include\moving\spring_behavior.h" />
     <ClInclude Include="include\object\block_object.h" />
+    <ClInclude Include="include\object\breakout_enemy.h" />
     <ClInclude Include="include\object\breakout_object.h" />
     <ClInclude Include="include\object\object.h" />
     <ClInclude Include="include\object\shape.h" />
     <ClInclude Include="include\object\units.h" />
     <ClInclude Include="include\util\breakout_params.h" />
     <ClInclude Include="include\util\color_palette.h" />
+    <ClInclude Include="include\util\score.h" />
     <ClInclude Include="include\util\timer.h" />
     <ClInclude Include="include\util\util.h" />
     <ClInclude Include="main.h" />
