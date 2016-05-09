@@ -690,7 +690,7 @@ class SinglePlayerGame : public Game {
 	};
 
 	class Teresa : public Enemy {
-		std::shared_ptr<PendulumCounter> swingCounter = makePendulum(2);
+		std::shared_ptr<PendulumCounter> swingCounter = makePendulum(10);
 	public:
 		static const int width = 80;
 		static const int height = 32;
@@ -1262,11 +1262,13 @@ class SinglePlayerGame : public Game {
 			const int& width = rect.width;
 			const int& height = rect.height;
 
-			const double diffX = x - prevX;
-			const double diffY = y - prevY;
+			//const double diffX = x - prevX;
+			//const double diffY = y - prevY;
+			const double diffX = 40 * tanh((x - prevX) / 40);
+			const double diffY = 40 * tanh((y - prevY) / 40);
 
 			acX = -0.5 * (1 - (diffX <= 0) - (diffX < 0));
-			acY = 3.2;
+			acY = 2.8;
 
 			if (key[KEY_INPUT_LSHIFT]) {
 				isToJump = false;
@@ -1290,7 +1292,7 @@ class SinglePlayerGame : public Game {
 					isToJump = true;
 				}
 				else {
-					acX = rand() % 30 - 15 - 5 * (1 - ( x <= WIDTH/2 ) - ( x < WIDTH/2 ));
+					acX = rand() % 19 - 10 - 5 * (1 - ( x <= WIDTH/2 ) - ( x < WIDTH/2 ));
 					moveDirection = acX > 0 ? RIGHT : acX < 0 ? LEFT : moveDirection;
 				}
 
