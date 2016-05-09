@@ -76,6 +76,7 @@ public:
         return true;
     }
 private:
+	bool m_is_mode_selected = false;
     std::thread m_detect_thread;
 
     BreakoutComponents* m_components = new BreakoutComponents();
@@ -88,6 +89,7 @@ private:
 
         m_components->setup();
 		m_components->info->init();
+		m_is_mode_selected = false;
     }
 
 	// すべての衝突判定
