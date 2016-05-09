@@ -303,7 +303,6 @@ bool SinglePlayerGame::onUpdate() {
 		if (hasPlayerWon && player->deathDecision(enemyList)) {
 			hasPlayerWon = false;
 			bgm->stop();
-			bgm->playDeadSound();
 			funcTimer.set([this]() {
 				willFinishMode = true;
 			}, FPS*5);

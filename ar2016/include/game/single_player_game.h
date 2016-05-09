@@ -135,11 +135,6 @@ class SinglePlayerGame : public Game {
 			}
 			}
 		}
-
-		// プレイヤーが死んだときの効果音
-		void playDeadSound() {
-			PlaySoundMem(soundHandles["s_game_dead"], DX_PLAYTYPE_BACK, true);
-		}
 	};
 
 	class SingleGameObject : public Object {
@@ -166,6 +161,16 @@ class SinglePlayerGame : public Game {
 			SetDrawBright(100, 100, 100);
 			func();
 			SetDrawBright(255, 255, 255);
+		}
+
+		void drawWithRotation(int imgHandle, double angle, bool turnFlag = false) {
+			int imageWidth = 0;
+			int imageHeight = 0;
+			GetGraphSize(imgHandle, &imageWidth, &imageHeight);
+			imageWidth = imageWidth > 0 ? imageWidth : 1;
+			imageHeight= imageHeight> 0 ? imageHeight: 1;
+			DrawRotaGraph3((left() + right()) / 2, (top() + bottom()) / 2, imageWidth / 2, imageHeight / 2, rect.width / (double)imageWidth, rect.height / (double)imageHeight, angle, imgHandle, true, turnFlag);
+			//DrawRotaGraph3((left() + right()) / 2, (top() + bottom()) / 2, (left() + right()) / 2, (top() + bottom()) / 2, 0.125, 0.125, angle, imgHandle, true, turnFlag);
 		}
 	};
 
@@ -386,6 +391,8 @@ class SinglePlayerGame : public Game {
 		const int overBufferMax;
 		int overBuffer;
 
+		double angle = 0;
+
 		SinglePlayerGame& game;
 
 		Character(const int x_, const int y_, const int width_, const int height_, const std::string imgHandleKey_, const int maxDamage_, SinglePlayerGame& game_, const int overBufferMax_, int const maxInvincibleTime_) : maxDamage(maxDamage_), game(game_), overBufferMax(overBufferMax_), maxInvincibleTime(maxInvincibleTime_) {
@@ -410,14 +417,15 @@ class SinglePlayerGame : public Game {
 			switch (moveDirection)
 			{
 			case RIGHT: {
-				
-				drawWithRect(imgHandle[characterState], 0, true);
+				//drawWithRect(imgHandle[characterState], 0, true);
+				drawWithRotation(imgHandle[characterState], angle, true);
 				break;
 			}
 
 			case NOMOVE:
 			case LEFT: {
-				drawWithRect(imgHandle[characterState]);
+				//drawWithRect(imgHandle[characterState]);
+				drawWithRotation(imgHandle[characterState], angle);
 				break;
 			}
 			default:
@@ -1354,6 +1362,14 @@ class SinglePlayerGame : public Game {
 			else {
 				die();
 			}
+		}
+
+		virtual void die() {
+			changeCharacterState(OVER);
+			PlaySoundMem(soundHandles["s_game_dead"], DX_PLAYTYPE_BACK, true);
+
+			if (overBuffer <= 0) isAlive = false;
+			overBuffer--;
 		}
 	};
 
