@@ -166,7 +166,7 @@ bool Object::load() {
 	isSuccess &= loadImage("s_game_result_dead", "s_game/s_game_result");
 	isSuccess &= loadImage("s_game_dead", "s_game/dead_sample");
 	isSuccess &= loadSound("s_game_over", "s_game/game_over.wav");
-	isSuccess &= loadEffect("s_game_over_hanabi", "s_game/hanabi", 14, 13, 7168, 7680);
+	isSuccess &= loadEffect("s_game_over_hanabi", "s_game/hanabi", 14, 15, 7168, 7680);
 	//isSuccess &= loadMovie("s_game_over_hanabi", "s_game/hanabi");
 
 	// puzzle game

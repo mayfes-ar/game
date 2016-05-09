@@ -354,6 +354,32 @@ class SinglePlayerGame : public Game {
 		}
 	};
 
+	//シーンチェンジのカーテン
+	class CurtainObject : public Object {
+		const bool isOpen;
+		int counter = 0;
+		const int openCountMax = effectHandles["p_curtain_open"].size();
+		const int closeCountMax = effectHandles["p_curtain_close"].size();
+	public:
+		CurtainObject(bool isOpen_) : isOpen(isOpen_) {
+			layer = 300;
+		}
+		bool draw() {
+			const int handle = isOpen ? effectHandles["p_curtain_open"][counter] : effectHandles["p_curtain_close"][counter];
+			DrawExtendGraph(0, 0, 1280, 720, handle, true);
+
+			if (isOpen) {
+				counter++;
+				return !(counter == openCountMax);
+			}
+			else {
+				if (counter < closeCountMax - 1) { counter++; }
+				return true;
+			}
+		}
+	};
+
+
 	//キャラクター一般
 	class Character : public SingleGameObject {
 	public:
@@ -1400,6 +1426,7 @@ class SinglePlayerGame : public Game {
 	};
 
 	int timer = maxTime;
+	int result_timer = maxTime;
 	bool hasPlayerWon;
 
 	Difficulty difficulty = EASY;

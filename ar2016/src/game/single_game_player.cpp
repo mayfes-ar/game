@@ -159,7 +159,7 @@ bool SinglePlayerGame::onStart() {
 
 		drawList.push_back(player);
 		drawList.push_back(make_shared<Background>(share.handle));
-		/*
+		
 		makeEffect("s_game_coin", 200, 200, 50, 50, true);
 		makeEffect("s_game_coin", 250, 200, 50, 50, true, 150, 1, 3);
 		makeEffect("s_game_coin", 300, 200, 50, 50, true, 150, 2);
@@ -171,7 +171,7 @@ bool SinglePlayerGame::onStart() {
 		makeEffect("s_game_hit", 600, 200, 50, 50, true, 150, 2);
 		makeEffect("s_game_enemy_over", 650, 200, 50, 50, true, 150, 3);
 		makeEffect("s_game_sword", 700, 200, 50, 50, true, 150, 2);
-		*/
+		
 
 		share.rectMutex.lock();
 		markerList.clear();
@@ -190,6 +190,12 @@ bool SinglePlayerGame::onStart() {
 
 	// mode 2
 	mode.setMode([this]() {
+		
+		drawList.push_back(std::make_shared<CurtainObject>(false));//カーテンしめる		
+		drawList.clear();	
+		drawList.push_back(std::make_shared<CurtainObject>(true));//あける
+
+		
 
 		class Title : public Object {
 			bool hasPlayerWon = true;
@@ -206,7 +212,17 @@ bool SinglePlayerGame::onStart() {
 				timer = timer_;
 			}
 
+			
 			bool draw() {
+				rect.y += 2;
+				
+				std::string dead1 = "あなたはお姫様を守ることができませんでした。";
+				std::string dead2 = "お姫様の躯は無残な有様であの丘の上、";
+				std::string dead3 = "風化に任せるままに寂しげに横たわっています。";
+				std::string dead4 = "姫の残機は無限。";
+				std::string dead5 = "次の姫様は、守ることができるといいですね。";
+				std::string dead6 = "遊んでくれてありがとうございました。";
+
 				if (hasPlayerWon) {
 					DrawExtendGraph(0, 0, WIDTH, HEIGHT, imgHandles["s_game_result_clear"], true);
 					std::string clearScore = "Score : " + std::to_string(maxTime + (player->getMaxDamage() - player->getPlayerDamage()) * 50);
@@ -214,12 +230,19 @@ bool SinglePlayerGame::onStart() {
 				}
 				else {
 					//DrawExtendGraph(WIDTH / 2 - 400, 30, WIDTH / 2 + 400, 30 + 296, imgHandles["s_game_result_dead"], true);
-					//DrawExtendGraph(WIDTH / 2 - 75, 400, WIDTH / 2 + 75, 400 + 150, imgHandles["s_game_dead"], true);
-					std::string deadScore = "Score : " + std::to_string(maxTime - timer);
-					std::string playTime = "Time : " + std::to_string((maxTime - timer) / 30);
+					DrawExtendGraph(621/5 , 1046/5, 621 , 1046, imgHandles["s_game_player_drowned"], true);
+					std::string deadScore = "得点 : " + std::to_string(maxTime - timer);
+					std::string playTime = "記録 : " + std::to_string((maxTime - timer) / 30) + "秒";
 					DrawString(100, 150, deadScore.c_str(), GetColor(255, 255, 255));
 					DrawString(100, 200, playTime.c_str(), GetColor(255, 255, 255));
 
+					DrawString(600, HEIGHT - rect.y, dead1.c_str(), GetColor(255, 255, 255));
+					DrawString(600, HEIGHT+100 - rect.y, dead2.c_str(), GetColor(255, 255, 255));
+					DrawString(600, HEIGHT+200 - rect.y, dead3.c_str(), GetColor(255, 255, 255));
+					DrawString(600, HEIGHT+300 - rect.y, dead4.c_str(), GetColor(255, 255, 255));
+					DrawString(600, HEIGHT+400 - rect.y, dead5.c_str(), GetColor(255, 255, 255));
+					DrawString(600, HEIGHT+500 - rect.y, dead6.c_str(), GetColor(255, 255, 255));
+					
 				}
 				
 				std::string damage = ("Damage : " + std::to_string(player->getPlayerDamage()));
@@ -229,21 +252,25 @@ bool SinglePlayerGame::onStart() {
 				return true;
 			}
 		};
-
+		
 		//yu
-		drawList.clear();
-		drawList.push_back(make_shared<Title>(hasPlayerWon, player, maxTime, timer));
+		
+		drawList.push_back(make_shared<Title>(hasPlayerWon, player, maxTime, timer));	
 
-		makeEffect("s_game_over_hanabi", 250, 250, 512, 512, true,150 ,1,4);
-		makeEffect("s_game_over_hanabi", 400, 250, 400, 400, true, 150, 1,3);
+		makeEffect("s_game_over_hanabi", 500, 300, 300, 300, true,150 ,1,4);
+		makeEffect("s_game_over_hanabi", 600, 300, 500, 500, true, 150, 1,3);
 		makeEffect("s_game_coin", 250, 200, 50, 50, true, 150, 1, 3);
 		makeEffect("s_game_coin", 300, 200, 50, 50, true, 150, 2);
 		makeEffect("s_game_coin", 350, 200, 50, 50, true, 150, 2, 3);
 
 
+
+
 		bgm->stop();
 		bgm = make_shared<BGM>(2, hasPlayerWon);
 		bgm->start();
+
+
 	}, -1);
 
 	return Game::onStart();
@@ -312,12 +339,15 @@ bool SinglePlayerGame::onUpdate() {
 		enemySubList.shrink_to_fit();
 
 		if (hasPlayerWon && player->deathDecision(enemyList)) {
+			
 			hasPlayerWon = false;
 			bgm->stop();
 			bgm->playDeadSound();
 			funcTimer.set([this]() {
 				willFinishMode = true;
 			}, FPS*5);
+
+
 		}
 
 		// 敵の出現を管理する
@@ -478,11 +508,19 @@ bool SinglePlayerGame::onUpdate() {
 		break;
 	}
 	case 2: { // リザルト画面
+		
+		result_timer -= 1;
+
 		if (key[KEY_INPUT_RETURN]) {
 			willFinishMode = true;
-		}
+			result_timer = maxTime;
+		}		
+		
+	
 		break;
 	}
+
+
 
 	default:
 
