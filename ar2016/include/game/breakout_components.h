@@ -7,12 +7,15 @@
 #include <vector>
 #include <unordered_map>
 #include "object/breakout_object.h"
+#include "object/breakout_enemy.h"
 #include "const.h"
 #include <Eigen/Core>
 #include "moving/newton_behavior.h"
 #include "moving/spring_behavior.h"
+#include "moving/random_behavior.h"
 #include "game/fps.h"
 #include "util/breakout_params.h"
+
 
 namespace Breakout{
 	enum class Mode : uint8_t {
@@ -54,4 +57,10 @@ public:
 	std::vector<std::shared_ptr<Breakout::Item>> item_list;
 
 	std::shared_ptr<Breakout::EnemyHead> enemy = nullptr;
+
+	std::shared_ptr<Breakout::EnemyManager> enemy_manager = nullptr;
+
+	std::vector<std::shared_ptr<Breakout::House>> house_list;
+
+	std::vector<std::shared_ptr<Breakout::Resident>> resident_list;
 };

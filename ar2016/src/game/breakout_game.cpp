@@ -7,6 +7,7 @@ void BreakoutGame::updateCollisionDetection()
 	// FireBallの衝突判定
 	{
 		for (auto& fireball : m_components->fireball_manager->getFireballList()) {
+			bool continue_loop = false;
 
 			// 下壁との衝突判定
 			if (CollisionDetection::isOnLine(fireball->getRealm(),
@@ -25,7 +26,8 @@ void BreakoutGame::updateCollisionDetection()
 			// Ship衝突判定
 			if (m_components->ship->isAlive()) {
 				if (fireball->isCollided(m_components->ship->getRealm(), 1, m_components->ship->getVelocity())) {
-					if (fireball->getMode() == Breakout::FireballKind::EnemyStrong) {
+					// EnemyStrongであり かつ 無敵状態じゃなかったら
+					if (fireball->getMode() == Breakout::FireballKind::EnemyStrong && !m_components->ship->isEnhanced()) {
 						//fireballを消す
 						m_components->fireball_manager->destroy(fireball);
 						m_components->ship->damageShip(1);
@@ -39,42 +41,77 @@ void BreakoutGame::updateCollisionDetection()
 
 			// Block衝突判定
 			// EnemyModeだったらBlockと衝突させない
-			if (fireball->isEnemy()) { continue; }
-			else {
+			if (!fireball->isEnemy()) {
 				for (int block_id = 0; block_id < Breakout::BLOCK_HEIGHT_NUM * Breakout::BLOCK_WIDTH_NUM; ++block_id) {
 					if (m_components->block_list.at(block_id)->isDisappeared()) continue;
 					if (fireball->isCollided(m_components->block_list.at(block_id)->getRealm())) {
 						m_components->block_list.at(block_id)->damageBlock(fireball->giveDamage());
+						continue_loop = true;
 						break;
 					}
 				}
 			}
+			if (continue_loop) continue;
 
 			// Enemy衝突判定
 			//エネミーモードじゃなかったら
 			if (!fireball->isEnemy()) {
 				if (m_components->enemy->isAlive()) {
 					if (fireball->isCollided(m_components->enemy->getRealm())) {
-						m_components->enemy->damageEnemy(fireball->giveDamage());
-						m_components->fireball_manager->destroy(fireball);
+						m_components->enemy->damageByPlayerFireball(fireball, m_components->fireball_manager);
 						continue;
 					}
-				}
-				if (m_components->enemy->getLeftHand()->isAlive()) {
-					if (fireball->isCollided(m_components->enemy->getLeftHand()->getRealm())) {
-						m_components->enemy->getLeftHand()->damageEnemy(fireball->giveDamage());
-						m_components->fireball_manager->destroy(fireball);
-						continue;
+
+					if (m_components->enemy->getLeftHand()->isAlive()) {
+						if (fireball->isCollided(m_components->enemy->getLeftHand()->getRealm())) {
+							m_components->enemy->getLeftHand()->damageByPlayerFireball(fireball, m_components->fireball_manager);
+							continue;
+						}
+					}
+					if (m_components->enemy->getRightHand()->isAlive()) {
+						if (fireball->isCollided(m_components->enemy->getRightHand()->getRealm())) {
+							m_components->enemy->getRightHand()->damageByPlayerFireball(fireball, m_components->fireball_manager);
+							continue;
+						}
 					}
 				}
-				if (m_components->enemy->getRightHand()->isAlive()) {
-					if (fireball->isCollided(m_components->enemy->getRightHand()->getRealm())) {
-						m_components->enemy->getRightHand()->damageEnemy(fireball->giveDamage());
-						m_components->fireball_manager->destroy(fireball);
-						continue;
+
+
+				for (auto& enemy : m_components->enemy_manager->getEnemyList()) {
+					if (enemy->isAlive()) {
+						if (fireball->isCollided(enemy->getRealm())) {
+							enemy->damageByPlayerFireball(fireball, m_components->fireball_manager);
+							continue_loop = true;
+							break;
+						}
 					}
 				}
 			}
+			if (continue_loop) continue;
+
+			// Town の衝突判定
+			for (auto& house : m_components->house_list) {
+				if (house->isAlive()) {
+					if (fireball->isCollided(house->getRealm())) {
+						house->damageByFireball(fireball, m_components->fireball_manager);
+						continue_loop = true;
+						break;
+					}
+				}
+			}
+			if (continue_loop) continue;
+
+			for (auto& resident : m_components->resident_list) {
+				if (resident->isAlive()) {
+					if (fireball->isCollided(resident->getRealm())) {
+						resident->damageByFireball(fireball, m_components->fireball_manager);
+						continue_loop = true;
+						break;
+					}
+				}
+			}
+			if (continue_loop) continue;
+
 		}
 	}
 	//Itemの衝突判定
@@ -188,7 +225,9 @@ void BreakoutGame::updateGameState()
 		}
 
 		if (m_components->info->isTimeOver() ||
-			!m_components->ship->isAlive()) {
+			!m_components->ship->isAlive() ||
+			(m_components->house_list.size() == 0 &&
+				m_components->resident_list.size() == 0)) {
 			mode.goNext();
 			return;
 		}
@@ -211,14 +250,16 @@ void BreakoutGame::updateGameState()
 bool BreakoutGame::isGameClear() const
 {
 	if (m_components->enemy->isAlive()) return false;
-
-	for (const auto& block : m_components->block_list) {
-		//壊せないブロックだったら勘定に入れない
-		if (block->getBlockKind() == "UnbreakableBlock") continue;
-		if (!block->isDisappeared()) {
-			return false;
-		}
+	for (auto& enemy : m_components->enemy_manager->getEnemyList()) {
+		if (enemy->isAlive()) return false;
 	}
+	//for (const auto& block : m_components->block_list) {
+	//	//壊せないブロックだったら勘定に入れない
+	//	if (block->getBlockKind() == "UnbreakableBlock") continue;
+	//	if (!block->isDisappeared()) {
+	//		return false;
+	//	}
+	//}
 
 	return true;
 }
@@ -293,9 +334,49 @@ void BreakoutGame::updatePotStatus() {
 
 void BreakoutGame::updateEnemy() {
 	m_components->enemy->updatePosition();
+	m_components->enemy_manager->updatePosition();
 
+	m_components->enemy_manager->destroyIfEffectIsFinished();
+
+	// Enemyがファイアーボールをはく
 	while (!m_components->fireball_manager->isMax()) {
 		m_components->fireball_manager->add(m_components->enemy->makeFireball());
 	}
+	while (!m_components->enemy_manager->isMax()) {
+		m_components->enemy_manager->add(m_components->enemy->makeEnemy());
+	}
 
+}
+
+void BreakoutGame::updateTown() {
+	for (auto& itr = m_components->house_list.begin(); itr != m_components->house_list.end();) {
+		if ((*itr)->isEffectContinuing()) {
+			(*itr)->updatePosition();
+			++itr;
+		}
+		else {
+			itr = m_components->house_list.erase(itr);
+		}
+	}
+
+	for (auto& itr = m_components->resident_list.begin(); itr != m_components->resident_list.end();) {
+		if ((*itr)->isEffectContinuing()) {
+			(*itr)->updatePosition();
+			++itr;
+		}
+		else {
+			itr = m_components->resident_list.erase(itr);
+		}
+	}
+}
+
+void BreakoutGame::EnemyVSTown() {
+	for (auto& enemy : m_components->enemy_manager->getEnemyList()) {
+		for (auto& house : m_components->house_list) {
+			enemy->attackOnTown(house);
+		}
+		for (auto& resident : m_components->resident_list) {
+			enemy->attackOnTown(resident);
+		}
+	}
 }

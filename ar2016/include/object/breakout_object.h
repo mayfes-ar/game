@@ -23,6 +23,7 @@
 #include "util/color_palette.h"
 #include "moving/newton_behavior.h"
 #include "moving/spring_behavior.h"
+#include "moving/random_behavior.h"
 #include "Dxlib.h"
 
 
@@ -36,11 +37,55 @@ namespace Breakout {
 	constexpr int PRIORITY_CHARACTER = 4; // キャラクター(マリオ)
 	constexpr int PRIORITY_INFO = 5; // インフォメーション
 
+	class Effect : public Object {
+	public:
+		Effect(std::vector<int>& effectHandle, int frames_per_scene, const int priority) {
+			m_effectHandles = effectHandle;
+			m_count_max = m_effectHandles.size();
+			m_frames_per_scene = frames_per_scene;
+			Object::layer = priority;
+		}
+		Effect(std::vector<int>& effectHandle, const int priority) {
+			m_effectHandles = effectHandle;
+			m_count_max = m_effectHandles.size();
+			Object::layer = priority;
+		}
+
+		void drawWithRealm(Shape::Rectangle realm) {
+			DrawExtendGraph(realm.left(), realm.top(),
+				realm.right(), realm.bottom(),
+				m_effectHandles[m_counter / m_frames_per_scene], TRUE);
+		}
+
+		void incrementCounterWhenDrawWithRealm(Shape::Rectangle realm) {
+			DrawExtendGraph(realm.left(), realm.top(),
+				realm.right(), realm.bottom(),
+				m_effectHandles[m_counter / m_frames_per_scene], TRUE);
+			incrementCounter();
+		}
+
+		bool draw() override { return true; };
+
+		void incrementCounter() {
+			m_counter++;
+			if (m_counter == m_count_max * m_frames_per_scene) m_counter = 0;
+		}
+	private:
+		std::vector<int> m_effectHandles;
+		int m_count_max = 0;
+		int m_counter = 0;
+		// 1つの差分を連続で何フレーム映すか
+		int m_frames_per_scene = 1;
+	};
+
 	class ItemReceiverBase;
 
 	enum ItemKind {
 		RestoreShip,
-		DamageShip
+		DamageShip,
+		EnhanceShip,
+		RestorePot,
+		RestoreTime
 	};
 
 	//アイテムクラス
@@ -80,6 +125,7 @@ namespace Breakout {
 		ItemReceiverBase(const Shape::Rectangle& realm) : m_realm(realm) {}
 		virtual ~ItemReceiverBase() {}
 		//本当は純粋仮想にしたかったけどそうするとこのクラスのインスタンスthisがつくれないからこのようにした
+		// applyItems は毎ループ呼ぶためにdraw()の中に入れるようにする。
 		virtual void applyItems() {}
 		virtual const Shape::Rectangle getRealm() { return m_realm; }
 
@@ -98,7 +144,7 @@ namespace Breakout {
 		void attachItem(std::shared_ptr<ItemBase> item) {
 			m_items.push_back(item);
 			item->attachItemReceiver(std::make_shared<ItemReceiverBase>(*this));
-			applyItems();
+			//applyItems();
 		}
 
 		//使用済みのアイテムを消す
@@ -132,7 +178,7 @@ namespace Breakout {
 				m_realm.start_point = m_item_receiver->getRealm().start_point;// + Eigen::Vector2i((m_item_receiver->getRealm().width - m_realm.width) / 2, 0);
 			}
 			else {
-				m_realm.start_point += Eigen::Vector2i(0, 20);
+				m_realm.start_point += Eigen::Vector2i(0, 10);
 			}
 		}
 
@@ -142,10 +188,19 @@ namespace Breakout {
 
 			switch (m_item_kind) {
 			case RestoreShip:
-				DrawExtendGraph(m_realm.left(), m_realm.top(), m_realm.right(), m_realm.bottom(), imgHandles["restore_ship"], TRUE);
+				DrawExtendGraph(m_realm.left(), m_realm.top(), m_realm.right(), m_realm.bottom(), imgHandles["b_restore_ship"], TRUE);
 				break;
 			case DamageShip:
-				DrawExtendGraph(m_realm.left(), m_realm.top(), m_realm.right(), m_realm.bottom(), imgHandles["damage_ship"], TRUE);
+				DrawExtendGraph(m_realm.left(), m_realm.top(), m_realm.right(), m_realm.bottom(), imgHandles["b_damage_ship"], TRUE);
+				break;
+			case EnhanceShip:
+				DrawExtendGraph(m_realm.left(), m_realm.top(), m_realm.right(), m_realm.bottom(), imgHandles["b_enhance_ship"], TRUE);
+				break;
+			case RestorePot:
+				DrawExtendGraph(m_realm.left(), m_realm.top(), m_realm.right(), m_realm.bottom(), imgHandles["b_pot"], TRUE);
+				break;
+			case RestoreTime:
+				DrawExtendGraph(m_realm.left(), m_realm.top(), m_realm.right(), m_realm.bottom(), imgHandles["b_restore_time"], TRUE);
 				break;
 			}
 
@@ -346,6 +401,10 @@ public:
 		m_timer->reset();
 	}
 
+	void restoreTimer(int minute, int second) {
+		m_timer->increaseStartTime(minute, second);
+	}
+
 	bool draw() {
 		SetDrawBright(100, 100, 100);
 		DrawBox(m_realm.left(), m_realm.top(),
@@ -403,7 +462,6 @@ public:
 				imgHandles[key.str()], TRUE);
 		}
 
-		m_score->addPoint(1);
 		auto score = m_score->getPoint();
 		std::array<int, 4> score_num;
 		score_num.at(0) = score / 1000;
@@ -551,17 +609,17 @@ public:
 		case Color::Green:
 			DrawExtendGraph(m_realm.left(), m_realm.top(),
 				m_realm.right(), m_realm.bottom(),
-				imgHandles["block_green"], TRUE);
+				imgHandles["b_block_green"], TRUE);
 			break;
 		case Color::Blue:
 			DrawExtendGraph(m_realm.left(), m_realm.top(),
 				m_realm.right(), m_realm.bottom(),
-				imgHandles["block_blue"], TRUE);
+				imgHandles["b_block_blue"], TRUE);
 			break;
 		case Color::Red:
 			DrawExtendGraph(m_realm.left(), m_realm.top(),
 				m_realm.right(), m_realm.bottom(),
-				imgHandles["block_red"], TRUE);
+				imgHandles["b_block_red"], TRUE);
 			break;
 		}
 
@@ -636,7 +694,7 @@ public:
 	bool draw() override {
 		if (isDisappeared()) return true;
 		Block::draw();
-		DrawExtendGraph(m_realm.left(), m_realm.top(), m_realm.right(), m_realm.bottom(), imgHandles["hatena_block"], TRUE);
+		DrawExtendGraph(m_realm.left(), m_realm.top(), m_realm.right(), m_realm.bottom(), imgHandles["b_hatena_block"], TRUE);
 		return true;
 	}
 	std::string getBlockKind() override {
@@ -655,7 +713,7 @@ public:
 	bool draw() override {
 		if (isDisappeared()) return true;
 		Block::draw();
-		DrawExtendGraph(m_realm.left(), m_realm.top(), m_realm.right(), m_realm.bottom(), imgHandles["hard_block"], TRUE);
+		DrawExtendGraph(m_realm.left(), m_realm.top(), m_realm.right(), m_realm.bottom(), imgHandles["b_hard_block"], TRUE);
 		return true;
 	}
 	std::string getBlockKind() override {
@@ -674,7 +732,7 @@ public:
 	bool draw() override {
 		if (isDisappeared()) return true;
 		Block::draw();
-		DrawExtendGraph(m_realm.left(), m_realm.top(), m_realm.right(), m_realm.bottom(), imgHandles["unbreakable_block"], TRUE);
+		DrawExtendGraph(m_realm.left(), m_realm.top(), m_realm.right(), m_realm.bottom(), imgHandles["b_unbreakable_block"], TRUE);
 		return true;
 	}
 	std::string getBlockKind() override {
@@ -700,6 +758,8 @@ enum FireballKind {
 class Fireball : public Object
 {
 public:
+	Fireball() {}
+
 	Fireball(const Shape::Circle& realm, const std::shared_ptr<Moving>& moving)
 		: m_realm(realm), m_moving(moving)
 	{
@@ -885,148 +945,6 @@ private:
 };
 
 
-
-// キャラクタがのる船
-// ライフをもつ
-class Ship : public Object, public ItemReceiverBase
-{
-public:
-	explicit Ship(const Eigen::Vector2i& start_point, const Life& life)
-		: m_start_point(start_point), m_life(life)
-	{
-		Object::layer = PRIORITY_DYNAMIC_OBJECT;
-		for (int i = 0; i < m_life.getLifeNum(); i++) {
-			m_blocks.push_back(Shape::Rectangle(start_point + Eigen::Vector2i{ BLOCK_WIDTH, 0 } *i, BLOCK_WIDTH, BLOCK_HEIGHT));
-		}
-	}
-
-	//! @brief 舟を動かす
-	bool translate(int translation) {
-		//範囲外なら移動させない
-		//start_pointの更新
-		m_start_point = m_blocks[0].getLeftTopPoint();
-		if (m_blocks[m_blocks.size() - 1].right() + translation > FIELD_START_POS.x() + FIELD_WIDTH ||
-			m_blocks[0].left() + translation < FIELD_START_POS.x()) return false;
-
-		for (auto &block : m_blocks) {
-			block.start_point.x() += translation;
-		}
-		// m_velocityのセット
-		m_velocity = translation;
-		return true;
-	}
-
-	bool restoreShip(int amount) {
-		if (!m_life.restore(amount)) return false;
-		if (m_blocks.empty()) {
-			m_blocks.push_back(Shape::Rectangle(m_start_point, BLOCK_WIDTH, BLOCK_HEIGHT));
-			return true;
-		}
-		for (int i = 0; i < amount; i++) {
-			if (m_blocks[m_blocks.size() - 1].getRightBottomPoint().x() + BLOCK_WIDTH > FIELD_START_POS.x() + FIELD_WIDTH) {
-				m_blocks.insert(m_blocks.begin(), Shape::Rectangle(m_blocks[0].getLeftTopPoint() - Eigen::Vector2i(BLOCK_WIDTH, 0), BLOCK_WIDTH, BLOCK_HEIGHT));
-			}
-			else
-				m_blocks.push_back(Shape::Rectangle(m_blocks[m_blocks.size() - 1].getRightTopPoint(), BLOCK_WIDTH, BLOCK_HEIGHT));
-		}
-		return true;
-	}
-
-	bool damageShip(int amount) {
-		if (!m_life.damage(amount)) return false;
-		for (int i = 0; i < amount; i++) {
-			m_blocks.pop_back();
-		}
-		return true;
-	}
-
-	void resetShip() {
-		m_blocks.clear();
-		m_life.resetLife();
-		for (int i = 0; i < m_life.getLifeNum(); i++) {
-			m_blocks.push_back(Shape::Rectangle(m_start_point + Eigen::Vector2i{ BLOCK_WIDTH, 0 } *i, BLOCK_WIDTH, BLOCK_HEIGHT));
-		}
-	}
-
-	int getLifeNum() {
-		return m_life.getLifeNum();
-	}
-
-	bool isAlive() const {
-		return m_life.isAlive();
-	}
-
-	int left() {
-		return m_start_point[0];
-	}
-	int right() {
-		return m_start_point[0] + m_blocks.size() * BLOCK_WIDTH;
-	}
-	int top() {
-		return m_start_point[1];
-	}
-	int bottom() {
-		return m_start_point[1] + BLOCK_HEIGHT;
-	}
-	int getVelocity() {
-		return m_velocity;
-	}
-
-	bool draw() override {
-		if (m_is_disappered) {
-			// 何も描画しない
-			return true;
-		}
-
-		for (auto block : m_blocks) {
-			DrawExtendGraph(block.left(), block.top(),
-				block.right(), block.bottom(),
-				imgHandles["ship_block"], TRUE);
-		}
-
-		return true;
-	}
-
-
-	// Blockの消滅
-	void disapper()
-	{
-		m_is_disappered = true;
-	}
-
-	const Shape::Rectangle getRealm() override {
-		return Shape::Rectangle(m_start_point, m_blocks.size() * BLOCK_WIDTH, BLOCK_HEIGHT);
-	}
-
-	void applyItems() override {
-		for (int i = 0; i < m_items.size(); i++) {
-
-			switch (m_items[i]->getItemKind()) {
-				//継続的な効果を持たないものは適用したら消す
-			case RestoreShip:
-				restoreShip(1);
-				deleteItem(m_items[i]);
-				//消したのでその分indexを減らす
-				i--;
-				break;
-			case DamageShip:
-				damageShip(1);
-				deleteItem(m_items[i]);
-				i--;
-				break;
-			}
-		}
-	}
-
-private:
-	bool m_is_disappered = false;
-	std::vector<Shape::Rectangle> m_blocks = {};
-	Eigen::Vector2i m_start_point = Eigen::Vector2i::Zero();
-	int m_velocity = 0; // マーカーを認識しているときにtranslateで渡されるもの。実際の速度的な概念とは違う。
-	Life m_life = Life(); // defaultは４つ。火の玉に当たるごとに一つ減る
-};
-
-
 class Pot : public Object
 {
 public:
@@ -1120,6 +1038,14 @@ public:
 		return m_fireball;
 	}
 
+	void resetStatus() {
+		m_is_disappered = true;
+		m_rotation = 0;
+		m_fireball = nullptr;
+		m_initial_fireball_speed = 0;
+		m_count = 90;
+	}
+
 	bool draw() override {
 		if (m_is_disappered || !isAvailable()) {
 			// 何も描画しない
@@ -1144,7 +1070,7 @@ public:
 
 		DrawRotaGraph(m_realm.getCenterPoint().x(), m_realm.getCenterPoint().y(),
 			(double)m_realm.width / 150.0, m_rotation,
-			imgHandles["pot"], TRUE, FALSE);
+			imgHandles["b_pot"], TRUE, FALSE);
 
 
 		DrawBox(m_realm.left(), m_realm.top(),
@@ -1170,223 +1096,330 @@ private:
 	}
 };
 
-class EnemyBase {
+// キャラクタがのる船
+// ライフをもつ
+class Ship : public Object, public ItemReceiverBase
+{
 public:
-	EnemyBase() {}
-	virtual ~EnemyBase() {}
-	virtual std::shared_ptr<Fireball> makeFireball() = 0;
-	// mode が enemy じゃない fireball にあたったらLifeを減らすようなメソッド
-	virtual bool damageEnemy(int amount) = 0;
-	// 何かしらのアクションでLifeを回復するメソッド。実装したくない場合はreturnすればよい
-	virtual bool restoreEnemy() = 0;
-	virtual void resetEnemy() = 0;
-	virtual void updatePosition() = 0;
+	explicit Ship(const Eigen::Vector2i& start_point, const Life& life, std::shared_ptr<Pot>& pot, std::shared_ptr<Info>& info)
+		: m_start_point(start_point), m_life(life), m_pot(pot), m_info(info)
+	{
+		Object::layer = PRIORITY_DYNAMIC_OBJECT;
+		for (int i = 0; i < m_life.getLifeNum(); i++) {
+			m_blocks.push_back(Shape::Rectangle(start_point + Eigen::Vector2i{ BLOCK_WIDTH, 0 } *i, BLOCK_WIDTH, BLOCK_HEIGHT));
+		}
+	}
 
-	std::shared_ptr<Fireball> makeFireball(Eigen::Vector2f velocity, FireballKind kind) {
-		auto moving = std::make_shared<Moving>(1.0f, std::make_shared<NewtonBehavior>(), velocity, Eigen::Vector2f::Zero());
-		auto fireball = std::make_shared<Fireball>(Shape::Circle(m_realm.getLeftBottomPoint(), FIREBALL_RADIUS), moving, kind);
-		return fireball;
-	};
+	//! @brief 舟を動かす
+	bool translate(int translation) {
+		//範囲外なら移動させない
+		//start_pointの更新
+		m_start_point = m_blocks[0].getLeftTopPoint();
+		if (m_blocks[m_blocks.size() - 1].right() + translation > FIELD_START_POS.x() + FIELD_WIDTH ||
+			m_blocks[0].left() + translation < FIELD_START_POS.x()) return false;
+
+		for (auto &block : m_blocks) {
+			block.start_point.x() += translation;
+		}
+		// m_velocityのセット
+		m_velocity = translation;
+		return true;
+	}
+
+	bool restoreShip(int amount) {
+		if (!m_life.restore(amount)) return false;
+		if (m_blocks.empty()) {
+			m_blocks.push_back(Shape::Rectangle(m_start_point, BLOCK_WIDTH, BLOCK_HEIGHT));
+			return true;
+		}
+		for (int i = 0; i < amount; i++) {
+			if (m_blocks[m_blocks.size() - 1].getRightBottomPoint().x() + BLOCK_WIDTH > FIELD_START_POS.x() + FIELD_WIDTH) {
+				m_blocks.insert(m_blocks.begin(), Shape::Rectangle(m_blocks[0].getLeftTopPoint() - Eigen::Vector2i(BLOCK_WIDTH, 0), BLOCK_WIDTH, BLOCK_HEIGHT));
+			}
+			else
+				m_blocks.push_back(Shape::Rectangle(m_blocks[m_blocks.size() - 1].getRightTopPoint(), BLOCK_WIDTH, BLOCK_HEIGHT));
+		}
+		return true;
+	}
+
+	bool damageShip(int amount) {
+		if (!m_life.damage(amount)) return false;
+		for (int i = 0; i < amount; i++) {
+			m_blocks.pop_back();
+		}
+		return true;
+	}
+
+	void resetShip() {
+		m_blocks.clear();
+		m_life.resetLife();
+		for (int i = 0; i < m_life.getLifeNum(); i++) {
+			m_blocks.push_back(Shape::Rectangle(m_start_point + Eigen::Vector2i{ BLOCK_WIDTH, 0 } *i, BLOCK_WIDTH, BLOCK_HEIGHT));
+		}
+	}
 
 	int getLifeNum() {
 		return m_life.getLifeNum();
 	}
+
 	bool isAlive() const {
+		return m_life.isAlive();
+	}
+
+	int left() {
+		return m_start_point[0];
+	}
+	int right() {
+		return m_start_point[0] + m_blocks.size() * BLOCK_WIDTH;
+	}
+	int top() {
+		return m_start_point[1];
+	}
+	int bottom() {
+		return m_start_point[1] + BLOCK_HEIGHT;
+	}
+	int getVelocity() {
+		return m_velocity;
+	}
+
+	// Blockの消滅
+	void disapper()
+	{
+		m_is_disappered = true;
+	}
+
+	const Shape::Rectangle getRealm() override {
+		return Shape::Rectangle(m_start_point, m_blocks.size() * BLOCK_WIDTH, BLOCK_HEIGHT);
+	}
+
+	bool isEnhanced() {
+		return m_is_enhanced;
+	}
+
+	void applyItems() override {
+		for (int i = 0; i < m_items.size(); i++) {
+
+			switch (m_items[i]->getItemKind()) {
+				//継続的な効果を持たないものは適用したら消す
+			case RestoreShip:
+				restoreShip(1);
+				deleteItem(m_items[i]);
+				//消したのでその分indexを減らす
+				i--;
+				break;
+			case DamageShip:
+				damageShip(1);
+				deleteItem(m_items[i]);
+				i--;
+				break;
+			case EnhanceShip:
+				if (!m_is_enhanced) m_is_enhanced = true;
+				else {
+					m_enhanced_count--;
+				}
+
+				// 強化時間を越えたら
+				if (m_enhanced_count < 0) {
+					m_is_enhanced = false;
+					m_enhanced_count = 150;
+					deleteItem(m_items[i]);
+					i--;
+				}
+				break;
+			case RestorePot:
+				// available じゃなかったら適用せず保持しておく。
+				if (!m_pot->isAvailable()) {
+					m_pot->resetStatus();
+					deleteItem(m_items[i]);
+					i--;
+				}
+				break;
+			case RestoreTime:
+				m_info->restoreTimer(0, 10);
+				deleteItem(m_items[i]);
+				i--;
+			default:
+				break;
+			}
+		}
+	}
+
+	bool draw() override {
+		// drawは毎ループ呼ばれるからここに書く
+		applyItems();
+
+		if (m_is_disappered) {
+			// 何も描画しない
+			return true;
+		}
+
+		if (isEnhanced()) {
+			for (auto block : m_blocks) {
+				DrawExtendGraph(block.left(), block.top(),
+					block.right(), block.bottom(),
+					imgHandles["b_ship_block"], TRUE);
+				m_muteki_effect.drawWithRealm(block);
+			}
+		}
+		else {
+			for (auto block : m_blocks) {
+				DrawExtendGraph(block.left(), block.top(),
+					block.right(), block.bottom(),
+					imgHandles["b_ship_block"], TRUE);
+			}
+		}
+
+		if (isEnhanced()) {
+			m_muteki_effect.incrementCounter();
+		}
+		return true;
+	}
+
+private:
+	bool m_is_disappered = false;
+	std::vector<Shape::Rectangle> m_blocks = {};
+	Eigen::Vector2i m_start_point = Eigen::Vector2i::Zero();
+	int m_velocity = 0; // マーカーを認識しているときにtranslateで渡されるもの。実際の速度的な概念とは違う。
+	Life m_life = Life(); // defaultは４つ。火の玉に当たるごとに一つ減る
+	bool m_is_enhanced = false;
+	int m_enhanced_count = 150;
+	Effect m_muteki_effect = Effect(effectHandles["b_muteki"], PRIORITY_DYNAMIC_OBJECT);
+	// item を pot に適用させるため
+	std::shared_ptr<Pot> m_pot = nullptr;
+	// item を　info に適用させるため
+	std::shared_ptr<Info> m_info = nullptr;
+};
+
+
+class Town : public Object
+{
+public:
+	Town() {}
+	virtual ~Town() {}
+	bool isFixed() {
+		if (m_moving->getVelocity() == Eigen::Vector2f::Zero(), m_moving->getAccel() == Eigen::Vector2f::Zero()) return true;
+		else return false;
+	}
+	virtual void changeBehavior(std::shared_ptr<MovingBehavior>& behavior) {
+		m_moving->setBehavior(behavior);
+	}
+	virtual void updatePosition() {
+		m_moving->updatePoistion(m_realm.start_point);
+	}
+	virtual void damageTown(int amount) {
+		m_life.damage(amount);
+	}
+	virtual int giveDamage() {
+		return 1;
+	}
+	virtual void damageByFireball(std::shared_ptr<Fireball>& fireball, std::shared_ptr<FireballManager>& manager) {
+		// もし敵のfireballだったら。（ここらへんどうしようか）
+		if (fireball->isEnemy()) {
+			m_life.damage(fireball->giveDamage());
+
+			//触れたら消える
+			manager->destroy(fireball);
+		}
+	}
+	bool isAlive() {
 		return m_life.isAlive();
 	}
 	Shape::Rectangle getRealm() {
 		return m_realm;
 	}
+
+	// 子クラスで呼んでもらう
+	virtual bool draw() override {
+		//死んでいて
+		if (!isAlive()) {
+			//燃える処理が終わってないなら
+			if (m_burning_count >= 0) {
+				m_burning_effect.incrementCounterWhenDrawWithRealm(m_realm);
+				m_burning_count--;
+			}
+		}
+		return true;
+	}
+
+	bool isEffectContinuing() {
+		return m_burning_count >= 0;
+	}
+	
 protected:
 	Shape::Rectangle m_realm = Shape::Rectangle();
-	Life m_life = Life();
-	std::shared_ptr<Moving> m_moving = nullptr;
-	std::random_device rnd;
-	std::mt19937 mt = std::mt19937(rnd());
+	Life m_life;
+	std::shared_ptr<Moving> m_moving = std::make_shared<Moving>(1.0f/30.0f, std::make_shared<NewtonBehavior>());
 
-	std::uniform_real_distribution<double> velocity_generator = std::uniform_real_distribution<double>(FIREBALL_STARTVEL.x(), FIREBALL_STARTVEL.y());
-	std::uniform_real_distribution<double> fireball_mode_generator = std::uniform_real_distribution<double>(0.0, 1.0);
-};
-
-
-class EnemyLeftHand : public Object, public EnemyBase {
-public:
-	EnemyLeftHand(Shape::Rectangle realm, std::shared_ptr<Moving> moving, Life life) {
-		m_life = life;
-		m_realm = realm;
-		m_moving = moving;
-		Object::layer = PRIORITY_DYNAMIC_OBJECT;
-	}
-	std::shared_ptr<Fireball> makeFireball() override {
-		Eigen::Vector2f base_vel(velocity_generator(mt), velocity_generator(mt));
-		FireballKind kind;
-		float fireball_kind_prob = 0.8;
-
-		if (fireball_mode_generator(mt) > fireball_kind_prob) kind = FireballKind::EnemyStrong;
-		else kind = FireballKind::EnemyWeak;
-
-		return EnemyBase::makeFireball(base_vel, kind);
-	}
-	bool damageEnemy(int amount) override {
-		// TODO mode (mode == プレイヤーだったら)
-		// TODO fireballはあたったら消えるからmanagerから消す
-
-		return m_life.damage(amount);
-	}
-	void updatePosition() override {
-		m_moving->updatePoistion(m_realm.start_point);
-	}
-
-	// 何かしらのアクションでLifeを回復するメソッド。実装したくない場合はreturnすればよい
-	bool restoreEnemy() override {
-		return m_life.restore(1);
-	}
-	void resetEnemy() override {
-		m_life.resetLife();
-	}
-
-	bool draw() override {
-		if (!isAlive()) return true;
-		DrawExtendGraph(m_realm.left(), m_realm.top(), m_realm.right(), m_realm.bottom(), imgHandles["left_hand"], TRUE);
-		return true;
-	}
 private:
-
+	int m_burning_count = 60;
+	Effect m_burning_effect = Effect(effectHandles["b_burning"], 5, PRIORITY_DYNAMIC_OBJECT);
 };
 
-class EnemyRightHand : public Object, public EnemyBase {
+class House : public Town
+{
 public:
-	EnemyRightHand(Shape::Rectangle realm, std::shared_ptr<Moving> moving, Life life) {
-		m_life = life;
+	House(Shape::Rectangle realm, Life life) {
 		m_realm = realm;
-		m_moving = moving;
-		Object::layer = PRIORITY_DYNAMIC_OBJECT;
+		m_life = life;
+		Object::layer = PRIORITY_STATIC_OBJECT;
 	}
-	std::shared_ptr<Fireball> makeFireball() override {
-		Eigen::Vector2f base_vel(velocity_generator(mt), velocity_generator(mt));
-		FireballKind kind;
-		float fireball_kind_prob = 0.8;
-
-		if (fireball_mode_generator(mt) > fireball_kind_prob) kind = FireballKind::EnemyStrong;
-		else kind = FireballKind::EnemyWeak;
-
-		return EnemyBase::makeFireball(base_vel, kind);
+	House(Shape::Rectangle realm, Life life, int img_handle) {
+		m_realm = realm;
+		m_life = life;
+		m_img_handle = img_handle;
+		Object::layer = PRIORITY_STATIC_OBJECT;
 	}
-	bool damageEnemy(int amount) override {
-		// TODO mode (mode == プレイヤーだったら)
-		// TODO fireballはあたったら消えるからmanagerから消す
-
-		return m_life.damage(amount);
-	}
-	void updatePosition() override {
-		m_moving->updatePoistion(m_realm.start_point);
-	}
-
-	// 何かしらのアクションでLifeを回復するメソッド。実装したくない場合はreturnすればよい
-	bool restoreEnemy() override {
-		return m_life.restore(1);
-	}
-	void resetEnemy() override {
-		m_life.resetLife();
-	}
-
 	bool draw() override {
-		if (!isAlive()) return true;
-		DrawExtendGraph(m_realm.left(), m_realm.top(), m_realm.right(), m_realm.bottom(), imgHandles["right_hand"], TRUE);
-		return true;
-	}
-private:
-
-};
-
-
-class EnemyHead : public Object, public EnemyBase {
-public:
-	EnemyHead(Shape::Rectangle realm, std::shared_ptr<Moving>& moving, Life life, std::shared_ptr<EnemyLeftHand>& left_hand, std::shared_ptr<EnemyRightHand>& right_hand)
-		: m_left_hand(left_hand), m_right_hand(right_hand)
-	{
-		m_life = life;
-		m_realm = realm;
-		m_moving = moving;
-		Object::layer = PRIORITY_DYNAMIC_OBJECT;
-	}
-
-	EnemyHead(Shape::Rectangle realm, std::shared_ptr<Moving>& moving, Life life)
-	{
-		m_life = life;
-		m_realm = realm;
-		m_moving = moving;
-		Object::layer = PRIORITY_DYNAMIC_OBJECT;
-	}
-
-	std::shared_ptr<Fireball> makeFireball() override {
-		std::uniform_real_distribution<double> select_enemy_generator = std::uniform_real_distribution<double>(0.0, 1.0);
-		double ratio = select_enemy_generator(mt);
-		if (ratio > 0.7 && hasLeft()) {
-			return m_left_hand->makeFireball();
+		if (m_life.isAlive() || isEffectContinuing()) {
+			DrawExtendGraph(m_realm.left(), m_realm.top(), m_realm.right(), m_realm.bottom(), m_img_handle, TRUE);
 		}
-		else if (ratio > 0.4 && hasRight()) {
-			return m_right_hand->makeFireball();
-		}
-
-		Eigen::Vector2f base_vel(velocity_generator(mt), velocity_generator(mt));
-		FireballKind kind;
-		float fireball_kind_prob;
-		if (hasLeft() && hasRight()) fireball_kind_prob = 0.8;
-		else if (hasLeft() || hasRight()) fireball_kind_prob = 0.6;
-		else fireball_kind_prob = 0.4;
-
-		if (fireball_mode_generator(mt) > fireball_kind_prob) kind = FireballKind::EnemyStrong;
-		else kind = FireballKind::EnemyWeak;
-
-		return EnemyBase::makeFireball(base_vel, kind);
+		Town::draw();
+		return true;
 	}
+private:
+	int m_img_handle = imgHandles["b_house01"];
+};
 
-	bool damageEnemy(int amount) override {
-		// TODO mode (mode == プレイヤーだったら)
-		// TODO fireballはあたったら消えるからmanagerから消す
-
-		return m_life.damage(amount);
+class Resident : public Town
+{
+public:
+	Resident(Shape::Rectangle realm, Life life, std::shared_ptr<MovingBehavior>& behavior) {
+		m_realm = realm;
+		m_life = life;
+		m_moving->setBehavior(behavior);
+		Object::layer = PRIORITY_DYNAMIC_OBJECT;
 	}
-	void updatePosition() override {
-		m_moving->updatePoistion(m_realm.start_point);
-		if (hasLeft()) m_left_hand->updatePosition();
-		if (hasRight()) m_right_hand->updatePosition();
+	Resident(Shape::Rectangle realm, Life life, std::shared_ptr<MovingBehavior>& behavior, int img_handle) {
+		m_realm = realm;
+		m_life = life;
+		m_moving->setBehavior(behavior);
+		m_img_handle = img_handle;
+		Object::layer = PRIORITY_DYNAMIC_OBJECT;
 	}
-
-	// 何かしらのアクションでLifeを回復するメソッド。実装したくない場合はreturnすればよい
-	bool restoreEnemy() override {
-		return m_life.restore(1);
-	}
-	void resetEnemy() override {
-		m_life.resetLife();
+	Resident(Shape::Rectangle realm, Life life, std::shared_ptr<MovingBehavior>& behavior, int img_handle, int img_handle_damaged) {
+		m_realm = realm;
+		m_life = life;
+		m_moving->setBehavior(behavior);
+		m_img_handle = img_handle;
+		m_img_handle_damaged = img_handle_damaged;
+		Object::layer = PRIORITY_DYNAMIC_OBJECT;
 	}
 
 	bool draw() override {
-		if (!isAlive()) return true;
-		DrawExtendGraph(m_realm.left(), m_realm.top(), m_realm.right(), m_realm.bottom(), imgHandles["donald"], TRUE);
-		if (hasLeft()) m_left_hand->draw();
-		if (hasRight()) m_right_hand->draw();
+		if (m_life.isAlive()) {
+			DrawExtendGraph(m_realm.left(), m_realm.top(), m_realm.right(), m_realm.bottom(), m_img_handle, TRUE);
+		}
+		else {
+			if (isEffectContinuing()) {
+				DrawExtendGraph(m_realm.left(), m_realm.top(), m_realm.right(), m_realm.bottom(), m_img_handle_damaged, TRUE);
+			}
+		}
+		Town::draw();
 		return true;
 	}
-
-	bool hasLeft() {
-		return m_left_hand != nullptr ? true : false;
-	}
-
-	bool hasRight() {
-		return m_right_hand != nullptr ? true : false;
-	}
-
-	std::shared_ptr<EnemyLeftHand> getLeftHand() {
-		return m_left_hand;
-	}
-	std::shared_ptr<EnemyRightHand> getRightHand() {
-		return m_right_hand;
-	}
 private:
-	std::shared_ptr<EnemyLeftHand> m_left_hand = nullptr;
-	std::shared_ptr<EnemyRightHand> m_right_hand = nullptr;
+	int m_img_handle = imgHandles["b_hime"];
+	int m_img_handle_damaged = imgHandles["b_hime_damaged"];
 };
 
 } // namespace Breakout

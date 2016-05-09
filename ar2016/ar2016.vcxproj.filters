@@ -13,6 +13,46 @@
     <ClCompile Include="src\object\object.cpp" />
     <ClCompile Include="src\util\color_palette.cpp" />
     <ClCompile Include="src\util\timer.cpp" />
+    <ClCompile Include="src\object\object.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="src\game\image_process.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="src\game\menu.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="const.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="main.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="src\game\puzzle_game.cpp">
+    <ClCompile Include="src\game\breakout_game.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="src\moving\moving.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="src\object\breakout_object.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="src\math\collision_detection.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="src\game\breakout_components.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="src\util\timer.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="src\util\color_palette.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="src\game\single_game_player.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="const.h" />
@@ -30,7 +70,6 @@
     <ClInclude Include="include\math\math_util.h" />
     <ClInclude Include="include\moving\moving.h" />
     <ClInclude Include="include\object\block_object.h" />
-    <ClInclude Include="include\object\breakout_object.h" />
     <ClInclude Include="include\object\object.h" />
     <ClInclude Include="include\object\shape.h" />
     <ClInclude Include="include\object\units.h" />
@@ -43,5 +82,8 @@
     <ClInclude Include="include\moving\newton_behavior.h" />
     <ClInclude Include="include\moving\spring_behavior.h" />
     <ClInclude Include="include\util\score.h" />
+    <ClInclude Include="include\moving\random_behavior.h" />
+    <ClInclude Include="include\object\breakout_object.h" />
+    <ClInclude Include="include\object\breakout_enemy.h" />
   </ItemGroup>
 </Project>

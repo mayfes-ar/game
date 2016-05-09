@@ -165,6 +165,7 @@
     <ClCompile Include="src\game\image_process.cpp" />
     <ClCompile Include="src\game\menu.cpp" />
     <ClCompile Include="src\game\puzzle_game.cpp" />
+    <ClCompile Include="src\game\single_game_player.cpp" />
     <ClCompile Include="src\math\collision_detection.cpp" />
     <ClCompile Include="src\object\breakout_object.cpp" />
     <ClCompile Include="src\object\object.cpp" />
@@ -188,8 +189,10 @@
     <ClInclude Include="include\moving\moving.h" />
     <ClInclude Include="include\moving\moving_behavior.h" />
     <ClInclude Include="include\moving\newton_behavior.h" />
+    <ClInclude Include="include\moving\random_behavior.h" />
     <ClInclude Include="include\moving\spring_behavior.h" />
     <ClInclude Include="include\object\block_object.h" />
+    <ClInclude Include="include\object\breakout_enemy.h" />
     <ClInclude Include="include\object\breakout_object.h" />
     <ClInclude Include="include\object\object.h" />
     <ClInclude Include="include\object\shape.h" />

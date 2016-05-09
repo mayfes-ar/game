@@ -43,9 +43,9 @@ void BreakoutComponents::setup()
 	// Blockの初期化
 	for (int x = 0; x < BLOCK_WIDTH_NUM; ++x) {
 		for (int y = 0; y < BLOCK_HEIGHT_NUM; ++y) {
-			const Eigen::Vector2i realm 
-				= Eigen::Vector2i{BLOCK_OFFSET_X + x * BLOCK_WIDTH, BLOCK_OFFSET_Y + y * BLOCK_HEIGHT };
-		
+			const Eigen::Vector2i realm
+				= Eigen::Vector2i{ BLOCK_OFFSET_X + x * BLOCK_WIDTH, BLOCK_OFFSET_Y + y * BLOCK_HEIGHT };
+
 			const Shape::Rectangle rec(realm, BLOCK_WIDTH, BLOCK_HEIGHT);
 
 			auto color = Breakout::Block::Color::Green;
@@ -97,17 +97,13 @@ void BreakoutComponents::setup()
 
 			if (fireball_mode_generator(mt) > 0.7) {
 				fireball_manager->add(std::make_shared<Breakout::Fireball>(circle, moving, EnemyStrong));
-			} else {
+			}
+			else {
 				fireball_manager->add(std::make_shared<Breakout::Fireball>(circle, moving, EnemyWeak));
 			}
 		}
 	}
 
-	// shipの初期化
-	{
-		const Life life = Life{SHIP_LIFE_NUM, SHIP_LIFE_NUM, SHIP_LIFE_NUM};
-		ship = std::make_shared<Breakout::Ship>(SHIP_START_POS, life);
-	}
 
 	// potの初期化
 	{
@@ -115,14 +111,36 @@ void BreakoutComponents::setup()
 		pot = std::make_shared<Breakout::Pot>(realm);
 	}
 
-	// itemの初期化
-	for (auto &block : block_list) {
-		const auto color = block->getColor();
-		using Color = Breakout::Block::Color;
+	// shipの初期化
+	{
+		const Life life = Life{ SHIP_LIFE_NUM, SHIP_LIFE_NUM, SHIP_LIFE_NUM };
+		ship = std::make_shared<Breakout::Ship>(SHIP_START_POS, life, pot, info);
+	}
 
-		switch (color) {
-			case Color::Green:
+	// itemの初期化
+	{
+		std::uniform_real_distribution<> item_kind_generator(0.0, 1.0);
+
+		for (auto &block : block_list) {
+			const auto color = block->getColor();
+			using Color = Breakout::Block::Color;
+
+			switch (color) {
+			case Color::Green: {
+				std::shared_ptr<Breakout::Item> item;
+				auto ratio = item_kind_generator(mt);
+				if (ratio > 0.7) {
+					item = std::make_shared<Item>(Breakout::ItemKind::RestoreTime);
+				}
+				else if (ratio > 0.4) {
+					item = std::make_shared<Item>(Breakout::ItemKind::RestorePot);
+				} else {
+					item = std::make_shared<Item>(Breakout::ItemKind::EnhanceShip);
+				}
+				block->attachItem(item);
+				item_list.push_back(item);
 				break;
+			}
 			case Color::Blue: {
 				auto item = std::make_shared<Item>(Breakout::ItemKind::RestoreShip);
 				block->attachItem(item);
@@ -137,20 +155,42 @@ void BreakoutComponents::setup()
 			}
 			default:
 				break;
+			}
 		}
 	}
 
-	// EnemyHeadの初期化
+	// Enemyの初期化
 	{
-		auto moving = std::make_shared<Moving>(1.0f/30.0f, std::make_shared<StringBehavior>(Eigen::Vector2f{ 100.0f, 0.0f }, 0.03f));
-		auto moving2 = std::make_shared<Moving>(1.0f / 30.0f, std::make_shared<StringBehavior>(Eigen::Vector2f{ 100.0f, 0.0f }, 0.03f));
-		auto moving3 = std::make_shared<Moving>(1.0f / 30.0f, std::make_shared<StringBehavior>(Eigen::Vector2f{ 100.0f, 0.0f }, 0.03f));
+		std::shared_ptr<MovingBehavior> behavior_head = std::make_shared<StringBehavior>(Eigen::Vector2f{ 100.0f, 0.0f }, 0.03f);
+		std::shared_ptr<MovingBehavior> behavior_left = std::make_shared<StringBehavior>(Eigen::Vector2f{ 100.0f, 0.0f }, 0.03f);
+		std::shared_ptr<MovingBehavior> behavior_right = std::make_shared<StringBehavior>(Eigen::Vector2f{ 100.0f, 0.0f }, 0.03f);
 		auto life = Life(ENEMY_HEAD_LIFE, ENEMY_HEAD_LIFE);
 
-		auto enemy_left_hand = std::make_shared<Breakout::EnemyLeftHand>(Shape::Rectangle(ENEMY_HEAD_POS - Eigen::Vector2i(100, 0), ENEMY_HEAD_WIDTH, ENEMY_HEAD_WIDTH), moving, life);
-		auto enemy_right_hand = std::make_shared<Breakout::EnemyRightHand>(Shape::Rectangle(ENEMY_HEAD_POS + Eigen::Vector2i(100, 0), ENEMY_HEAD_WIDTH, ENEMY_HEAD_WIDTH), moving2, life);
-		enemy = std::make_shared<Breakout::EnemyHead>(Shape::Rectangle(ENEMY_HEAD_POS, ENEMY_HEAD_WIDTH, ENEMY_HEAD_WIDTH), moving3, life, enemy_left_hand, enemy_right_hand);
+		auto enemy_left_hand = std::make_shared<Breakout::EnemyLeftHand>(Shape::Rectangle(ENEMY_HEAD_POS - Eigen::Vector2i(100, 0), ENEMY_HEAD_WIDTH, ENEMY_HEAD_WIDTH), behavior_left, life);
+		auto enemy_right_hand = std::make_shared<Breakout::EnemyRightHand>(Shape::Rectangle(ENEMY_HEAD_POS + Eigen::Vector2i(100, 0), ENEMY_HEAD_WIDTH, ENEMY_HEAD_WIDTH), behavior_right, life);
+		enemy = std::make_shared<Breakout::EnemyHead>(Shape::Rectangle(ENEMY_HEAD_POS, ENEMY_HEAD_WIDTH, ENEMY_HEAD_WIDTH), behavior_head, life, enemy_left_hand, enemy_right_hand);
+		
+		enemy_manager = std::make_shared<EnemyManager>(MAX_ENEMY_NUM);
 	}
 
-	// Todo Player
+	// Townの初期化　
+	{
+		for (int i = 0; i < HOUSE_NUM; i++) {
+			auto realm = Shape::Rectangle(HOUSE_START_POS + Eigen::Vector2i(FIELD_WIDTH * i / HOUSE_NUM, 0), HOUSE_WIDTH, HOUSE_HEIGHT);
+			auto life = Life(HOUSE_LIFE, HOUSE_LIFE);
+			auto house = std::make_shared<Breakout::House>(realm, life);
+			house_list.push_back(house);
+		}
+
+		for (int i = 0; i < RESIDENT_NUM; i++) {
+			auto realm = Shape::Rectangle(RESIDENT_START_POS + Eigen::Vector2i(FIELD_WIDTH * i / RESIDENT_NUM, 0), RESIDENT_WIDTH, RESIDENT_HEIGHT);
+			auto life = Life(RESIDENT_LIFE, RESIDENT_LIFE);
+			std::shared_ptr<MovingBehavior> rnd_behavior = std::make_shared<RandomBehavior>(FIELD_START_POS.x(),
+				FIELD_START_POS.x() + FIELD_WIDTH - RESIDENT_WIDTH,
+				FIELD_START_POS.y() + FIELD_HEIGHT - RESIDENT_HEIGHT,
+				FIELD_START_POS.y() + FIELD_HEIGHT - RESIDENT_HEIGHT);
+			auto resident = std::make_shared<Breakout::Resident>(realm, life, rnd_behavior);
+			resident_list.push_back(resident);
+		}
+	}
 }
