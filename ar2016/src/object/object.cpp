@@ -133,6 +133,7 @@ bool Object::load() {
 	isSuccess &= loadEffect("p_init", "puzzle/init", 14, 1, 1680, 120);
 	isSuccess &= loadSound("p_bgm1", "puzzle/otenbahime.mp3");
 	isSuccess &= loadSound("p_bgm2", "puzzle/hajimetenootsukai.mp3");
+	isSuccess &= loadSound("p_bgm3", "puzzle/kibou.mp3");
 
 	isSuccess &= loadMovie("p_flower", "puzzle/flower");
 

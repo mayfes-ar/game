@@ -22,6 +22,8 @@ bool PuzzleGame::onStart() {
 	mode.setMode([this]() {
 		makeStageBase();
 		drawList.push_back(std::make_shared<CurtainObject>(true));
+		timer->startPlayingBGM();
+
 		setPlayer(100, -100);
 		setGoal(1080, 555);
 
@@ -209,6 +211,7 @@ bool PuzzleGame::onStart() {
 	mode.setMode([this]() {
 		drawList.clear();
 		gimmicks.clear();
+		timer->stopPlayingBGM();
 
 		score->setResultDraw();
 

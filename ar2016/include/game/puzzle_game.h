@@ -106,7 +106,11 @@ class PuzzleGame : public Game {
 	class Explanation : public Object {
 	public:
 		Explanation() {
+			PlaySoundMem(soundHandles["p_bgm1"], DX_PLAYTYPE_LOOP, true);
 			layer = 2;
+		}
+		~Explanation() {
+			StopSoundMem(soundHandles["p_bgm1"]);
 		}
 		bool isFirst = true;
 		bool draw() {
@@ -128,6 +132,10 @@ class PuzzleGame : public Game {
 			if (GetMovieStateToGraph(handle) == 0) {
 				PlayMovieToGraph(handle);
 			}
+			PlaySoundMem(soundHandles["p_bgm3"], DX_PLAYTYPE_LOOP, true);
+		}
+		~ResultObject() {
+			StopSoundMem(soundHandles["p_bgm3"]);
 		}
 		bool draw() {
 			DrawGraph(0, 0, handle, false);
@@ -179,6 +187,12 @@ class PuzzleGame : public Game {
 		bool update() {
 			time--;
 			return time == 0;
+		}
+		void startPlayingBGM() {
+			PlaySoundMem(soundHandles["p_bgm2"], DX_PLAYTYPE_LOOP, true);
+		}
+		void stopPlayingBGM() {
+			StopSoundMem(soundHandles["p_bgm2"]);
 		}
 	};
 
