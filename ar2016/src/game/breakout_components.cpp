@@ -169,6 +169,8 @@ void BreakoutComponents::setup()
 		auto enemy_left_hand = std::make_shared<Breakout::EnemyLeftHand>(Shape::Rectangle(ENEMY_HEAD_POS - Eigen::Vector2i(100, 0), ENEMY_HEAD_WIDTH, ENEMY_HEAD_WIDTH), behavior_left, life);
 		auto enemy_right_hand = std::make_shared<Breakout::EnemyRightHand>(Shape::Rectangle(ENEMY_HEAD_POS + Eigen::Vector2i(100, 0), ENEMY_HEAD_WIDTH, ENEMY_HEAD_WIDTH), behavior_right, life);
 		enemy = std::make_shared<Breakout::EnemyHead>(Shape::Rectangle(ENEMY_HEAD_POS, ENEMY_HEAD_WIDTH, ENEMY_HEAD_WIDTH), behavior_head, life, enemy_left_hand, enemy_right_hand);
+		
+		enemy_manager = std::make_shared<EnemyManager>(MAX_ENEMY_NUM);
 	}
 
 	// Townの初期化　

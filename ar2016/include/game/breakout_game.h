@@ -47,6 +47,7 @@ public:
 			for (const auto& resident : m_components->resident_list) {
 				drawList.push_back(resident);
 			}
+			drawList.push_back(m_components->enemy_manager);
 		}, -1);
 
 		// Result画面
@@ -67,6 +68,7 @@ public:
 		updatePotStatus();
 		updateEnemy();
 		updateTown();
+		EnemyVSTown();
 
 		if (key[KEY_INPUT_ESCAPE]) {
 			share.willFinish = true;
@@ -113,11 +115,14 @@ private:
 	// PotとFireBallの当たり判定をし、fireballを吸い込むかを決める
 	void updatePotStatus();
 
-	// EnemyとFireballの当たり判定をしたり、する
+	// Enemyのupdate
 	void updateEnemy();
 
 	// Townのupdate
 	void updateTown();
+
+	// EnemyとTownの戦闘
+	void EnemyVSTown();
 
 	// ゲームをクリアしたかどうか
 	// 現在はBlockが一つもない場合はクリアとみなす

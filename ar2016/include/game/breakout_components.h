@@ -58,6 +58,8 @@ public:
 
 	std::shared_ptr<Breakout::EnemyHead> enemy = nullptr;
 
+	std::shared_ptr<Breakout::EnemyManager> enemy_manager = nullptr;
+
 	std::vector<std::shared_ptr<Breakout::House>> house_list;
 
 	std::vector<std::shared_ptr<Breakout::Resident>> resident_list;

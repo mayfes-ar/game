@@ -75,6 +75,11 @@ namespace Breakout {
 	const Eigen::Vector2i ENEMY_HEAD_POS = FIELD_START_POS + Eigen::Vector2i{ FIELD_WIDTH / 2 - ENEMY_HEAD_WIDTH / 2 , 0 };
 
 	const int ENEMY_HEAD_LIFE = 2;
+	const int SNAKE_ENEMY_LIFE = 1;
+
+	constexpr int MAX_ENEMY_NUM = 3;
+	constexpr int SNAKE_WIDTH = 60;
+	constexpr int SNAKE_HEIGHT = 60;
 
 	// House のパラメータ
 	constexpr int HOUSE_NUM = 4;

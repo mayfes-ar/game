@@ -759,6 +759,8 @@ enum FireballKind {
 class Fireball : public Object
 {
 public:
+	Fireball() {}
+
 	Fireball(const Shape::Circle& realm, const std::shared_ptr<Moving>& moving)
 		: m_realm(realm), m_moving(moving)
 	{
@@ -1305,13 +1307,20 @@ public:
 	virtual void updatePosition() {
 		m_moving->updatePoistion(m_realm.start_point);
 	}
+	virtual void damageTown(int amount) {
+		m_life.damage(amount);
+	}
+	virtual int giveDamage() {
+		return 1;
+	}
 	virtual void damageByFireball(std::shared_ptr<Fireball>& fireball, std::shared_ptr<FireballManager>& manager) {
 		// もし敵のfireballだったら。（ここらへんどうしようか）
 		if (fireball->isEnemy()) {
 			m_life.damage(fireball->giveDamage());
+
+			//触れたら消える
+			manager->destroy(fireball);
 		}
-		//触れたら消える
-		manager->destroy(fireball);
 	}
 	bool isAlive() {
 		return m_life.isAlive();

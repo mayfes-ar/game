@@ -220,6 +220,7 @@ bool Object::load() {
 	isSuccess &= loadImage("b_donald", "breakout/donald");
 	isSuccess &= loadImage("b_right_hand", "breakout/right_hand");
 	isSuccess &= loadImage("b_left_hand", "breakout/left_hand");
+	isSuccess &= loadImage("b_snake_weak", "breakout/snake_weak");
 
 	isSuccess &= loadImage("b_block_blue", "block_blue");
 	isSuccess &= loadImage("b_block_red", "block_red");

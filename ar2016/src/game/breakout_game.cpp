@@ -75,7 +75,18 @@ void BreakoutGame::updateCollisionDetection()
 						}
 					}
 				}
+
+				for (auto& enemy : m_components->enemy_manager->getEnemyList()) {
+					if (enemy->isAlive()) {
+						if (fireball->isCollided(enemy->getRealm())) {
+							enemy->damageByPlayerFireball(fireball, m_components->fireball_manager);
+							continue_loop = true;
+							break;
+						}
+					}
+				}
 			}
+			if (continue_loop) continue;
 
 			// Town の衝突判定
 			for (auto& house : m_components->house_list) {
@@ -99,6 +110,7 @@ void BreakoutGame::updateCollisionDetection()
 				}
 			}
 			if (continue_loop) continue;
+
 		}
 	}
 	//Itemの衝突判定
@@ -315,9 +327,16 @@ void BreakoutGame::updatePotStatus() {
 
 void BreakoutGame::updateEnemy() {
 	m_components->enemy->updatePosition();
+	m_components->enemy_manager->updatePosition();
 
+	m_components->enemy_manager->destroyIfEffectIsFinished();
+
+	// Enemyがファイアーボールをはく
 	while (!m_components->fireball_manager->isMax()) {
 		m_components->fireball_manager->add(m_components->enemy->makeFireball());
+	}
+	while (!m_components->enemy_manager->isMax()) {
+		m_components->enemy_manager->add(m_components->enemy->makeEnemy());
 	}
 
 }
@@ -340,6 +359,17 @@ void BreakoutGame::updateTown() {
 		}
 		else {
 			itr = m_components->resident_list.erase(itr);
+		}
+	}
+}
+
+void BreakoutGame::EnemyVSTown() {
+	for (auto& enemy : m_components->enemy_manager->getEnemyList()) {
+		for (auto& house : m_components->house_list) {
+			enemy->attackOnTown(house);
+		}
+		for (auto& resident : m_components->resident_list) {
+			enemy->attackOnTown(resident);
 		}
 	}
 }
