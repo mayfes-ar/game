@@ -176,17 +176,11 @@ bool Object::load() {
 	isSuccess &= loadImage("p_block", "puzzle/block");
 	isSuccess &= loadImage("p_block_x", "puzzle/block_x");
 	isSuccess &= loadImage("s_block", "Brick02");
-	isSuccess &= loadImage("p_man", "man");
 	isSuccess &= loadImage("p_needle", "puzzle/needle");
 	isSuccess &= loadImage("p_hime", "puzzle/hime_normal");
 	isSuccess &= loadImage("p_hime_damaged", "puzzle/hime_gameover");
 	isSuccess &= loadImage("p_explain1", "puzzle/explanation1");
 	isSuccess &= loadImage("p_explain2", "puzzle/explanation2");
-	isSuccess &= loadImage("p_goal", "goal");
-	isSuccess &= loadImage("p_on", "switch_on");
-	isSuccess &= loadImage("p_off", "switch_off");
-
-	isSuccess &= loadImage("p_arrow", "arrow");
 	isSuccess &= loadImage("p_castle", "puzzle/castle");
 	isSuccess &= loadImage("p_saihu", "puzzle/saihu_kari");
 	isSuccess &= loadImage("p_timer", "puzzle/clock_kari");

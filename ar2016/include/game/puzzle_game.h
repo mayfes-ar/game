@@ -39,9 +39,9 @@ class PuzzleGame : public Game {
 	//
 	class StageBlock : public BlockObject {
 	public:
-		const int kind = 0;
+		const int kind;
 
-		StageBlock(Rectan rect_, bool canHit_=true) {
+		StageBlock(Rectan rect_, bool canHit_=true, int kind_=0) : kind(kind_){
 			rect = rect_;
 			willStay = true;
 			layer = 20;
@@ -49,10 +49,17 @@ class PuzzleGame : public Game {
 		}
 		bool draw() {
 			if (canHit) {
-				DrawRectGraph(left(), top(), left(), top(), rect.width, rect.height, imgHandles["s_brick1"], false, false);
-				//DrawBox(left(), top(), right(), bottom(), GetColor(240, 117, 50), true);
+				switch (kind) {
+				case 1: {
+					
+					break;
+				}
+				default: {
+					DrawRectGraph(left(), top(), left(), top(), rect.width, rect.height, imgHandles["s_brick1"], false, false);
+				}
+				}
 			} else {
-				DrawBox(left(), top(), right(), bottom(), GetColor(40, 117, 50), false);
+				//DrawBox(left(), top(), right(), bottom(), GetColor(40, 117, 50), false);
 			}
 			return willStay;
 		}
@@ -171,7 +178,8 @@ class PuzzleGame : public Game {
 	};
 
 	class TimerObject : public Object {
-		int time = 300 * FPS;
+		static const int gameTime = 300;
+		int time = gameTime * FPS;
 
 	public:
 		TimerObject() {
@@ -425,7 +433,7 @@ class PuzzleGame : public Game {
 			return willExist;
 		}
 		bool update() {
-			if (isContacted(game.markerBlock) && game.markerBlock->canHit) { willExist = false; }
+			if (isContacted(game.markerBlock)) { willExist = false; }
 			return willExist;
 		}
 	};
@@ -518,7 +526,7 @@ class PuzzleGame : public Game {
 		int counter = 0;
 		int pusheffect = 0;
 		const int countMax = effectHandles["p_crystal1"].size() * 2;
-		const int effectMax = effectHandles["p_sush_switch"].size();
+		const int effectMax = effectHandles["p_push_switch"].size();
 		void setSwitch(bool isOn_) {
 			if (isOn == false && isOn_ == true) {
 				pusheffect = 1;
@@ -668,8 +676,8 @@ class PuzzleGame : public Game {
 
 	int counter = 0;
 
-	std::shared_ptr<StageBlock> setBlock(int x, int y, int width, int height, bool canHit=true) {
-		auto block = std::make_shared<StageBlock>(Rectan(x, y, width, height), canHit);
+	std::shared_ptr<StageBlock> setBlock(int x, int y, int width, int height, bool canHit=true, int kind=0) {
+		auto block = std::make_shared<StageBlock>(Rectan(x, y, width, height), canHit, kind);
 		stageBlocks.push_back(block);
 		drawList.push_back(block);
 		return block;
@@ -751,6 +759,9 @@ public:
 		mt = std::mt19937(rnd());
 		score = std::make_shared<ScoreObject>();
 		timer = std::make_shared<TimerObject>();
+	}
+	~PuzzleGame() {
+		timer->stopPlayingBGM();
 	}
 
 	bool onStart();
