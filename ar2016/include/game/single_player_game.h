@@ -191,6 +191,10 @@ class SinglePlayerGame : public Game {
 			double getAngle(bool increment = true) {
 				return increment ? M_PI / 180 * get() : M_PI / 180 * phase;
 			}
+
+			void reset() {
+				phase = 0;
+			}
 		};
 
 		std::shared_ptr<PendulumCounter> makePendulum(int amplitude, int phase = 0) {
@@ -686,7 +690,7 @@ class SinglePlayerGame : public Game {
 	};
 
 	class Teresa : public Enemy {
-		
+		std::shared_ptr<PendulumCounter> swingCounter = makePendulum(2);
 	public:
 		static const int width = 80;
 		static const int height = 32;
@@ -699,13 +703,14 @@ class SinglePlayerGame : public Game {
 		void setAc(double& acX, double& acY) {
 			acX = rand() % 3 - 1;
 			acY = rand() % 3 - 1;
-			angle = (rand() % 5 - 2) * M_PI / 180;
+			angle = swingCounter->getAngle();
 		}
 		
 	};
 
 	class RocketWanwan : public Enemy {
 		int stayCount = FPS * 2;
+		std::shared_ptr<PendulumCounter> swingCounter = makePendulum(5);
 	public :
 		static const int width = 430;
 		static const int height = 275;
@@ -743,9 +748,7 @@ class SinglePlayerGame : public Game {
 				}
 			}
 			else if (stayCount > 0) {
-				if (stayCount % 3 == 0) {
-					angle = ( rand() % 20 - 9 ) * 2 * M_PI / 360;
-				}
+				angle = swingCounter->getAngle();
 				stayCount--;
 			}
 		}
@@ -823,7 +826,7 @@ class SinglePlayerGame : public Game {
 		static const int height = 225 / 2;
 		int stopCount = FPS * 6;
 		int turnCounter = FPS * 4;
-		int swingCounter = 0;
+		std::shared_ptr<PendulumCounter> swingCounter = makePendulum(10);
 		std::shared_ptr<Ray> ray = nullptr;
 
 	public:
@@ -833,20 +836,19 @@ class SinglePlayerGame : public Game {
 
 		void update() {
 			if (characterState == OVER) { return; }
+
 			stopCount--;
-			if (stopCount == FPS * 2) {
-				angle = 0;
-				swingCounter = 0;
-			}
-			else if (stopCount == FPS * 2 - 15) {
+			if (stopCount == FPS * 2 - 15) {
 				ray = game.makeRay(rect.x + rect.width / 2 - Ray::width / 2, bottom(), 1);
 			}
 			else if (stopCount < FPS * 2) {
+				angle += (0 - angle) / 10;
 				if (stopCount == 0) {
 					ray->die();
 					ray = nullptr;
 
 					stopCount = FPS * 6;
+					swingCounter->reset();
 				}
 			}
 			else {
@@ -854,14 +856,7 @@ class SinglePlayerGame : public Game {
 				double acY = 0;
 				setAc(acX, acY);
 				updateCoordinate(acX, acY);
-				swingCounter = swingCounter == FPS*4 ? 0 : swingCounter + 1;
-				if (swingCounter < FPS || swingCounter > FPS*3) {
-					angle += M_PI /180 / 2;
-				}
-				else {
-					angle -= M_PI / 180 / 2;
-				}
-
+				angle = swingCounter->getAngle();
 			}
 			turnCounter--;
 			if (turnCounter == 0) {
@@ -911,6 +906,7 @@ class SinglePlayerGame : public Game {
 		static const int height = 200 / 8;
 		Drop(int x_, int y_, SinglePlayerGame& game_, double size, int maxDamage_ = 1, std::string imgHandleKey_ = "s_game_drop") : Enemy(x_, y_, width * size, height * size, imgHandleKey_, maxDamage_, game_, 0, 0) {
 			layer = 139;
+			imageSize = 0.1;
 		};
 		
 		void update() {
@@ -921,6 +917,7 @@ class SinglePlayerGame : public Game {
 			moveBecauseMarkerCollision(game.markerList);
 			moveBecauseBlockCollision(game.blockList);
 			angle = M_PI / 180 * (rand() % 3 - 1);
+			imageSize += imageSize >= 1 ? 0 : 0.05;
 		}
 
 		void setAc(double& acX, double& acY) {
@@ -980,8 +977,21 @@ class SinglePlayerGame : public Game {
 			if (fallDropCounter < 40 && fallDropCounter % 4 == 0) {
 				game.makeDrop(rect.x + rand() % (rect.width) - Drop::width / 2, bottom(), 1);
 			}
+			if (fallDropCounter < 10) {
+				imageSize += (1.0 - imageSize) / 5;
+			}
+			else if (fallDropCounter < 25) {
+				imageSize += (0.4 - imageSize) / 15;
+			}
+			else if (fallDropCounter < 60) {
+				imageSize += (1.7 - imageSize) / 15;
+			}
+			else {
+				imageSize = 1 + 0.01 * sizeCounter->get();
+			}
 			if (fallDropCounter == 0) {
-				fallDropCounter = rand() % 100 + FPS * 2;
+				fallDropCounter = rand() % 100 + FPS * 4;
+				sizeCounter->reset();
 			}
 
 			turnCounter--;
@@ -993,7 +1003,6 @@ class SinglePlayerGame : public Game {
 			double acY = 0;
 			setAc(acX, acY);
 			updateCoordinate(acX, acY);
-			imageSize = 1 + 0.01 * sizeCounter->get();
 		}
 
 		void updateCoordinate(double acX, double acY) {
@@ -1041,12 +1050,19 @@ class SinglePlayerGame : public Game {
 			if (stayCount == 0) {
 				acX = 3;
 				acY = 3;
+				// angle = -M_PI / 180 * 45;
+				angle = M_PI / 180 * 30;
 			}
 			else if (stayCount > 0) {
 				stayCount--;
 				acY = 0;
 				acX = pow(-1, stayCount/20);
+				if (stayCount < FPS) {
+					// angle += angle - (-M_PI / 180 * 45) / 10;
+					angle += (M_PI / 180 * 30 - angle) / 10;
+				}
 			}
+			
 		}
 	};
 
@@ -1054,6 +1070,7 @@ class SinglePlayerGame : public Game {
 		static const int width = 345 / 4;
 		static const int height = 333 / 4;
 		int frameCounter = FPS*3;
+		std::shared_ptr<PendulumCounter> swingCounter = makePendulum(10);
 	public:
 		Heiho(int x_, int y_, SinglePlayerGame& game_, double size, int maxDamage_ = 2, std::string imgHandleKey_ = "s_game_ghorst") : Enemy(x_, y_, width * size, height * size, imgHandleKey_, maxDamage_, game_) {
 			moveDirection = LEFT;
@@ -1082,6 +1099,7 @@ class SinglePlayerGame : public Game {
 			double diffX;
 			if (frameCounter > 0) {
 				diffX = -2;
+				angle = swingCounter->getAngle();
 			}
 			else if (frameCounter == 0) {
 				game.makeEffect("s_game_fireshot", left(), top(), rect.width, rect.width, false, layer+1, 3);
@@ -1089,17 +1107,22 @@ class SinglePlayerGame : public Game {
 				acY = 0;
 			}
 			else if (frameCounter == -FPS) {
+				angle = 0;
 				PlaySoundMem(soundHandles["s_game_fireshot"], DX_PLAYTYPE_BACK, true);
 				game.makeFire(left(), (top() + bottom()) / 2, 1);
 				diffX = 0;
 				acY = 0;
+				swingCounter->reset();
 			}
 			else if (frameCounter < 0 && frameCounter > -FPS) {
 				diffX = 0;
 				acY = 0;
+				//angle = swingCounter->getAngle();
+				angle = (rand() % 11 - 5) * M_PI / 180;
 			}
 			else {
 				diffX = 2;
+				angle = swingCounter->getAngle();
 			}
 			const double diffY = 0;
 
@@ -1120,7 +1143,8 @@ class SinglePlayerGame : public Game {
 		static const int height = 194 / 3;
 		Fire(int x_, int y_, SinglePlayerGame& game_, double size, int maxDamage_ = 1, std::string imgHandleKey_ = "s_game_fire") : Enemy(x_, y_, width * size, height * size, imgHandleKey_, maxDamage_, game_, 0, 0) {
 			moveDirection = LEFT;
-			layer = 151;
+			layer = 153;
+			imageSize = 0.1;
 		}
 
 		void update() {
@@ -1130,7 +1154,8 @@ class SinglePlayerGame : public Game {
 			setAc(acX, acY);
 			updateCoordinate(acX, acY);
 			moveBecauseMarkerCollision(game.markerList);
-			angle = M_PI / 180 * (rand() % 3 - 1);
+			angle = M_PI / 180 * (rand() % 5 - 2);
+			imageSize += imageSize >= 1 ? 0 : 0.05;
 		}
 		
 		void setAc(double& acX, double& acY) {
