@@ -68,6 +68,7 @@ public:
 		updatePotStatus();
 		updateEnemy();
 		updateTown();
+		shipVSEnemy()
 		EnemyVSTown();
 
 		if (key[KEY_INPUT_ESCAPE]) {
@@ -120,6 +121,9 @@ private:
 
 	// Townのupdate
 	void updateTown();
+
+	// ShipとEnemyの接触判定
+	void shipVSEnemy();
 
 	// EnemyとTownの戦闘
 	void EnemyVSTown();
