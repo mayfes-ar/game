@@ -291,7 +291,7 @@ bool SinglePlayerGame::onUpdate() {
 					heihoFreezeTimeRemain--;
 				}
 				else {
-					if (!tutoenemy->childfire->getIsAlive()) {
+					if (tutoenemy->childfire->getIsAlive()) {
 						tutoenemy->setIsAlive();
 					}
 
