@@ -220,7 +220,7 @@ bool Object::load() {
 	isSuccess &= loadImage("b_donald", "breakout/donald");
 	isSuccess &= loadImage("b_right_hand", "breakout/right_hand");
 	isSuccess &= loadImage("b_left_hand", "breakout/left_hand");
-	isSuccess &= loadImage("b_snake_weak", "breakout/snake_weak");
+	isSuccess &= loadImage("b_snake_weak", "breakout/tokage");
 
 	isSuccess &= loadImage("b_block_blue", "block_blue");
 	isSuccess &= loadImage("b_block_red", "block_red");
@@ -253,6 +253,7 @@ bool Object::load() {
 	isSuccess &= loadEffect("b_fireball_reflect", "breakout/fireball_reflect", 14, 1, 1680, 120);
 	isSuccess &= loadEffect("b_green_fireball", "breakout/green_fireball", 5, 5, 500, 500);
 	isSuccess &= loadEffect("b_green_fireball_reflect", "breakout/green_fireball_reflect", 14, 1, 1680, 120);
+	isSuccess &= loadEffect("b_crawl", "breakout/crawl", 5, 2, 1200, 480);
 	
 
 	for (int num = 0; num <= 9; ++num) {

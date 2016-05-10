@@ -375,7 +375,17 @@ void BreakoutGame::updateTown() {
 
 void BreakoutGame::shipVSEnemy() {
 	for (auto& enemy : m_components->enemy_manager->getEnemyList()) {
-		/*if()*/
+		//右で衝突されたら
+		if (!enemy->isAlive()) continue;
+		auto ship_realm = m_components->ship->getRealm();
+		auto enemy_realm = enemy->getRealm();
+		if (enemy_realm.isContacted(ship_realm)) {
+			enemy->damageEnemy(2);
+			//このダメージで死んだら
+			if (!enemy->isAlive()) {
+				enemy->setDeadEffect("b_crawl", 5);
+			}
+		}
 	}
 }
 
