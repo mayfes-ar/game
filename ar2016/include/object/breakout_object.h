@@ -800,15 +800,15 @@ public:
 		realm.height = height;
 		switch (dir) {
 		case Top:
-			realm.start_point = hit_point + Eigen::Vector2i(-width/2, -height/2);
+			realm.start_point = hit_point + Eigen::Vector2i(-width / 2, -height / 2);
 			break;
 		case Left:
-			realm.start_point = hit_point + Eigen::Vector2i(-width/2, height/2);
+			realm.start_point = hit_point + Eigen::Vector2i(-width, -height / 2);
 			break;
 		case Bottom:
-			realm.start_point = hit_point + Eigen::Vector2i(-width/2, height/2);
+			realm.start_point = hit_point;// +Eigen::Vector2i(-width / 2, 0);
 		case Right:
-			realm.start_point = hit_point + Eigen::Vector2i(width/2, height / 2);
+			realm.start_point = hit_point + Eigen::Vector2i(0, - height / 2);
 		}
 	}
 

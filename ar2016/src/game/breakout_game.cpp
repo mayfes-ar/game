@@ -19,7 +19,9 @@ void BreakoutGame::updateCollisionDetection()
 				continue;
 			}
 
-			if (fireball->isCollided(m_components->field->getRealm(), -1)) {
+			auto fireball_effect = fireball->returnFireballReflect(m_components->field->getRealm(), -1);
+			if (fireball_effect->isCollide()) {
+				drawList.push_back(fireball_effect);
 				continue;
 			}
 
@@ -47,8 +49,10 @@ void BreakoutGame::updateCollisionDetection()
 			if (!fireball->isEnemy()) {
 				for (int block_id = 0; block_id < Breakout::BLOCK_HEIGHT_NUM * Breakout::BLOCK_WIDTH_NUM; ++block_id) {
 					if (m_components->block_list.at(block_id)->isDisappeared()) continue;
-					if (fireball->isCollided(m_components->block_list.at(block_id)->getRealm())) {
+					auto fireball_effect = fireball->returnFireballReflect(m_components->block_list.at(block_id)->getRealm());
+					if (fireball_effect->isCollide()) {
 						m_components->block_list.at(block_id)->damageBlock(fireball->giveDamage());
+						drawList.push_back(fireball_effect);
 						continue_loop = true;
 						break;
 					}
