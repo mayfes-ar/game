@@ -249,6 +249,10 @@ bool Object::load() {
 	isSuccess &= loadEffect("b_muteki", "breakout/muteki", 1, 6, 320, 1440);
 	isSuccess &= loadEffect("b_burning", "breakout/burning", 1, 5, 240, 900);
 	isSuccess &= loadEffect("b_explosion", "breakout/explosion", 7, 1, 840, 120);
+	isSuccess &= loadEffect("b_fireball", "breakout/fireball", 5, 5, 500, 500);
+	isSuccess &= loadEffect("b_fireball_reflect", "breakout/fireball_reflect", 14, 1, 1680, 120);
+	isSuccess &= loadEffect("b_green_fireball", "breakout/green_fireball", 5, 5, 500, 500);
+	
 
 	for (int num = 0; num <= 9; ++num) {
 		for (const auto& color : { "red", "blue", "yellow", "green" }) {

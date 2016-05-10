@@ -25,7 +25,8 @@ void BreakoutGame::updateCollisionDetection()
 
 			// Ship衝突判定
 			if (m_components->ship->isAlive()) {
-				if (fireball->isCollided(m_components->ship->getRealm(), 1, m_components->ship->getVelocity())) {
+				auto fireball_effect = fireball->returnFireballReflect(m_components->ship->getRealm(), 1, m_components->ship->getVelocity());
+				if (fireball_effect->isCollide()) {
 					// EnemyStrongであり かつ 無敵状態じゃなかったら
 					if (fireball->getMode() == Breakout::FireballKind::EnemyStrong && !m_components->ship->isEnhanced()) {
 						//fireballを消す
@@ -33,6 +34,8 @@ void BreakoutGame::updateCollisionDetection()
 						m_components->ship->damageShip(1);
 					}
 					else {
+						//跳ね返すときは反射effectを入れる
+						drawList.push_back(fireball_effect);
 						fireball->changeModeToPlayer();
 					}
 					continue;
