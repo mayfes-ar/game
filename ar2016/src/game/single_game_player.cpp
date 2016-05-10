@@ -110,7 +110,7 @@ bool SinglePlayerGame::onStart() {
 	
 	srand((unsigned int)time(NULL));
 
-	// mode 0
+	// INTRO
 	mode.setMode([this]() {
 		class Title : public Object {
 			Difficulty& difficulty;
@@ -137,7 +137,23 @@ bool SinglePlayerGame::onStart() {
 		bgm->start();
 	}, -1);
 
-	// mode 1
+	// TUTORIAL
+	mode.setMode([this]() {
+		drawList.clear();
+
+		share.rectMutex.lock();
+		markerList.clear();
+		markerList.shrink_to_fit();
+		for (int i = 0; i < share.rects.size(); i++) {
+			auto marker = std::make_shared<Marker>(share.rects[i], false, i, *this);
+			markerList.push_back(marker);
+			drawList.push_back(marker);
+		}
+		share.rectMutex.unlock();
+
+	}, -1);
+	
+	// GAME
 	mode.setMode([this]() {
 		maxPlayerDamage = difficulty == EASY ? 5 : difficulty == HARD ? 10 : 20;
 		player = std::make_shared<Player>(WIDTH / 2 - 100 / 2, HEIGHT / 2 - 150 / 2, Player::width, Player::height, "s_game_player", maxPlayerDamage, *this);
@@ -191,7 +207,7 @@ bool SinglePlayerGame::onStart() {
 
 	}, maxTime);
 
-	// mode 2
+	// RESULT
 	mode.setMode([this]() {
 		
 	
@@ -313,7 +329,7 @@ bool SinglePlayerGame::onUpdate() {
 	funcTimer.update();
 
 	switch (mode.getMode()) {
-	case 0: { // イントロダクション
+	case INTRO: { // イントロダクション
 		static int counterForWait = 5;
 		if (counterForWait == 0) {
 			counterForWait = 5;
@@ -345,7 +361,19 @@ bool SinglePlayerGame::onUpdate() {
 
 		break;
 	}
-	case 1: { // playing
+	case TUTORIAL: {
+
+		// 認識したマーカーを描画
+		share.rectMutex.lock();
+		for (auto marker : markerList) {
+			marker->setRect(share.rects[marker->getIndex()]);
+		}
+		share.rectMutex.unlock();
+
+		break;
+	}
+	case GAME: { // playing
+
 		timer -= 1;
 		if (timer <= 0) {
 			willFinishMode = true;
@@ -550,7 +578,7 @@ bool SinglePlayerGame::onUpdate() {
 		
 		break;
 	}
-	case 2: { // リザルト画面
+	case RESULT: { // リザルト画面
 
 		result_timer -= 1;
 
@@ -570,10 +598,7 @@ bool SinglePlayerGame::onUpdate() {
 		break;
 	}
 
-
-
 	default:
-
 		break;
 	}
 
@@ -581,9 +606,12 @@ bool SinglePlayerGame::onUpdate() {
 	if (key[KEY_INPUT_ESCAPE]) {
 		share.willFinish = true;
 	}
-	if (key[KEY_INPUT_N]) {
+	static int waitNCounter = FPS / 3;
+	if (key[KEY_INPUT_N] && waitNCounter == 0) {
 		willFinishMode = true;
+		waitNCounter = FPS / 3;
 	}
+	if (waitNCounter > 0) { waitNCounter--; }
 
 
 	for (auto& itr = enemyList.begin(); itr != enemyList.end();) {

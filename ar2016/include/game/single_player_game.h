@@ -14,9 +14,9 @@ class SinglePlayerGame : public Game {
 			Cloud : 140
 			Drop : 139
 			Ufo :  150
-			Ray :  180 TODO: 半透明
+			Ray :  180
 			Heiho :	152
-			Fire : 151
+			Fire : 153
 		Effect : 周りの描画に影響しそうな大きなエフェクト
 			??? :
 		Block : 50
@@ -531,7 +531,6 @@ class SinglePlayerGame : public Game {
 							x = block->left() - width;
 						}
 						else {
-							// TODO
 						}
 					}
 					else {
@@ -543,7 +542,6 @@ class SinglePlayerGame : public Game {
 							isJumping = false;
 						}
 						else {
-							// TODO
 						}
 					}
 				}
@@ -570,7 +568,6 @@ class SinglePlayerGame : public Game {
 							x = marker->left() - width;
 						}
 						else {
-							// TODO
 						}
 					}
 					else {
@@ -582,7 +579,6 @@ class SinglePlayerGame : public Game {
 							isJumping = false;
 						}
 						else {
-							// TODO
 						}
 					}
 				}
@@ -1522,6 +1518,10 @@ class SinglePlayerGame : public Game {
 
 	enum Difficulty {
 		EASY, HARD, NIGHTMARE,
+	};
+
+	enum GameMode {
+		INTRO, TUTORIAL, GAME, RESULT // 0, 1, 2, 3 
 	};
 
 	int timer = maxTime;
