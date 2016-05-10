@@ -155,7 +155,7 @@ bool SinglePlayerGame::onStart() {
 	
 	// GAME
 	mode.setMode([this]() {
-		maxPlayerDamage = difficulty == EASY ? 5 : difficulty == HARD ? 10 : 20;
+		maxPlayerDamage = difficulty == EASY ? 1 : difficulty == HARD ? 10 : 20;
 		player = std::make_shared<Player>(WIDTH / 2 - 100 / 2, HEIGHT / 2 - 150 / 2, Player::width, Player::height, "s_game_player", maxPlayerDamage, *this);
 
 		drawList.clear();
@@ -229,79 +229,91 @@ bool SinglePlayerGame::onStart() {
 				timer = timer_;
 			}
 
-			
+			//クリアの文
+			const std::string clear1 = "お姫様を無事に守ることができたあなた。";
+			const std::string clear2 = "お姫様はあなたをお城のパーティに招待しました。";
+			const std::string clear3 = "莫大な予算に支えられた豪奢なパーティ。";
+			const std::string clear4 = "あああああああああああああああ";
+			const std::string clear5 = "次の姫様も、守ることができるといいですね。";
+			const std::string clear6 = "遊んでくれてありがとうございました。";
+			//ゲームオーバーの文
+			const std::string dead1 = "あなたはお姫様を守ることができませんでした。";
+			const std::string dead2 = "お姫様の躯は無残な有様であの丘の上、";
+			const std::string dead3 = "風化に任せるままに寂しげに横たわっています。";
+			const std::string dead4 = "姫の残機は無限。";
+			const std::string dead5 = "次の姫様は、守ることができるといいですね。";
+			const std::string dead6 = "遊んでくれてありがとうございました。";
+
+
 			bool draw() {
-				rect.y += 2;
+				rect.y += 2;//文章スクロール用
 				
-				
-
 				if (hasPlayerWon) {
-					
 					//********勝利画面
-					std::string clear1 = "お姫様を無事に守ることができたあなた。";
-					std::string clear2 = "お姫様はあなたをお城のパーティに招待しました。";
-					std::string clear3 = "莫大な予算に支えられた豪奢なパーティ。";
-					std::string clear4 = "あああああああああああああああ";
-					std::string clear5 = "次の姫様も、守ることができるといいですね。";
-					std::string clear6 = "遊んでくれてありがとうございました。";
 
-					DrawExtendGraph(0, 0, WIDTH, HEIGHT, imgHandles["s_game_result_clear"], true);
-					std::string clearScore = "得点 : " + std::to_string(maxTime + (player->getMaxDamage() - player->getPlayerDamage()) * 50);
-					DrawString(100, 150, clearScore.c_str(), GetColor(0, 0, 0));
+					//画像
+					DrawExtendGraph(0, 0, WIDTH, HEIGHT, imgHandles["s_game_result_stage1"], true);
 
-					DrawExtendGraph(621 / 5, 1046 / 5, 621, 1046, imgHandles["s_game_player"], true);
-					
+
+					//スクロール文章
 					DrawString(600, HEIGHT - rect.y, clear1.c_str(), GetColor(255, 255, 255));
 					DrawString(600, HEIGHT + 100 - rect.y, clear2.c_str(), GetColor(255, 255, 255));
 					DrawString(600, HEIGHT + 200 - rect.y, clear3.c_str(), GetColor(255, 255, 255));
 					DrawString(600, HEIGHT + 300 - rect.y, clear4.c_str(), GetColor(255, 255, 255));
 					DrawString(600, HEIGHT + 400 - rect.y, clear5.c_str(), GetColor(255, 255, 255));
 					DrawString(600, HEIGHT + 500 - rect.y, clear6.c_str(), GetColor(255, 255, 255));
+
+					//スコア
+					std::string clearScore = "得点 : " + std::to_string(maxTime + (player->getMaxDamage() - player->getPlayerDamage()) * 50);
+					DrawString(100, 150, clearScore.c_str(), GetColor(0, 0, 0));
+					DrawExtendGraph(621/4, 1046/4, 621/2, 1046/2, imgHandles["s_game_player"], true);
+					
 				}
 
 				else {
-					
 					//******ゲームオーバー画面
-					std::string dead1 = "あなたはお姫様を守ることができませんでした。";
-					std::string dead2 = "お姫様の躯は無残な有様であの丘の上、";
-					std::string dead3 = "風化に任せるままに寂しげに横たわっています。";
-					std::string dead4 = "姫の残機は無限。";
-					std::string dead5 = "次の姫様は、守ることができるといいですね。";
-					std::string dead6 = "遊んでくれてありがとうございました。";
 
-					//DrawExtendGraph(WIDTH / 2 - 400, 30, WIDTH / 2 + 400, 30 + 296, imgHandles["s_game_result_dead"], true);
-					DrawExtendGraph(621/5 , 1046/5, 621/2 , 1046/2, imgHandles["s_game_player_drowned"], true);
-					std::string deadScore = "得点 : " + std::to_string(maxTime - timer);
-					std::string playTime = "記録 : " + std::to_string((maxTime - timer) / 30) + "秒";
-					DrawString(100, 150, deadScore.c_str(), GetColor(255, 255, 255));
-					DrawString(100, 200, playTime.c_str(), GetColor(255, 255, 255));
+					//画像・ゲームオーバー
+					DrawExtendGraph(0, 0, WIDTH, HEIGHT, imgHandles["s_game_result_stage2"], true);
+					DrawExtendGraph(10, 300,10 +1600/5 , 300+ 1555/5, imgHandles["s_game_result_sketch"], true);
+					DrawExtendGraph(621 / 3, 1046 / 3, 621 / 2, 1046 / 2, imgHandles["s_game_player_drowned"], true);
 
-					//スクロール文章
+					//スクロール文章・ゲームオーバー
 					DrawString(600, HEIGHT - rect.y, dead1.c_str(), GetColor(255, 255, 255));
 					DrawString(600, HEIGHT+100 - rect.y, dead2.c_str(), GetColor(255, 255, 255));
 					DrawString(600, HEIGHT+200 - rect.y, dead3.c_str(), GetColor(255, 255, 255));
 					DrawString(600, HEIGHT+300 - rect.y, dead4.c_str(), GetColor(255, 255, 255));
 					DrawString(600, HEIGHT+400 - rect.y, dead5.c_str(), GetColor(255, 255, 255));
-					DrawString(600, HEIGHT+500 - rect.y, dead6.c_str(), GetColor(255, 255, 255));
+					DrawString(600, HEIGHT+500 - rect.y, dead6.c_str(), GetColor(255, 255, 255));	
 					
+					//スコア
+					std::string deadScore = "得点 : " + std::to_string(maxTime - timer);
+					std::string playTime = "記録 : " + std::to_string((maxTime - timer) / 30) + "秒";
+					DrawString(100, 150, deadScore.c_str(), GetColor(255, 255, 255));
+					DrawString(100, 200, playTime.c_str(), GetColor(255, 255, 255));
 
+					DrawExtendGraph(0, 0, WIDTH, HEIGHT, imgHandles["s_game_result_frame_star"], true);
 				}
 				
 				std::string damage = ("Damage : " + std::to_string(player->getPlayerDamage()));
 				DrawString(100, 100, damage.c_str(), GetColor(255, 0, 0));
-				
-			
+							
 				return true;
 			}
 		};
-		
+
+		drawList.push_back(make_shared<Title>(hasPlayerWon, player, maxTime, timer));
+
 		//yu
 		if (hasPlayerWon) {
-
+			//勝利画面のエフェクト・リザルト
+			makeEffect("s_game_coin", 250, 200, 50, 50, true, 150, 1, 3);
+			makeEffect("s_game_coin", 300, 200, 50, 50, true, 150, 2);
+			makeEffect("s_game_coin", 350, 200, 50, 50, true, 150, 2, 3);
 		}
 		else {
-			drawList.push_back(make_shared<Title>(hasPlayerWon, player, maxTime, timer));
-
+			//ゲームオーバーのエフェクト・リザルト
+			
 			makeEffect("s_game_over_hanabi", 100, 200, 600, 600, true, 150, 1, 5);
 			makeEffect("s_game_over_hanabi", 700, 50, 500, 500, true, 150, 1, 2);
 			makeEffect("s_game_coin", 250, 200, 50, 50, true, 150, 1, 3);
@@ -368,9 +380,19 @@ bool SinglePlayerGame::onUpdate() {
 		}
 		share.rectMutex.unlock();
 
+		//////////////////デバッグ用チート設定//////////////////////////
+		if (key[KEY_INPUT_1]) {
+			willFinishMode = true;
+		}
 		break;
 	}
 	case GAME: { // playing
+
+
+		////////////////////デバッグ用チート////////////////////////////////
+		if (key[KEY_INPUT_2]) {
+			timer = 0;
+		}
 
 		timer -= 1;
 		if (timer <= 0) {
@@ -583,14 +605,6 @@ bool SinglePlayerGame::onUpdate() {
 		if (key[KEY_INPUT_RETURN]) {
 			willFinishMode = true;
 			result_timer = maxTime;
-		}
-
-		if (result_timer = maxTime - 50)
-		{
-			//drawList.push_back(std::make_shared<CurtainObject>(false));//カーテンしめる		
-		}
-		else {
-			
 		}
 	
 		break;
