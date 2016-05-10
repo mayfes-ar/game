@@ -127,11 +127,11 @@ namespace Breakout {
 					if (inOrOut == 1) {
 						Eigen::Vector2i hit_point = pos + Eigen::Vector2i(m_realm.radius, 0);
 						Direction dir = Left;
-						return std::make_shared<FireballReflect>(hit_point, dir);
+						return std::make_shared<FireballReflect>(hit_point, dir, getMode());
 					} else {
 						Eigen::Vector2i hit_point = pos + Eigen::Vector2i(-m_realm.radius, 0);
 						Direction dir = Right;
-						return std::make_shared<FireballReflect>(hit_point, dir);
+						return std::make_shared<FireballReflect>(hit_point, dir, getMode());
 					}
 				}
 			}
@@ -144,12 +144,12 @@ namespace Breakout {
 					if (inOrOut == 1) {
 						Eigen::Vector2i hit_point = pos + Eigen::Vector2i(-m_realm.radius, 0);
 						Direction dir = Right;
-						return std::make_shared<FireballReflect>(hit_point, dir);
+						return std::make_shared<FireballReflect>(hit_point, dir, getMode());
 					}
 					else {
 						Eigen::Vector2i hit_point = pos + Eigen::Vector2i(m_realm.radius, 0);
 						Direction dir = Left;
-						return std::make_shared<FireballReflect>(hit_point, dir);
+						return std::make_shared<FireballReflect>(hit_point, dir, getMode());
 					}
 				}
 			}
@@ -163,12 +163,12 @@ namespace Breakout {
 				if (inOrOut == 1) {
 					Eigen::Vector2i hit_point = pos + Eigen::Vector2i(0, m_realm.radius);
 					Direction dir = Top;
-					return std::make_shared<FireballReflect>(hit_point, dir);
+					return std::make_shared<FireballReflect>(hit_point, dir, getMode());
 				}
 				else {
 					Eigen::Vector2i hit_point = pos + Eigen::Vector2i(0, -m_realm.radius);
 					Direction dir = Bottom;
-					return std::make_shared<FireballReflect>(hit_point, dir);
+					return std::make_shared<FireballReflect>(hit_point, dir, getMode());
 				}
 
 			}
@@ -178,12 +178,12 @@ namespace Breakout {
 				if (inOrOut == 1) {
 					Eigen::Vector2i hit_point = pos + Eigen::Vector2i(0, m_realm.radius);
 					Direction dir = Top;
-					return std::make_shared<FireballReflect>(hit_point, dir);
+					return std::make_shared<FireballReflect>(hit_point, dir, getMode());
 				}
 				else {
 					Eigen::Vector2i hit_point = pos + Eigen::Vector2i(0, -m_realm.radius);
 					Direction dir = Bottom;
-					return std::make_shared<FireballReflect>(hit_point, dir);
+					return std::make_shared<FireballReflect>(hit_point, dir, getMode());
 				}
 			}
 			m_moving->setVelocity(new_vel * vel.norm() / new_vel.norm());
@@ -191,12 +191,12 @@ namespace Breakout {
 			if (inOrOut == 1) {
 				Eigen::Vector2i hit_point = pos + Eigen::Vector2i(0, m_realm.radius);
 				Direction dir = Top;
-				return std::make_shared<FireballReflect>(hit_point, dir);
+				return std::make_shared<FireballReflect>(hit_point, dir, getMode());
 			}
 			else {
 				Eigen::Vector2i hit_point = pos + Eigen::Vector2i(0, -m_realm.radius);
 				Direction dir = Bottom;
-				return std::make_shared<FireballReflect>(hit_point, dir);
+				return std::make_shared<FireballReflect>(hit_point, dir, getMode());
 			}
 
 		}
@@ -213,12 +213,12 @@ namespace Breakout {
 					if (inOrOut == 1) {
 						Eigen::Vector2i hit_point = pos + Eigen::Vector2i(m_realm.radius, 0);
 						Direction dir = Left;
-						return std::make_shared<FireballReflect>(hit_point, dir);
+						return std::make_shared<FireballReflect>(hit_point, dir, getMode());
 					}
 					else {
 						Eigen::Vector2i hit_point = pos + Eigen::Vector2i(-m_realm.radius, 0);
 						Direction dir = Right;
-						return std::make_shared<FireballReflect>(hit_point, dir);
+						return std::make_shared<FireballReflect>(hit_point, dir, getMode());
 					}
 				}
 			}
@@ -231,12 +231,12 @@ namespace Breakout {
 					if (inOrOut == 1) {
 						Eigen::Vector2i hit_point = pos + Eigen::Vector2i(-m_realm.radius, 0);
 						Direction dir = Right;
-						return std::make_shared<FireballReflect>(hit_point, dir);
+						return std::make_shared<FireballReflect>(hit_point, dir, getMode());
 					}
 					else {
 						Eigen::Vector2i hit_point = pos + Eigen::Vector2i(m_realm.radius, 0);
 						Direction dir = Left;
-						return std::make_shared<FireballReflect>(hit_point, dir);
+						return std::make_shared<FireballReflect>(hit_point, dir, getMode());
 					}
 
 				}
@@ -252,12 +252,12 @@ namespace Breakout {
 				if (inOrOut == 1) {
 					Eigen::Vector2i hit_point = pos + Eigen::Vector2i(0, -m_realm.radius);
 					Direction dir = Bottom;
-					return std::make_shared<FireballReflect>(hit_point, dir);
+					return std::make_shared<FireballReflect>(hit_point, dir, getMode());
 				}
 				else {
 					Eigen::Vector2i hit_point = pos + Eigen::Vector2i(0, m_realm.radius);
 					Direction dir = Top;
-					return std::make_shared<FireballReflect>(hit_point, dir);
+					return std::make_shared<FireballReflect>(hit_point, dir, getMode());
 				}
 			}
 			else if (degree < -M_PI * 8.0 / 9.0) {
@@ -266,12 +266,12 @@ namespace Breakout {
 				if (inOrOut == 1) {
 					Eigen::Vector2i hit_point = pos + Eigen::Vector2i(0, -m_realm.radius);
 					Direction dir = Bottom;
-					return std::make_shared<FireballReflect>(hit_point, dir);
+					return std::make_shared<FireballReflect>(hit_point, dir, getMode());
 				}
 				else {
 					Eigen::Vector2i hit_point = pos + Eigen::Vector2i(0, m_realm.radius);
 					Direction dir = Top;
-					return std::make_shared<FireballReflect>(hit_point, dir);
+					return std::make_shared<FireballReflect>(hit_point, dir, getMode());
 				}
 			}
 			m_moving->setVelocity(new_vel * vel.norm() / new_vel.norm());
@@ -279,12 +279,12 @@ namespace Breakout {
 			if (inOrOut == 1) {
 				Eigen::Vector2i hit_point = pos + Eigen::Vector2i(0, -m_realm.radius);
 				Direction dir = Bottom;
-				return std::make_shared<FireballReflect>(hit_point, dir);
+				return std::make_shared<FireballReflect>(hit_point, dir, getMode());
 			}
 			else {
 				Eigen::Vector2i hit_point = pos + Eigen::Vector2i(0, m_realm.radius);
 				Direction dir = Top;
-				return std::make_shared<FireballReflect>(hit_point, dir);
+				return std::make_shared<FireballReflect>(hit_point, dir, getMode());
 			}
 		}
 		// 四角形の左側との衝突
@@ -297,12 +297,12 @@ namespace Breakout {
 			if (inOrOut == 1) {
 				Eigen::Vector2i hit_point = pos + Eigen::Vector2i(m_realm.radius, 0);
 				Direction dir = Left;
-				return std::make_shared<FireballReflect>(hit_point, dir);
+				return std::make_shared<FireballReflect>(hit_point, dir, getMode());
 			}
 			else {
 				Eigen::Vector2i hit_point = pos + Eigen::Vector2i(-m_realm.radius, 0);
 				Direction dir = Right;
-				return std::make_shared<FireballReflect>(hit_point, dir);
+				return std::make_shared<FireballReflect>(hit_point, dir, getMode());
 			}
 		}
 		// 四角形の右側との衝突
@@ -315,12 +315,12 @@ namespace Breakout {
 			if (inOrOut == 1) {
 				Eigen::Vector2i hit_point = pos + Eigen::Vector2i(-m_realm.radius, 0);
 				Direction dir = Right;
-				return std::make_shared<FireballReflect>(hit_point, dir);
+				return std::make_shared<FireballReflect>(hit_point, dir, getMode());
 			}
 			else {
 				Eigen::Vector2i hit_point = pos + Eigen::Vector2i(m_realm.radius, 0);
 				Direction dir = Left;
-				return std::make_shared<FireballReflect>(hit_point, dir);
+				return std::make_shared<FireballReflect>(hit_point, dir, getMode());
 			}
 		}
 

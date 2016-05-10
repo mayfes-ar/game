@@ -252,6 +252,7 @@ bool Object::load() {
 	isSuccess &= loadEffect("b_fireball", "breakout/fireball", 5, 5, 500, 500);
 	isSuccess &= loadEffect("b_fireball_reflect", "breakout/fireball_reflect", 14, 1, 1680, 120);
 	isSuccess &= loadEffect("b_green_fireball", "breakout/green_fireball", 5, 5, 500, 500);
+	isSuccess &= loadEffect("b_green_fireball_reflect", "breakout/green_fireball_reflect", 14, 1, 1680, 120);
 	
 
 	for (int num = 0; num <= 9; ++num) {

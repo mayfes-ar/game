@@ -37,7 +37,18 @@ namespace Breakout {
 	constexpr int PRIORITY_CHARACTER = 4; // キャラクター(マリオ)
 	constexpr int PRIORITY_INFO = 5; // インフォメーション
 
+	// 方向をあらわすenum
 	enum Direction { Top, Left, Bottom, Right };
+
+	//Fireball の Modeを決定するためのもの
+	//EnemyかPlayerか、StrongかWeakかの4種類からなっている。
+	//それぞれ描画時に色を変える？
+	enum FireballKind {
+		EnemyWeak,
+		EnemyStrong,
+		PlayerWeak,
+		PlayerStrong
+	};
 
 	class Effect : public Object {
 	public:
@@ -780,35 +791,34 @@ public:
 	}
 };
 
-//Fireball の Modeを決定するためのもの
-//EnemyかPlayerか、StrongかWeakかの4種類からなっている。
-//それぞれ描画時に色を変える？
-enum FireballKind {
-	EnemyWeak,
-	EnemyStrong,
-	PlayerWeak,
-	PlayerStrong
-};
-
 class FireballReflect : public Object
 {
 public:
 	FireballReflect() {}
-	FireballReflect(Eigen::Vector2i& hit_point, Direction dir) {
+	FireballReflect(Eigen::Vector2i& hit_point, Direction dir, FireballKind kind) {
 		is_collide = true;
 		realm.width = width;
 		realm.height = height;
 		switch (dir) {
 		case Top:
-			realm.start_point = hit_point + Eigen::Vector2i(-width / 2, -height / 2);
+			realm.start_point = hit_point + Eigen::Vector2i( -width / 2, -height / 2);
 			break;
 		case Left:
-			realm.start_point = hit_point + Eigen::Vector2i(-width, -height / 2);
+			realm.start_point = hit_point + Eigen::Vector2i( -width / 2, -height / 2);
 			break;
 		case Bottom:
 			realm.start_point = hit_point;// +Eigen::Vector2i(-width / 2, 0);
 		case Right:
-			realm.start_point = hit_point + Eigen::Vector2i(0, - height / 2);
+			realm.start_point = hit_point + Eigen::Vector2i(-width / 2, - height / 2);
+		}
+		switch (kind) {
+		case EnemyStrong:
+		case EnemyWeak:
+			break;
+		case PlayerStrong:
+		case PlayerWeak:
+			setReflectEffect("b_green_fireball_reflect");
+			break;
 		}
 	}
 
@@ -828,9 +838,9 @@ private:
 	bool is_collide = false;
 	Direction direction = Top;
 	Shape::Rectangle realm = Shape::Rectangle();
-	int width = 60;
-	int height = 60;
-	Effect reflect_effect = Effect(effectHandles["b_fireball_reflect"], 30);
+	int width = 40;
+	int height = 40;
+	Effect reflect_effect = Effect(effectHandles["b_fireball_reflect"], PRIORITY_DYNAMIC_OBJECT);
 };
 
 // Block崩しに使われるBlock
