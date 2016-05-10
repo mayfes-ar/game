@@ -110,7 +110,7 @@ bool SinglePlayerGame::onStart() {
 	
 	srand((unsigned int)time(NULL));
 
-	// mode 0
+	// INTRO
 	mode.setMode([this]() {
 		class Title : public Object {
 			Difficulty& difficulty;
@@ -137,8 +137,27 @@ bool SinglePlayerGame::onStart() {
 		bgm->start();
 	}, -1);
 
-	// mode 1
+	// TUTORIAL
 	mode.setMode([this]() {
+		drawList.clear();
+
+		share.rectMutex.lock();
+		markerList.clear();
+		markerList.shrink_to_fit();
+		for (int i = 0; i < share.rects.size(); i++) {
+			auto marker = std::make_shared<Marker>(share.rects[i], false, i, *this);
+			markerList.push_back(marker);
+			drawList.push_back(marker);
+		}
+		share.rectMutex.unlock();
+
+	}, -1);
+	
+	// GAME
+	mode.setMode([this]() {
+		maxPlayerDamage = difficulty == EASY ? 5 : difficulty == HARD ? 10 : 20;
+		player = std::make_shared<Player>(WIDTH / 2 - 100 / 2, HEIGHT / 2 - 150 / 2, Player::width, Player::height, "s_game_player", maxPlayerDamage, *this);
+
 		drawList.clear();
 		auto makeBlock = [this](int x, int y, int width, int height) {
 			auto block = make_shared<SingleGameBlockObject>(x, y, width, height, true);
@@ -159,7 +178,7 @@ bool SinglePlayerGame::onStart() {
 
 		drawList.push_back(player);
 		drawList.push_back(make_shared<Background>(share.handle));
-		
+		/*
 		makeEffect("s_game_coin", 200, 200, 50, 50, true);
 		makeEffect("s_game_coin", 250, 200, 50, 50, true, 150, 1, 3);
 		makeEffect("s_game_coin", 300, 200, 50, 50, true, 150, 2);
@@ -171,7 +190,7 @@ bool SinglePlayerGame::onStart() {
 		makeEffect("s_game_hit", 600, 200, 50, 50, true, 150, 2);
 		makeEffect("s_game_enemy_over", 650, 200, 50, 50, true, 150, 3);
 		makeEffect("s_game_sword", 700, 200, 50, 50, true, 150, 2);
-		
+		*/
 
 		share.rectMutex.lock();
 		markerList.clear();
@@ -188,14 +207,12 @@ bool SinglePlayerGame::onStart() {
 
 	}, maxTime);
 
-	// mode 2
+	// RESULT
 	mode.setMode([this]() {
 		
 	
 		drawList.clear();	
-		drawList.push_back(std::make_shared<CurtainObject>(true));//あける
-
-		
+		makeEffect("s_game_curtain_open", 0, 0, WIDTH, HEIGHT, false, 400, 1);
 
 		class Title : public Object {
 			bool hasPlayerWon = true;
@@ -310,7 +327,7 @@ bool SinglePlayerGame::onUpdate() {
 	funcTimer.update();
 
 	switch (mode.getMode()) {
-	case 0: { // イントロダクション
+	case INTRO: { // イントロダクション
 		static int counterForWait = 5;
 		if (counterForWait == 0) {
 			counterForWait = 5;
@@ -342,7 +359,19 @@ bool SinglePlayerGame::onUpdate() {
 
 		break;
 	}
-	case 1: { // playing
+	case TUTORIAL: {
+
+		// 認識したマーカーを描画
+		share.rectMutex.lock();
+		for (auto marker : markerList) {
+			marker->setRect(share.rects[marker->getIndex()]);
+		}
+		share.rectMutex.unlock();
+
+		break;
+	}
+	case GAME: { // playing
+
 		timer -= 1;
 		if (timer <= 0) {
 			willFinishMode = true;
@@ -371,7 +400,6 @@ bool SinglePlayerGame::onUpdate() {
 			
 			hasPlayerWon = false;
 			bgm->stop();
-			bgm->playDeadSound();
 			funcTimer.set([this]() {
 				willFinishMode = true;
 			}, FPS*5);
@@ -403,10 +431,22 @@ bool SinglePlayerGame::onUpdate() {
 			case 900: {
 				makeInundation();
 			}
-			case 1200:
-			case 1230:
-			case 1260:
+			case 950: {
+				makeCloud(0, 50, 1);
+				break;
+			}
+			case 1100: {
+				makeUfo(0, 50, 1);
+				break;
+			}
+			case 1260: {
+				makeEagle(0, 0, 1);
+				break;
+			}
 			case 1400: {
+				makeInundation();
+			}
+			case 1600: {
 				makeHeiho(WIDTH, 300, 1);
 				break;
 			}
@@ -536,7 +576,7 @@ bool SinglePlayerGame::onUpdate() {
 		
 		break;
 	}
-	case 2: { // リザルト画面
+	case RESULT: { // リザルト画面
 
 		result_timer -= 1;
 
@@ -556,10 +596,7 @@ bool SinglePlayerGame::onUpdate() {
 		break;
 	}
 
-
-
 	default:
-
 		break;
 	}
 
@@ -567,9 +604,12 @@ bool SinglePlayerGame::onUpdate() {
 	if (key[KEY_INPUT_ESCAPE]) {
 		share.willFinish = true;
 	}
-	if (key[KEY_INPUT_N]) {
+	static int waitNCounter = FPS / 3;
+	if (key[KEY_INPUT_N] && waitNCounter == 0) {
 		willFinishMode = true;
+		waitNCounter = FPS / 3;
 	}
+	if (waitNCounter > 0) { waitNCounter--; }
 
 
 	for (auto& itr = enemyList.begin(); itr != enemyList.end();) {

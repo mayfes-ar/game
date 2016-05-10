@@ -27,7 +27,7 @@ bool PuzzleGame::onStart() {
 
 		setBlock(0, 520, 540, 200);
 		setBlock(540, 200, 170, 500);
-		setBlock(1000, 220, 300, 20);
+		setBlock(1000, 220, 300, 100);
 		setCoin(1050, 130);
 		setCoin(1130, 130);
 		setCoin(1090, 50);
@@ -69,19 +69,19 @@ bool PuzzleGame::onStart() {
 		setBlock(0, 300, 1100, 40);
 		setBlock(200, 560, 290, 220);
 
-		for (int i = 580; i < 680; i += 10) {
-			setDamage(482, i, 10);
+		for (int i = 580; i < 700; i += 20) {
+			setDamage(482, i, 20);
 		}
 
 		setBlock(700, 0, 40, 190);
-		for (int i = 0; i < 180; i += 10) {
-			setDamage(692, i, 10);
+		for (int i = 0; i < 180; i += 20) {
+			setDamage(692, i, 20);
 		}
 		setCoin(600, 40);
 
 		setBlock(880, 540, 240, 20);
 		setBlock(620, 540, 120, 20);
-		setDamage(780, 340, 20);
+		setDamage(780, 320, 40);
 		setBlock(1050, 340, 50, 200);
 		setCoin(500, 600);
 		setCoin(900, 440);
@@ -89,9 +89,8 @@ bool PuzzleGame::onStart() {
 		setCoin(900, 370);
 		setCoin(980, 370);
 
-		//setBlock(0, 680, 1300, 200);
 
-		setWind(1070, 150, 130, 51, -2, 0);
+		setWind(1040, 150, 140, 51, -2, 0);
 		setCoin(1120, 10);
 
 	}, -1);
@@ -118,14 +117,14 @@ bool PuzzleGame::onStart() {
 		setCoin(770, 50);
 
 	}, -1);
-	
+
 	// mode 5
 	mode.setMode([this]() {
 		makeStageBase(false);
 		setPlayer(100, 90);
 		setGoal(950, 500);
 
-		for (int i = 0; i * 50 <= 1200; i++) {
+		for (int i = 0; i * 50 <= WIDTH; i++) {
 			setLoop(i * 50, 780, 50, 10, (i - 1) * 50, 0);
 			setLoop(i * 50, -10, 50, 10, (i - 1) * 50, 670);
 		}
@@ -145,7 +144,7 @@ bool PuzzleGame::onStart() {
 		setDamage(1150, 600, 30);
 		setDamage(1150, 650, 30);
 		setDamage(1150, 700, 30);
-		setBlock(0, 200, 400, 20);
+		setBlock(20, 200, 400, 20);
 		setBlock(200, 150, 70, 70);
 		setBlock(440, 400, 24, 240);
 		setBlock(700, 400, 24, 240);
@@ -215,6 +214,7 @@ bool PuzzleGame::onStart() {
 
 		drawList.push_back(std::make_shared<CurtainObject>(true));
 		drawList.push_back(score);
+		drawList.push_back(std::make_shared<ResultObject>());
 
 	}, -1);
 
