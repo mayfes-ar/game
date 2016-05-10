@@ -131,9 +131,10 @@ class PuzzleGame : public Game {
 	};
 
 	class ResultObject : public Object {
+		PuzzleGame& game;
 		const int handle = movieHandles["p_flower"];
 	public:
-		ResultObject() {
+		ResultObject(PuzzleGame& game_) : game(game_){
 			layer = 0;
 			SeekMovieToGraph(handle, 0);
 			if (GetMovieStateToGraph(handle) == 0) {
@@ -146,7 +147,12 @@ class PuzzleGame : public Game {
 		}
 		bool draw() {
 			DrawGraph(0, 0, handle, false);
-			return GetMovieStateToGraph(handle) == 1;
+			//DrawExtendGraph(400, 100, 680, 300, imgHandles["p_score"], true);
+			if (GetMovieStateToGraph(handle) == 1) {
+				return true;
+			}
+			game.share.willFinish = true;
+			return false;
 		}
 	};
 
@@ -167,9 +173,9 @@ class PuzzleGame : public Game {
 				drawNumber(400+size, 2, size, score, effectHandles["p_num"]);
 				//DrawFormatString(400, 0, GetColor(65, 205, 63), "SCORE: %d", score);
 			} else {
-				const int size = 80;
-				DrawExtendGraph(400, 400,400+size, 400+size, imgHandles["p_saihu"], true);
-				drawNumber(400+size, 400, size, score, effectHandles["p_num"]);
+				const int size = 200;
+				//DrawExtendGraph(400, 400,400+size, 400+size, imgHandles["p_saihu"], true);
+				drawNumber(360, 400, size, score, effectHandles["p_num"]);
 				//DrawFormatString(400, 400, GetColor(165, 205, 163), "SCORE: %d", score);
 			}
 			return true;
@@ -265,7 +271,7 @@ class PuzzleGame : public Game {
 		Player(int x_, int y_, PuzzleGame& game_) : initX(x_), initY(y_), game(game_) {
 			rect.x = prevX = x_;
 			rect.y = prevY = y_;
-			rect.width = 75;
+			rect.width = 60;
 			rect.height =100;
 			layer = 100;
 		}

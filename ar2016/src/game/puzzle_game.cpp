@@ -53,7 +53,7 @@ bool PuzzleGame::onStart() {
 
 		setWarp(50, 620, 100, 100, 1150, 0);
 
-		for (int i = 0; i < 80; i++){
+		for (int i = 0; i < 40; i++){
 			setSmog();
 		}
 
@@ -212,12 +212,11 @@ bool PuzzleGame::onStart() {
 		drawList.clear();
 		gimmicks.clear();
 		timer->stopPlayingBGM();
-
 		score->setResultDraw();
 
 		drawList.push_back(std::make_shared<CurtainObject>(true));
 		drawList.push_back(score);
-		drawList.push_back(std::make_shared<ResultObject>());
+		drawList.push_back(std::make_shared<ResultObject>(*this));
 
 	}, -1);
 

@@ -202,6 +202,7 @@ bool Object::load() {
 	isSuccess &= loadSound("p_bgm2", "puzzle/hajimetenootsukai.mp3");
 	isSuccess &= loadSound("p_bgm3", "puzzle/kibou.mp3");
 
+	isSuccess &= loadImage("p_score", "puzzle/score");
 	isSuccess &= loadMovie("p_flower", "puzzle/flower");
 
 	// breakout game
