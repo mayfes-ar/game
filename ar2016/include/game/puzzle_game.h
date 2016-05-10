@@ -504,7 +504,7 @@ class PuzzleGame : public Game {
 		int counter = 0;
 		int pusheffect = 0;
 		const int countMax = effectHandles["p_crystal1"].size() * 2;
-		const int effectMax = effectHandles["p_sush_switch"].size();
+		const int effectMax = effectHandles["p_push_switch"].size();
 		void setSwitch(bool isOn_) {
 			if (isOn == false && isOn_ == true) {
 				pusheffect = 1;
