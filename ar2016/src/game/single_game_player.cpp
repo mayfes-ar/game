@@ -286,7 +286,7 @@ bool SinglePlayerGame::onStart() {
 			drawList.push_back(make_shared<Title>(hasPlayerWon, player, maxTime, timer));
 
 			makeEffect("s_game_over_hanabi", 100, 200, 600, 600, true, 150, 1, 5);
-			makeEffect("s_game_over_hanabi", 700, 200, 500, 500, true, 150, 1, 2);
+			makeEffect("s_game_over_hanabi", 700, 50, 500, 500, true, 150, 1, 2);
 			makeEffect("s_game_coin", 250, 200, 50, 50, true, 150, 1, 3);
 			makeEffect("s_game_coin", 300, 200, 50, 50, true, 150, 2);
 			makeEffect("s_game_coin", 350, 200, 50, 50, true, 150, 2, 3);
