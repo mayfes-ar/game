@@ -322,12 +322,12 @@ class SinglePlayerGame : public Game {
 			switch (moveDirection)
 			{
 			case RIGHT: {
-				drawWithRotation(imgHandle, rect.rotate, true, imageSize);
+				drawWithRotation(imgHandle, 0, true, imageSize);
 				break;
 			}
 
 			case LEFT: {
-				drawWithRotation(imgHandle, rect.rotate, false, imageSize);
+				drawWithRotation(imgHandle, 0, false, imageSize);
 				break;
 			}
 			default:
