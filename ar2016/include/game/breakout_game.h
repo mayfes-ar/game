@@ -68,7 +68,7 @@ public:
 		updatePotStatus();
 		updateEnemy();
 		updateTown();
-		shipVSEnemy()
+		shipVSEnemy();
 		EnemyVSTown();
 
 		if (key[KEY_INPUT_ESCAPE]) {

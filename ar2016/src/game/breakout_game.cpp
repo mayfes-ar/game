@@ -373,6 +373,11 @@ void BreakoutGame::updateTown() {
 	}
 }
 
+void BreakoutGame::shipVSEnemy() {
+
+
+}
+
 void BreakoutGame::EnemyVSTown() {
 	for (auto& enemy : m_components->enemy_manager->getEnemyList()) {
 		for (auto& house : m_components->house_list) {
