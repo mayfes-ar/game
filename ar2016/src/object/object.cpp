@@ -196,6 +196,7 @@ bool Object::load() {
 	isSuccess &= loadEffect("p_crystal2", "puzzle/crystal2", 5, 4, 600, 480);
 	isSuccess &= loadEffect("p_warp", "puzzle/warp", 2, 8, 1600, 4800);
 	isSuccess &= loadEffect("p_num", "puzzle/number", 10, 1, 390, 54);
+	isSuccess &= loadEffect("p_num_2", "puzzle/number_2", 10, 1, 1840, 223);
 	isSuccess &= loadEffect("p_init", "puzzle/init", 14, 1, 1680, 120);
 	isSuccess &= loadEffect("p_push_switch", "puzzle/snow", 3,10, 1920, 4800);
 	isSuccess &= loadSound("p_bgm1", "puzzle/otenbahime.mp3");
@@ -203,6 +204,7 @@ bool Object::load() {
 	isSuccess &= loadSound("p_bgm3", "puzzle/kibou.mp3");
 
 	isSuccess &= loadImage("p_score", "puzzle/score");
+	isSuccess &= loadImage("p_perfect", "puzzle/perfect");
 	isSuccess &= loadMovie("p_flower", "puzzle/flower");
 
 	// breakout game

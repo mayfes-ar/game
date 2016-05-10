@@ -147,7 +147,6 @@ class PuzzleGame : public Game {
 		}
 		bool draw() {
 			DrawGraph(0, 0, handle, false);
-			//DrawExtendGraph(400, 100, 680, 300, imgHandles["p_score"], true);
 			if (GetMovieStateToGraph(handle) == 1) {
 				return true;
 			}
@@ -173,9 +172,13 @@ class PuzzleGame : public Game {
 				drawNumber(400+size, 2, size, score, effectHandles["p_num"]);
 				//DrawFormatString(400, 0, GetColor(65, 205, 63), "SCORE: %d", score);
 			} else {
-				const int size = 200;
-				//DrawExtendGraph(400, 400,400+size, 400+size, imgHandles["p_saihu"], true);
-				drawNumber(360, 400, size, score, effectHandles["p_num"]);
+				if (score < 10000) {
+					DrawExtendGraph(400, 50, 400 + 480, 50 + 200, imgHandles["p_score"], true);
+					static const int size = 253;
+					drawNumber(240, 320, size, score, effectHandles["p_num_2"]);
+				} else {
+					DrawGraph(150, 200, imgHandles["p_perfect"], true);
+				}
 				//DrawFormatString(400, 400, GetColor(165, 205, 163), "SCORE: %d", score);
 			}
 			return true;
