@@ -51,7 +51,7 @@ bool PuzzleGame::onStart() {
 		setCoin(260, 420);
 		setCoin(340, 420);
 
-		setWarp(50, 620, 100, 100, 1150, 0);
+		setWarp(50, 620, 100, 100, 1150, 0, true);
 
 		for (int i = 0; i < 40; i++){
 			setSmog();
@@ -152,8 +152,8 @@ bool PuzzleGame::onStart() {
 		setBlock(700, 400, 24, 240);
 		setBlock(464, 400, 236, 24);
 		setBlock(464, 616, 236, 24);
-		setWarp(620, 424, 60, 60, 600, 300);
-		setWarp(1200, 650, 60, 60, 520, 500);
+		setWarp(620, 424, 60, 60, 600, 300, true);
+		setWarp(1200, 650, 60, 60, 520, 500, true);
 		setCoin(40, 240);
 		setCoin(120, 240);
 		setCoin(200, 240);
@@ -358,6 +358,7 @@ void PuzzleGame::Player::update() {
 
 	if (game.key[KEY_INPUT_UP] && !isJumping) {
 		acY = -25;
+		PlaySoundMem(soundHandles["ps_jump"], DX_PLAYTYPE_BACK);
 	}
 	isJumping = true;
 
@@ -429,7 +430,7 @@ void PuzzleGame::Player::update() {
 		}
 	}
 
-	if (y > 4000) {
+	if (y > 2000) {
 		init();
 	}
 }

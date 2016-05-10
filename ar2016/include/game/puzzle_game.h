@@ -310,9 +310,22 @@ class PuzzleGame : public Game {
 				exForceX = exForceY = 0;
 			};
 		}
-		void init() {
+		void init(int soundNum=0) {
 			if (!isMovable) { return; }
 			game.drawList.push_back(std::make_shared<InitEffect>(rect.x - 62, rect.y - 50, 200));
+			switch (soundNum)
+			{
+			case 1: {
+				PlaySoundMem(soundHandles["ps_needle"], DX_PLAYTYPE_BACK);
+				break;
+			}
+			case 2: {
+				PlaySoundMem(soundHandles["ps_ball"], DX_PLAYTYPE_BACK);
+				break;
+			}
+			default:
+				break;
+			}
 
 			updateFunc = [this]() {
 				isDamaged = true;
@@ -348,6 +361,9 @@ class PuzzleGame : public Game {
 				layer = 101;
 			}
 			bool draw() {
+				if (counter % 2 == 0) {
+					PlaySoundMem(soundHandles["ps_coin"], DX_PLAYTYPE_BACK);
+				}
 				drawWithRect(effectHandles["p_coins"][counter], 50);
 				counter++;
 				return counter < countMax;
@@ -418,7 +434,7 @@ class PuzzleGame : public Game {
 			}
 
 			if (isContacted(game.player)) {
-				game.player->init();
+				game.player->init(canVanish ? 2 : 1);
 			}
 			return willExist;
 		}
@@ -467,6 +483,7 @@ class PuzzleGame : public Game {
 			if (isContacted(game.player)) {
 				game.score->score += value;
 				willExist = false;
+				PlaySoundMem(soundHandles["ps_coin"], DX_PLAYTYPE_BACK);
 			}
 			return willExist;
 		}
@@ -483,6 +500,7 @@ class PuzzleGame : public Game {
 		void setSwitch(bool isOn_) {
 			if (isOn == false && isOn_ == true) {
 				pusheffect = 1;
+				PlaySoundMem(soundHandles["ps_crystal"], DX_PLAYTYPE_BACK);
 			}
 			isOn = isOn_;
 			if (isReverse) {
@@ -539,6 +557,7 @@ class PuzzleGame : public Game {
 		void setSwitch(bool isOn_) {
 			if (isOn == false && isOn_ == true) {
 				pusheffect = 1;
+				PlaySoundMem(soundHandles["ps_crystal"], DX_PLAYTYPE_BACK);
 			}
 			if (isOn_ && !isOn) {
 				func();
@@ -585,9 +604,10 @@ class PuzzleGame : public Game {
 		const double posY;
 		int counter = 0;
 		const int countMax = effectHandles["p_warp"].size();
+		const bool hasSound;
 
 	public:
-		WarpGimmick(Rectan rect_, double posX_, double posY_, PuzzleGame& game_) : posX(posX_), posY(posY_), Gimmick(game_) {
+		WarpGimmick(Rectan rect_, double posX_, double posY_, PuzzleGame& game_, bool hasSound_) : posX(posX_), posY(posY_), Gimmick(game_), hasSound(hasSound_) {
 			rect = rect_;
 			layer = 70;
 		}
@@ -604,6 +624,9 @@ class PuzzleGame : public Game {
 		bool update() {
 			if (isContacted(game.player)) {
 				game.player->warp(posX, posY);
+				if (hasSound) {
+					PlaySoundMem(soundHandles["ps_warp"], DX_PLAYTYPE_BACK);
+				}
 			}
 			return willExist;
 		}
@@ -717,8 +740,8 @@ class PuzzleGame : public Game {
 		gimmicks.push_back(switch_);
 		drawList.push_back(switch_);
 	}
-	void setWarp(int x, int y, int width, int height, int posX, int posY) {
-		auto warp = std::make_shared<WarpGimmick>(Rectan(x, y, width, height), posX, posY, *this);
+	void setWarp(int x, int y, int width, int height, int posX, int posY, bool hasSound=false) {
+		auto warp = std::make_shared<WarpGimmick>(Rectan(x, y, width, height), posX, posY, *this, hasSound);
 		gimmicks.push_back(warp);
 		drawList.push_back(warp);
 	}
