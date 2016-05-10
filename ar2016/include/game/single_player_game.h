@@ -14,7 +14,7 @@ class SinglePlayerGame : public Game {
 			Cloud : 140
 			Drop : 139
 			Ufo :  150
-			Ray :  180
+			Ray :  149
 			Heiho :	152
 			Fire : 153
 		Effect : 周りの描画に影響しそうな大きなエフェクト
@@ -384,32 +384,6 @@ class SinglePlayerGame : public Game {
 			return canGuard;
 		}
 	};
-
-	//シーンチェンジのカーテン
-	class CurtainObject : public Object {
-		const bool isOpen;
-		int counter = 0;
-		const int openCountMax = effectHandles["p_curtain_open"].size();
-		const int closeCountMax = effectHandles["p_curtain_close"].size();
-	public:
-		CurtainObject(bool isOpen_) : isOpen(isOpen_) {
-			layer = 300;
-		}
-		bool draw() {
-			const int handle = isOpen ? effectHandles["p_curtain_open"][counter] : effectHandles["p_curtain_close"][counter];
-			DrawExtendGraph(0, 0, 1280, 720, handle, true);
-
-			if (isOpen) {
-				counter++;
-				return !(counter == openCountMax);
-			}
-			else {
-				if (counter < closeCountMax - 1) { counter++; }
-				return true;
-			}
-		}
-	};
-
 
 	//キャラクター一般
 	class Character : public SingleGameObject {
@@ -847,7 +821,7 @@ class SinglePlayerGame : public Game {
 		static const int height = 720;
 
 		Ray(int x_, int y_, SinglePlayerGame& game_, double size, int maxDamage_ = -1, std::string imgHandleKey_ = "s_game_ray") : Enemy(x_, y_, width * size, height * size, imgHandleKey_, maxDamage_, game_, 0) {
-			layer = 180;
+			layer = 149;
 		}
 
 		void update() {}
@@ -874,12 +848,16 @@ class SinglePlayerGame : public Game {
 			if (characterState == OVER) { return; }
 
 			stopCount--;
+			if (stopCount == FPS * 2 - 3) {
+				game.makeEffect("s_game_uforay_start", rect.x + rect.width / 2 - Ray::width / 2, bottom(),  Ray::width, Ray::height, false, layer-1, 2);
+			}
 			if (stopCount == FPS * 2 - 15) {
 				ray = game.makeRay(rect.x + rect.width / 2 - Ray::width / 2, bottom(), 1);
 			}
 			else if (stopCount < FPS * 2) {
 				angle += (0 - angle) / 10;
 				if (stopCount == 0) {
+					game.makeEffect("s_game_uforay_end", rect.x + rect.width / 2 - Ray::width / 2, bottom(), Ray::width, Ray::height, false, layer - 1, 2);
 					ray->die();
 					ray = nullptr;
 
@@ -1899,8 +1877,6 @@ class SinglePlayerGame : public Game {
 public:
 	SinglePlayerGame() {
 		thread = std::thread::thread(capture, std::ref(share));
-
-
 		hasPlayerWon = true;
 	}
 
