@@ -295,10 +295,12 @@ class SinglePlayerGame : public Game {
 		bool canGuard;
 		bool canAttack;
 
+		double imageSize = 1.2;
+
 		void modifyRect() {
 			if (rect.width > 0 || rect.height > 0) {
-				rect.width = markerType == PIYO ? 1920/14 : markerType == SWORD ? 765/3 : 256;
-				rect.height = markerType == PIYO ? 1409/14 : markerType == SWORD ? 765/3 : 256;
+				rect.width = markerType == PIYO ? 1920/14 : markerType == SWORD ? 765/4 : 256*0.8;
+				rect.height = markerType == PIYO ? 1409/14 : markerType == SWORD ? 765/4 : 256*0.8;
 			}
 			else {
 				rect.x = rect.y = -300;
@@ -317,25 +319,29 @@ class SinglePlayerGame : public Game {
 		}
 
 		bool draw() {
-			if (isEnable) {
-				switch (moveDirection)
-				{
-				case RIGHT: {
-					drawImage(imgHandle, rect.width, rect.height, 0, 0, true);
-					break;
-				}
+			switch (moveDirection)
+			{
+			case RIGHT: {
+				drawWithRotation(imgHandle, rect.rotate, true, imageSize);
+				break;
+			}
 
-				case LEFT: {
-					drawImage(imgHandle, rect.width, rect.height);
-					break;
-				}
-				default:
-					break;
-				}
+			case LEFT: {
+				drawWithRotation(imgHandle, rect.rotate, false, imageSize);
+				break;
 			}
-			else {
-				drawDark([this]() {drawImage(imgHandles["s_game_invalid"], rect.width, rect.height); });
+			default:
+				break;
 			}
+
+			if (!isEnable) {
+				drawDark([this]() {
+					SetDrawBlendMode(DX_BLENDMODE_ALPHA, 150);
+					drawImage(imgHandles["s_game_invalid"], rect.width, rect.height);
+					SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 100);
+				});
+			}
+
 			return true;
 		}
 
@@ -626,12 +632,16 @@ class SinglePlayerGame : public Game {
 
 	// 敵キャラクター
 	class Enemy : public Character {
+	protected:
 		std::string imgHandleKey;
+		const double defaultImageSize = 1.1;
 	public:
 		Enemy(int x_, int y_, int width_, int height_, std::string imgHandleKey_, int maxDamage_, SinglePlayerGame& game_, int overBufferMax_ = FPS, int maxInvincibleTime_ = FPS) : Character(x_,y_,width_,height_,imgHandleKey_,maxDamage_,game_, overBufferMax_, maxInvincibleTime_) {
 			layer = 101;
 			imgHandleKey = imgHandleKey_;
+			imageSize = defaultImageSize;
 		}
+
 		
 		std::string overEffectKey = "s_game_enemy_over";
 		std::string damageSoundKey = "s_game_attack";
@@ -943,7 +953,7 @@ class SinglePlayerGame : public Game {
 			moveBecauseMarkerCollision(game.markerList);
 			moveBecauseBlockCollision(game.blockList);
 			angle = M_PI / 180 * (rand() % 3 - 1);
-			imageSize += imageSize >= 1 ? 0 : 0.05;
+			imageSize += imageSize >= defaultImageSize ? 0 : 0.05;
 		}
 
 		void setAc(double& acX, double& acY) {
@@ -1004,7 +1014,7 @@ class SinglePlayerGame : public Game {
 				game.makeDrop(rect.x + rand() % (rect.width) - Drop::width / 2, bottom(), 1);
 			}
 			if (fallDropCounter < 10) {
-				imageSize += (1.0 - imageSize) / 5;
+				imageSize += (defaultImageSize - imageSize) / 5;
 			}
 			else if (fallDropCounter < 25) {
 				imageSize += (0.4 - imageSize) / 15;
@@ -1013,7 +1023,7 @@ class SinglePlayerGame : public Game {
 				imageSize += (1.7 - imageSize) / 15;
 			}
 			else {
-				imageSize = 1 + 0.01 * sizeCounter->get();
+				imageSize = defaultImageSize + 0.01 * sizeCounter->get();
 			}
 			if (fallDropCounter == 0) {
 				fallDropCounter = rand() % 100 + FPS * 4;
@@ -1181,7 +1191,7 @@ class SinglePlayerGame : public Game {
 			updateCoordinate(acX, acY);
 			moveBecauseMarkerCollision(game.markerList);
 			angle = M_PI / 180 * (rand() % 5 - 2);
-			imageSize += imageSize >= 1 ? 0 : 0.05;
+			imageSize += imageSize >= defaultImageSize ? 0 : 0.05;
 		}
 		
 		void setAc(double& acX, double& acY) {

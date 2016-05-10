@@ -164,7 +164,7 @@ bool Object::load() {
 	isSuccess &= loadImage("s_game_piyo", "s_game/piyo");
 	isSuccess &= loadImage("s_game_sword", "s_game/sword");
 	isSuccess &= loadImage("s_game_shield", "s_game/shield");
-	isSuccess &= loadImage("s_game_invalid", "s_game/dead_sample");
+	isSuccess &= loadImage("s_game_invalid", "s_game/batsu");
 	// リザルト
 	isSuccess &= loadImage("s_game_result_clear", "s_game/s_game_clear");
 	isSuccess &= loadImage("s_game_result_dead", "s_game/s_game_result");
