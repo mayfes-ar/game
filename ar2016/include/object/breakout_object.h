@@ -31,11 +31,12 @@ namespace Breakout {
 
 	// 描画の優先順位
 	constexpr int PRIORITY_BACKGROUND = 0; // 背景画像
-	constexpr int PRIORITY_SECTION = 1; // レイアウト（ゲームフィールド、スコア表示、デバッグ表示等）
-	constexpr int PRIORITY_STATIC_OBJECT = 2; // 静的オブジェクト (Block)
-	constexpr int PRIORITY_DYNAMIC_OBJECT = 3; // 動的オブジェクト(Ship, Fireball)
-	constexpr int PRIORITY_CHARACTER = 4; // キャラクター(マリオ)
-	constexpr int PRIORITY_INFO = 5; // インフォメーション
+	constexpr int PRIORITY_SECTION = 10; // レイアウト（ゲームフィールド、スコア表示、デバッグ表示等）
+	constexpr int PRIORITY_FIREBALL_REFLECT = 15; // ファイアーボールの反射の優先度
+	constexpr int PRIORITY_STATIC_OBJECT = 20; // 静的オブジェクト (Block)
+	constexpr int PRIORITY_DYNAMIC_OBJECT = 30; // 動的オブジェクト(Ship, Fireball)
+	constexpr int PRIORITY_CHARACTER = 40; // キャラクター(マリオ)
+	constexpr int PRIORITY_INFO = 50; // インフォメーション
 
 	// 方向をあらわすenum
 	enum Direction { Top, Left, Bottom, Right };
@@ -438,7 +439,7 @@ public:
 	explicit Info(const Shape::Rectangle realm, const std::shared_ptr<Timer>& timer)
 		: m_realm(realm), m_timer(timer)
 	{
-		Object::layer = PRIORITY_SECTION;
+		Object::layer = PRIORITY_INFO;
 		m_score = std::make_shared<Score>();
 	}
 
@@ -794,7 +795,9 @@ public:
 class FireballReflect : public Object
 {
 public:
-	FireballReflect() {}
+	FireballReflect() { 
+		Object::layer = PRIORITY_FIREBALL_REFLECT;
+	}
 	FireballReflect(Eigen::Vector2i& hit_point, Direction dir, FireballKind kind) {
 		is_collide = true;
 		realm.width = width;
@@ -820,6 +823,7 @@ public:
 			setReflectEffect("b_green_fireball_reflect");
 			break;
 		}
+		Object::layer = PRIORITY_FIREBALL_REFLECT;
 	}
 
 	bool draw() override {
@@ -827,7 +831,7 @@ public:
 	}
 
 	void setReflectEffect(std::string effect_name) {
-		reflect_effect = Effect(effectHandles[effect_name], PRIORITY_DYNAMIC_OBJECT);
+		reflect_effect = Effect(effectHandles[effect_name], PRIORITY_FIREBALL_REFLECT);
 	}
 
 	bool isCollide() {
@@ -840,7 +844,7 @@ private:
 	Shape::Rectangle realm = Shape::Rectangle();
 	int width = 40;
 	int height = 40;
-	Effect reflect_effect = Effect(effectHandles["b_fireball_reflect"], PRIORITY_DYNAMIC_OBJECT);
+	Effect reflect_effect = Effect(effectHandles["b_fireball_reflect"], PRIORITY_FIREBALL_REFLECT);
 };
 
 // Block崩しに使われるBlock
