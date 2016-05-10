@@ -212,9 +212,7 @@ bool SinglePlayerGame::onStart() {
 		
 	
 		drawList.clear();	
-		drawList.push_back(std::make_shared<CurtainObject>(true));//あける
-
-		
+		makeEffect("s_game_curtain_open", 0, 0, WIDTH, HEIGHT, false, 400, 1);
 
 		class Title : public Object {
 			bool hasPlayerWon = true;

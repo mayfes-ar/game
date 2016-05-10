@@ -122,11 +122,12 @@ bool Object::load() {
 	isSuccess &= loadImage("s_game_ufo", "s_game/ufo");
 	isSuccess &= loadImage("s_game_ufo_damage", "s_game/ufo");
 	isSuccess &= loadImage("s_game_ufo_over", "s_game/ufo");
+	isSuccess &= loadEffect("s_game_uforay_start", "s_game/ufo_ray_start", 6, 1, 1440, 480);
+	isSuccess &= loadEffect("s_game_uforay_end", "s_game/ufo_ray_end", 4, 1, 960, 480);
 
-
-	isSuccess &= loadImage("s_game_ray", "s_game/uforay");
-	isSuccess &= loadImage("s_game_ray_damage", "s_game/uforay");
-	isSuccess &= loadImage("s_game_ray_over", "s_game/uforay");
+	isSuccess &= loadImage("s_game_ray", "s_game/ufo_ray");
+	isSuccess &= loadImage("s_game_ray_damage", "s_game/ufo_ray");
+	isSuccess &= loadImage("s_game_ray_over", "s_game/ufo_ray");
 
 	isSuccess &= loadImage("s_game_cloud", "s_game/cloud");
 	isSuccess &= loadImage("s_game_cloud_damage", "s_game/cloud");
@@ -172,6 +173,8 @@ bool Object::load() {
 	isSuccess &= loadSound("s_game_over", "s_game/game_over.wav");
 	isSuccess &= loadEffect("s_game_over_hanabi", "s_game/hanabi", 14, 15, 7168, 7680);
 	//isSuccess &= loadMovie("s_game_over_hanabi", "s_game/hanabi");
+	isSuccess &= loadEffect("s_game_curtain_close", "s_game/curtain_close", 1, 18, 640, 8640);
+	isSuccess &= loadEffect("s_game_curtain_open", "s_game/curtain_open", 1, 10, 640, 4800);
 
 	// puzzle game
 	isSuccess &= loadImage("p_block", "puzzle/block");
