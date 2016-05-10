@@ -374,8 +374,9 @@ void BreakoutGame::updateTown() {
 }
 
 void BreakoutGame::shipVSEnemy() {
-
-
+	for (auto& enemy : m_components->enemy_manager->getEnemyList()) {
+		/*if()*/
+	}
 }
 
 void BreakoutGame::EnemyVSTown() {
