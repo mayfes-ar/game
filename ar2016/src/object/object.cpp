@@ -171,9 +171,19 @@ bool Object::load() {
 	isSuccess &= loadImage("s_game_result_clear", "s_game/s_game_clear");
 	isSuccess &= loadImage("s_game_result_dead", "s_game/s_game_result");
 	isSuccess &= loadImage("s_game_dead", "s_game/dead_sample");
+	isSuccess &= loadImage("s_game_result_frame_star", "s_game/result_frame_star");
+	isSuccess &= loadImage("s_game_result_frame_blackstar", "s_game/result_frame_blackstar");
+	isSuccess &= loadImage("s_game_result_rainbow", "s_game/result_rainbow");
+	isSuccess &= loadImage("s_game_result_castle", "s_game/result_castle");
+	isSuccess &= loadImage("s_game_result_castle2", "s_game/result_castle2");
+	isSuccess &= loadImage("s_game_result_castle3", "s_game/result_castle3");
+	isSuccess &= loadImage("s_game_result_stage1", "s_game/result_stage1");
+	isSuccess &= loadImage("s_game_result_stage2", "s_game/result_stage2");
+	isSuccess &= loadImage("s_game_result_sketch", "s_game/result_sketch");
+
 	isSuccess &= loadSound("s_game_over", "s_game/game_over.wav");
+	
 	isSuccess &= loadEffect("s_game_over_hanabi", "s_game/hanabi", 14, 15, 7168, 7680);
-	//isSuccess &= loadMovie("s_game_over_hanabi", "s_game/hanabi");
 	isSuccess &= loadEffect("s_game_curtain_close", "s_game/curtain_close", 1, 18, 640, 8640);
 	isSuccess &= loadEffect("s_game_curtain_open", "s_game/curtain_open", 1, 10, 640, 4800);
 
