@@ -155,7 +155,7 @@ bool SinglePlayerGame::onStart() {
 	
 	// GAME
 	mode.setMode([this]() {
-		maxPlayerDamage = difficulty == EASY ? 5 : difficulty == HARD ? 10 : 20;
+		maxPlayerDamage = difficulty == EASY ? 10 : difficulty == HARD ? 10 : 20;
 		player = std::make_shared<Player>(WIDTH / 2 - 100 / 2, HEIGHT / 2 - 150 / 2, Player::width, Player::height, "s_game_player", maxPlayerDamage, *this);
 
 		drawList.clear();
@@ -416,39 +416,30 @@ bool SinglePlayerGame::onUpdate() {
 				makeEagle(0, 0, 1);
 				break;
 			}
-			case 200: {
-				makeCloud(0, 50, 1);
-				break;
-			}
-			case 300: {
-				//makeUfo(0, 50, 1);
-				break;
-			}
 			case 600: {
 				makeRocketWanwan(-RocketWanwan::width / 2, HEIGHT / 2 + 50);
 				break;
 			}
-			case 900: {
+			case 1000: {
 				makeInundation();
 			}
-			case 950: {
-				//makeCloud(0, 50, 1);
-				break;
-			}
-			case 1100: {
-				makeUfo(0, 50, 1);
-				break;
-			}
-			case 1260: {
-				makeEagle(0, 0, 1);
-				break;
-			}
-			case 1400: {
-			}
-			case 1600: {
+			case 2000: {
 				makeHeiho(WIDTH, 300, 1);
 				break;
 			}
+			case 2300: {
+				makeUfo(0, 50, 1);
+				break;
+			}
+			case 2800: {
+				makeCloud(0, 50, 1);
+				break;
+			}
+
+			case 3400: {
+				makeHeiho(WIDTH, 300, 1);
+				break;
+		    }
 			default: {
 			}
 			}
