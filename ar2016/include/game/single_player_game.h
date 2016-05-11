@@ -178,6 +178,7 @@ class SinglePlayerGame : public Game {
 		const int maxCount;
 		const int framePerCount;
 		int counter;
+		bool isRunning;
 
 	public :
 		Effect(std::string effectHandleKey_, int x_ = 0, int y_ = 0, int width_ = WIDTH, int height_ = HEIGHT, bool willStay_ = false, int layer_ = 150, int framePerCount_ = 1, int counter_ = 0) : effectHandle(effectHandles[effectHandleKey_]), willStay(willStay_), maxCount(effectHandles[effectHandleKey_].size()*(framePerCount_ > 0 ? framePerCount_ : 1)), framePerCount((framePerCount_ > 0 ? framePerCount_ : 1)) {
@@ -187,6 +188,11 @@ class SinglePlayerGame : public Game {
 			rect.height = height_;
 			counter = counter_*(framePerCount_ > 0 ? framePerCount_ : 1);
 			layer = layer_;
+			isRunning = true;
+		}
+
+		void changeIsRunning() {
+			isRunning = false;
 		}
 	
 		bool draw() {
@@ -196,10 +202,15 @@ class SinglePlayerGame : public Game {
 				}
 			}
 
+	
+			//if (!Inundation::getIsAlive()) {
+				//isEnable = false;
+			//}
+
 			drawWithRect(effectHandle[counter/framePerCount]);
 			counter++;
 
-			return willStay || counter != maxCount;
+			return (willStay || counter != maxCount) && isRunning;
 		}
 	};
 
@@ -574,7 +585,7 @@ class SinglePlayerGame : public Game {
 		Enemy(int x_, int y_, int width_, int height_, std::string imgHandleKey_, int maxDamage_, SinglePlayerGame& game_, int overBufferMax_ = FPS, int maxInvincibleTime_ = FPS) : Character(x_,y_,width_,height_,imgHandleKey_,maxDamage_,game_, overBufferMax_, maxInvincibleTime_) {
 			layer = 101;
 		}
-		
+	
 		std::string overEffectKey = "s_game_enemy_over";
 		std::string damageSoundKey = "s_game_attack";
 		std::string attackEffectKey = "s_game_sword";
@@ -707,14 +718,22 @@ class SinglePlayerGame : public Game {
 	};
 
 	class Switch : public Enemy {
-		static const int width = 100;
-		static const int height = 100;
+		static const int width = 150;
+		static const int height = 150;
 
 	public:
+		std::shared_ptr<Effect> faucet = std::make_shared<Effect>("s_game_water", left() + 60, top() + 90, rect.width, 200, true, 150, 1, 0);
+		
 		Switch(int x_, int y_, SinglePlayerGame& game_, double size, int maxDamage_ = 2, std::string imgHandleKey_ = "s_game_switch") : Enemy(x_, y_, width * size, height * size, imgHandleKey_, maxDamage_, game_) {
 			layer = 130;
 			moveDirection = RIGHT;
+
+			
+			game_.drawList.push_back(faucet);
+			//game.makeEffect("s_game_water", left() + 60, top() + 90, rect.width, 200, true);
 		}
+		
+
 
 		void update() {}
 
@@ -730,10 +749,11 @@ class SinglePlayerGame : public Game {
 		std::shared_ptr<Switch> button;
 		Inundation(int x_, int y_, SinglePlayerGame& game_, double size, int maxDamage_ = -1, std::string imgHandleKey_ = "s_game_water") : Enemy(x_, y_, width * size, height * size, imgHandleKey_, maxDamage_, game_) {
 			layer = 300;
-			button = game_.makeSwitch(100, 100, 1);
+			button = game_.makeSwitch(0, 200, 1);
 		}
 
 		bool draw() {
+			
 			DrawExtendGraph(left(), top() - 150, right(), bottom() + 800, imgHandles["s_game_water"], true);
 			return getIsAlive();
 		}
@@ -741,6 +761,8 @@ class SinglePlayerGame : public Game {
 		void update() {
 			if (!button->getIsAlive()) {
 				isWaterUp = false;
+				button->faucet->changeIsRunning();
+
 			}
 			else if (inundationCounter > 0){
 				inundationCounter--;
@@ -1298,7 +1320,7 @@ class SinglePlayerGame : public Game {
 			double& y = rect.y;
 			const int& width = rect.width;
 			const int& height = rect.height;
-
+			
 			for (auto block : objectList) {
 				if (left() < block->right() && top() < block->bottom() &&
 					right() > block->left() && bottom() > block->top()) {
@@ -1369,8 +1391,8 @@ class SinglePlayerGame : public Game {
 
 	void makeEffect(std::string effectHandleKey_, int x_ = 0, int y_ = 0, int width_ = WIDTH, int height_ = HEIGHT, bool willStay_ = false, int layer_ = 150, int framePerCount_ = 1, int counter_ = 0) {
 		drawList.push_back(std::make_shared<Effect>(effectHandleKey_, x_, y_, width_, height_, willStay_, layer_, framePerCount_, counter_));
+	
 	}
-
 	std::shared_ptr<BGM> bgm;
 	const int maxTime = FPS * 60;
 	const int maxPlayerDamage = 10;

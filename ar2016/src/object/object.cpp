@@ -124,9 +124,9 @@ bool Object::load() {
 	isSuccess &= loadImage("s_game_water_damage", "s_game/water");
 	isSuccess &= loadImage("s_game_water_over", "s_game/water");
 
-	isSuccess &= loadImage("s_game_switch", "s_game/switch1");
-	isSuccess &= loadImage("s_game_switch_damage", "s_game/switch");
-	isSuccess &= loadImage("s_game_switch_over", "s_game/switch");
+	isSuccess &= loadImage("s_game_switch", "s_game/jaguti");
+	isSuccess &= loadImage("s_game_switch_damage", "s_game/jaguti");
+	isSuccess &= loadImage("s_game_switch_over", "s_game/jaguti");
 
 	isSuccess &= loadImage("s_game_heart", "s_game/heart");
 
@@ -140,6 +140,7 @@ bool Object::load() {
 	isSuccess &= loadEffect("s_game_enemy_over", "s_game/enemy", 10, 1, 1200, 200);
 	isSuccess &= loadEffect("s_game_sword", "s_game/sword", 9, 1, 1080, 120);
 
+	isSuccess &= loadEffect("s_game_water", "s_game/water", 5, 6, 2560, 1536);
 
 	isSuccess &= loadEffect("s_game_coin", "s_game/coin", 5, 2, 1000, 400);
 	// マーカー
