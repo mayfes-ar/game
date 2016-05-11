@@ -486,13 +486,15 @@ bool SinglePlayerGame::onUpdate() {
 	}
 	case TUTORIAL: {
 
-		// 認識したマーカーを描画
-		share.rectMutex.lock();
-		for (auto marker : markerList) {
-			marker->setRect(share.rects[marker->getIndex()]);
-		}
-		share.rectMutex.unlock();
+		if (tutorial != START) {
 
+			// 認識したマーカーを描画
+			share.rectMutex.lock();
+			for (auto marker : markerList) {
+				marker->setRect(share.rects[marker->getIndex()]);
+			}
+			share.rectMutex.unlock();
+		}
 
 		switch (tutorial) {
 		case START: {
@@ -506,15 +508,19 @@ bool SinglePlayerGame::onUpdate() {
 		
 			break;
 		}
-		case BEATFIRE: {
-			tutoenemy->childfire->deathDecision();
+		case BEATFIRE: {//Titleクラス
+			if (tutoenemy->childfire->getIsAlive()) {
+				tutoenemy->childfire->deathDecision();
+			}
 			break;
 		}
-		case BEATHEIHO: {
-			tutoenemy->deathDecision();
+		case BEATHEIHO: {//Titleクラス
+			if (tutoenemy->getIsAlive()) {
+				tutoenemy->deathDecision();
+			}
 			break;
 		}
-		case END: {//Titleクラスの中でtutorialがENDになる
+		case END: {//Titleクラス
 			willFinishMode = true;
 			break;
 		}
@@ -532,8 +538,8 @@ bool SinglePlayerGame::onUpdate() {
 		}
 		enemySubList.clear();
 		enemySubList.shrink_to_fit();
-
 		tutoplayer->update(key);
+
 		break;
 	}
 	case GAME: { // playing
