@@ -182,12 +182,16 @@ void BreakoutGame::updateGameState()
 	case Selecting:
 	{
 		static int initilized_cnt = 0;
-		if (initilized_cnt < 10) {
+		if (initilized_cnt < 10 && !m_is_mode_selected) {
 			initilized_cnt++;
 			return;
 		}
+		else {
+			m_is_mode_selected = true;
+			initilized_cnt = 0;
+		}
 
-		if (m_components->info->isTimeOver() || m_components->select->selected()) {
+		if (m_components->select->selected()) {
 			const auto game_mode = m_components->select->getMode();
 			switch (game_mode) {
 			case Breakout::Mode::Easy:
