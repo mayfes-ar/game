@@ -8,8 +8,8 @@ namespace Breakout {
 	bool Fireball::isCollided(const Shape::Rectangle& parent, const int inOrOut, const int parentVelocity) {
 
 		const auto vel = m_moving->getVelocity();
-		const float coe = 0.5;
-		const int arranged_parent_vel = (int)((float)parentVelocity * coe);
+		const float coe = 0.2;
+		const float arranged_parent_vel = ((float)parentVelocity * coe);
 
 		// 四角形の上側との衝突
 		const int dist_center_top = MathUtil::distPointToLine(m_realm.center, parent.getTopLine());
@@ -23,20 +23,29 @@ namespace Breakout {
 				if (dist_center_top < dist_center_left) {
 					auto pos = Eigen::Vector2i(inOrOut * -1 * m_realm.radius + parent.left(), m_realm.center[1]);
 					setPosition(pos);
-					m_moving->setVelocity(Eigen::Vector2f{ -vel.x() + arranged_parent_vel, vel.y() });
+					m_moving->setVelocity(Eigen::Vector2f{ -vel.x(), vel.y() });
 					return true;
 				}
 			} else if (m_realm.center.x() > parent.right()) {
 				if (dist_center_top < dist_center_right) {
 					auto pos = Eigen::Vector2i(inOrOut * m_realm.radius + parent.right(), m_realm.center[1]);
 					setPosition(pos);
-					m_moving->setVelocity(Eigen::Vector2f{ -vel.x() + arranged_parent_vel, vel.y()});
+					m_moving->setVelocity(Eigen::Vector2f{ -vel.x(), vel.y()});
 					return true;
 				}
 			}
 			auto pos = Eigen::Vector2i(m_realm.center[0], inOrOut * -1 * m_realm.radius + parent.top());
 			setPosition(pos);
-			m_moving->setVelocity(Eigen::Vector2f{ vel.x() + arranged_parent_vel, -vel.y()});
+			auto new_vel = Eigen::Vector2f{ vel.x() + arranged_parent_vel, -vel.y() };
+			auto degree = atan2f(-inOrOut * new_vel.y(), new_vel.x());
+			if (degree < M_PI/9.0) {
+				m_moving->setVelocity(Eigen::Vector2f(cos(M_PI / 9), -inOrOut * sin(M_PI / 9)) * vel.norm());
+				return true;
+			} else if(degree > M_PI * 8.0 / 9.0) {
+				m_moving->setVelocity(Eigen::Vector2f(cos(M_PI * 8 / 9), -inOrOut * sin(M_PI * 8 / 9)) * vel.norm());
+				return true;
+			}
+			m_moving->setVelocity(new_vel * vel.norm() / new_vel.norm());
 			return true;
 
 		}
@@ -45,7 +54,7 @@ namespace Breakout {
 			auto vel = m_moving->getVelocity();
 			if (m_realm.center.x() < parent.left()) {
 				if (dist_center_bottom < dist_center_left) {
-					m_moving->setVelocity(Eigen::Vector2f{ -vel.x() + arranged_parent_vel, vel.y() });
+					m_moving->setVelocity(Eigen::Vector2f{ -vel.x(), vel.y() });
 					auto pos = Eigen::Vector2i(inOrOut * -1 * m_realm.radius + parent.left(), m_realm.center[1]);
 					setPosition(pos);
 					return true;
@@ -53,21 +62,32 @@ namespace Breakout {
 			}
 			else if (m_realm.center.x() > parent.right()) {
 				if (dist_center_bottom < dist_center_right) {
-					m_moving->setVelocity(Eigen::Vector2f{ -vel.x() + arranged_parent_vel, vel.y()});
+					m_moving->setVelocity(Eigen::Vector2f{ -vel.x(), vel.y()});
 					auto pos = Eigen::Vector2i(inOrOut * m_realm.radius + parent.right(), m_realm.center[1]);
 					setPosition(pos);
 					return true;
 				}
 			}
-			m_moving->setVelocity(Eigen::Vector2f{ vel.x() + arranged_parent_vel, -vel.y()});
+			
 			auto pos = Eigen::Vector2i(m_realm.center[0], inOrOut * m_realm.radius + parent.bottom());
 			setPosition(pos);
+			auto new_vel = Eigen::Vector2f{ vel.x() + arranged_parent_vel, -vel.y() };
+			auto degree = atan2f(-inOrOut * new_vel.y(), new_vel.x());
+			if (degree > -M_PI / 9.0) {
+				m_moving->setVelocity(Eigen::Vector2f(cos(M_PI / 9), -inOrOut * sin(M_PI / 9)) * vel.norm());
+				return true;
+			}
+			else if (degree < -M_PI * 8.0 / 9.0) {
+				m_moving->setVelocity(Eigen::Vector2f(cos(-M_PI * 8.0 / 9.0), -inOrOut * sin(-M_PI*8.0 / 9.0)) * vel.norm());
+				return true;
+			}
+			m_moving->setVelocity(new_vel * vel.norm() / new_vel.norm());
 			return true;
 		}
 		// 四角形の左側との衝突
 		else if (CollisionDetection::isOnLine(m_realm, parent.getLeftLine())) {
 			auto vel = m_moving->getVelocity();
-			m_moving->setVelocity(Eigen::Vector2f{ -vel.x() + arranged_parent_vel, vel.y()});
+			m_moving->setVelocity(Eigen::Vector2f{ -vel.x(), vel.y()});
 			auto pos = Eigen::Vector2i(inOrOut * -1 * m_realm.radius + parent.left(), m_realm.center[1]);
 			setPosition(pos);
 			return true;
@@ -75,7 +95,7 @@ namespace Breakout {
 		// 四角形の右側との衝突
 		else if (CollisionDetection::isOnLine(m_realm, parent.getRightLine())) {
 			auto vel = m_moving->getVelocity();
-			m_moving->setVelocity(Eigen::Vector2f{ -vel.x() + arranged_parent_vel, vel.y()});
+			m_moving->setVelocity(Eigen::Vector2f{ -vel.x(), vel.y()});
 			auto pos = Eigen::Vector2i(inOrOut * m_realm.radius + parent.right(), m_realm.center[1]);
 			setPosition(pos);
 			return true;

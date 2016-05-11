@@ -33,4 +33,8 @@ public:
 		return m_life != 0;
 	}
 
+	float getRatio() {
+		return (float)m_life / (float)m_max_life;
+	}
+
 };
