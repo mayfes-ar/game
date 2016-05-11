@@ -1111,32 +1111,36 @@ class SinglePlayerGame : public Game {
 		}
 
 		bool draw() {
-			if (isToJump) {
-				DrawExtendGraph(left() - 50, top() - rect.height - 50, right() + 50, bottom() - rect.height, imgHandles["s_game_balloon"], true);
-				int commentX = left() - 10;
-				int commentY = top() - rect.height - 20;
+			if (isToJump && !isDrowned) {
 
 				if (frameCount <= FPS * 2) {
-					message = "I want to\njump!!";
-					commentY = top() - rect.height - 40;
+					DrawExtendGraph(left() - 100, top() - rect.height - 50, right(), bottom() - rect.height, imgHandles["s_game_fighting"], true);
 				}
 				else if (frameCount <= FPS * 2 + FPS) {
-					message = "3";
+					DrawExtendGraph(left() - 100, top() - rect.height - 50, right(), bottom() - rect.height, imgHandles["s_game_handsome"], true);
 				}
 				else if (frameCount <= FPS * 2 + FPS*2) {
-					message = "2";
+					DrawExtendGraph(left() - 50, top() - rect.height - 50, right() + 50, bottom() - rect.height, imgHandles["s_game_jump"], true);
 				}
 				else if (frameCount <= FPS * 2 + FPS*3) {
-					message = "1";
+					DrawExtendGraph(left() - 50, top() - rect.height - 50, right() + 50, bottom() - rect.height, imgHandles["s_game_3"], true);
+				}
+				else if (frameCount <= FPS * 2 + FPS*4) {
+					DrawExtendGraph(left() - 50, top() - rect.height - 50, right() + 50, bottom() - rect.height, imgHandles["s_game_2"], true);
+				}
+				else if (frameCount <= FPS * 2 + FPS*5) {
+					DrawExtendGraph(left() - 50, top() - rect.height - 50, right() + 50, bottom() - rect.height, imgHandles["s_game_1"], true);
 				}
 
-				DrawString(commentX, commentY, message.c_str(), GetColor(0, 0, 0));
+				
 			}
 			for (int heart = 0; heart <= (maxDamage - damage - 1); heart++) {
 				DrawExtendGraph(50 + 50 * heart, 50, 100 + 50 * heart, 100, imgHandles["s_game_heart"], true);
 			}
 
-			if (isDrowned) { imgHandle[DAMAGE] = imgHandles["s_game_player_drowned"]; }
+			if (isDrowned) { 
+				DrawExtendGraph(left() - 100, top() - rect.height - 50, right(), bottom() - rect.height, imgHandles["s_game_dangerous"], true);
+				imgHandle[DAMAGE] = imgHandles["s_game_player_drowned"]; }
 			else { imgHandle[DAMAGE] = imgHandles["s_game_player_damage"]; }
 
 			Character::draw();
@@ -1216,7 +1220,7 @@ class SinglePlayerGame : public Game {
 			}
 
 			if (isToJump) {
-				if (frameCount >= FPS*2 + FPS*3) {
+				if (frameCount >= FPS*2 + FPS*5) {
 					acY = -30;
 					PlaySoundMem(soundHandles["s_game_jump"], DX_PLAYTYPE_BACK, true);
 					isJumping = true;

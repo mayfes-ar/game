@@ -112,6 +112,14 @@ bool Object::load() {
 	isSuccess &= loadImage("s_game_fire_over", "s_game/fire2");
 
 	isSuccess &= loadImage("s_game_balloon", "s_game/balloon");
+	isSuccess &= loadImage("s_game_dangerous", "s_game/dangerous");
+	isSuccess &= loadImage("s_game_letsplay", "s_game/letsplay");
+	isSuccess &= loadImage("s_game_handsome", "s_game/handsome");
+	isSuccess &= loadImage("s_game_fighting", "s_game/fighting");
+	isSuccess &= loadImage("s_game_3", "s_game/three");
+	isSuccess &= loadImage("s_game_2", "s_game/two");
+	isSuccess &= loadImage("s_game_1", "s_game/one");
+	isSuccess &= loadImage("s_game_jump", "s_game/jump");
 
 	isSuccess &= loadImage("s_game_drop", "s_game/drop");
 	isSuccess &= loadImage("s_game_drop_damage", "s_game/drop");

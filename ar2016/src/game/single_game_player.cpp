@@ -315,26 +315,26 @@ bool SinglePlayerGame::onUpdate() {
 			switch (maxTime - timer) {
 			
 			case 100: {
-				makeRocketWanwan(-RocketWanwan::width/2, HEIGHT / 2 + 50);
-				break;
-			}
-			case 200: {
 				makeEagle(0, 0, 1);
 				break;
 			}
+			case 200: {
+				makeCloud(0, 50, 1);
+				break;
+			}
 			case 300: {
-				makeUfo(0, 50, 1);
+				//makeUfo(0, 50, 1);
 				break;
 			}
 			case 600: {
-				makeCloud(0, 50, 1);
+				makeRocketWanwan(-RocketWanwan::width / 2, HEIGHT / 2 + 50);
 				break;
 			}
 			case 900: {
 				makeInundation();
 			}
 			case 950: {
-				makeCloud(0, 50, 1);
+				//makeCloud(0, 50, 1);
 				break;
 			}
 			case 1100: {
@@ -346,7 +346,6 @@ bool SinglePlayerGame::onUpdate() {
 				break;
 			}
 			case 1400: {
-				makeInundation();
 			}
 			case 1600: {
 				makeHeiho(WIDTH, 300, 1);
