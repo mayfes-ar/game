@@ -234,15 +234,16 @@ bool SinglePlayerGame::onStart() {
 			const std::string clear2 = "彼女は守られていたことに気付きもしないまま。";
 			const std::string clear3 = "褒められはしない。言葉も交わせない。";
 			const std::string clear4 = "けれども、それでいいのです。";
-			const std::string clear5 = "名も無い騎士は、その先に本当の幸せを見つけました。";
-			const std::string clear6 = "あなたの美しい愛が、いつまでも正しくありますように。";
+			const std::string clear5 = "その先に本当の幸せがあるのかも知れません。";
+			const std::string clear6 = "あなたの美しい愛が、ずっと正しくありますように。";
 			const std::string clear7 = "遊んでくれてありがとうございました。";
+
 			//ゲームオーバーの文
 			const std::string dead1 = "あなたはお姫様を守ることができませんでした。";
 			const std::string dead2 = "どうか気づいてください。";
 			const std::string dead3 = "あなたが本当に守れなかったのは姫の命ではなく、";
 			const std::string dead4 = "「姫」という物語の命だということ。";
-			const std::string dead5 = "確かに彼女は、僕らと同じようには死なないかもしれない。";
+			const std::string dead5 = "彼女は、僕らと同じようには死なないかもしれない。";
 			const std::string dead6 = "しかし、失うものは何もないのでしょうか。";
 			const std::string dead7 = "聞こえますか。物語の儚い鼓動の音が。";
 
@@ -251,23 +252,24 @@ bool SinglePlayerGame::onStart() {
 				rect.y += 2;//文章スクロール用
 				
 				if (hasPlayerWon) {
+
 					//********勝利画面
-
 					//画像
-					
-					DrawExtendGraph(0, 0, WIDTH, HEIGHT, imgHandles["s_game_result_frame_star"], true);
-					DrawExtendGraph(150, 150, 900, 350, imgHandles["s_game_result_rainbow"], true);
-					DrawExtendGraph(621 / 3, 1046 / 3, 621 / 3 + 621 / 3, 1046 / 3 + 1046 / 3, imgHandles["s_game_player"], true);
-
+					DrawExtendGraph(0, 0, WIDTH, HEIGHT, imgHandles["s_game_result_background1"], true);
+					DrawExtendGraph(700, 450, 700 + 320, 450 + 311, imgHandles["s_game_result_castle"], true);
+					//DrawExtendGraph(30, 0, WIDTH-30, HEIGHT, imgHandles["s_game_result_frame_blackstar"], true);					
+					DrawExtendGraph(250, 150, 900, 350, imgHandles["s_game_result_rainbow"], true);
+					DrawExtendGraph(621 / 3, 1046 / 3, 621 / 3 + 621 / 4, 1046 / 3 + 1046 / 4, imgHandles["s_game_player"], true);
+					DrawExtendGraph(WIDTH / 2, 10, WIDTH-10, HEIGHT-10, imgHandles["s_game_result_background_gameover1"], true);
 					//スクロール文章
 					
-					DrawString(600, HEIGHT - rect.y, clear1.c_str(), GetColor(255, 255, 255));
-					DrawString(600, HEIGHT + 150 - rect.y, clear2.c_str(), GetColor(255, 255, 255));
-					DrawString(600, HEIGHT + 300 - rect.y, clear3.c_str(), GetColor(255, 255, 255));
-					DrawString(600, HEIGHT + 450 - rect.y, clear4.c_str(), GetColor(255, 255, 255));
-					DrawString(600, HEIGHT + 600 - rect.y, clear5.c_str(), GetColor(255, 255, 255));
-					DrawString(600, HEIGHT + 750 - rect.y, clear6.c_str(), GetColor(255, 255, 255));
-					DrawString(600, HEIGHT + 900 - rect.y, clear7.c_str(), GetColor(255, 255, 255));
+					DrawString(700, HEIGHT - rect.y, clear1.c_str(), GetColor(25, 25, 25));
+					DrawString(700, HEIGHT + 150 - rect.y, clear2.c_str(), GetColor(25, 25, 25));
+					DrawString(700, HEIGHT + 300 - rect.y, clear3.c_str(), GetColor(25, 25, 25));
+					DrawString(700, HEIGHT + 450 - rect.y, clear4.c_str(), GetColor(25, 25, 25));
+					DrawString(700, HEIGHT + 600 - rect.y, clear5.c_str(), GetColor(25, 25, 25));
+					DrawString(700, HEIGHT + 750 - rect.y, clear6.c_str(), GetColor(25, 25, 25));
+					DrawString(700, HEIGHT + 900 - rect.y, clear7.c_str(), GetColor(25, 25, 25));
 
 					//スコア
 					std::string clearScore = "得点 : " + std::to_string(maxTime + (player->getMaxDamage() - player->getPlayerDamage()) * 50);
@@ -278,21 +280,22 @@ bool SinglePlayerGame::onStart() {
 				}
 
 				else {
+
 					//******ゲームオーバー画面
 
 					//画像・ゲームオーバー
 					DrawExtendGraph(0, 0, WIDTH, HEIGHT, imgHandles["s_game_result_stage1"], true);
-					DrawExtendGraph(100, 300,100 +1600/5 , 300+ 1555/5, imgHandles["s_game_result_sketch"], true);
-					DrawExtendGraph(621 / 3, 1046 / 3, 621 / 3 + 621 / 3, 1046 / 3 + 1046 / 3, imgHandles["s_game_player_drowned"], true);
+					DrawExtendGraph(600, 500,600 +1600/5 , 500+ 1555/5, imgHandles["s_game_result_sketch"], true);
+					DrawExtendGraph(621 / 3, 450, 621 / 3 + 621 / 4, 450 + 1046 / 4, imgHandles["s_game_player_drowned"], true);
 
 					//スクロール文章・ゲームオーバー
-					DrawString(600, HEIGHT - rect.y, dead1.c_str(), GetColor(255, 255, 255));
-					DrawString(600, HEIGHT+150 - rect.y, dead2.c_str(), GetColor(255, 255, 255));
-					DrawString(600, HEIGHT+300 - rect.y, dead3.c_str(), GetColor(255, 255, 255));
-					DrawString(600, HEIGHT+450 - rect.y, dead4.c_str(), GetColor(255, 255, 255));
-					DrawString(600, HEIGHT+600 - rect.y, dead5.c_str(), GetColor(255, 255, 255));
-					DrawString(600, HEIGHT + 750 - rect.y, dead6.c_str(), GetColor(255, 255, 255));
-					DrawString(600, HEIGHT + 900 - rect.y, dead7.c_str(), GetColor(255, 255, 255));
+					DrawString(700, HEIGHT - rect.y, dead1.c_str(), GetColor(25, 25, 25));
+					DrawString(700, HEIGHT+150 - rect.y, dead2.c_str(), GetColor(25, 25, 25));
+					DrawString(700, HEIGHT+300 - rect.y, dead3.c_str(), GetColor(25, 25, 25));
+					DrawString(700, HEIGHT+450 - rect.y, dead4.c_str(), GetColor(25, 25, 25));
+					DrawString(700, HEIGHT+600 - rect.y, dead5.c_str(), GetColor(25, 25, 25));
+					DrawString(700, HEIGHT + 750 - rect.y, dead6.c_str(), GetColor(25, 25, 25));
+					DrawString(700, HEIGHT + 900 - rect.y, dead7.c_str(), GetColor(25, 25, 25));
 
 					//スコア
 					std::string deadScore = "得点 : " + std::to_string(maxTime - timer);

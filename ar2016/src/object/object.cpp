@@ -179,6 +179,9 @@ bool Object::load() {
 	isSuccess &= loadImage("s_game_result_stage1", "s_game/result_stage1");
 	isSuccess &= loadImage("s_game_result_stage2", "s_game/result_stage2");
 	isSuccess &= loadImage("s_game_result_sketch", "s_game/result_sketch");
+	isSuccess &= loadImage("s_game_result_background_gameover1", "s_game/result_background_gameover1");
+	isSuccess &= loadImage("s_game_result_background1", "s_game/result_background1");
+	isSuccess &= loadImage("s_game_result_background_gameover2", "s_game/result_background_gameover2");
 
 	isSuccess &= loadSound("s_game_over", "s_game/game_over.wav");
 	
