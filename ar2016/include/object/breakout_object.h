@@ -77,6 +77,10 @@ namespace Breakout {
 			return m_counter;
 		}
 
+		int getCountMax() {
+			return m_count_max;
+		}
+
 		void setCounter(int counter) {
 			m_counter = counter;
 		}
@@ -1458,9 +1462,10 @@ public:
 		return m_dead_count >= 0;
 	}
 
-	void setDeadEffect(std::string effect_name, int frames_per_scene, int dead_effect = 0) {
+	void setDeadEffect(std::string effect_name, int frames_per_scene, int dead_count = 0) {
 		m_dead_effect = Effect(effectHandles[effect_name], frames_per_scene, PRIORITY_DYNAMIC_OBJECT);
-		if (dead_effect == 0) dead_effect = m_dead_effect.getCounter() * m_dead_effect.getFramesPerScene();
+		if (dead_count == 0) dead_count = m_dead_effect.getCountMax() * m_dead_effect.getFramesPerScene();
+		m_dead_count = dead_count;
 	}
 	
 protected:

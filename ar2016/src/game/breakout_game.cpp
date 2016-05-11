@@ -379,15 +379,21 @@ void BreakoutGame::updateTown() {
 
 void BreakoutGame::shipVSEnemy() {
 	for (auto& enemy : m_components->enemy_manager->getEnemyList()) {
-		//右で衝突されたら
 		if (!enemy->isAlive()) continue;
 		auto ship_realm = m_components->ship->getRealm();
 		auto enemy_realm = enemy->getRealm();
 		if (enemy_realm.isContacted(ship_realm)) {
-			enemy->damageEnemy(2);
-			//このダメージで死んだら
-			if (!enemy->isAlive()) {
-				enemy->setDeadEffect("b_crawl", 5);
+			// もしエネミーの下がshipの上から1/3よりも上にあったら
+			if (enemy_realm.bottom() < ship_realm.top() + ship_realm.height / 3) {
+				//shipの上に乗っていると判断
+				enemy->setIsOnShip(m_components->ship, true);
+			}
+			else {
+				enemy->damageEnemy(2);
+				//このダメージで死んだら
+				if (!enemy->isAlive()) {
+					enemy->setDeadEffect("b_enemy_vanish", 5);
+				}
 			}
 		}
 	}

@@ -25,9 +25,8 @@ namespace Breakout
 				town->damageTown(giveDamage());
 				damageEnemy(town->giveDamage());
 				if (!town->isAlive()) town->setDeadEffect("b_crawl", 5);
+				m_is_damaged = 30;
 			}
-			
-			//if (!isAlive()) setDeadEffect("m_crawl", 5);
 		}
 
 		virtual void attackOnTown(std::shared_ptr<Resident>& town) {
@@ -38,8 +37,8 @@ namespace Breakout
 				town->damageTown(giveDamage());
 				damageEnemy(town->giveDamage());
 				if (!town->isAlive()) town->setDeadEffect("b_crawl", 5);
+				m_is_damaged = 30;
 			}
-			//if (!isAlive()) setDeadEffect("m_crawl", 5);
 		}
 
 		virtual void updatePosition() {
@@ -62,6 +61,7 @@ namespace Breakout
 
 		// mode が enemy じゃない fireball にあたったらLifeを減らすようなメソッド
 		virtual bool damageEnemy(int amount) {
+			m_is_damaged = 30;
 			return m_life.damage(amount);
 		}
 
@@ -70,6 +70,7 @@ namespace Breakout
 			m_life.damage(fireball->giveDamage());
 			//触れたら消える
 			manager->destroy(fireball);
+			m_is_damaged = 30;
 		}
 
 		bool isAlive() {
@@ -83,12 +84,30 @@ namespace Breakout
 		// 子クラスで呼んでもらう
 		virtual bool draw() override {
 			//死んでいて
+			
 			if (!isAlive()) {
 				//燃える処理が終わってないなら
+				if (isDamagedEffectContinuing()) {
+					int monotonedHandle, width, height;
+					GetGraphSize(imgHandles[m_enemy_img_name], &width, &height);
+					monotonedHandle = MakeScreen(width, height, TRUE);
+					GraphFilterBlt(imgHandles[m_enemy_img_name], monotonedHandle, DX_GRAPH_FILTER_MONO, -60, 7);
+					DrawExtendGraph(m_realm.left(), m_realm.top(), m_realm.right(), m_realm.bottom(), monotonedHandle, TRUE);
+				}
 				if (m_dead_count >= 0) {
 					m_dead_effect.incrementCounterWhenDrawWithRealm(m_realm);
 					m_dead_count--;
 				}
+			} else {
+				if (isDamagedEffectContinuing()) {
+					int monotonedHandle, width, height;
+					GetGraphSize(imgHandles[m_enemy_img_name], &width, &height);
+					monotonedHandle = MakeScreen(width, height, TRUE);
+					GraphFilterBlt(imgHandles[m_enemy_img_name], monotonedHandle, DX_GRAPH_FILTER_MONO, -60, 7);
+					DrawExtendGraph(m_realm.left(), m_realm.top(), m_realm.right(), m_realm.bottom(), monotonedHandle, TRUE);
+					return true;
+				}
+				DrawExtendGraph(m_realm.left(), m_realm.top(), m_realm.right(), m_realm.bottom(), imgHandles[m_enemy_img_name], TRUE);
 			}
 			return true;
 		}
@@ -97,9 +116,22 @@ namespace Breakout
 			return m_dead_count >= 0;
 		}
 
-		void setDeadEffect(std::string effect_name, int frames_per_scene, int dead_effect = 0) {
+		void setDeadEffect(std::string effect_name, int frames_per_scene, int dead_count = 0) {
 			m_dead_effect = Effect(effectHandles[effect_name], frames_per_scene, PRIORITY_DYNAMIC_OBJECT);
-			if (dead_effect == 0) dead_effect = m_dead_effect.getCounter() * m_dead_effect.getFramesPerScene();
+			if (dead_count == 0) dead_count = m_dead_effect.getCountMax() * m_dead_effect.getFramesPerScene();
+			m_dead_count = dead_count;
+		}
+
+		//ダメージを受けたframeに判断する
+		bool isDamaged() {
+			return m_is_damaged == 30;
+		}
+
+		bool getIsOnShip() { return m_is_on_ship; }
+
+		void setIsOnShip(std::shared_ptr<Ship>& ship, bool isOrNot) { 
+			m_is_on_ship = isOrNot;
+			m_ship = ship;
 		}
 
 	protected:
@@ -112,6 +144,18 @@ namespace Breakout
 		std::uniform_real_distribution<double> velocity_generator = std::uniform_real_distribution<double>(FIREBALL_STARTVEL.x(), FIREBALL_STARTVEL.y());
 		std::uniform_real_distribution<double> fireball_mode_generator = std::uniform_real_distribution<double>(0.0, 1.0);
 		std::uniform_real_distribution<double> enemy_kind_generator = std::uniform_real_distribution<double>(0.0, 1.0);
+		// ダメージを受けたら30になって、毎フレーム減っていく。draw()に影響を与える
+		int m_is_damaged = 0;
+		bool m_is_on_ship = false;
+		std::shared_ptr<Breakout::Ship> m_ship = nullptr;
+
+		//ダメージを受けた後の効果が継続しているかどうか
+		bool isDamagedEffectContinuing() {
+			m_is_damaged--;
+			return m_is_damaged > 0;
+		}
+
+		std::string m_enemy_img_name;
 
 	private:
 		Effect m_dead_effect = Effect(effectHandles["b_explosion"], 5, PRIORITY_DYNAMIC_OBJECT);
@@ -125,6 +169,7 @@ namespace Breakout
 			m_life = life;
 			m_realm = realm;
 			m_moving->setBehavior(behavior);
+			m_enemy_img_name = "b_snake_weak";
 			Object::layer = PRIORITY_DYNAMIC_OBJECT;
 		}
 		SnakeEnemy(Shape::Rectangle realm, std::shared_ptr<MovingBehavior> behavior, Eigen::Vector2f& velocity , Life life) {
@@ -132,6 +177,7 @@ namespace Breakout
 			m_realm = realm;
 			m_moving->setBehavior(behavior);
 			m_moving->setVelocity(velocity);
+			m_enemy_img_name = "b_snake_weak";
 			Object::layer = PRIORITY_DYNAMIC_OBJECT;
 		}
 
@@ -147,7 +193,33 @@ namespace Breakout
 
 		// 壁に沿って降りてから横にランダムに移動する。
 		void updatePosition() override {
-			if (m_realm.bottom() >= FIELD_START_POS.y() + FIELD_HEIGHT) {
+			//もし死んでいたら動かないようにする。
+			if (!isAlive()) return;
+
+			if (getIsOnShip()) {
+				std::shared_ptr<MovingBehavior> rnd_behavior = std::make_shared<RandomBehavior>(
+					m_ship->getRealm().left(),
+					m_ship->getRealm().right() - SNAKE_WIDTH,
+					m_ship->getRealm().top() - SNAKE_HEIGHT + 2,
+					m_ship->getRealm().top() - SNAKE_HEIGHT + 2);
+				m_moving->setBehavior(rnd_behavior);
+				if (m_realm.left() > m_ship->getRealm().right()) {
+					std::shared_ptr<MovingBehavior> newton = std::make_shared<NewtonBehavior>();
+					m_moving->setBehavior(newton);
+					m_moving->setVelocity(Eigen::Vector2f(30.0f, -20.0f));
+					m_moving->setAccel(Eigen::Vector2f(0, 50.0f));
+					std::shared_ptr<Ship> null_ship = nullptr;
+					setIsOnShip(null_ship, false);
+				} else if(m_realm.right() < m_ship->getRealm().left()) {
+					std::shared_ptr<MovingBehavior> newton = std::make_shared<NewtonBehavior>();
+					m_moving->setBehavior(newton);
+					m_moving->setVelocity(Eigen::Vector2f(-30.0f, -20.0f));
+					m_moving->setAccel(Eigen::Vector2f(0, 100.0f));
+					std::shared_ptr<Ship> null_ship = nullptr;
+					setIsOnShip(null_ship, false);
+				}
+			}
+			else if (m_realm.bottom() >= FIELD_START_POS.y() + FIELD_HEIGHT) {
 				std::shared_ptr<MovingBehavior> rnd_behavior = std::make_shared<RandomBehavior>(FIELD_START_POS.x(),
 					FIELD_START_POS.x() + FIELD_WIDTH - SNAKE_WIDTH,
 					// ここで-2することでもう一度randomがセットされるのを防いでいる
@@ -156,22 +228,13 @@ namespace Breakout
 				m_moving->setBehavior(rnd_behavior);
 			}
 			else if (m_realm.left() <= FIELD_START_POS.x() || m_realm.right() >= FIELD_START_POS.x() + FIELD_WIDTH) {
-				m_moving->setVelocity(Eigen::Vector2f(0.0f, 60.0f));
+				if(m_moving->getAccel().y() == 0)
+					m_moving->setVelocity(Eigen::Vector2f(0.0f, 30.0f));
+				m_moving->setVelocity(Eigen::Vector2f(0.0f, m_moving->getVelocity().y()));
+				m_moving->setAccel(Eigen::Vector2f(0.0f, 50.0f));
 			}
 			
 			m_moving->updatePoistion(m_realm.start_point);
-		}
-
-		bool draw() override {
-			if (!isAlive()) {
-				if (isEffectContinuing()) {
-					DrawExtendGraph(m_realm.left(), m_realm.top(), m_realm.right(), m_realm.bottom(), imgHandles["b_snake_weak"], TRUE);
-					EnemyBase::draw();
-				}
-				return true;
-			}
-			DrawExtendGraph(m_realm.left(), m_realm.top(), m_realm.right(), m_realm.bottom(), imgHandles["b_snake_weak"], TRUE);
-			return true;
 		}
 	};
 
@@ -183,6 +246,7 @@ namespace Breakout
 			m_life = life;
 			m_realm = realm;
 			m_moving->setBehavior(behavior);
+			m_enemy_img_name = "b_left_hand";
 			Object::layer = PRIORITY_DYNAMIC_OBJECT;
 		}
 		std::shared_ptr<Fireball> makeFireball() override {
@@ -216,17 +280,6 @@ namespace Breakout
 			m_life.resetLife();
 		}
 
-		bool draw() override {
-			if (!isAlive()) {
-				if (isEffectContinuing()) {
-					DrawExtendGraph(m_realm.left(), m_realm.top(), m_realm.right(), m_realm.bottom(), imgHandles["b_left_hand"], TRUE);
-					EnemyBase::draw();
-				}
-				return true;
-			}
-			DrawExtendGraph(m_realm.left(), m_realm.top(), m_realm.right(), m_realm.bottom(), imgHandles["b_left_hand"], TRUE);
-			return true;
-		}
 	private:
 
 	};
@@ -237,6 +290,7 @@ namespace Breakout
 			m_life = life;
 			m_realm = realm;
 			m_moving->setBehavior(behavior);
+			m_enemy_img_name = "b_right_hand";
 			Object::layer = PRIORITY_DYNAMIC_OBJECT;
 		}
 		std::shared_ptr<Fireball> makeFireball() override {
@@ -278,17 +332,6 @@ namespace Breakout
 			m_life.resetLife();
 		}
 
-		bool draw() override {
-			if (!isAlive()) {
-				if (isEffectContinuing()) {
-					DrawExtendGraph(m_realm.left(), m_realm.top(), m_realm.right(), m_realm.bottom(), imgHandles["b_right_hand"], TRUE);
-					EnemyBase::draw();
-				}
-				return true;
-			}
-			DrawExtendGraph(m_realm.left(), m_realm.top(), m_realm.right(), m_realm.bottom(), imgHandles["b_right_hand"], TRUE);
-			return true;
-		}
 	private:
 
 	};
@@ -302,6 +345,7 @@ namespace Breakout
 			m_life = life;
 			m_realm = realm;
 			m_moving->setBehavior(behavior);
+			m_enemy_img_name = "b_donald";
 			Object::layer = PRIORITY_DYNAMIC_OBJECT;
 		}
 
@@ -310,6 +354,7 @@ namespace Breakout
 			m_life = life;
 			m_realm = realm;
 			m_moving->setBehavior(behavior);
+			m_enemy_img_name = "b_donald";
 			Object::layer = PRIORITY_DYNAMIC_OBJECT;
 		}
 
@@ -364,16 +409,11 @@ namespace Breakout
 
 		bool draw() override {
 			if (!isAlive()) {
-				if (isEffectContinuing()) {
-					DrawExtendGraph(m_realm.left(), m_realm.top(), m_realm.right(), m_realm.bottom(), imgHandles["b_donald"], TRUE);
-					EnemyBase::draw();
-				}
-				return true;
+				EnemyBase::draw();
 			}
-			DrawExtendGraph(m_realm.left(), m_realm.top(), m_realm.right(), m_realm.bottom(), imgHandles["b_donald"], TRUE);
-
 			if (hasLeft()) m_left_hand->draw();
 			if (hasRight()) m_right_hand->draw();
+			EnemyBase::draw();
 			return true;
 		}
 
