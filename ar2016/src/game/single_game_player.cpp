@@ -277,7 +277,7 @@ bool SinglePlayerGame::onStart() {
 	
 	// GAME
 	mode.setMode([this]() {
-		maxPlayerDamage = difficulty == EASY ? 1 : difficulty == HARD ? 10 : 20;
+		maxPlayerDamage = difficulty == EASY ? 5 : difficulty == HARD ? 10 : 20;
 		player = std::make_shared<Player>(WIDTH / 2 - 100 / 2, HEIGHT / 2 - 150 / 2, Player::width, Player::height, "s_game_player", maxPlayerDamage, *this);
 
 		drawList.clear();
