@@ -104,14 +104,14 @@ std::shared_ptr<SinglePlayerGame::Fire> SinglePlayerGame::makeFire(int x, int y,
 
 std::shared_ptr<SinglePlayerGame::tutoHeiho> SinglePlayerGame::maketutoHeiho(int x, int y, double size = 1.0) {
 	auto enemy = std::make_shared<tutoHeiho>(x, y, *this, size);
-	if (player->isContacted(enemy)) {
+	if (tutoplayer->isContacted(enemy)) {
 		enemy = std::make_shared<tutoHeiho>(x, y - 200, *this, size);
 	}
 	enemySubList.push_back(enemy);
 	drawList.push_back(enemy);
 	return enemy;
 }
-
+	
 std::shared_ptr<SinglePlayerGame::tutoFire> SinglePlayerGame::maketutoFire(int x, int y, double size = 1.0) {
 	auto enemy = std::make_shared<tutoFire>(x, y, *this, size);
 
@@ -129,7 +129,7 @@ bool SinglePlayerGame::onStart() {
 	
 	srand((unsigned int)time(NULL));
 
-	// mode 0
+	// INTRO
 	mode.setMode([this]() {
 		class Title : public Object {
 			Difficulty& difficulty;
@@ -156,7 +156,120 @@ bool SinglePlayerGame::onStart() {
 		bgm->start();
 	}, -1);
 
-	// mode 1
+	// TUTORIAL
+	mode.setMode([this]() {
+		maxPlayerDamage = difficulty == EASY ? 5 : difficulty == HARD ? 10 : 20;
+		tutoplayer = std::make_shared<tutoPlayer>(WIDTH / 2 - 100 / 2, HEIGHT / 2 - 150 / 2, tutoPlayer::width, tutoPlayer::height, "s_game_player", maxPlayerDamage, *this);
+
+		drawList.clear();
+
+		auto makeBlock = [this](int x, int y, int width, int height) {
+			auto block = make_shared<SingleGameBlockObject>(x, y, width, height, true);
+			blockList.push_back(block);
+			drawList.push_back(block);
+		};
+		makeBlock(0 - 200, 650, 200, 200);
+		makeBlock(0, 650, 200, 200);
+		makeBlock(0 + 200, 650, 200, 200);
+		makeBlock(0 + 400, 650, 200, 200);
+		makeBlock(0 + 600, 650, 200, 200);
+		makeBlock(0 + 800, 650, 200, 200);
+		makeBlock(0 + 1000, 650, 200, 200);
+		makeBlock(0 + 1200, 650, 200, 200);
+		makeBlock(0 + 1400, 650, 200, 200);
+		makeBlock(0 - 400, 0, 250, HEIGHT);
+		makeBlock(WIDTH + 150, 0, 250, HEIGHT);
+
+
+		drawList.push_back(tutoplayer);
+		drawList.push_back(make_shared<Background>(share.handle));
+
+
+		share.rectMutex.lock();
+		markerList.clear();
+		markerList.shrink_to_fit();
+		for (int i = 0; i < share.rects.size(); i++) {
+			auto marker = std::make_shared<Marker>(share.rects[i], false, i, *this);
+			markerList.push_back(marker);
+			drawList.push_back(marker);
+		}
+		share.rectMutex.unlock();
+
+		class Title : public Object {
+			bool start = false;
+			int timer = 0;
+			std::shared_ptr<SinglePlayerGame::tutoHeiho> tutoenemy;
+			int *tutorial;
+			std::string tutosen1= "あ、危ない！！";
+			std::string tutosen2 = "お姫様に火の玉が当たりそうです！！";
+			std::string tutosen3 = "お姫様を守るために盾を使ってみましょう";
+			std::string tutosen4 = "マーカーを火の玉に当ててみてください";
+			std::string tutosen5 = "剣を使えば敵を倒すこともできます";
+			std::string tutosen6 = "これでチュートリアルを終了します";
+
+		
+		public:
+			Title(std::shared_ptr<SinglePlayerGame::tutoHeiho> &tutoenemy_,SinglePlayerGame& game_ ) {
+				layer = 50;
+				tutoenemy = tutoenemy_;
+				tutorial = &game_.tutorial;
+			}
+
+			void update() {
+				if (tutoenemy->childfire != NULL) {
+					if (tutoenemy->childfire->getIsFreezed() && start == false) {
+					start = true;
+					}
+					if (start == true) {
+						timer++;
+					}
+				}
+			}
+
+			bool draw() {
+				update();
+				if (timer <= FPS * 2/3) {
+
+				}
+				else if (timer <= FPS * 2) {
+					DrawString(550, 350, tutosen1.c_str(), GetColor(0, 0, 0));
+				}
+				else if (timer <= FPS * 4) {
+					DrawString(550, 350, tutosen2.c_str(), GetColor(0, 0, 0));
+				}
+				else if (timer <= FPS * 6) {
+					DrawString(550, 350, tutosen3.c_str(), GetColor(0, 0, 0));
+				}
+				else if (timer <= FPS * 8) {
+					DrawString(550, 350, tutosen4.c_str(), GetColor(0, 0, 0));
+					if (timer == FPS * 8 && tutoenemy->childfire->getIsAlive()) {
+						timer--;
+					}
+				}
+				else if (timer <= FPS * 10) {
+					DrawString(550, 350, tutosen5.c_str(), GetColor(0, 0, 0));
+					if (timer == FPS * 10 && tutoenemy->getIsAlive()) {
+						timer--;
+					}
+				}
+				else if (timer <= FPS * 12) {
+					DrawString(550, 350, tutosen6.c_str(), GetColor(0, 0, 0));
+				}
+				else {
+					*tutorial = 3;
+				}
+				return true;
+			}
+		};
+
+		tutoenemy = maketutoHeiho(WIDTH, 300, 1);
+		shared_ptr<Title> tutorial = make_shared<Title>(tutoenemy,*this);
+		drawList.push_back(tutorial);
+
+
+	}, -1);
+	
+	// GAME
 	mode.setMode([this]() {
 		maxPlayerDamage = difficulty == EASY ? 5 : difficulty == HARD ? 10 : 20;
 		player = std::make_shared<Player>(WIDTH / 2 - 100 / 2, HEIGHT / 2 - 150 / 2, Player::width, Player::height, "s_game_player", maxPlayerDamage, *this);
@@ -205,12 +318,13 @@ bool SinglePlayerGame::onStart() {
 		}
 		share.rectMutex.unlock();
 
+
 		bgm = make_shared<BGM>(1);
 		bgm->start();
 
 	}, maxTime);
 
-	// mode 2
+	// RESULT
 	mode.setMode([this]() {
 		
 	
@@ -332,7 +446,7 @@ bool SinglePlayerGame::onUpdate() {
 	funcTimer.update();
 
 	switch (mode.getMode()) {
-	case 0: { // イントロダクション
+	case INTRO: { // イントロダクション
 		static int counterForWait = 5;
 		if (counterForWait == 0) {
 			counterForWait = 5;
@@ -364,39 +478,64 @@ bool SinglePlayerGame::onUpdate() {
 
 		break;
 	}
-	case 1: { // playing
-		if (tutorial == 0) {
-			timer -= 1;
-		}
-		else{
-			switch (tutorial) {
-			case 1: {
-				tutoenemy = maketutoHeiho(WIDTH,300,1);
-				//tutoenemy = makeTeresa(WIDTH-200,HEIGHT-300,2);
-				tutorial = 2;
-			}
-			case 2: {
-				if (heihoFreezeTimeRemain >= 0) {
-					heihoFreezeTimeRemain--;
-				}
-				else {
-					if (tutoenemy->childfire->getIsAlive()) {
-						tutoenemy->setIsAlive();
-					}
+	case TUTORIAL: {
 
-					if (!tutoenemy->childfire->getIsAlive() && !tutoenemy->getIsAlive()) {
-						tutorial = 0;
-					}
-				}
-				if (heihoFreezeTimeRemain == 0) {
-					tutoenemy->freeze();
-					tutoenemy->childfire->freeze();
-				}
-				
-			}
-			}
+		// 認識したマーカーを描画
+		share.rectMutex.lock();
+		for (auto marker : markerList) {
+			marker->setRect(share.rects[marker->getIndex()]);
 		}
+		share.rectMutex.unlock();
+
+
+		switch (tutorial) {
+		case 1: {
+			//tutoenemy = makeTeresa(WIDTH-200,HEIGHT-300,2);
+			tutorial = 2;
+			break;
+		}
+		case 2: {
+		if (heihoFreezeTimeRemain >= 0) {
+				heihoFreezeTimeRemain--;
+			}
+			else {
+				if (tutoenemy->childfire->getIsAlive()) {
+					tutoenemy->setIsAlive();
+				}
+
+				if (!tutoenemy->childfire->getIsAlive() && !tutoenemy->getIsAlive()) {
+					tutorial = 0;
+				}
+			}
+			if (heihoFreezeTimeRemain == 0) {
+				tutoenemy->freeze();
+				tutoenemy->childfire->freeze();
+			}
 		
+			break;
+		}
+		}
+
+
+		for (auto enemy : enemyList) {
+			enemy->deathDecision();
+			enemy->update();
+		}
+		for (auto enemy : enemySubList) {
+			enemyList.push_back(enemy);
+		}
+		enemySubList.clear();
+		enemySubList.shrink_to_fit();
+
+		tutoplayer->update(key);
+		if (tutorial == 3) {
+			willFinishMode = true;
+		}
+		break;
+	}
+	case GAME: { // playing
+
+		timer -= 1;
 		if (timer <= 0) {
 			willFinishMode = true;
 		}
@@ -600,7 +739,7 @@ bool SinglePlayerGame::onUpdate() {
 		
 		break;
 	}
-	case 2: { // リザルト画面
+	case RESULT: { // リザルト画面
 
 		result_timer -= 1;
 
@@ -620,10 +759,7 @@ bool SinglePlayerGame::onUpdate() {
 		break;
 	}
 
-
-
 	default:
-
 		break;
 	}
 
@@ -631,9 +767,12 @@ bool SinglePlayerGame::onUpdate() {
 	if (key[KEY_INPUT_ESCAPE]) {
 		share.willFinish = true;
 	}
-	if (key[KEY_INPUT_N]) {
+	static int waitNCounter = FPS / 3;
+	if (key[KEY_INPUT_N] && waitNCounter == 0) {
 		willFinishMode = true;
+		waitNCounter = FPS / 3;
 	}
+	if (waitNCounter > 0) { waitNCounter--; }
 
 
 	for (auto& itr = enemyList.begin(); itr != enemyList.end();) {
