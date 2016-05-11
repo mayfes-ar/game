@@ -14,9 +14,9 @@ class SinglePlayerGame : public Game {
 			Cloud : 140
 			Drop : 139
 			Ufo :  150
-			Ray :  180 TODO: 半透明
+			Ray :  149
 			Heiho :	152
-			Fire : 151
+			Fire : 153
 		Effect : 周りの描画に影響しそうな大きなエフェクト
 			??? :
 		Block : 50
@@ -217,6 +217,7 @@ class SinglePlayerGame : public Game {
 		const int maxCount;
 		const int framePerCount;
 		int counter;
+		bool isRunning;
 
 	public :
 		Effect(std::string effectHandleKey_, int x_ = 0, int y_ = 0, int width_ = WIDTH, int height_ = HEIGHT, bool willStay_ = false, int layer_ = 150, int framePerCount_ = 1, int counter_ = 0) : effectHandle(effectHandles[effectHandleKey_]), willStay(willStay_), maxCount(effectHandles[effectHandleKey_].size()*(framePerCount_ > 0 ? framePerCount_ : 1)), framePerCount((framePerCount_ > 0 ? framePerCount_ : 1)) {
@@ -226,6 +227,11 @@ class SinglePlayerGame : public Game {
 			rect.height = height_;
 			counter = counter_*(framePerCount_ > 0 ? framePerCount_ : 1);
 			layer = layer_;
+			isRunning = true;
+		}
+
+		void changeIsRunning() {
+			isRunning = false;
 		}
 	
 		bool draw() {
@@ -235,10 +241,15 @@ class SinglePlayerGame : public Game {
 				}
 			}
 
+	
+			//if (!Inundation::getIsAlive()) {
+				//isEnable = false;
+			//}
+
 			drawWithRect(effectHandle[counter/framePerCount]);
 			counter++;
 
-			return willStay || counter != maxCount;
+			return (willStay || counter != maxCount) && isRunning;
 		}
 	};
 
@@ -295,10 +306,12 @@ class SinglePlayerGame : public Game {
 		bool canGuard;
 		bool canAttack;
 
+		double imageSize = 1.2;
+
 		void modifyRect() {
 			if (rect.width > 0 || rect.height > 0) {
-				rect.width = markerType == PIYO ? 1920/14 : markerType == SWORD ? 765/3 : 256;
-				rect.height = markerType == PIYO ? 1409/14 : markerType == SWORD ? 765/3 : 256;
+				rect.width = markerType == PIYO ? 1920/14 : markerType == SWORD ? 765/4 : 256*0.8;
+				rect.height = markerType == PIYO ? 1409/14 : markerType == SWORD ? 765/4 : 256*0.8;
 			}
 			else {
 				rect.x = rect.y = -300;
@@ -317,25 +330,29 @@ class SinglePlayerGame : public Game {
 		}
 
 		bool draw() {
-			if (isEnable) {
-				switch (moveDirection)
-				{
-				case RIGHT: {
-					drawImage(imgHandle, rect.width, rect.height, 0, 0, true);
-					break;
-				}
+			switch (moveDirection)
+			{
+			case RIGHT: {
+				drawWithRotation(imgHandle, 0, true, imageSize);
+				break;
+			}
 
-				case LEFT: {
-					drawImage(imgHandle, rect.width, rect.height);
-					break;
-				}
-				default:
-					break;
-				}
+			case LEFT: {
+				drawWithRotation(imgHandle, 0, false, imageSize);
+				break;
 			}
-			else {
-				drawDark([this]() {drawImage(imgHandles["s_game_invalid"], rect.width, rect.height); });
+			default:
+				break;
 			}
+
+			if (!isEnable) {
+				drawDark([this]() {
+					SetDrawBlendMode(DX_BLENDMODE_ALPHA, 150);
+					drawImage(imgHandles["s_game_invalid"], rect.width, rect.height);
+					SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 100);
+				});
+			}
+
 			return true;
 		}
 
@@ -378,32 +395,6 @@ class SinglePlayerGame : public Game {
 			return canGuard;
 		}
 	};
-
-	//シーンチェンジのカーテン
-	class CurtainObject : public Object {
-		const bool isOpen;
-		int counter = 0;
-		const int openCountMax = effectHandles["p_curtain_open"].size();
-		const int closeCountMax = effectHandles["p_curtain_close"].size();
-	public:
-		CurtainObject(bool isOpen_) : isOpen(isOpen_) {
-			layer = 300;
-		}
-		bool draw() {
-			const int handle = isOpen ? effectHandles["p_curtain_open"][counter] : effectHandles["p_curtain_close"][counter];
-			DrawExtendGraph(0, 0, 1280, 720, handle, true);
-
-			if (isOpen) {
-				counter++;
-				return !(counter == openCountMax);
-			}
-			else {
-				if (counter < closeCountMax - 1) { counter++; }
-				return true;
-			}
-		}
-	};
-
 
 	//キャラクター一般
 	class Character : public SingleGameObject {
@@ -525,7 +516,6 @@ class SinglePlayerGame : public Game {
 							x = block->left() - width;
 						}
 						else {
-							// TODO
 						}
 					}
 					else {
@@ -537,7 +527,6 @@ class SinglePlayerGame : public Game {
 							isJumping = false;
 						}
 						else {
-							// TODO
 						}
 					}
 				}
@@ -564,7 +553,6 @@ class SinglePlayerGame : public Game {
 							x = marker->left() - width;
 						}
 						else {
-							// TODO
 						}
 					}
 					else {
@@ -576,7 +564,6 @@ class SinglePlayerGame : public Game {
 							isJumping = false;
 						}
 						else {
-							// TODO
 						}
 					}
 				}
@@ -599,6 +586,10 @@ class SinglePlayerGame : public Game {
 		
 		virtual bool getIsAlive() {
 			return isAlive;
+		}
+
+		virtual void setIsAlive() {
+			isAlive = true;
 		}
 
 		virtual void die() {
@@ -626,13 +617,16 @@ class SinglePlayerGame : public Game {
 
 	// 敵キャラクター
 	class Enemy : public Character {
+	protected:
 		std::string imgHandleKey;
+		const double defaultImageSize = 1.1;
 	public:
 		Enemy(int x_, int y_, int width_, int height_, std::string imgHandleKey_, int maxDamage_, SinglePlayerGame& game_, int overBufferMax_ = FPS, int maxInvincibleTime_ = FPS) : Character(x_,y_,width_,height_,imgHandleKey_,maxDamage_,game_, overBufferMax_, maxInvincibleTime_) {
 			layer = 101;
 			imgHandleKey = imgHandleKey_;
+			imageSize = defaultImageSize;
 		}
-		
+
 		std::string overEffectKey = "s_game_enemy_over";
 		std::string damageSoundKey = "s_game_attack";
 		std::string attackEffectKey = "s_game_sword";
@@ -781,14 +775,22 @@ class SinglePlayerGame : public Game {
 	};
 
 	class Switch : public Enemy {
-		static const int width = 100;
-		static const int height = 100;
+		static const int width = 150;
+		static const int height = 150;
 
 	public:
-		Switch(int x_, int y_, SinglePlayerGame& game_, double size, int maxDamage_ = 1, std::string imgHandleKey_ = "s_game_switch") : Enemy(x_, y_, width * size, height * size, imgHandleKey_, maxDamage_, game_) {
+		std::shared_ptr<Effect> faucet = std::make_shared<Effect>("s_game_water", left() + 60, top() + 90, rect.width, 200, true, 150, 1, 0);
+		
+		Switch(int x_, int y_, SinglePlayerGame& game_, double size, int maxDamage_ = 2, std::string imgHandleKey_ = "s_game_switch") : Enemy(x_, y_, width * size, height * size, imgHandleKey_, maxDamage_, game_) {
 			layer = 130;
 			moveDirection = RIGHT;
+
+			
+			game_.drawList.push_back(faucet);
+			//game.makeEffect("s_game_water", left() + 60, top() + 90, rect.width, 200, true);
 		}
+		
+
 
 		void update() {}
 
@@ -804,10 +806,11 @@ class SinglePlayerGame : public Game {
 		std::shared_ptr<Switch> button;
 		Inundation(int x_, int y_, SinglePlayerGame& game_, double size, int maxDamage_ = -1, std::string imgHandleKey_ = "s_game_water") : Enemy(x_, y_, width * size, height * size, imgHandleKey_, maxDamage_, game_) {
 			layer = 300;
-			button = game_.makeSwitch(100, 100, 1);
+			button = game_.makeSwitch(0, 200, 1);
 		}
 
 		bool draw() {
+			
 			DrawExtendGraph(left(), top() - 150, right(), bottom() + 800, imgHandles["s_game_water"], true);
 			return getIsAlive();
 		}
@@ -815,6 +818,8 @@ class SinglePlayerGame : public Game {
 		void update() {
 			if (!button->getIsAlive()) {
 				isWaterUp = false;
+				button->faucet->changeIsRunning();
+
 			}
 			else if (inundationCounter > 0){
 				inundationCounter--;
@@ -837,7 +842,7 @@ class SinglePlayerGame : public Game {
 		static const int height = 720;
 
 		Ray(int x_, int y_, SinglePlayerGame& game_, double size, int maxDamage_ = -1, std::string imgHandleKey_ = "s_game_ray") : Enemy(x_, y_, width * size, height * size, imgHandleKey_, maxDamage_, game_, 0) {
-			layer = 180;
+			layer = 149;
 		}
 
 		void update() {}
@@ -864,12 +869,16 @@ class SinglePlayerGame : public Game {
 			if (characterState == OVER) { return; }
 
 			stopCount--;
+			if (stopCount == FPS * 2 - 3) {
+				game.makeEffect("s_game_uforay_start", rect.x + rect.width / 2 - Ray::width / 2, bottom(),  Ray::width, Ray::height, false, layer-1, 2);
+			}
 			if (stopCount == FPS * 2 - 15) {
 				ray = game.makeRay(rect.x + rect.width / 2 - Ray::width / 2, bottom(), 1);
 			}
 			else if (stopCount < FPS * 2) {
 				angle += (0 - angle) / 10;
 				if (stopCount == 0) {
+					game.makeEffect("s_game_uforay_end", rect.x + rect.width / 2 - Ray::width / 2, bottom(), Ray::width, Ray::height, false, layer - 1, 2);
 					ray->die();
 					ray = nullptr;
 
@@ -943,7 +952,7 @@ class SinglePlayerGame : public Game {
 			moveBecauseMarkerCollision(game.markerList);
 			moveBecauseBlockCollision(game.blockList);
 			angle = M_PI / 180 * (rand() % 3 - 1);
-			imageSize += imageSize >= 1 ? 0 : 0.05;
+			imageSize += imageSize >= defaultImageSize ? 0 : 0.05;
 		}
 
 		void setAc(double& acX, double& acY) {
@@ -1004,7 +1013,7 @@ class SinglePlayerGame : public Game {
 				game.makeDrop(rect.x + rand() % (rect.width) - Drop::width / 2, bottom(), 1);
 			}
 			if (fallDropCounter < 10) {
-				imageSize += (1.0 - imageSize) / 5;
+				imageSize += (defaultImageSize - imageSize) / 5;
 			}
 			else if (fallDropCounter < 25) {
 				imageSize += (0.4 - imageSize) / 15;
@@ -1013,7 +1022,7 @@ class SinglePlayerGame : public Game {
 				imageSize += (1.7 - imageSize) / 15;
 			}
 			else {
-				imageSize = 1 + 0.01 * sizeCounter->get();
+				imageSize = defaultImageSize + 0.01 * sizeCounter->get();
 			}
 			if (fallDropCounter == 0) {
 				fallDropCounter = rand() % 100 + FPS * 4;
@@ -1092,6 +1101,8 @@ class SinglePlayerGame : public Game {
 		}
 	};
 
+		
+
 	class Heiho : public Enemy {
 		static const int width = 345 / 4;
 		static const int height = 333 / 4;
@@ -1110,6 +1121,7 @@ class SinglePlayerGame : public Game {
 			setAc(acX, acY);
 			updateCoordinate(acX, acY);
 			// moveBecauseBlockCollision(game.blockList);
+		
 			moveBecauseMarkerCollision(game.markerList);
 		}
 
@@ -1181,7 +1193,7 @@ class SinglePlayerGame : public Game {
 			updateCoordinate(acX, acY);
 			moveBecauseMarkerCollision(game.markerList);
 			angle = M_PI / 180 * (rand() % 5 - 2);
-			imageSize += imageSize >= 1 ? 0 : 0.05;
+			imageSize += imageSize >= defaultImageSize ? 0 : 0.05;
 		}
 		
 		void setAc(double& acX, double& acY) {
@@ -1198,16 +1210,154 @@ class SinglePlayerGame : public Game {
 				break;
 			}
 			acY = 0;
+			acX = -2;
 		}
 	};
 
+
+	enum Tutorial {
+		START,BEATFIRE,BEATHEIHO,END
+	};
+	Tutorial tutorial = START;
+
+	class tutoFire : public Enemy {
+		bool freezed = false;
+		int freezetime = FPS/3 * 2;
+		Tutorial tutorial;
+	public:
+		static const int width = 280 / 3;
+		static const int height = 194 / 3;
+		tutoFire(int x_, int y_, SinglePlayerGame& game_, double size, int maxDamage_ = 1, std::string imgHandleKey_ = "s_game_fire") : Enemy(x_, y_, width * size, height * size, imgHandleKey_, maxDamage_, game_, 0, 0) {
+			moveDirection = LEFT;
+			layer = 151;
+			tutorial = game_.tutorial;
+		}
+
+		void update() {
+			if (characterState == OVER) { return; }
+			double acX = 0;
+			double acY = 0;
+			if (freezed) {
+				if (freezetime <= 0) {
+					acX = prevX - rect.x;
+				}
+				else if (freezetime >= 0) {
+					setAc(acX, acY);
+				}
+				freezetime--;
+			}
+			else {
+				setAc(acX, acY);
+			}
+			updateCoordinate(acX, acY);
+			//moveBecauseMarkerCollision(game.markerList);
+		}
+
+		void setAc(double& acX, double& acY) {
+			acY = 0;
+			acX = -2;
+		}
+
+		bool getIsFreezed() {
+			return freezed;
+		}
+
+		void freeze() {
+			freezed = true;
+		}
+	};
+
+
+	class tutoHeiho : public Enemy {
+		static const int width = 345 / 4;
+		static const int height = 333 / 4;
+		int frameCounter = FPS * 3;
+		double acX = 0;
+		double acY = 2;
+		Tutorial tutorial;
+		std::shared_ptr<PendulumCounter> swingCounter = makePendulum(10);
+	public:
+		std::shared_ptr<SinglePlayerGame::tutoFire> childfire = NULL;
+		tutoHeiho(int x_, int y_, SinglePlayerGame& game_, double size, int maxDamage_ = 2, std::string imgHandleKey_ = "s_game_ghorst") : Enemy(x_, y_, width * size, height * size, imgHandleKey_, maxDamage_, game_) {
+			moveDirection = LEFT;
+			layer = 152;
+			tutorial = game_.tutorial;
+		}
+
+		void update() {
+			if (characterState == OVER) { return; }
+			//setAc(acX, acY);
+			updateCoordinate(acX, acY);
+			// moveBecauseBlockCollision(game.blockList);
+
+			//moveBecauseMarkerCollision(game.markerList);
+		}
+
+		void setAc(double& acX, double& acY) {
+			acY = 2;
+		}
+
+
+
+
+		void updateCoordinate(double acX, double acY) {
+			double& x = rect.x;
+			double& y = rect.y;
+			frameCounter--;
+
+			double diffX;
+			if (frameCounter > 0) {
+				diffX = -2;
+				angle = swingCounter->getAngle();
+			}
+			else if (frameCounter == 0) {
+				game.makeEffect("s_game_fireshot", left(), top(), rect.width, rect.width, false, layer + 1, 3);
+				diffX = 0;
+			}
+			else if (frameCounter == -FPS) {
+				angle = 0;
+				PlaySoundMem(soundHandles["s_game_fireshot"], DX_PLAYTYPE_BACK, true);
+				childfire = game.maketutoFire(left(), (top() + bottom()) / 2, 1);
+				diffX = 0;
+				acY = 0;
+				swingCounter->reset();
+			}
+			else if (frameCounter < 0 && frameCounter > -FPS) {
+				diffX = 0;
+				acY = 0;
+				//angle = swingCounter->getAngle();
+				angle = (rand() % 11 - 5) * M_PI / 180;
+			}
+			else {
+				diffX = 2;
+				angle = swingCounter->getAngle();
+			}
+			const double diffY = 0;
+
+
+			// verlet法
+			const double tempX = x;
+			x += diffX + acX;
+			prevX = tempX;
+			const double tempY = y;
+			y += diffY + acY;
+			prevY = tempY;
+		}
+
+		void freeze() {
+			acY = 0;
+			acX = -2;
+		}
+	};
+
+	
 	// 姫様
 	class Player : public Character {
 		bool isToJump = false;
 		int frameCount;
 		std::string message;
 		bool isDrowned = false;
-
+		
 	public:
 		static const int width = 621/8;
 		static const int height = 1046/8;
@@ -1281,6 +1431,8 @@ class SinglePlayerGame : public Game {
 			prevY = tempY;
 		}
 
+
+	
 		// プレイヤーキャラクターの座標更新
 		void setAc(double& acX, double& acY, const char key[]) {
 			double& x = rect.x;
@@ -1424,7 +1576,7 @@ class SinglePlayerGame : public Game {
 			double& y = rect.y;
 			const int& width = rect.width;
 			const int& height = rect.height;
-
+			
 			for (auto block : objectList) {
 				if (left() < block->right() && top() < block->bottom() &&
 					right() > block->left() && bottom() > block->top()) {
@@ -1474,8 +1626,224 @@ class SinglePlayerGame : public Game {
 		}
 	};
 
+
+	class tutoPlayer : public Character {
+		int frameCount;
+		std::string message;
+		Tutorial tutorial;
+		bool isToJump = false;
+	public:
+		static const int width = 621 / 8;
+		static const int height = 1046 / 8;
+
+		tutoPlayer(int x_, int y_, int width_, int height_, std::string imgHandleKey_, int maxDamage_, SinglePlayerGame& game_) : Character(x_, y_, width_, height_, imgHandleKey_, maxDamage_, game_, 0, FPS * 2) {
+			layer = 100;
+			// overBuffer = overBufferMax;
+			tutorial = game_.tutorial;
+		}
+
+		bool draw() {
+			for (int heart = 0; heart <= (maxDamage - damage - 1); heart++) {
+				DrawExtendGraph(50 + 50 * heart, 50, 100 + 50 * heart, 100, imgHandles["s_game_heart"], true);
+			}
+
+			Character::draw();
+
+			return true;
+
+		}
+
+		void update(const char key[]) {
+			if (!isAlive || characterState == OVER) { return; }
+			double acX = 0;
+			double acY = 0;
+			setAc(acX, acY, key);
+			updateCoordinate(acX, acY);
+			moveBecauseBlockCollision(game.blockList);
+			moveBecauseMarkerCollision(game.markerList);
+		}
+
+		void updateCoordinate(double& acX, double& acY) {
+			double& x = rect.x;
+			double& y = rect.y;
+			const int& width = rect.width;
+			const int& height = rect.height;
+
+			const double diffX = x - prevX;
+			const double diffY = y - prevY;
+
+
+			// verlet法
+			const double tempX = x;
+			x += diffX + acX;
+			prevX = tempX;
+			const double tempY = y;
+			y += diffY + acY;
+			prevY = tempY;
+		}
+
+
+
+		// プレイヤーキャラクターの座標更新
+		void setAc(double& acX, double& acY, const char key[]) {
+			double& x = rect.x;
+			double& y = rect.y;
+			const int& width = rect.width;
+			const int& height = rect.height;
+
+			//const double diffX = x - prevX;
+			//const double diffY = y - prevY;
+			const double diffX = 40 * tanh((x - prevX) / 40);
+			const double diffY = 40 * tanh((y - prevY) / 40);
+
+			acX = -0.5 * (1 - (diffX <= 0) - (diffX < 0));
+			acY = 2.8;
+
+			if (key[KEY_INPUT_LSHIFT]) {
+				isToJump = false;
+				if (key[KEY_INPUT_UP] && !isJumping) {
+					acY = -40;
+					PlaySoundMem(soundHandles["s_game_jump"], DX_PLAYTYPE_BACK, true);
+					isJumping = true;
+				}
+				if (key[KEY_INPUT_RIGHT]) {
+					acX = 1.5 * (diffX < 15);
+					moveDirection = RIGHT;
+				}
+				if (key[KEY_INPUT_LEFT]) {
+					acX = -1.5 * (diffX > -15);
+					moveDirection = LEFT;
+				}
+			}
+		}
+
+		// プレイヤーキャラクターの生死判定更新
+		bool deathDecision(std::vector<std::shared_ptr<Enemy>> enemyList) {
+			if (invincibleTime == 0 && characterState != OVER) {
+				changeCharacterState(NORMAL);
+				for (auto enemy : enemyList) {
+					if (left() <= enemy->right() && top() <= enemy->bottom() &&
+						right() >= enemy->left() && bottom() >= enemy->top()) {
+						damageControl();
+						invincibleTime = maxInvincibleTime;
+						break;
+					}
+				}
+			}
+			else if (invincibleTime > 0) {
+				invincibleTime--;
+			}
+
+			
+			if (damage >= maxDamage) {
+				die();
+			}
+
+			return Character::deathDecision();
+		}
+
+		int getPlayerDamage() {
+			return damage;
+		}
+
+		void moveBecauseMarkerCollision(const std::vector<std::shared_ptr<Marker>> objectList) {
+			double& x = rect.x;
+			double& y = rect.y;
+			const int& width = rect.width;
+			const int& height = rect.height;
+
+			for (auto marker : objectList) {
+				marker->on();
+				if (left() < marker->right() && top() < marker->bottom() &&
+					right() > marker->left() && bottom() > marker->top()) {
+
+					if (prevY < marker->bottomHit() && prevY + height > marker->topHit()) {
+						if (prevX >= marker->rightHit()) {
+							x = marker->right();
+						}
+						else if (prevX + width <= marker->leftHit()) {
+							x = marker->left() - width;
+						}
+						else {
+							marker->off();
+						}
+					}
+					else {
+						if (prevY >= marker->bottomHit()) {
+							y = marker->bottom();
+						}
+						else if (prevY + height <= marker->topHit()) {
+							y = marker->top() - height;
+							isJumping = false;
+						}
+						else {
+							marker->off();
+						}
+					}
+					prevX = x;
+					prevY = y;
+				}
+			}
+		}
+
+		void moveBecauseBlockCollision(const std::vector<std::shared_ptr<SingleGameBlockObject>> objectList) {
+			double& x = rect.x;
+			double& y = rect.y;
+			const int& width = rect.width;
+			const int& height = rect.height;
+
+			for (auto block : objectList) {
+				if (left() < block->right() && top() < block->bottom() &&
+					right() > block->left() && bottom() > block->top()) {
+					if (top() < block->top()) {
+						y = block->top() - height;
+						prevY = y;
+						isJumping = false;
+					}
+					else if (left() < block->left()) {
+						x = block->left() - width;
+						prevX = x;
+					}
+					else if (right() > block->right()) {
+						x = block->right();
+						prevX = x;
+					}
+					else {
+						y = block->top() - height;
+						prevY = y;
+						isJumping = false;
+					}
+
+				}
+
+			}
+		}
+
+		void damageControl() {
+			damage++;
+			game.makeEffect("s_game_hit", left(), top(), rect.width, rect.width, false, layer + 1, 2);
+
+			if (damage < maxDamage) {
+				// HP残ってる
+				changeCharacterState(DAMAGE);
+			}
+			else {
+				die();
+			}
+		}
+
+		virtual void die() {
+			changeCharacterState(OVER);
+			PlaySoundMem(soundHandles["s_game_dead"], DX_PLAYTYPE_BACK, true);
+
+			if (overBuffer <= 0) isAlive = false;
+			overBuffer--;
+		}
+	};
+
 	std::thread thread;
 	std::shared_ptr<Player> player;
+	std::shared_ptr<tutoPlayer> tutoplayer;
 
 	std::vector<std::shared_ptr<SingleGameBlockObject>> blockList;
 	std::vector<std::shared_ptr<Enemy>> enemyList;
@@ -1500,11 +1868,14 @@ class SinglePlayerGame : public Game {
 	std::shared_ptr<Eagle> makeEagle(int x, int y, double size);
 	std::shared_ptr<Heiho> makeHeiho(int x, int y, double size);
 	std::shared_ptr<Fire> makeFire(int x, int y, double size);
+	std::shared_ptr<tutoHeiho> maketutoHeiho(int x, int y, double size);
+	std::shared_ptr<tutoFire> maketutoFire(int x, int y, double size);
+
 
 	void makeEffect(std::string effectHandleKey_, int x_ = 0, int y_ = 0, int width_ = WIDTH, int height_ = HEIGHT, bool willStay_ = false, int layer_ = 150, int framePerCount_ = 1, int counter_ = 0) {
 		drawList.push_back(std::make_shared<Effect>(effectHandleKey_, x_, y_, width_, height_, willStay_, layer_, framePerCount_, counter_));
+	
 	}
-
 	std::shared_ptr<BGM> bgm;
 	const int maxTime = FPS * 60;
 
@@ -1512,6 +1883,10 @@ class SinglePlayerGame : public Game {
 
 	enum Difficulty {
 		EASY, HARD, NIGHTMARE,
+	};
+
+	enum GameMode {
+		INTRO, TUTORIAL, GAME, RESULT // 0, 1, 2, 3 
 	};
 
 	int timer = maxTime;
@@ -1523,12 +1898,13 @@ class SinglePlayerGame : public Game {
 public:
 	SinglePlayerGame() {
 		thread = std::thread::thread(capture, std::ref(share));
-
-
 		hasPlayerWon = true;
 	}
 
 	bool onStart();
 	bool onUpdate();
 	bool onFinish();
+
+	std::shared_ptr<SinglePlayerGame::tutoHeiho> tutoenemy;
+	int heihoFreezeTimeRemain = FPS*4 + 5;
 };

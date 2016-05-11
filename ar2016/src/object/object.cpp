@@ -122,11 +122,12 @@ bool Object::load() {
 	isSuccess &= loadImage("s_game_ufo", "s_game/ufo");
 	isSuccess &= loadImage("s_game_ufo_damage", "s_game/ufo");
 	isSuccess &= loadImage("s_game_ufo_over", "s_game/ufo");
+	isSuccess &= loadEffect("s_game_uforay_start", "s_game/ufo_ray_start", 6, 1, 1440, 480);
+	isSuccess &= loadEffect("s_game_uforay_end", "s_game/ufo_ray_end", 4, 1, 960, 480);
 
-
-	isSuccess &= loadImage("s_game_ray", "s_game/uforay");
-	isSuccess &= loadImage("s_game_ray_damage", "s_game/uforay");
-	isSuccess &= loadImage("s_game_ray_over", "s_game/uforay");
+	isSuccess &= loadImage("s_game_ray", "s_game/ufo_ray");
+	isSuccess &= loadImage("s_game_ray_damage", "s_game/ufo_ray");
+	isSuccess &= loadImage("s_game_ray_over", "s_game/ufo_ray");
 
 	isSuccess &= loadImage("s_game_cloud", "s_game/cloud");
 	isSuccess &= loadImage("s_game_cloud_damage", "s_game/cloud");
@@ -140,9 +141,9 @@ bool Object::load() {
 	isSuccess &= loadImage("s_game_water_damage", "s_game/water");
 	isSuccess &= loadImage("s_game_water_over", "s_game/water");
 
-	isSuccess &= loadImage("s_game_switch", "s_game/switch1");
-	isSuccess &= loadImage("s_game_switch_damage", "s_game/switch");
-	isSuccess &= loadImage("s_game_switch_over", "s_game/switch");
+	isSuccess &= loadImage("s_game_switch", "s_game/jaguti");
+	isSuccess &= loadImage("s_game_switch_damage", "s_game/jaguti");
+	isSuccess &= loadImage("s_game_switch_over", "s_game/jaguti");
 
 	isSuccess &= loadImage("s_game_heart", "s_game/heart");
 
@@ -158,20 +159,33 @@ bool Object::load() {
 	isSuccess &= loadEffect("s_game_sword", "s_game/sword", 9, 1, 1080, 120);
 	isSuccess &= loadEffect("s_game_fireshot", "s_game/ghorst_", 10, 1, 2400, 240);
 
+	isSuccess &= loadEffect("s_game_water", "s_game/water", 5, 6, 2560, 1536);
 
 	isSuccess &= loadEffect("s_game_coin", "s_game/coin", 5, 2, 1000, 400);
 	// マーカー
 	isSuccess &= loadImage("s_game_piyo", "s_game/piyo");
 	isSuccess &= loadImage("s_game_sword", "s_game/sword");
 	isSuccess &= loadImage("s_game_shield", "s_game/shield");
-	isSuccess &= loadImage("s_game_invalid", "s_game/dead_sample");
+	isSuccess &= loadImage("s_game_invalid", "s_game/batsu");
 	// リザルト
 	isSuccess &= loadImage("s_game_result_clear", "s_game/s_game_clear");
 	isSuccess &= loadImage("s_game_result_dead", "s_game/s_game_result");
 	isSuccess &= loadImage("s_game_dead", "s_game/dead_sample");
+	isSuccess &= loadImage("s_game_result_frame_star", "s_game/result_frame_star");
+	isSuccess &= loadImage("s_game_result_frame_blackstar", "s_game/result_frame_blackstar");
+	isSuccess &= loadImage("s_game_result_rainbow", "s_game/result_rainbow");
+	isSuccess &= loadImage("s_game_result_castle", "s_game/result_castle");
+	isSuccess &= loadImage("s_game_result_castle2", "s_game/result_castle2");
+	isSuccess &= loadImage("s_game_result_castle3", "s_game/result_castle3");
+	isSuccess &= loadImage("s_game_result_stage1", "s_game/result_stage1");
+	isSuccess &= loadImage("s_game_result_stage2", "s_game/result_stage2");
+	isSuccess &= loadImage("s_game_result_sketch", "s_game/result_sketch");
+
 	isSuccess &= loadSound("s_game_over", "s_game/game_over.wav");
+	
 	isSuccess &= loadEffect("s_game_over_hanabi", "s_game/hanabi", 14, 15, 7168, 7680);
-	//isSuccess &= loadMovie("s_game_over_hanabi", "s_game/hanabi");
+	isSuccess &= loadEffect("s_game_curtain_close", "s_game/curtain_close", 1, 18, 640, 8640);
+	isSuccess &= loadEffect("s_game_curtain_open", "s_game/curtain_open", 1, 10, 640, 4800);
 
 	// puzzle game
 	isSuccess &= loadImage("p_block", "puzzle/block");
