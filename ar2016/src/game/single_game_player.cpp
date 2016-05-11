@@ -230,19 +230,21 @@ bool SinglePlayerGame::onStart() {
 			}
 
 			//クリアの文
-			const std::string clear1 = "お姫様を無事に守ることができたあなた。";
-			const std::string clear2 = "お姫様はあなたをお城のパーティに招待しました。";
-			const std::string clear3 = "莫大な予算に支えられた豪奢なパーティ。";
-			const std::string clear4 = "あああああああああああああああ";
-			const std::string clear5 = "次の姫様も、守ることができるといいですね。";
-			const std::string clear6 = "遊んでくれてありがとうございました。";
+			const std::string clear1 = "あなたはお姫様を守り抜くことができましたが、";
+			const std::string clear2 = "彼女は守られていたことに気付きもしないまま。";
+			const std::string clear3 = "褒められはしない。言葉も交わせない。";
+			const std::string clear4 = "けれども、それでいいのです。";
+			const std::string clear5 = "名も無い騎士は、その先に本当の幸せを見つけました。";
+			const std::string clear6 = "あなたの美しい愛が、いつまでも正しくありますように。";
+			const std::string clear7 = "遊んでくれてありがとうございました。";
 			//ゲームオーバーの文
 			const std::string dead1 = "あなたはお姫様を守ることができませんでした。";
-			const std::string dead2 = "お姫様の躯は無残な有様であの丘の上、";
-			const std::string dead3 = "風化に任せるままに寂しげに横たわっています。";
-			const std::string dead4 = "姫の残機は無限。";
-			const std::string dead5 = "次の姫様は、守ることができるといいですね。";
-			const std::string dead6 = "遊んでくれてありがとうございました。";
+			const std::string dead2 = "どうか気づいてください。";
+			const std::string dead3 = "あなたが本当に守れなかったのは姫の命ではなく、";
+			const std::string dead4 = "「姫」という物語の命だということ。";
+			const std::string dead5 = "確かに彼女は、僕らと同じようには死なないかもしれない。";
+			const std::string dead6 = "しかし、失うものは何もないのでしょうか。";
+			const std::string dead7 = "聞こえますか。物語の儚い鼓動の音が。";
 
 
 			bool draw() {
@@ -252,21 +254,26 @@ bool SinglePlayerGame::onStart() {
 					//********勝利画面
 
 					//画像
-					DrawExtendGraph(0, 0, WIDTH, HEIGHT, imgHandles["s_game_result_stage1"], true);
-
+					
+					DrawExtendGraph(0, 0, WIDTH, HEIGHT, imgHandles["s_game_result_frame_star"], true);
+					DrawExtendGraph(150, 150, 900, 350, imgHandles["s_game_result_rainbow"], true);
+					DrawExtendGraph(621 / 3, 1046 / 3, 621 / 3 + 621 / 3, 1046 / 3 + 1046 / 3, imgHandles["s_game_player"], true);
 
 					//スクロール文章
+					
 					DrawString(600, HEIGHT - rect.y, clear1.c_str(), GetColor(255, 255, 255));
-					DrawString(600, HEIGHT + 100 - rect.y, clear2.c_str(), GetColor(255, 255, 255));
-					DrawString(600, HEIGHT + 200 - rect.y, clear3.c_str(), GetColor(255, 255, 255));
-					DrawString(600, HEIGHT + 300 - rect.y, clear4.c_str(), GetColor(255, 255, 255));
-					DrawString(600, HEIGHT + 400 - rect.y, clear5.c_str(), GetColor(255, 255, 255));
-					DrawString(600, HEIGHT + 500 - rect.y, clear6.c_str(), GetColor(255, 255, 255));
+					DrawString(600, HEIGHT + 150 - rect.y, clear2.c_str(), GetColor(255, 255, 255));
+					DrawString(600, HEIGHT + 300 - rect.y, clear3.c_str(), GetColor(255, 255, 255));
+					DrawString(600, HEIGHT + 450 - rect.y, clear4.c_str(), GetColor(255, 255, 255));
+					DrawString(600, HEIGHT + 600 - rect.y, clear5.c_str(), GetColor(255, 255, 255));
+					DrawString(600, HEIGHT + 750 - rect.y, clear6.c_str(), GetColor(255, 255, 255));
+					DrawString(600, HEIGHT + 900 - rect.y, clear7.c_str(), GetColor(255, 255, 255));
 
 					//スコア
 					std::string clearScore = "得点 : " + std::to_string(maxTime + (player->getMaxDamage() - player->getPlayerDamage()) * 50);
 					DrawString(100, 150, clearScore.c_str(), GetColor(0, 0, 0));
-					DrawExtendGraph(621/4, 1046/4, 621/2, 1046/2, imgHandles["s_game_player"], true);
+
+					
 					
 				}
 
@@ -274,28 +281,29 @@ bool SinglePlayerGame::onStart() {
 					//******ゲームオーバー画面
 
 					//画像・ゲームオーバー
-					DrawExtendGraph(0, 0, WIDTH, HEIGHT, imgHandles["s_game_result_stage2"], true);
-					DrawExtendGraph(10, 300,10 +1600/5 , 300+ 1555/5, imgHandles["s_game_result_sketch"], true);
-					DrawExtendGraph(621 / 3, 1046 / 3, 621 / 2, 1046 / 2, imgHandles["s_game_player_drowned"], true);
+					DrawExtendGraph(0, 0, WIDTH, HEIGHT, imgHandles["s_game_result_stage1"], true);
+					DrawExtendGraph(100, 300,100 +1600/5 , 300+ 1555/5, imgHandles["s_game_result_sketch"], true);
+					DrawExtendGraph(621 / 3, 1046 / 3, 621 / 3 + 621 / 3, 1046 / 3 + 1046 / 3, imgHandles["s_game_player_drowned"], true);
 
 					//スクロール文章・ゲームオーバー
 					DrawString(600, HEIGHT - rect.y, dead1.c_str(), GetColor(255, 255, 255));
-					DrawString(600, HEIGHT+100 - rect.y, dead2.c_str(), GetColor(255, 255, 255));
-					DrawString(600, HEIGHT+200 - rect.y, dead3.c_str(), GetColor(255, 255, 255));
-					DrawString(600, HEIGHT+300 - rect.y, dead4.c_str(), GetColor(255, 255, 255));
-					DrawString(600, HEIGHT+400 - rect.y, dead5.c_str(), GetColor(255, 255, 255));
-					DrawString(600, HEIGHT+500 - rect.y, dead6.c_str(), GetColor(255, 255, 255));	
-					
+					DrawString(600, HEIGHT+150 - rect.y, dead2.c_str(), GetColor(255, 255, 255));
+					DrawString(600, HEIGHT+300 - rect.y, dead3.c_str(), GetColor(255, 255, 255));
+					DrawString(600, HEIGHT+450 - rect.y, dead4.c_str(), GetColor(255, 255, 255));
+					DrawString(600, HEIGHT+600 - rect.y, dead5.c_str(), GetColor(255, 255, 255));
+					DrawString(600, HEIGHT + 750 - rect.y, dead6.c_str(), GetColor(255, 255, 255));
+					DrawString(600, HEIGHT + 900 - rect.y, dead7.c_str(), GetColor(255, 255, 255));
+
 					//スコア
 					std::string deadScore = "得点 : " + std::to_string(maxTime - timer);
 					std::string playTime = "記録 : " + std::to_string((maxTime - timer) / 30) + "秒";
 					DrawString(100, 150, deadScore.c_str(), GetColor(255, 255, 255));
 					DrawString(100, 200, playTime.c_str(), GetColor(255, 255, 255));
 
-					DrawExtendGraph(0, 0, WIDTH, HEIGHT, imgHandles["s_game_result_frame_star"], true);
+					//DrawExtendGraph(0, 0, WIDTH, HEIGHT, imgHandles["s_game_result_frame_blackstar"], true);
 				}
 				
-				std::string damage = ("Damage : " + std::to_string(player->getPlayerDamage()));
+				std::string damage = ("受けたダメージ : " + std::to_string(player->getPlayerDamage()));
 				DrawString(100, 100, damage.c_str(), GetColor(255, 0, 0));
 							
 				return true;
@@ -307,15 +315,15 @@ bool SinglePlayerGame::onStart() {
 		//yu
 		if (hasPlayerWon) {
 			//勝利画面のエフェクト・リザルト
-			makeEffect("s_game_coin", 250, 200, 50, 50, true, 150, 1, 3);
+			makeEffect("s_game_result_hanabi", 300, 200, 600, 600, true, 10, 1, 3);
+			makeEffect("s_game_result_hanabi", 700, 50, 500, 500, true, 10, 2, 3);
+
 			makeEffect("s_game_coin", 300, 200, 50, 50, true, 150, 2);
 			makeEffect("s_game_coin", 350, 200, 50, 50, true, 150, 2, 3);
 		}
 		else {
-			//ゲームオーバーのエフェクト・リザルト
-			
-			makeEffect("s_game_over_hanabi", 100, 200, 600, 600, true, 150, 1, 5);
-			makeEffect("s_game_over_hanabi", 700, 50, 500, 500, true, 150, 1, 2);
+			//ゲームオーバーのエフェクト・リザルト	
+			makeEffect("s_game_result_kirakira", 500, 600, 600, 600, true, 150, 1, 0);
 			makeEffect("s_game_coin", 250, 200, 50, 50, true, 150, 1, 3);
 			makeEffect("s_game_coin", 300, 200, 50, 50, true, 150, 2);
 			makeEffect("s_game_coin", 350, 200, 50, 50, true, 150, 2, 3);
@@ -604,9 +612,9 @@ bool SinglePlayerGame::onUpdate() {
 
 		if (key[KEY_INPUT_RETURN]) {
 			willFinishMode = true;
-			result_timer = maxTime;
 		}
-	
+
+
 		break;
 	}
 
