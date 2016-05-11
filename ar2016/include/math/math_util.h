@@ -16,4 +16,24 @@ namespace MathUtil {
 		assert(width != 0);
 		return area / width;
 	}
+
+	template <typename T>
+	inline T clamp(T val, T min, T max) {
+		assert(min <= max);
+		return std::max(min, std::min(val, max));
+	}
+
+	template <typename T>
+	inline T wrap(T val, T low, T high) {
+		assert(low < high);
+		const T n = std::fmod(val - low, high - low);
+		return (n >= 0) ? n + low : n + high;
+	}
+
+	template <>
+	inline int wrap(int val, int low, int high) {
+		assert(low < high);
+		const int n = (val - low) % (high - low);
+		return (n >= 0) ? n + low : n + high;
+	}
 } // namespace MathUtil

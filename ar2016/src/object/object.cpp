@@ -1,21 +1,35 @@
 ﻿#include "object/object.h"
+#include <sstream>
 
 using namespace std;
 
 map<string, int> Object::imgHandles;
+map<string, int> Object::movieHandles;
 map<string, vector<int>> Object::effectHandles;
 map<string, int> Object::soundHandles;
+//std::map<std::string, int> Object::movieHandles;
 
 // 一番最初に一回だけ呼ぶ
 bool Object::load() {
 
-	auto loadImage = [](string key, string name) -> bool {
-		const string path = "img/" + name + ".png";
+	auto loadImage = [](string key, string name, string extension="png") -> bool {
+		const string path = "img/" + name + "." + extension;
 		const int handle = LoadGraph(path.c_str());
 		if (handle == -1) {
 			return false;
 		} else {
 			Object::imgHandles[key] = handle;
+			return true;
+		}
+	};
+
+	auto loadMovie = [](string key, string name, string extension="mpg") -> bool {
+		const string path = "movie/" + name + "." + extension;
+		const int handle = LoadGraph(path.c_str());
+		if (handle == -1) {
+			return false;
+		} else {
+			Object::movieHandles[key] = handle;
 			return true;
 		}
 	};
@@ -75,10 +89,11 @@ bool Object::load() {
 	isSuccess &= loadImage("s_game_player", "s_game/hime_normal");
 	isSuccess &= loadImage("s_game_player_damage", "s_game/hime_odoroki");
 	isSuccess &= loadImage("s_game_player_over", "s_game/hime_gameover");
+	isSuccess &= loadImage("s_game_player_drowned", "s_game/hime_obore");
 
 	isSuccess &= loadImage("s_game_wanwan", "s_game/wolf");
 	isSuccess &= loadImage("s_game_wanwan_damage", "s_game/wolf");
-	isSuccess &= loadImage("s_game_wanwan_over", "s_game/block1");
+	isSuccess &= loadImage("s_game_wanwan_over", "s_game/wolf");
 
 	isSuccess &= loadImage("s_game_block", "s_game/block1");
 
@@ -103,14 +118,16 @@ bool Object::load() {
 	isSuccess &= loadImage("s_game_drop", "s_game/drop");
 	isSuccess &= loadImage("s_game_drop_damage", "s_game/drop");
 	isSuccess &= loadImage("s_game_drop_over", "s_game/drop");
+
 	isSuccess &= loadImage("s_game_ufo", "s_game/ufo");
-	isSuccess &= loadImage("s_game_ufo_damage", "s_game/eagle");
-	isSuccess &= loadImage("s_game_ufo_over", "s_game/drop");
+	isSuccess &= loadImage("s_game_ufo_damage", "s_game/ufo");
+	isSuccess &= loadImage("s_game_ufo_over", "s_game/ufo");
+	isSuccess &= loadEffect("s_game_uforay_start", "s_game/ufo_ray_start", 6, 1, 1440, 480);
+	isSuccess &= loadEffect("s_game_uforay_end", "s_game/ufo_ray_end", 4, 1, 960, 480);
 
-
-	isSuccess &= loadImage("s_game_ray", "s_game/uforay");
-	isSuccess &= loadImage("s_game_ray_damage", "s_game/uforay");
-	isSuccess &= loadImage("s_game_ray_over", "s_game/uforay");
+	isSuccess &= loadImage("s_game_ray", "s_game/ufo_ray");
+	isSuccess &= loadImage("s_game_ray_damage", "s_game/ufo_ray");
+	isSuccess &= loadImage("s_game_ray_over", "s_game/ufo_ray");
 
 	isSuccess &= loadImage("s_game_cloud", "s_game/cloud");
 	isSuccess &= loadImage("s_game_cloud_damage", "s_game/cloud");
@@ -134,11 +151,13 @@ bool Object::load() {
 	isSuccess &= loadSound("s_game_dead", "s_game/dead.wav");
 	isSuccess &= loadSound("s_game_attack", "s_game/bomb.mp3");
 	isSuccess &= loadSound("s_game_jump", "s_game/jump.mp3");
-	isSuccess &= loadSound("s_game_shuzo", "s_game/shuzo.mp3");
+	isSuccess &= loadSound("s_game_shuzo", "s_game/shuzo.mp3"); 
+	isSuccess &= loadSound("s_game_fireshot", "s_game/fireshot_kurage.mp3");
 
 	isSuccess &= loadEffect("s_game_hit", "s_game/hit", 5, 2, 1200, 400);
 	isSuccess &= loadEffect("s_game_enemy_over", "s_game/enemy", 10, 1, 1200, 200);
 	isSuccess &= loadEffect("s_game_sword", "s_game/sword", 9, 1, 1080, 120);
+	isSuccess &= loadEffect("s_game_fireshot", "s_game/ghorst_", 10, 1, 2400, 240);
 
 	isSuccess &= loadEffect("s_game_water", "s_game/water", 5, 6, 2560, 1536);
 
@@ -147,13 +166,16 @@ bool Object::load() {
 	isSuccess &= loadImage("s_game_piyo", "s_game/piyo");
 	isSuccess &= loadImage("s_game_sword", "s_game/sword");
 	isSuccess &= loadImage("s_game_shield", "s_game/shield");
-	isSuccess &= loadImage("s_game_invalid", "s_game/dead_sample");
+	isSuccess &= loadImage("s_game_invalid", "s_game/batsu");
 	// リザルト
 	isSuccess &= loadImage("s_game_result_clear", "s_game/s_game_clear");
 	isSuccess &= loadImage("s_game_result_dead", "s_game/s_game_result");
 	isSuccess &= loadImage("s_game_dead", "s_game/dead_sample");
 	isSuccess &= loadSound("s_game_over", "s_game/game_over.wav");
-
+	isSuccess &= loadEffect("s_game_over_hanabi", "s_game/hanabi", 14, 15, 7168, 7680);
+	//isSuccess &= loadMovie("s_game_over_hanabi", "s_game/hanabi");
+	isSuccess &= loadEffect("s_game_curtain_close", "s_game/curtain_close", 1, 18, 640, 8640);
+	isSuccess &= loadEffect("s_game_curtain_open", "s_game/curtain_open", 1, 10, 640, 4800);
 
 	// puzzle game
 	isSuccess &= loadImage("p_block", "puzzle/block");
@@ -180,26 +202,69 @@ bool Object::load() {
 	isSuccess &= loadEffect("p_coins", "puzzle/coins", 5, 6, 1200, 1440);
 	isSuccess &= loadEffect("p_curtain_close", "puzzle/curtain_close", 1, 18, 640, 8640);
 	isSuccess &= loadEffect("p_curtain_open", "puzzle/curtain_open", 1, 10, 640, 4800);
-	isSuccess &= loadEffect("p_arrow1", "arrow1",10,1,1200,120);
+	isSuccess &= loadEffect("p_arrow", "puzzle/arrow",10,1,1200,120);
 	isSuccess &= loadEffect("p_crystal1", "puzzle/crystal1", 5, 4, 600, 480);
 	isSuccess &= loadEffect("p_crystal2", "puzzle/crystal2", 5, 4, 600, 480);
 	isSuccess &= loadEffect("p_warp", "puzzle/warp", 2, 8, 1600, 4800);
 	isSuccess &= loadEffect("p_num", "puzzle/number", 10, 1, 390, 54);
 	isSuccess &= loadEffect("p_init", "puzzle/init", 14, 1, 1680, 120);
+	isSuccess &= loadSound("p_bgm1", "puzzle/otenbahime.mp3");
+	isSuccess &= loadSound("p_bgm2", "puzzle/hajimetenootsukai.mp3");
+
+	isSuccess &= loadMovie("p_flower", "puzzle/flower");
 
 	// breakout game
-	isSuccess &= loadImage("ship_block", "shipBlock");
-	isSuccess &= loadImage("pot", "pot");
-	isSuccess &= loadImage("restore_ship", "restore_ship");
-	isSuccess &= loadImage("damage_ship", "damage_ship");
-	isSuccess &= loadImage("block_blue", "block_blue");
-	isSuccess &= loadImage("block_red", "block_red");
-	isSuccess &= loadImage("block_green", "block_green");
+
+	isSuccess &= loadImage("b_ship_block", "shipBlock");
+	isSuccess &= loadImage("b_pot", "pot");
+	isSuccess &= loadImage("b_restore_ship", "restore_ship");
+	isSuccess &= loadImage("b_damage_ship", "damage_ship");
+	isSuccess &= loadImage("b_enhance_ship", "breakout/star");
+	isSuccess &= loadImage("b_restore_time", "breakout/clock");
+
+	isSuccess &= loadImage("b_donald", "breakout/donald");
+	isSuccess &= loadImage("b_right_hand", "breakout/right_hand");
+	isSuccess &= loadImage("b_left_hand", "breakout/left_hand");
+	isSuccess &= loadImage("b_snake_weak", "breakout/snake_weak");
+
+	isSuccess &= loadImage("b_block_blue", "block_blue");
+	isSuccess &= loadImage("b_block_red", "block_red");
+	isSuccess &= loadImage("b_block_green", "block_green");
+
+	isSuccess &= loadImage("b_hard_block", "breakout/hard_block");
+	isSuccess &= loadImage("b_hatena_block", "breakout/hatena_block");
+	isSuccess &= loadImage("b_unbreakable_block", "breakout/unbreakable_block");
+
 	isSuccess &= loadImage("b_forest", "breakout/forest");
 	isSuccess &= loadImage("b_magma", "breakout/magma");
+	isSuccess &= loadImage("b_hill", "breakout/hill");
+
 	isSuccess &= loadImage("b_game_over", "breakout/game_over");
 	isSuccess &= loadImage("b_game_clear", "breakout/game_clear");
 	isSuccess &= loadImage("b_explanation", "breakout/explanation");
 
+	isSuccess &= loadImage("b_easy", "breakout/easy");
+	isSuccess &= loadImage("b_normal", "breakout/normal");
+	isSuccess &= loadImage("b_hard", "breakout/hard");
+
+	isSuccess &= loadImage("b_house01", "breakout/house01");
+	isSuccess &= loadImage("b_hime", "puzzle/hime_normal");
+	isSuccess &= loadImage("b_hime_damaged", "puzzle/hime_gameover");
+
+	isSuccess &= loadEffect("b_muteki", "breakout/muteki", 1, 6, 320, 1440);
+	isSuccess &= loadEffect("b_burning", "breakout/burning", 1, 5, 240, 900);
+	isSuccess &= loadEffect("b_explosion", "breakout/explosion", 7, 1, 840, 120);
+
+	for (int num = 0; num <= 9; ++num) {
+		for (const auto& color : { "red", "blue", "yellow", "green" }) {
+			std::ostringstream key;
+			std::ostringstream name;
+			key << color << "_" << num;
+			name << "breakout/number/" << color << "/" << num;
+			isSuccess &= loadImage(key.str(), name.str());
+		}
+	}
+
+	//isSuccess &= loadMovie("b_mode_select", "breakout/mode_select.mp4");
 	return isSuccess;
 }
