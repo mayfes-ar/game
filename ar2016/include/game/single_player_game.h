@@ -1216,13 +1216,15 @@ class SinglePlayerGame : public Game {
 	};
 
 
-
-	int tutorial = 1;
+	enum Tutorial {
+		START,BEATFIRE,BEATHEIHO,END
+	};
+	Tutorial tutorial = START;
 
 	class tutoFire : public Enemy {
 		bool freezed = false;
 		int freezetime = FPS/3 * 2;
-		int tutorial;
+		Tutorial tutorial;
 	public:
 		static const int width = 280 / 3;
 		static const int height = 194 / 3;
@@ -1249,7 +1251,7 @@ class SinglePlayerGame : public Game {
 				setAc(acX, acY);
 			}
 			updateCoordinate(acX, acY);
-			moveBecauseMarkerCollision(game.markerList);
+			//moveBecauseMarkerCollision(game.markerList);
 		}
 
 		void setAc(double& acX, double& acY) {
@@ -1273,7 +1275,7 @@ class SinglePlayerGame : public Game {
 		int frameCounter = FPS * 3;
 		double acX = 0;
 		double acY = 2;
-		int tutorial;
+		Tutorial tutorial;
 		std::shared_ptr<PendulumCounter> swingCounter = makePendulum(10);
 	public:
 		std::shared_ptr<SinglePlayerGame::tutoFire> childfire = NULL;
@@ -1289,7 +1291,7 @@ class SinglePlayerGame : public Game {
 			updateCoordinate(acX, acY);
 			// moveBecauseBlockCollision(game.blockList);
 
-			moveBecauseMarkerCollision(game.markerList);
+			//moveBecauseMarkerCollision(game.markerList);
 		}
 
 		void setAc(double& acX, double& acY) {
@@ -1629,7 +1631,7 @@ class SinglePlayerGame : public Game {
 	class tutoPlayer : public Character {
 		int frameCount;
 		std::string message;
-		int tutorial;
+		Tutorial tutorial;
 		bool isToJump = false;
 	public:
 		static const int width = 621 / 8;

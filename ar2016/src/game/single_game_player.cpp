@@ -1,4 +1,5 @@
 ﻿#include "game/single_player_game.h"
+#include <typeinfo.h>
 
 std::shared_ptr<SinglePlayerGame::Teresa> SinglePlayerGame::makeTeresa(int x = 0, int y = 0, double size = 1.0) {
 	if (x == 0 && y == 0) {
@@ -199,13 +200,14 @@ bool SinglePlayerGame::onStart() {
 			bool start = false;
 			int timer = 0;
 			std::shared_ptr<SinglePlayerGame::tutoHeiho> tutoenemy;
-			int *tutorial;
+			Tutorial *tutorial;
 			std::string tutosen1= "あ、危ない！！";
 			std::string tutosen2 = "お姫様に火の玉が当たりそうです！！";
 			std::string tutosen3 = "お姫様を守るために盾を使ってみましょう";
 			std::string tutosen4 = "マーカーを火の玉に当ててみてください";
 			std::string tutosen5 = "剣を使えば敵を倒すこともできます";
-			std::string tutosen6 = "これでチュートリアルを終了します";
+			std::string tutosen6 = "盾と剣を使ってお姫様を敵から守りましょう！！";
+			std::string tutosen7 = "これでチュートリアルを終了します";
 
 		
 		public:
@@ -241,12 +243,14 @@ bool SinglePlayerGame::onStart() {
 					DrawString(550, 350, tutosen3.c_str(), GetColor(0, 0, 0));
 				}
 				else if (timer <= FPS * 8) {
+					*tutorial = BEATFIRE;
 					DrawString(550, 350, tutosen4.c_str(), GetColor(0, 0, 0));
 					if (timer == FPS * 8 && tutoenemy->childfire->getIsAlive()) {
 						timer--;
 					}
 				}
 				else if (timer <= FPS * 10) {
+					*tutorial = BEATHEIHO;
 					DrawString(550, 350, tutosen5.c_str(), GetColor(0, 0, 0));
 					if (timer == FPS * 10 && tutoenemy->getIsAlive()) {
 						timer--;
@@ -255,16 +259,18 @@ bool SinglePlayerGame::onStart() {
 				else if (timer <= FPS * 12) {
 					DrawString(550, 350, tutosen6.c_str(), GetColor(0, 0, 0));
 				}
+				else if (timer <= FPS * 14) {
+					DrawString(550, 350, tutosen7.c_str(), GetColor(0, 0, 0));
+				}
 				else {
-					*tutorial = 3;
+					*tutorial = END;
 				}
 				return true;
 			}
 		};
 
 		tutoenemy = maketutoHeiho(WIDTH, 300, 1);
-		shared_ptr<Title> tutorial = make_shared<Title>(tutoenemy,*this);
-		drawList.push_back(tutorial);
+		drawList.push_back(make_shared<Title>(tutoenemy, *this));
 
 
 	}, -1);
@@ -489,23 +495,9 @@ bool SinglePlayerGame::onUpdate() {
 
 
 		switch (tutorial) {
-		case 1: {
-			//tutoenemy = makeTeresa(WIDTH-200,HEIGHT-300,2);
-			tutorial = 2;
-			break;
-		}
-		case 2: {
-		if (heihoFreezeTimeRemain >= 0) {
+		case START: {
+			if (heihoFreezeTimeRemain >= 0) {
 				heihoFreezeTimeRemain--;
-			}
-			else {
-				if (tutoenemy->childfire->getIsAlive()) {
-					tutoenemy->setIsAlive();
-				}
-
-				if (!tutoenemy->childfire->getIsAlive() && !tutoenemy->getIsAlive()) {
-					tutorial = 0;
-				}
 			}
 			if (heihoFreezeTimeRemain == 0) {
 				tutoenemy->freeze();
@@ -514,11 +506,25 @@ bool SinglePlayerGame::onUpdate() {
 		
 			break;
 		}
+		case BEATFIRE: {
+			tutoenemy->childfire->deathDecision();
+			break;
+		}
+		case BEATHEIHO: {
+			tutoenemy->deathDecision();
+			break;
+		}
+		case END: {//Titleクラスの中でtutorialがENDになる
+			willFinishMode = true;
+			break;
+		}
 		}
 
 
+		
+
+
 		for (auto enemy : enemyList) {
-			enemy->deathDecision();
 			enemy->update();
 		}
 		for (auto enemy : enemySubList) {
@@ -528,9 +534,6 @@ bool SinglePlayerGame::onUpdate() {
 		enemySubList.shrink_to_fit();
 
 		tutoplayer->update(key);
-		if (tutorial == 3) {
-			willFinishMode = true;
-		}
 		break;
 	}
 	case GAME: { // playing
