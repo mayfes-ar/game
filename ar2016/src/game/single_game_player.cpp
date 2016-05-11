@@ -543,7 +543,10 @@ bool SinglePlayerGame::onUpdate() {
 		break;
 	}
 	case GAME: { // playing
-
+		tutoenemy->setIsDead();
+		if (tutoenemy->childfire != NULL) {
+			tutoenemy->childfire->setIsDead();
+		}
 		timer -= 1;
 		if (timer <= 0) {
 			willFinishMode = true;

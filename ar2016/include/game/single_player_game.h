@@ -603,8 +603,8 @@ class SinglePlayerGame : public Game {
 			return isAlive;
 		}
 
-		virtual void setIsAlive() {
-			isAlive = true;
+		virtual void setIsDead() {
+			isAlive = false;
 		}
 
 		virtual void die() {
@@ -1288,7 +1288,9 @@ class SinglePlayerGame : public Game {
 		void update() {
 			if (characterState == OVER) { return; }
 			//setAc(acX, acY);
-			updateCoordinate(acX, acY);
+			if (tutorial != END) {
+				updateCoordinate(acX, acY);
+			}
 			// moveBecauseBlockCollision(game.blockList);
 
 			//moveBecauseMarkerCollision(game.markerList);
@@ -1661,7 +1663,7 @@ class SinglePlayerGame : public Game {
 			setAc(acX, acY, key);
 			updateCoordinate(acX, acY);
 			moveBecauseBlockCollision(game.blockList);
-			moveBecauseMarkerCollision(game.markerList);
+		//	moveBecauseMarkerCollision(game.markerList);
 		}
 
 		void updateCoordinate(double& acX, double& acY) {
