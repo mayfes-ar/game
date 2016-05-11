@@ -233,7 +233,7 @@ bool SinglePlayerGame::onStart() {
 				update();
 				UINT w, h;
 				getPngSize("img/s_game/tuto0.png",&w,&h);
-				DrawExtendGraph(WIDTH - w/2, 30, WIDTH, 30 + h/2, imgHandles["s_game_tuto0"], false);
+				DrawExtendGraph(WIDTH - w/2, 30, WIDTH, 30 + h/2, imgHandles["s_game_tuto0"], true);
 				//DrawString(WIDTH - 700, 30, std::to_string(w).c_str(), GetColor(0, 0, 0));
 
 				if (timer <= FPS * 2/3) {
@@ -242,23 +242,23 @@ bool SinglePlayerGame::onStart() {
 				else if (timer <= FPS * 2) {
 					getPngSize("img/s_game/tuto1.png", &w, &h);
 					//DrawString(550, 350, tutosen1.c_str(), GetColor(0, 0, 0));
-					DrawGraph(WIDTH/2-w/2, HEIGHT/2-h/2, imgHandles["s_game_tuto1"], false);
+					DrawGraph(WIDTH/2-w/2, HEIGHT/2-h/2, imgHandles["s_game_tuto1"], true);
 				}
 				else if (timer <= FPS * 4) {
 					getPngSize("img/s_game/tuto2.png", &w, &h);
 					//DrawString(550, 350, tutosen2.c_str(), GetColor(0, 0, 0));
-					DrawGraph(WIDTH / 2 - w / 2, HEIGHT / 2 - h / 2, imgHandles["s_game_tuto2"], false);
+					DrawGraph(WIDTH / 2 - w / 2, HEIGHT / 2 - h / 2, imgHandles["s_game_tuto2"], true);
 				}
 				else if (timer <= FPS * 6) {
 					getPngSize("img/s_game/tuto3.png", &w, &h);
 					//DrawString(550, 350, tutosen3.c_str(), GetColor(0, 0, 0));
-					DrawGraph(WIDTH / 2 - w / 2, HEIGHT / 2 - h / 2, imgHandles["s_game_tuto3"], false);
+					DrawGraph(WIDTH / 2 - w / 2, HEIGHT / 2 - h / 2, imgHandles["s_game_tuto3"], true);
 				}
 				else if (timer <= FPS * 8) {
 					*tutorial = BEATFIRE;
 					getPngSize("img/s_game/tuto4.png", &w, &h);
 					//DrawString(550, 350, tutosen4.c_str(), GetColor(0, 0, 0));
-					DrawGraph(WIDTH / 2 - w / 2, HEIGHT / 2 - h / 2, imgHandles["s_game_tuto4"], false);
+					DrawGraph(WIDTH / 2 - w / 2, HEIGHT / 2 - h / 2, imgHandles["s_game_tuto4"], true);
 					if (timer == FPS * 8 && tutoenemy->childfire->getIsAlive()) {
 						timer--;
 					}
@@ -267,7 +267,7 @@ bool SinglePlayerGame::onStart() {
 					*tutorial = BEATHEIHO;
 					getPngSize("img/s_game/tuto5.png", &w, &h);
 					//DrawString(550, 350, tutosen5.c_str(), GetColor(0, 0, 0));
-					DrawGraph(WIDTH / 2 - w / 2, HEIGHT / 2 - h / 2, imgHandles["s_game_tuto5"], false);
+					DrawGraph(WIDTH / 2 - w / 2, HEIGHT / 2 - h / 2, imgHandles["s_game_tuto5"], true);
 					if (timer == FPS * 10 && tutoenemy->getIsAlive()) {
 						timer--;
 					}
@@ -275,12 +275,12 @@ bool SinglePlayerGame::onStart() {
 				else if (timer <= FPS * 12) {
 					getPngSize("img/s_game/tuto6.png", &w, &h);
 					//DrawString(550, 350, tutosen6.c_str(), GetColor(0, 0, 0));
-					DrawGraph(WIDTH / 2 - w / 2, HEIGHT / 2 - h / 2, imgHandles["s_game_tuto6"], false);
+					DrawGraph(WIDTH / 2 - w / 2, HEIGHT / 2 - h / 2, imgHandles["s_game_tuto6"], true);
 				}
 				else if (timer <= FPS * 14) {
 					getPngSize("img/s_game/tuto7.png", &w, &h);
 					//DrawString(550, 350, tutosen7.c_str(), GetColor(0, 0, 0));
-					DrawGraph(WIDTH / 2 - w / 2, HEIGHT / 2 - h / 2, imgHandles["s_game_tuto7"], false);
+					DrawGraph(WIDTH / 2 - w / 2, HEIGHT / 2 - h / 2, imgHandles["s_game_tuto7"], true);
 				}
 				else {
 					*tutorial = END;
