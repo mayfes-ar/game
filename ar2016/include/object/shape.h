@@ -120,11 +120,6 @@ namespace Shape {
 			Line line(getLeftBottomPoint(), getRightBottomPoint() - getLeftBottomPoint());
 			return line;
 		}
-
-		bool isContacted(Rectangle rect) const {
-			return (left() < rect.right() && top() < rect.bottom() &&
-				right() > rect.left() && bottom() > rect.top());
-		}
 	};
 
 } // namespace Shape

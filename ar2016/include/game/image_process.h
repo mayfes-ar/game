@@ -1,7 +1,6 @@
 ﻿#pragma once
 
 #include "object/units.h"
-#include "game/marker_dictionary.h"
 
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
@@ -27,10 +26,9 @@ public:
 
 	std::mutex rectMutex;
 	//マーカーが認識されなかったときにこの値が正ならマーカーが認識されなくなっても値分のフレームだけ画面に表示される。
-	std::array<int, MARKER_NUM> lives{0,0,0,0,0};
+	std::array<int, MARKER_NUM> lives{0,0,0,0,0,0,0};
 	//rects が認識結果（座標と大きさ）
 	std::array<Rectan, MARKER_NUM>  rects;
-	aruco::Dictionary dictionary = MarkerDictionary().dictionary;
 };
 
 void capture(ShareData& share);

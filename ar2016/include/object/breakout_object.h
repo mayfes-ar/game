@@ -31,25 +31,11 @@ namespace Breakout {
 
 	// 描画の優先順位
 	constexpr int PRIORITY_BACKGROUND = 0; // 背景画像
-	constexpr int PRIORITY_SECTION = 10; // レイアウト（ゲームフィールド、スコア表示、デバッグ表示等）
-	constexpr int PRIORITY_FIREBALL_REFLECT = 15; // ファイアーボールの反射の優先度
-	constexpr int PRIORITY_STATIC_OBJECT = 20; // 静的オブジェクト (Block)
-	constexpr int PRIORITY_DYNAMIC_OBJECT = 30; // 動的オブジェクト(Ship, Fireball)
-	constexpr int PRIORITY_CHARACTER = 40; // キャラクター(マリオ)
-	constexpr int PRIORITY_INFO = 50; // インフォメーション
-
-	// 方向をあらわすenum
-	enum Direction { Top, Left, Bottom, Right };
-
-	//Fireball の Modeを決定するためのもの
-	//EnemyかPlayerか、StrongかWeakかの4種類からなっている。
-	//それぞれ描画時に色を変える？
-	enum FireballKind {
-		EnemyWeak,
-		EnemyStrong,
-		PlayerWeak,
-		PlayerStrong
-	};
+	constexpr int PRIORITY_SECTION = 1; // レイアウト（ゲームフィールド、スコア表示、デバッグ表示等）
+	constexpr int PRIORITY_STATIC_OBJECT = 2; // 静的オブジェクト (Block)
+	constexpr int PRIORITY_DYNAMIC_OBJECT = 3; // 動的オブジェクト(Ship, Fireball)
+	constexpr int PRIORITY_CHARACTER = 4; // キャラクター(マリオ)
+	constexpr int PRIORITY_INFO = 5; // インフォメーション
 
 	class Effect : public Object {
 	public:
@@ -57,13 +43,11 @@ namespace Breakout {
 			m_effectHandles = effectHandle;
 			m_count_max = m_effectHandles.size();
 			m_frames_per_scene = frames_per_scene;
-			GetGraphSize(m_effectHandles[0], &m_effect_width, &m_effect_height);
 			Object::layer = priority;
 		}
 		Effect(std::vector<int>& effectHandle, const int priority) {
 			m_effectHandles = effectHandle;
 			m_count_max = m_effectHandles.size();
-			GetGraphSize(m_effectHandles[0], &m_effect_width, &m_effect_height);
 			Object::layer = priority;
 		}
 
@@ -73,45 +57,11 @@ namespace Breakout {
 				m_effectHandles[m_counter / m_frames_per_scene], TRUE);
 		}
 
-		int getCounter() {
-			return m_counter;
-		}
-
-		void setCounter(int counter) {
-			m_counter = counter;
-		}
-
-		int getFramesPerScene() {
-			return m_frames_per_scene;
-		}
-
 		void incrementCounterWhenDrawWithRealm(Shape::Rectangle realm) {
 			DrawExtendGraph(realm.left(), realm.top(),
 				realm.right(), realm.bottom(),
 				m_effectHandles[m_counter / m_frames_per_scene], TRUE);
 			incrementCounter();
-		}
-
-		bool returnFalseWhenFinishDraw(Shape::Rectangle realm) {
-			if (m_counter < m_count_max) {
-				DrawExtendGraph(realm.left(), realm.top(),
-					realm.right(), realm.bottom(),
-					m_effectHandles[m_counter / m_frames_per_scene], TRUE);
-				m_counter++;
-				return true;
-			}
-			return false;
-		}
-		bool returnFalseWhenFinishDrawWithDirection(Shape::Rectangle realm, Direction dir) {
-			float degree = M_PI / 180.0 * (int)dir * 90;
-			if (m_counter < m_count_max) {
-				DrawRotaGraph(realm.getCenterPoint().x(), realm.getCenterPoint().y(),
-					(double)realm.width / (double)m_effect_width, degree,
-					m_effectHandles[m_counter / m_frames_per_scene], TRUE, FALSE);
-				m_counter++;
-				return true;
-			}
-			return false;
 		}
 
 		bool draw() override { return true; };
@@ -124,8 +74,6 @@ namespace Breakout {
 		std::vector<int> m_effectHandles;
 		int m_count_max = 0;
 		int m_counter = 0;
-		int m_effect_width = 0;
-		int m_effect_height = 0;
 		// 1つの差分を連続で何フレーム映すか
 		int m_frames_per_scene = 1;
 	};
@@ -439,7 +387,7 @@ public:
 	explicit Info(const Shape::Rectangle realm, const std::shared_ptr<Timer>& timer)
 		: m_realm(realm), m_timer(timer)
 	{
-		Object::layer = PRIORITY_INFO;
+		Object::layer = PRIORITY_SECTION;
 		m_score = std::make_shared<Score>();
 	}
 
@@ -514,6 +462,7 @@ public:
 				imgHandles[key.str()], TRUE);
 		}
 
+		m_score->addPoint(1);
 		auto score = m_score->getPoint();
 		std::array<int, 4> score_num;
 		score_num.at(0) = score / 1000;
@@ -792,59 +741,14 @@ public:
 	}
 };
 
-class FireballReflect : public Object
-{
-public:
-	FireballReflect() { 
-		Object::layer = PRIORITY_FIREBALL_REFLECT;
-	}
-	FireballReflect(Eigen::Vector2i& hit_point, Direction dir, FireballKind kind) {
-		is_collide = true;
-		realm.width = width;
-		realm.height = height;
-		switch (dir) {
-		case Top:
-			realm.start_point = hit_point + Eigen::Vector2i( -width / 2, -height / 2);
-			break;
-		case Left:
-			realm.start_point = hit_point + Eigen::Vector2i( -width / 2, -height / 2);
-			break;
-		case Bottom:
-			realm.start_point = hit_point;// +Eigen::Vector2i(-width / 2, 0);
-		case Right:
-			realm.start_point = hit_point + Eigen::Vector2i(-width / 2, - height / 2);
-		}
-		switch (kind) {
-		case EnemyStrong:
-		case EnemyWeak:
-			break;
-		case PlayerStrong:
-		case PlayerWeak:
-			setReflectEffect("b_green_fireball_reflect");
-			break;
-		}
-		Object::layer = PRIORITY_FIREBALL_REFLECT;
-	}
-
-	bool draw() override {
-		return reflect_effect.returnFalseWhenFinishDrawWithDirection(realm, direction);
-	}
-
-	void setReflectEffect(std::string effect_name) {
-		reflect_effect = Effect(effectHandles[effect_name], PRIORITY_FIREBALL_REFLECT);
-	}
-
-	bool isCollide() {
-		return is_collide;
-	}
-
-private:
-	bool is_collide = false;
-	Direction direction = Top;
-	Shape::Rectangle realm = Shape::Rectangle();
-	int width = 40;
-	int height = 40;
-	Effect reflect_effect = Effect(effectHandles["b_fireball_reflect"], PRIORITY_FIREBALL_REFLECT);
+//Fireball の Modeを決定するためのもの
+//EnemyかPlayerか、StrongかWeakかの4種類からなっている。
+//それぞれ描画時に色を変える？
+enum FireballKind {
+	EnemyWeak,
+	EnemyStrong,
+	PlayerWeak,
+	PlayerStrong
 };
 
 // Block崩しに使われるBlock
@@ -860,13 +764,11 @@ public:
 	Fireball(const Shape::Circle& realm, const std::shared_ptr<Moving>& moving)
 		: m_realm(realm), m_moving(moving)
 	{
-		m_bounding_box = Shape::Rectangle(m_realm.center - Eigen::Vector2i(m_realm.radius, m_realm.radius), m_realm.radius * 2, m_realm.radius * 2);
 		Object::layer = PRIORITY_DYNAMIC_OBJECT;
 	}
 	Fireball(const Shape::Circle& realm, const std::shared_ptr<Moving>& moving, FireballKind mode)
 		: m_realm(realm), m_moving(moving), m_mode(mode)
 	{
-		m_bounding_box = Shape::Rectangle(m_realm.center - Eigen::Vector2i(m_realm.radius, m_realm.radius), m_realm.radius * 2, m_realm.radius * 2);
 		Object::layer = PRIORITY_DYNAMIC_OBJECT;
 	}
 
@@ -878,24 +780,15 @@ public:
 		int x = m_realm.center.x();
 		int y = m_realm.center.y();
 		int r = m_realm.radius;
-
 		switch (m_mode) {
 		case EnemyWeak:
-			if (m_fireball_effect.getCounter() < 11 * m_fireball_effect.getFramesPerScene()) {
-				m_fireball_effect.incrementCounterWhenDrawWithRealm(m_bounding_box);
-			} else {
-				m_fireball_effect.incrementCounterWhenDrawWithRealm(m_bounding_box);
-				if (m_fireball_effect.getCounter() == 25 * m_fireball_effect.getFramesPerScene() - 1) {
-					m_fireball_effect.setCounter(m_fireball_effect.getFramesPerScene() * 11);
-				}
-			}
-			
+			DrawCircle(x, y, r, Color::RED, true);
 			break;
 		case EnemyStrong:
 			DrawCircle(x, y, r, Color::BLACK, true);
 			break;
 		case PlayerWeak:
-			m_green_fireball_effect.incrementCounterWhenDrawWithRealm(m_bounding_box);
+			DrawCircle(x, y, r, Color::BLUE, true);
 			break;
 		case PlayerStrong:
 			DrawCircle(x, y, r, Color::GREEN, true);
@@ -907,7 +800,6 @@ public:
 
 	void updatePosition() {
 		m_moving->updatePoistion(m_realm.center);
-		m_bounding_box = Shape::Rectangle(m_realm.center - Eigen::Vector2i(m_realm.radius, m_realm.radius), m_realm.radius * 2, m_realm.radius * 2);
 	}
 
 	void setPosition(const Eigen::Vector2i& pos) {
@@ -948,7 +840,6 @@ public:
 	}
 	// if in then -1, out then 1, default is 1
 	bool isCollided(const Shape::Rectangle& parent, const int inOrOut = 1, const int parentVelocity = 0);
-	std::shared_ptr<FireballReflect> returnFireballReflect(const Shape::Rectangle& parent, const int inOrOut = 1, const int parentVelocity = 0);
 
 	FireballKind getMode() {
 		return m_mode;
@@ -1002,11 +893,8 @@ public:
 private:
 	bool m_is_disappeared = false; // 火の玉にあったかどうか
 	Shape::Circle m_realm = Shape::Circle(); // Firebollの領域
-	Shape::Rectangle m_bounding_box = Shape::Rectangle();
 	std::shared_ptr<Moving> m_moving = nullptr;
 	FireballKind m_mode = EnemyWeak;
-	Effect m_fireball_effect = Effect(effectHandles["b_fireball"], 3, PRIORITY_DYNAMIC_OBJECT);
-	Effect m_green_fireball_effect = Effect(effectHandles["b_green_fireball"], PRIORITY_DYNAMIC_OBJECT);
 };
 
 class FireballManager : public Object {
@@ -1446,21 +1334,16 @@ public:
 		//死んでいて
 		if (!isAlive()) {
 			//燃える処理が終わってないなら
-			if (m_dead_count >= 0) {
-				m_dead_effect.incrementCounterWhenDrawWithRealm(m_realm);
-				m_dead_count--;
+			if (m_burning_count >= 0) {
+				m_burning_effect.incrementCounterWhenDrawWithRealm(m_realm);
+				m_burning_count--;
 			}
 		}
 		return true;
 	}
 
 	bool isEffectContinuing() {
-		return m_dead_count >= 0;
-	}
-
-	void setDeadEffect(std::string effect_name, int frames_per_scene, int dead_effect = 0) {
-		m_dead_effect = Effect(effectHandles[effect_name], frames_per_scene, PRIORITY_DYNAMIC_OBJECT);
-		if (dead_effect == 0) dead_effect = m_dead_effect.getCounter() * m_dead_effect.getFramesPerScene();
+		return m_burning_count >= 0;
 	}
 	
 protected:
@@ -1469,8 +1352,8 @@ protected:
 	std::shared_ptr<Moving> m_moving = std::make_shared<Moving>(1.0f/30.0f, std::make_shared<NewtonBehavior>());
 
 private:
-	Effect m_dead_effect = Effect(effectHandles["b_burning"], 5, PRIORITY_DYNAMIC_OBJECT);
-	int m_dead_count = 60;
+	int m_burning_count = 60;
+	Effect m_burning_effect = Effect(effectHandles["b_burning"], 5, PRIORITY_DYNAMIC_OBJECT);
 };
 
 class House : public Town

@@ -45,9 +45,89 @@ void detect(cv::Mat& src, ShareData& share) {
 	using namespace cv;
 	using namespace std;
 
-	static aruco::Dictionary dictionary = share.dictionary;
+	static aruco::Dictionary dictionary;
 	// markers of 6x6 bits
-	
+	dictionary.markerSize = 7;
+	// maximum number of bit corrections
+	dictionary.maxCorrectionBits = 1;
+	// lets create a dictionary of 100 markers
+
+	unsigned char markers[MARKER_NUM][49] = {
+		{
+			0,0,0,1,0,0,0,
+			0,0,1,0,0,0,0,
+			0,1,0,0,0,0,0,
+			1,0,1,1,1,1,1,
+			0,1,0,0,0,0,0,
+			0,0,1,0,0,0,0,
+			0,0,0,1,0,0,0
+		},
+		{
+			0,0,1,1,1,0,0,
+			0,1,0,0,0,1,0,
+			0,1,0,0,0,1,0,
+			0,0,1,1,0,0,0,
+			0,0,0,1,0,0,0,
+			0,0,0,0,0,0,0,
+			0,0,0,1,0,0,0
+		},
+		{
+			0,0,0,0,0,0,0,
+			0,1,1,1,1,1,0,
+			0,1,0,0,0,1,0,
+			0,1,0,0,0,1,0,
+			0,1,0,0,0,1,0,
+			0,1,1,1,1,1,0,
+			0,0,0,0,0,0,0
+		},
+		{
+			0,0,0,0,0,0,0,
+			0,1,1,1,1,1,0,
+			0,1,0,0,0,1,0,
+			1,1,0,0,0,1,0,
+			0,1,0,0,0,1,0,
+			0,1,1,1,1,1,0,
+			0,0,0,0,0,0,0
+		},
+		{
+			1,1,1,1,1,1,1,
+			0,1,1,1,1,1,0,
+			0,0,0,0,0,0,0,
+			0,1,1,1,1,1,0,
+			0,0,0,0,0,0,0,
+			1,1,1,1,1,1,1,
+			1,1,1,1,1,1,1
+		},
+		{
+			0,0,0,0,0,0,0,
+			0,0,1,1,1,1,1,
+			0,1,0,1,1,1,1,
+			1,1,1,1,1,1,1,
+			0,1,1,1,1,1,1,
+			0,0,1,1,1,1,1,
+			0,0,0,0,0,0,0
+		},
+		{
+			0,0,0,0,0,0,0,
+			0,1,1,0,1,1,0,
+			1,0,0,1,0,0,1,
+			1,0,0,1,0,0,1,
+			0,1,0,0,0,1,0,
+			0,0,1,0,1,0,0,
+			0,0,0,1,0,0,0
+		}
+	};
+
+	for (int i = 0; i < MARKER_NUM; i++) {
+		// assume generateMarkerBits() generate a new marker in binary format, so that
+		// markerBits is a 5x5 matrix of CV_8UC1 type, only containing 0s and 1s
+
+		cv::Mat markerBits(7, 7, CV_8UC1, markers[i]);//generateMarkerBits();
+
+		cv::Mat markerCompressed = aruco::Dictionary::getByteListFromBits(markerBits);
+		// add the marker as a new row
+		dictionary.bytesList.push_back(markerCompressed);
+	}
 
 	// if use predefined dictionaries, use below
 	//static aruco::Dictionary dictionary =
@@ -62,8 +142,8 @@ void detect(cv::Mat& src, ShareData& share) {
 	// detect markers and estimate pose
 	aruco::detectMarkers(src, dictionary, corners, ids, detectorParams);
 
-	//array<Rectan, 5> rects;
-	array<bool, MARKER_NUM> isDetected = {false, false, false, false, false};
+	//array<Rectan, 7> rects;
+	array<bool, MARKER_NUM> isDetected = {false, false, false, false, false, false, false};
 
 	// set results
 	for (int i = 0; i < ids.size(); i++) {

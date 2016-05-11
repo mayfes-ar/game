@@ -68,7 +68,6 @@ public:
 		updatePotStatus();
 		updateEnemy();
 		updateTown();
-		shipVSEnemy();
 		EnemyVSTown();
 
 		if (key[KEY_INPUT_ESCAPE]) {
@@ -86,8 +85,7 @@ public:
 		return true;
 	}
 private:
-	bool m_is_mode_selected = false;
-    std::thread m_detect_thread;
+	std::thread m_detect_thread;
 
 	BreakoutComponents* m_components = new BreakoutComponents();
 
@@ -99,8 +97,7 @@ private:
 
 		m_components->setup();
 		m_components->info->init();
-		m_is_mode_selected = false;
-    }
+	}
 
 	// すべての衝突判定
 	// Fireball, Itemなど
@@ -123,9 +120,6 @@ private:
 
 	// Townのupdate
 	void updateTown();
-
-	// ShipとEnemyの接触判定
-	void shipVSEnemy();
 
 	// EnemyとTownの戦闘
 	void EnemyVSTown();
