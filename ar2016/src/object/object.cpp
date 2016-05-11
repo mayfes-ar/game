@@ -141,9 +141,9 @@ bool Object::load() {
 	isSuccess &= loadImage("s_game_water_damage", "s_game/water");
 	isSuccess &= loadImage("s_game_water_over", "s_game/water");
 
-	isSuccess &= loadImage("s_game_switch", "s_game/switch1");
-	isSuccess &= loadImage("s_game_switch_damage", "s_game/switch");
-	isSuccess &= loadImage("s_game_switch_over", "s_game/switch");
+	isSuccess &= loadImage("s_game_switch", "s_game/jaguti");
+	isSuccess &= loadImage("s_game_switch_damage", "s_game/jaguti");
+	isSuccess &= loadImage("s_game_switch_over", "s_game/jaguti");
 
 	isSuccess &= loadImage("s_game_heart", "s_game/heart");
 
@@ -159,6 +159,7 @@ bool Object::load() {
 	isSuccess &= loadEffect("s_game_sword", "s_game/sword", 9, 1, 1080, 120);
 	isSuccess &= loadEffect("s_game_fireshot", "s_game/ghorst_", 10, 1, 2400, 240);
 
+	isSuccess &= loadEffect("s_game_water", "s_game/water", 5, 6, 2560, 1536);
 
 	isSuccess &= loadEffect("s_game_coin", "s_game/coin", 5, 2, 1000, 400);
 	// マーカー
@@ -238,7 +239,7 @@ bool Object::load() {
 	isSuccess &= loadImage("b_donald", "breakout/donald");
 	isSuccess &= loadImage("b_right_hand", "breakout/right_hand");
 	isSuccess &= loadImage("b_left_hand", "breakout/left_hand");
-	isSuccess &= loadImage("b_snake_weak", "breakout/snake_weak");
+	isSuccess &= loadImage("b_snake_weak", "breakout/tokage");
 
 	isSuccess &= loadImage("b_block_blue", "block_blue");
 	isSuccess &= loadImage("b_block_red", "block_red");
@@ -267,6 +268,12 @@ bool Object::load() {
 	isSuccess &= loadEffect("b_muteki", "breakout/muteki", 1, 6, 320, 1440);
 	isSuccess &= loadEffect("b_burning", "breakout/burning", 1, 5, 240, 900);
 	isSuccess &= loadEffect("b_explosion", "breakout/explosion", 7, 1, 840, 120);
+	isSuccess &= loadEffect("b_fireball", "breakout/fireball", 5, 5, 500, 500);
+	isSuccess &= loadEffect("b_fireball_reflect", "breakout/fireball_reflect", 14, 1, 1680, 120);
+	isSuccess &= loadEffect("b_green_fireball", "breakout/green_fireball", 5, 5, 500, 500);
+	isSuccess &= loadEffect("b_green_fireball_reflect", "breakout/green_fireball_reflect", 14, 1, 1680, 120);
+	isSuccess &= loadEffect("b_crawl", "breakout/crawl", 5, 2, 1200, 480);
+	
 
 	for (int num = 0; num <= 9; ++num) {
 		for (const auto& color : { "red", "blue", "yellow", "green" }) {
