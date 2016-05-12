@@ -372,17 +372,17 @@ bool SinglePlayerGame::onStart() {
 			const std::string clear2 = "見事お姫様を守り抜くことができました。";
 			const std::string clear3 = "彼女はあなたのことを「好き」と言っています。";
 			const std::string clear4 = "あなたはどうですか。";
-			const std::string clear5 = "姫を守るために振った「剣」の重さ";
+			const std::string clear5 = "姫を守るために取った「剣」の重さ";
 			const std::string clear6 = "どうか覚えていてくださいね。";
 			const std::string clear7 = "遊んでくれてありがとうございました。";
 
 			//ゲームオーバーの文
-			const std::string dead1 = "「今日のおやつは何かしら」";
-			const std::string dead2 = "お姫様は最後の一瞬まで無邪気でした。";
-			const std::string dead3 = "ゲームのデータが消えてしまっても";
-			const std::string dead4 = "まだ物語は息づいています。";
-			const std::string dead5 = "あなただけは、「お姫様」のこと";
-			const std::string dead6 = "忘れないでいてくださいね。";
+			const std::string dead1 = "あなたは姫を守り切れませんでした。";
+			const std::string dead2 = "これは単なる「ゲーム」でしたか？";
+			const std::string dead3 = "あなたの握った剣はニセモノでしたか？";
+			const std::string dead4 = "";
+			const std::string dead5 = "姫はどこかできっとあなたを待ち続けています。";
+			const std::string dead6 = "次があったら、ちゃんと守れるといいですね。";
 			const std::string dead7 = "遊んでくれてありがとうございました。";
 
 
