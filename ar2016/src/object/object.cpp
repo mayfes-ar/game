@@ -213,17 +213,11 @@ bool Object::load() {
 	isSuccess &= loadImage("p_block", "puzzle/block");
 	isSuccess &= loadImage("p_block_x", "puzzle/block_x");
 	isSuccess &= loadImage("s_block", "Brick02");
-	isSuccess &= loadImage("p_man", "man");
 	isSuccess &= loadImage("p_needle", "puzzle/needle");
 	isSuccess &= loadImage("p_hime", "puzzle/hime_normal");
 	isSuccess &= loadImage("p_hime_damaged", "puzzle/hime_gameover");
 	isSuccess &= loadImage("p_explain1", "puzzle/explanation1");
 	isSuccess &= loadImage("p_explain2", "puzzle/explanation2");
-	isSuccess &= loadImage("p_goal", "goal");
-	isSuccess &= loadImage("p_on", "switch_on");
-	isSuccess &= loadImage("p_off", "switch_off");
-
-	isSuccess &= loadImage("p_arrow", "arrow");
 	isSuccess &= loadImage("p_castle", "puzzle/castle");
 	isSuccess &= loadImage("p_saihu", "puzzle/saihu_kari");
 	isSuccess &= loadImage("p_timer", "puzzle/clock_kari");
@@ -239,10 +233,22 @@ bool Object::load() {
 	isSuccess &= loadEffect("p_crystal2", "puzzle/crystal2", 5, 4, 600, 480);
 	isSuccess &= loadEffect("p_warp", "puzzle/warp", 2, 8, 1600, 4800);
 	isSuccess &= loadEffect("p_num", "puzzle/number", 10, 1, 390, 54);
+	isSuccess &= loadEffect("p_num_2", "puzzle/number_2", 10, 1, 1840, 223);
 	isSuccess &= loadEffect("p_init", "puzzle/init", 14, 1, 1680, 120);
+	isSuccess &= loadEffect("p_push_switch", "puzzle/snow", 3,10, 1920, 4800);
 	isSuccess &= loadSound("p_bgm1", "puzzle/otenbahime.mp3");
 	isSuccess &= loadSound("p_bgm2", "puzzle/hajimetenootsukai.mp3");
+	isSuccess &= loadSound("p_bgm3", "puzzle/kibou.mp3");
 
+	isSuccess &= loadSound("ps_needle", "puzzle/needle.mp3");
+	isSuccess &= loadSound("ps_jump", "puzzle/jump.mp3");
+	isSuccess &= loadSound("ps_coin", "puzzle/coin.mp3");
+	isSuccess &= loadSound("ps_warp", "puzzle/warp.mp3");
+	isSuccess &= loadSound("ps_crystal", "puzzle/crystal.mp3");
+	isSuccess &= loadSound("ps_ball", "puzzle/ball.mp3");
+
+	isSuccess &= loadImage("p_score", "puzzle/score");
+	isSuccess &= loadImage("p_perfect", "puzzle/perfect");
 	isSuccess &= loadMovie("p_flower", "puzzle/flower");
 
 	// breakout game
