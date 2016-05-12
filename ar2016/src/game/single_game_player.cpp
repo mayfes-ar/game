@@ -427,6 +427,101 @@ bool SinglePlayerGame::onStart() {
 		bgm = make_shared<BGM>(1);
 		bgm->start();
 
+
+		class Title : public Object {
+			bool start = false;
+			int timer = 0;
+			int *gametimer;
+
+		public:
+			Title(int *gametimer_,SinglePlayerGame& game_) {
+				layer = 50;
+				gametimer = gametimer_;
+			}
+
+			void update() {
+						timer++;
+						(*gametimer)++;
+			}
+
+			bool draw() {
+				UINT w, h;
+				if (timer <= FPS * 6) {
+					update();
+				}
+				if (timer <= FPS * 2 / 3) {
+
+				}
+				else if (timer <= FPS * 2) {
+					getPngSize("img/s_game/3.png", &w, &h);
+					DrawGraph(WIDTH / 2 - w / 2, HEIGHT / 2 - h / 2, imgHandles["s_game_3"], true);
+				}
+				else if (timer <= FPS * 2 + FPS * 4/3) {
+					getPngSize("img/s_game/2.png", &w, &h);
+					DrawGraph(WIDTH / 2 - w / 2, HEIGHT / 2 - h / 2, imgHandles["s_game_2"], true);
+				}
+				else if (timer <= FPS * 2 + FPS * 8/3) {
+					getPngSize("img/s_game/1.png", &w, &h);
+					DrawGraph(WIDTH / 2 - w / 2, HEIGHT / 2 - h / 2, imgHandles["s_game_1"], true);
+				}
+				else if (timer <= FPS * 6) {
+					getPngSize("img/s_game/start.png", &w, &h);
+					DrawGraph(WIDTH / 2 - w / 2, HEIGHT / 2 - h / 2, imgHandles["s_game_start"], true);
+				}
+				return true;
+			}
+
+			/**
+			*	PNGファイルの画像サイズを取得する
+			*/
+			bool getPngSize(const char* path, UINT* width, UINT* height)
+			{
+				FILE* f;
+				fopen_s(&f, path, "rb");
+				if (!f) return false;
+
+				BYTE header[8];// PNGファイルシグネチャ 
+				if (fread(header, sizeof(BYTE), 8, f) < 8) { fclose(f); return false; }
+
+				const static BYTE png[] = { 0x89, 'P', 'N', 'G', 0x0d, 0x0a, 0x1a, 0x0a };
+				if (memcmp(header, png, 8) != 0) { fclose(f); return false; }
+
+				BYTE ihdr[25];// IHDRチャンク(イメージヘッダ) 
+				if (fread(ihdr, sizeof(BYTE), 25, f) < 25) { fclose(f); return false; }
+
+				// length = 13 (0x0D) 
+				const static BYTE length[] = { 0x00, 0x00, 0x00, 0x0D };
+				if (memcmp(ihdr, length, 4) != 0) { fclose(f); return false; }
+
+				// IHDR 
+				if (memcmp(ihdr + 4, "IHDR", 4) != 0) { fclose(f); return false; }
+
+				BYTE* p;
+
+				DWORD w;
+				p = (BYTE*)&w;
+				p[0] = ihdr[8 + 3];
+				p[1] = ihdr[8 + 2];
+				p[2] = ihdr[8 + 1];
+				p[3] = ihdr[8 + 0];
+
+				DWORD h;
+				p = (BYTE*)&h;
+				p[0] = ihdr[12 + 3];
+				p[1] = ihdr[12 + 2];
+				p[2] = ihdr[12 + 1];
+				p[3] = ihdr[12 + 0];
+
+				*width = (UINT)w;
+				*height = (UINT)h;
+
+				fclose(f);
+				return true;
+			}
+		};
+		drawList.push_back(make_shared<Title>(&timer,*this));
+
+
 	}, maxTime);
 
 	// RESULT
@@ -683,6 +778,7 @@ bool SinglePlayerGame::onUpdate() {
 
 		}
 
+		
 		// 敵の出現を管理する
 		switch (difficulty) {
 		case EASY: {
