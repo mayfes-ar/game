@@ -1722,7 +1722,7 @@ public:
 		resident->setVelocity(Eigen::Vector2f((m_realm.left() > FIELD_START_POS.x() + FIELD_WIDTH / 2 ? 80.0f : -80.0f), 20.0f));
 		resident->setAccel(Eigen::Vector2f(0.0f, 30.0f));
 		resident->setImageHandle("b_hime_damaged");
-		std::shared_ptr<Fukidashi> fukidashi = std::make_shared<Fukidashi>(resident->getRealm().getRightTopPoint(), "  daaaa", 60, GetColor(0, 0, 0));
+		std::shared_ptr<Fukidashi> fukidashi = std::make_shared<Fukidashi>(resident->getRealm().getRightTopPoint(), "  だから", 60, GetColor(0, 0, 0));
 		resident->setFukidashi(fukidashi);
 		m_resident = nullptr;
 	}
