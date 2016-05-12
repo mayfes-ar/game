@@ -68,7 +68,7 @@ class SinglePlayerGame : public Game {
 			DrawExtendGraph(CAP2IMG_SHIFT_X, CAP2IMG_SHIFT_Y, CAP2IMG_SHIFT_X + CAP2IMG_RATE*CAP_WIDTH, CAP2IMG_SHIFT_Y + CAP2IMG_RATE*CAP_HEIGHT, handle, FALSE);
 			// SetDrawBright(230, 230, 230);
 			SetDrawBlendMode(DX_BLENDMODE_ALPHA, 200);
-			DrawExtendGraph(0, 0, WIDTH, HEIGHT, imgHandles["background"], true);
+			DrawExtendGraph(0, 0, WIDTH, HEIGHT, imgHandles["s_game_background"], true);
 			SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 100);
 			// SetDrawBright(255, 255, 255);
 			return true;
@@ -1105,8 +1105,6 @@ class SinglePlayerGame : public Game {
 		}
 	};
 
-		
-
 	class Heiho : public Enemy {
 		static const int width = 345 / 4;
 		static const int height = 333 / 4;
@@ -1271,7 +1269,6 @@ class SinglePlayerGame : public Game {
 		}
 	};
 
-
 	class tutoHeiho : public Enemy {
 		static const int width = 345 / 4;
 		static const int height = 333 / 4;
@@ -1355,7 +1352,6 @@ class SinglePlayerGame : public Game {
 			acX = -2;
 		}
 	};
-
 	
 	// 姫様
 	class Player : public Character {
@@ -1648,7 +1644,6 @@ class SinglePlayerGame : public Game {
 			overBuffer--;
 		}
 	};
-
 
 	class tutoPlayer : public Character {
 		int frameCount;

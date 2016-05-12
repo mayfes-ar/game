@@ -140,12 +140,36 @@ bool SinglePlayerGame::onStart() {
 			}
 
 			bool draw() {
-				DrawExtendGraph(0, 0, WIDTH, HEIGHT, imgHandles["s_game_op"], true);
-				DrawExtendGraph(WIDTH / 2 - 429 / 2, 30, WIDTH / 2 + 429 / 2, 30 + 47, imgHandles["s_game_op_title"], true);
+				DrawExtendGraph(0, 0, WIDTH, HEIGHT, imgHandles["s_game_background"], true);
+				// DrawExtendGraph(WIDTH / 2 - 429 / 2, 30, WIDTH / 2 + 429 / 2, 30 + 47, imgHandles["s_game_op_title"], true);
 				// DrawExtendGraph(WIDTH/2-50, 400, WIDTH/2+50, 400+150, imgHandles["s_game_player"], true);
-				DrawString(50, 50, "EASY", difficulty == EASY ? GetColor(255,0,0) : GetColor(255, 255, 255));
-				DrawString(50, 100, "HARD", difficulty == HARD ? GetColor(255, 0, 0) : GetColor(255, 255, 255));
-				DrawString(50, 150, "NIGHTMARE", difficulty == NIGHTMARE ? GetColor(255, 0, 0) : GetColor(255, 255, 255));
+				SetFontSize(32);
+				SetFontThickness(9);
+				DrawString(200, 150, "EASY", difficulty == EASY ? GetColor(255,0,0) : GetColor(0, 0, 0));
+				DrawString(200, 250, "HARD", difficulty == HARD ? GetColor(255, 0, 0) : GetColor(0, 0, 0));
+				DrawString(200, 350, "NIGHTMARE", difficulty == NIGHTMARE ? GetColor(255, 0, 0) : GetColor(0, 0, 0));
+				SetFontSize(24);
+				SetFontThickness(6);
+
+				switch (difficulty)
+				{
+				case EASY: {
+					DrawString(450, 150, "←おすすめ", GetColor(255, 0, 0));
+					break;
+				}
+				case HARD: {
+					DrawString(450, 250, "←べてらん向け", GetColor(255, 0, 0));
+					break;
+				}
+				case NIGHTMARE: {
+					DrawString(450, 350, "←じごく", GetColor(255, 0, 0));
+					break;
+				}
+				default:
+					break;
+				}
+
+				DrawExtendGraph(760, 200, 760+Player::width*3, 200+Player::height*3, imgHandles[difficulty == EASY ? "s_game_player" : difficulty == HARD ? "s_game_player_damage" : "s_game_player_over"], true);
 				return true;
 			}
 		};
