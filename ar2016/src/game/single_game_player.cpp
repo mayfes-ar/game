@@ -103,6 +103,15 @@ std::shared_ptr<SinglePlayerGame::Fire> SinglePlayerGame::makeFire(int x, int y,
 	return enemy;
 }
 
+std::shared_ptr<SinglePlayerGame::Startsign> SinglePlayerGame::makeStartsign(int x, int y, double size = 5.0) {
+	auto enemy = std::make_shared<Startsign>(x, y, *this, size);
+
+	enemySubList.push_back(enemy);
+	drawList.push_back(enemy);
+	return enemy;
+}
+
+
 std::shared_ptr<SinglePlayerGame::tutoHeiho> SinglePlayerGame::maketutoHeiho(int x, int y, double size = 1.0) {
 	auto enemy = std::make_shared<tutoHeiho>(x, y, *this, size);
 	if (tutoplayer->isContacted(enemy)) {
@@ -122,12 +131,13 @@ std::shared_ptr<SinglePlayerGame::tutoFire> SinglePlayerGame::maketutoFire(int x
 }
 
 
+
 bool willFinishMode = false;
 
 bool SinglePlayerGame::onStart() {
 	using namespace std;
 	fps.isShow = true;
-	
+
 	srand((unsigned int)time(NULL));
 
 	// INTRO
@@ -143,7 +153,7 @@ bool SinglePlayerGame::onStart() {
 				DrawExtendGraph(0, 0, WIDTH, HEIGHT, imgHandles["s_game_op"], true);
 				DrawExtendGraph(WIDTH / 2 - 429 / 2, 30, WIDTH / 2 + 429 / 2, 30 + 47, imgHandles["s_game_op_title"], true);
 				// DrawExtendGraph(WIDTH/2-50, 400, WIDTH/2+50, 400+150, imgHandles["s_game_player"], true);
-				DrawString(50, 50, "EASY", difficulty == EASY ? GetColor(255,0,0) : GetColor(255, 255, 255));
+				DrawString(50, 50, "EASY", difficulty == EASY ? GetColor(255, 0, 0) : GetColor(255, 255, 255));
 				DrawString(50, 100, "HARD", difficulty == HARD ? GetColor(255, 0, 0) : GetColor(255, 255, 255));
 				DrawString(50, 150, "NIGHTMARE", difficulty == NIGHTMARE ? GetColor(255, 0, 0) : GetColor(255, 255, 255));
 				return true;
@@ -163,6 +173,7 @@ bool SinglePlayerGame::onStart() {
 		tutoplayer = std::make_shared<tutoPlayer>(WIDTH / 2 - 100 / 2, HEIGHT / 2 - 150 / 2, tutoPlayer::width, tutoPlayer::height, "s_game_player", maxPlayerDamage, *this);
 
 		drawList.clear();
+		drawList.push_back(std::make_shared<CurtainObject>(true));
 
 		auto makeBlock = [this](int x, int y, int width, int height) {
 			auto block = make_shared<SingleGameBlockObject>(x, y, width, height, true);
@@ -201,7 +212,7 @@ bool SinglePlayerGame::onStart() {
 			int timer = 0;
 			std::shared_ptr<SinglePlayerGame::tutoHeiho> tutoenemy;
 			Tutorial *tutorial;
-			std::string tutosen1= "あ、危ない！！";
+			std::string tutosen1 = "あ、危ない！！";
 			std::string tutosen2 = "お姫様に火の玉が当たりそうです！！";
 			std::string tutosen3 = "お姫様を守るために盾を使ってみましょう";
 			std::string tutosen4 = "マーカーを火の玉に当ててみてください";
@@ -209,18 +220,19 @@ bool SinglePlayerGame::onStart() {
 			std::string tutosen6 = "盾と剣を使ってお姫様を敵から守りましょう！！";
 			std::string tutosen7 = "これでチュートリアルを終了します";
 
-		
+
 		public:
-			Title(std::shared_ptr<SinglePlayerGame::tutoHeiho> &tutoenemy_,SinglePlayerGame& game_ ) {
+			Title(std::shared_ptr<SinglePlayerGame::tutoHeiho> &tutoenemy_, SinglePlayerGame& game_) {
 				layer = 50;
 				tutoenemy = tutoenemy_;
 				tutorial = &game_.tutorial;
 			}
 
 			void update() {
+
 				if (tutoenemy->childfire != NULL) {
 					if (tutoenemy->childfire->getIsFreezed() && start == false) {
-					start = true;
+						start = true;
 					}
 					if (start == true) {
 						timer++;
@@ -230,7 +242,7 @@ bool SinglePlayerGame::onStart() {
 
 			bool draw() {
 				update();
-				if (timer <= FPS * 2/3) {
+				if (timer <= FPS * 2 / 3) {
 
 				}
 				else if (timer <= FPS * 2) {
@@ -264,23 +276,32 @@ bool SinglePlayerGame::onStart() {
 				}
 				else {
 					*tutorial = END;
+
 				}
 				return true;
 			}
-		};
 
+		};
+		if (tutorial == END) {
+			drawList.push_back(std::make_shared<CurtainObject>(false));
+		}
 		tutoenemy = maketutoHeiho(WIDTH, 300, 1);
 		drawList.push_back(make_shared<Title>(tutoenemy, *this));
 
 
 	}, -1);
-	
+
 	// GAME
 	mode.setMode([this]() {
+		
+		
+		drawList.clear();
+		drawList.push_back(std::make_shared<CurtainObject>(true));
+		
 		maxPlayerDamage = difficulty == EASY ? 5 : difficulty == HARD ? 10 : 20;
 		player = std::make_shared<Player>(WIDTH / 2 - 100 / 2, HEIGHT / 2 - 150 / 2, Player::width, Player::height, "s_game_player", maxPlayerDamage, *this);
 
-		drawList.clear();
+
 		auto makeBlock = [this](int x, int y, int width, int height) {
 			auto block = make_shared<SingleGameBlockObject>(x, y, width, height, true);
 			blockList.push_back(block);
@@ -327,6 +348,7 @@ bool SinglePlayerGame::onStart() {
 
 		bgm = make_shared<BGM>(1);
 		bgm->start();
+		
 
 	}, maxTime);
 
@@ -335,7 +357,8 @@ bool SinglePlayerGame::onStart() {
 		
 	
 		drawList.clear();	
-		makeEffect("s_game_curtain_open", 0, 0, WIDTH, HEIGHT, false, 400, 1);
+		drawList.push_back(std::make_shared<CurtainObject>(true));
+
 
 		class Title : public Object {
 			bool hasPlayerWon = true;
@@ -353,7 +376,7 @@ bool SinglePlayerGame::onStart() {
 			}
 
 			//クリアの文
-			const std::string clear1 = "あなたはお姫様を守り抜くことができましたが、";
+			const std::string clear1 = "お姫様を守りぬくことができたあなた。";
 			const std::string clear2 = "彼女は守られていたことに気付きもしないまま。";
 			const std::string clear3 = "褒められはしない。言葉も交わせない。";
 			const std::string clear4 = "けれども、それでいいのです。";
@@ -367,7 +390,7 @@ bool SinglePlayerGame::onStart() {
 			const std::string dead3 = "あなたが本当に守れなかったのは姫の命ではなく、";
 			const std::string dead4 = "「姫」という物語の命だということ。";
 			const std::string dead5 = "彼女は、僕らと同じようには死なないかもしれない。";
-			const std::string dead6 = "しかし、失うものは何もないのでしょうか。";
+			const std::string dead6 = "しかし、本当に失うものは何もないのでしょうか。";
 			const std::string dead7 = "聞こえますか。物語の儚い鼓動の音が。";
 
 
@@ -379,24 +402,26 @@ bool SinglePlayerGame::onStart() {
 					//********勝利画面
 					//画像
 					DrawExtendGraph(0, 0, WIDTH, HEIGHT, imgHandles["s_game_result_background1"], true);
-					DrawExtendGraph(700, 450, 700 + 320, 450 + 311, imgHandles["s_game_result_castle"], true);
-					//DrawExtendGraph(30, 0, WIDTH-30, HEIGHT, imgHandles["s_game_result_frame_blackstar"], true);					
-					DrawExtendGraph(250, 150, 900, 350, imgHandles["s_game_result_rainbow"], true);
-					DrawExtendGraph(621 / 3, 1046 / 3, 621 / 3 + 621 / 4, 1046 / 3 + 1046 / 4, imgHandles["s_game_player"], true);
-					DrawExtendGraph(WIDTH / 2, 10, WIDTH-10, HEIGHT-10, imgHandles["s_game_result_background_gameover1"], true);
+					DrawExtendGraph(650, 450, 650 + 320, 450 + 311, imgHandles["s_game_result_castle"], true);
+					DrawExtendGraph(900, 170, WIDTH-80, 380, imgHandles["s_game_result_frame_star"], true);					
+					DrawExtendGraph(800, 20, WIDTH, 230, imgHandles["s_game_result_rainbow"], true);
+					DrawExtendGraph(1100, 1046 / 3 + 100, 1100 + 621 / 3, 1046 / 3 + 1046 / 3 + 100, imgHandles["s_game_player"], true);
+					DrawExtendGraph(20, 20, WIDTH/2-20, HEIGHT-20, imgHandles["s_game_result_background_gameover1"], true);
 					//スクロール文章
 					
-					DrawString(700, HEIGHT - rect.y, clear1.c_str(), GetColor(25, 25, 25));
-					DrawString(700, HEIGHT + 150 - rect.y, clear2.c_str(), GetColor(25, 25, 25));
-					DrawString(700, HEIGHT + 300 - rect.y, clear3.c_str(), GetColor(25, 25, 25));
-					DrawString(700, HEIGHT + 450 - rect.y, clear4.c_str(), GetColor(25, 25, 25));
-					DrawString(700, HEIGHT + 600 - rect.y, clear5.c_str(), GetColor(25, 25, 25));
-					DrawString(700, HEIGHT + 750 - rect.y, clear6.c_str(), GetColor(25, 25, 25));
-					DrawString(700, HEIGHT + 900 - rect.y, clear7.c_str(), GetColor(25, 25, 25));
+					DrawString(40, HEIGHT - rect.y, clear1.c_str(), GetColor(25, 25, 25));
+					DrawString(40, HEIGHT + 150 - rect.y, clear2.c_str(), GetColor(25, 25, 25));
+					DrawString(40, HEIGHT + 300 - rect.y, clear3.c_str(), GetColor(25, 25, 25));
+					DrawString(40, HEIGHT + 450 - rect.y, clear4.c_str(), GetColor(25, 25, 25));
+					DrawString(40, HEIGHT + 600 - rect.y, clear5.c_str(), GetColor(25, 25, 25));
+					DrawString(40, HEIGHT + 750 - rect.y, clear6.c_str(), GetColor(25, 25, 25));
+					DrawString(40, HEIGHT + 900 - rect.y, clear7.c_str(), GetColor(25, 25, 25));
 
 					//スコア
 					std::string clearScore = "得点 : " + std::to_string(maxTime + (player->getMaxDamage() - player->getPlayerDamage()) * 50);
-					DrawString(100, 150, clearScore.c_str(), GetColor(0, 0, 0));
+					DrawString(940, 230, clearScore.c_str(), GetColor(225, 225, 225));
+					std::string damage = ("受けたダメージ : " + std::to_string(player->getPlayerDamage()));
+					DrawString(940, 300, damage.c_str(), GetColor(255, 225, 225));
 
 					
 					
@@ -407,30 +432,31 @@ bool SinglePlayerGame::onStart() {
 					//******ゲームオーバー画面
 
 					//画像・ゲームオーバー
+					DrawExtendGraph(0, 0, WIDTH, HEIGHT, imgHandles["s_game_result_background2"], true);
+					DrawExtendGraph(170, 300, 170 + 1600 / 5, HEIGHT, imgHandles["s_game_result_sketch"], true);
+					DrawExtendGraph(621 / 3 - 50, 450, 621 / 3 + 621 / 4 - 50, HEIGHT, imgHandles["s_game_player_drowned"], true);
 					DrawExtendGraph(0, 0, WIDTH, HEIGHT, imgHandles["s_game_result_stage1"], true);
-					DrawExtendGraph(600, 500,600 +1600/5 , 500+ 1555/5, imgHandles["s_game_result_sketch"], true);
-					DrawExtendGraph(621 / 3, 450, 621 / 3 + 621 / 4, 450 + 1046 / 4, imgHandles["s_game_player_drowned"], true);
+					DrawExtendGraph(220, 100, 520, 320, imgHandles["s_game_result_frame_blackstar"], true);
 
 					//スクロール文章・ゲームオーバー
-					DrawString(700, HEIGHT - rect.y, dead1.c_str(), GetColor(25, 25, 25));
-					DrawString(700, HEIGHT+150 - rect.y, dead2.c_str(), GetColor(25, 25, 25));
-					DrawString(700, HEIGHT+300 - rect.y, dead3.c_str(), GetColor(25, 25, 25));
-					DrawString(700, HEIGHT+450 - rect.y, dead4.c_str(), GetColor(25, 25, 25));
-					DrawString(700, HEIGHT+600 - rect.y, dead5.c_str(), GetColor(25, 25, 25));
-					DrawString(700, HEIGHT + 750 - rect.y, dead6.c_str(), GetColor(25, 25, 25));
-					DrawString(700, HEIGHT + 900 - rect.y, dead7.c_str(), GetColor(25, 25, 25));
+					DrawString(600, HEIGHT - rect.y, dead1.c_str(), GetColor(225, 225, 225));
+					DrawString(600, HEIGHT+150 - rect.y, dead2.c_str(), GetColor(225, 225, 225));
+					DrawString(600, HEIGHT+300 - rect.y, dead3.c_str(), GetColor(225, 225, 225));
+					DrawString(600, HEIGHT+450 - rect.y, dead4.c_str(), GetColor(225, 225, 225));
+					DrawString(600, HEIGHT+600 - rect.y, dead5.c_str(), GetColor(225, 225, 225));
+					DrawString(600, HEIGHT + 750 - rect.y, dead6.c_str(), GetColor(225, 225, 225));
+					DrawString(600, HEIGHT + 900 - rect.y, dead7.c_str(), GetColor(225, 225, 225));
 
 					//スコア
 					std::string deadScore = "得点 : " + std::to_string(maxTime - timer);
 					std::string playTime = "記録 : " + std::to_string((maxTime - timer) / 30) + "秒";
-					DrawString(100, 150, deadScore.c_str(), GetColor(255, 255, 255));
-					DrawString(100, 200, playTime.c_str(), GetColor(255, 255, 255));
+					DrawString(260, 150, deadScore.c_str(), GetColor(225, 225, 225));
+					DrawString(260, 200, playTime.c_str(), GetColor(225, 225, 225));
+					std::string damage = ("受けたダメージ : " + std::to_string(player->getPlayerDamage()));
+					DrawString(260, 250, damage.c_str(), GetColor(225, 10, 10));
 
 					//DrawExtendGraph(0, 0, WIDTH, HEIGHT, imgHandles["s_game_result_frame_blackstar"], true);
 				}
-				
-				std::string damage = ("受けたダメージ : " + std::to_string(player->getPlayerDamage()));
-				DrawString(100, 100, damage.c_str(), GetColor(255, 0, 0));
 							
 				return true;
 			}
@@ -441,22 +467,15 @@ bool SinglePlayerGame::onStart() {
 		//yu
 		if (hasPlayerWon) {
 			//勝利画面のエフェクト・リザルト
-			makeEffect("s_game_result_hanabi", 300, 200, 600, 600, true, 10, 1, 3);
-			makeEffect("s_game_result_hanabi", 700, 50, 500, 500, true, 10, 2, 3);
+			makeEffect("s_game_result_hanabi", 400, 100, 500, 500, true, 50, 1, 4);
+			makeEffect("s_game_result_hanabi", 700, 50, 300, 300, true, 50, 1, 3);
 
-			makeEffect("s_game_coin", 300, 200, 50, 50, true, 150, 2);
-			makeEffect("s_game_coin", 350, 200, 50, 50, true, 150, 2, 3);
-		}
+			}
 		else {
 			//ゲームオーバーのエフェクト・リザルト	
-			makeEffect("s_game_result_kirakira", 500, 600, 600, 600, true, 150, 1, 0);
-			makeEffect("s_game_coin", 250, 200, 50, 50, true, 150, 1, 3);
-			makeEffect("s_game_coin", 300, 200, 50, 50, true, 150, 2);
-			makeEffect("s_game_coin", 350, 200, 50, 50, true, 150, 2, 3);
+			makeEffect("s_game_result_kirakira", 150, 600, 600, 600, true, 150, 1, 4);
+			
 		}
-
-
-
 
 		bgm->stop();
 		bgm = make_shared<BGM>(2, hasPlayerWon);
@@ -479,6 +498,7 @@ bool SinglePlayerGame::onUpdate() {
 			counterForWait = 5;
 			if (key[KEY_INPUT_RETURN]) {
 				willFinishMode = true;
+				drawList.push_back(std::make_shared<CurtainObject>(false));
 			}
 			else if (key[KEY_INPUT_1]) {
 				difficulty = EASY;
@@ -490,7 +510,6 @@ bool SinglePlayerGame::onUpdate() {
 				difficulty = NIGHTMARE;
 			}
 			else if (key[KEY_INPUT_UP]) {
-				difficulty = difficulty == EASY ? NIGHTMARE : difficulty == HARD ? EASY : HARD;
 			}
 			else if (key[KEY_INPUT_DOWN]) {
 				difficulty = difficulty == EASY ? HARD : difficulty == HARD ? NIGHTMARE : EASY;
@@ -502,13 +521,13 @@ bool SinglePlayerGame::onUpdate() {
 		else if (counterForWait > 0) {
 			counterForWait--;
 		}
-
+		
+		
 		break;
 	}
 	case TUTORIAL: {
 
 		if (tutorial != START) {
-
 			// 認識したマーカーを描画
 			share.rectMutex.lock();
 			for (auto marker : markerList) {
@@ -519,14 +538,15 @@ bool SinglePlayerGame::onUpdate() {
 
 		switch (tutorial) {
 		case START: {
-			if (heihoFreezeTimeRemain >= 0) {
+			if (heihoFreezeTimeRemain >= 0) {					
 				heihoFreezeTimeRemain--;
+				drawList.push_back(std::make_shared<CurtainObject>(true));
 			}
 			if (heihoFreezeTimeRemain == 0) {
 				tutoenemy->freeze();
 				tutoenemy->childfire->freeze();
+
 			}
-		
 			break;
 		}
 		case BEATFIRE: {//Titleクラス
@@ -543,12 +563,10 @@ bool SinglePlayerGame::onUpdate() {
 		}
 		case END: {//Titleクラス
 			willFinishMode = true;
+			drawList.push_back(std::make_shared<CurtainObject>(false));
 			break;
 		}
 		}
-
-
-		
 
 
 		for (auto enemy : enemyList) {
@@ -569,19 +587,25 @@ bool SinglePlayerGame::onUpdate() {
 	}
 	case GAME: { // playing
 
-
 		////////////////////デバッグ用チート////////////////////////////////
 		if (key[KEY_INPUT_2]) {
 			timer = 0;
 		}
+		if (key[KEY_INPUT_3]) {
+			willFinishMode = true;
+			hasPlayerWon = false;
+		}
 
 		timer -= 1;
+		
 		if (timer <= 0) {
 			willFinishMode = true;
+			drawList.push_back(std::make_shared<CurtainObject>(false));
 		}
 
 		// 認識したマーカーを描画
 		share.rectMutex.lock();
+	
 		for (auto marker : markerList) {
 			marker->setRect(share.rects[marker->getIndex()]);
 		}
@@ -615,6 +639,10 @@ bool SinglePlayerGame::onUpdate() {
 		case EASY: {
 			switch (maxTime - timer) {
 			
+			case 10:{
+				makeStartsign(WIDTH, HEIGHT / 2, 1.0);
+				break;
+			}
 			case 100: {
 				makeRocketWanwan(-RocketWanwan::width/2, HEIGHT / 2 + 50);
 				break;
@@ -781,6 +809,7 @@ bool SinglePlayerGame::onUpdate() {
 	}
 	case RESULT: { // リザルト画面
 
+		
 		result_timer -= 1;
 
 		if (key[KEY_INPUT_RETURN]) {
