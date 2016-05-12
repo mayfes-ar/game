@@ -36,9 +36,6 @@
     <ClCompile Include="src\game\breakout_game.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="src\moving\moving.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
     <ClCompile Include="src\object\breakout_object.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
@@ -89,5 +86,8 @@
     <ClInclude Include="include\moving\random_behavior.h" />
     <ClInclude Include="include\object\breakout_object.h" />
     <ClInclude Include="include\object\breakout_enemy.h" />
+    <ClInclude Include="include\game\marker_dictionary.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

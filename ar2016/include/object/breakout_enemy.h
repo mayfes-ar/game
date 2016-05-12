@@ -21,52 +21,25 @@ namespace Breakout
 			//もししんでたら
 			if (!town->isAlive() || !isAlive()) return;
 			// もし接触していたら
-			if (CollisionDetection::isInRectangle(Shape::Point(m_realm.left(), m_realm.top()), town->getRealm())) {
+			if (m_realm.isContacted(town->getRealm())) {
 				town->damageTown(giveDamage());
 				damageEnemy(town->giveDamage());
-				return;
+				if (!town->isAlive()) town->setDeadEffect("b_crawl", 5);
 			}
-			if (CollisionDetection::isInRectangle(Shape::Point(m_realm.right(), m_realm.top()), town->getRealm())) {
-				town->damageTown(giveDamage());
-				damageEnemy(town->giveDamage());
-				return;
-			}
-			if (CollisionDetection::isInRectangle(Shape::Point(m_realm.left(), m_realm.bottom()), town->getRealm())) {
-				town->damageTown(giveDamage());
-				damageEnemy(town->giveDamage());
-				return;
-			}
-			if (CollisionDetection::isInRectangle(Shape::Point(m_realm.right(), m_realm.bottom()), town->getRealm())) {
-				town->damageTown(giveDamage());
-				damageEnemy(town->giveDamage());
-				return;
-			}
+			
+			//if (!isAlive()) setDeadEffect("m_crawl", 5);
 		}
 
 		virtual void attackOnTown(std::shared_ptr<Resident>& town) {
 			//もししんでたら
 			if (!town->isAlive() || !isAlive()) return;
 			// もし接触していたら
-			if (CollisionDetection::isInRectangle(Shape::Point(m_realm.left(), m_realm.top()), town->getRealm())) {
+			if(m_realm.isContacted(town->getRealm())) {
 				town->damageTown(giveDamage());
 				damageEnemy(town->giveDamage());
-				return;
+				if (!town->isAlive()) town->setDeadEffect("b_crawl", 5);
 			}
-			if (CollisionDetection::isInRectangle(Shape::Point(m_realm.right(), m_realm.top()), town->getRealm())) {
-				town->damageTown(giveDamage());
-				damageEnemy(town->giveDamage());
-				return;
-			}
-			if (CollisionDetection::isInRectangle(Shape::Point(m_realm.left(), m_realm.bottom()), town->getRealm())) {
-				town->damageTown(giveDamage());
-				damageEnemy(town->giveDamage());
-				return;
-			}
-			if (CollisionDetection::isInRectangle(Shape::Point(m_realm.right(), m_realm.bottom()), town->getRealm())) {
-				town->damageTown(giveDamage());
-				damageEnemy(town->giveDamage());
-				return;
-			}
+			//if (!isAlive()) setDeadEffect("m_crawl", 5);
 		}
 
 		virtual void updatePosition() {
@@ -112,16 +85,21 @@ namespace Breakout
 			//死んでいて
 			if (!isAlive()) {
 				//燃える処理が終わってないなら
-				if (m_explosion_count >= 0) {
-					m_explosion_effect.incrementCounterWhenDrawWithRealm(m_realm);
-					m_explosion_count--;
+				if (m_dead_count >= 0) {
+					m_dead_effect.incrementCounterWhenDrawWithRealm(m_realm);
+					m_dead_count--;
 				}
 			}
 			return true;
 		}
 
 		bool isEffectContinuing() {
-			return m_explosion_count >= 0;
+			return m_dead_count >= 0;
+		}
+
+		void setDeadEffect(std::string effect_name, int frames_per_scene, int dead_effect = 0) {
+			m_dead_effect = Effect(effectHandles[effect_name], frames_per_scene, PRIORITY_DYNAMIC_OBJECT);
+			if (dead_effect == 0) dead_effect = m_dead_effect.getCounter() * m_dead_effect.getFramesPerScene();
 		}
 
 	protected:
@@ -136,8 +114,8 @@ namespace Breakout
 		std::uniform_real_distribution<double> enemy_kind_generator = std::uniform_real_distribution<double>(0.0, 1.0);
 
 	private:
-		int m_explosion_count = 35;
-		Effect m_explosion_effect = Effect(effectHandles["b_explosion"], 5, PRIORITY_DYNAMIC_OBJECT);
+		Effect m_dead_effect = Effect(effectHandles["b_explosion"], 5, PRIORITY_DYNAMIC_OBJECT);
+		int m_dead_count = 35;
 	};
 
 	// 人や住居とぶつかったら爆発して死ぬ。相手にもダメージを与える

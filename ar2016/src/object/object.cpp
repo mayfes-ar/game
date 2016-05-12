@@ -83,6 +83,17 @@ bool Object::load() {
 	isSuccess &= loadImage("s_game_op_title", "s_game/s_game_op_title");
 	isSuccess &= loadImage("s_game_op", "s_game/s_game_op");
 
+	//チュートリアル文字列
+	isSuccess &= loadImage("s_game_tuto0", "s_game/tuto0");
+	isSuccess &= loadImage("s_game_tuto1", "s_game/tuto1");
+	isSuccess &= loadImage("s_game_tuto2", "s_game/tuto2");
+	isSuccess &= loadImage("s_game_tuto3", "s_game/tuto3");
+	isSuccess &= loadImage("s_game_tuto4", "s_game/tuto4");
+	isSuccess &= loadImage("s_game_tuto5", "s_game/tuto5");
+	isSuccess &= loadImage("s_game_tuto6", "s_game/tuto6");
+	isSuccess &= loadImage("s_game_tuto7", "s_game/tuto7");
+
+
 	//　ゲーム本編
 	isSuccess &= loadImage("background", "s_game/background1");
 
@@ -113,7 +124,18 @@ bool Object::load() {
 	isSuccess &= loadImage("s_game_fire_damage", "s_game/fire2");
 	isSuccess &= loadImage("s_game_fire_over", "s_game/fire2");
 
-	isSuccess &= loadImage("s_game_balloon", "s_game/balloon");
+	//isSuccess &= loadImage("s_game_balloon", "s_game/balloon");
+	isSuccess &= loadImage("s_game_dangerous", "s_game/dangerous");
+	//isSuccess &= loadImage("s_game_letsplay", "s_game/letsplay");
+	isSuccess &= loadImage("s_game_handsome", "s_game/handsome");
+	isSuccess &= loadImage("s_game_fighting", "s_game/fighting");
+	isSuccess &= loadImage("s_game_cake", "s_game/cake");
+	isSuccess &= loadImage("s_game_3", "s_game/three");
+	isSuccess &= loadImage("s_game_2", "s_game/two");
+	isSuccess &= loadImage("s_game_1", "s_game/one");
+	isSuccess &= loadImage("s_game_jump", "s_game/jump");
+	isSuccess &= loadImage("s_game_beforefinish", "s_game/beforefinish");
+	isSuccess &= loadImage("s_game_help", "s_game/help");
 
 	isSuccess &= loadImage("s_game_drop", "s_game/drop");
 	isSuccess &= loadImage("s_game_drop_damage", "s_game/drop");
@@ -241,7 +263,7 @@ bool Object::load() {
 	isSuccess &= loadImage("b_donald", "breakout/donald");
 	isSuccess &= loadImage("b_right_hand", "breakout/right_hand");
 	isSuccess &= loadImage("b_left_hand", "breakout/left_hand");
-	isSuccess &= loadImage("b_snake_weak", "breakout/snake_weak");
+	isSuccess &= loadImage("b_snake_weak", "breakout/tokage");
 
 	isSuccess &= loadImage("b_block_blue", "block_blue");
 	isSuccess &= loadImage("b_block_red", "block_red");
@@ -274,6 +296,7 @@ bool Object::load() {
 	isSuccess &= loadEffect("b_fireball_reflect", "breakout/fireball_reflect", 14, 1, 1680, 120);
 	isSuccess &= loadEffect("b_green_fireball", "breakout/green_fireball", 5, 5, 500, 500);
 	isSuccess &= loadEffect("b_green_fireball_reflect", "breakout/green_fireball_reflect", 14, 1, 1680, 120);
+	isSuccess &= loadEffect("b_crawl", "breakout/crawl", 5, 2, 1200, 480);
 	
 
 	for (int num = 0; num <= 9; ++num) {

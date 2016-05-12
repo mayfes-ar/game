@@ -1446,16 +1446,21 @@ public:
 		//死んでいて
 		if (!isAlive()) {
 			//燃える処理が終わってないなら
-			if (m_burning_count >= 0) {
-				m_burning_effect.incrementCounterWhenDrawWithRealm(m_realm);
-				m_burning_count--;
+			if (m_dead_count >= 0) {
+				m_dead_effect.incrementCounterWhenDrawWithRealm(m_realm);
+				m_dead_count--;
 			}
 		}
 		return true;
 	}
 
 	bool isEffectContinuing() {
-		return m_burning_count >= 0;
+		return m_dead_count >= 0;
+	}
+
+	void setDeadEffect(std::string effect_name, int frames_per_scene, int dead_effect = 0) {
+		m_dead_effect = Effect(effectHandles[effect_name], frames_per_scene, PRIORITY_DYNAMIC_OBJECT);
+		if (dead_effect == 0) dead_effect = m_dead_effect.getCounter() * m_dead_effect.getFramesPerScene();
 	}
 	
 protected:
@@ -1464,8 +1469,8 @@ protected:
 	std::shared_ptr<Moving> m_moving = std::make_shared<Moving>(1.0f/30.0f, std::make_shared<NewtonBehavior>());
 
 private:
-	int m_burning_count = 60;
-	Effect m_burning_effect = Effect(effectHandles["b_burning"], 5, PRIORITY_DYNAMIC_OBJECT);
+	Effect m_dead_effect = Effect(effectHandles["b_burning"], 5, PRIORITY_DYNAMIC_OBJECT);
+	int m_dead_count = 60;
 };
 
 class House : public Town

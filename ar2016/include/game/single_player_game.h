@@ -588,8 +588,8 @@ class SinglePlayerGame : public Game {
 			return isAlive;
 		}
 
-		virtual void setIsAlive() {
-			isAlive = true;
+		virtual void setIsDead() {
+			isAlive = false;
 		}
 
 		virtual void die() {
@@ -1287,7 +1287,9 @@ class SinglePlayerGame : public Game {
 		void update() {
 			if (characterState == OVER) { return; }
 			//setAc(acX, acY);
-			updateCoordinate(acX, acY);
+			if (tutorial != END) {
+				updateCoordinate(acX, acY);
+			}
 			// moveBecauseBlockCollision(game.blockList);
 
 			//moveBecauseMarkerCollision(game.markerList);
@@ -1363,38 +1365,55 @@ class SinglePlayerGame : public Game {
 		static const int height = 1046/8;
 
 		Player(int x_, int y_, int width_, int height_, std::string imgHandleKey_, int maxDamage_, SinglePlayerGame& game_) : Character(x_, y_, width_, height_, imgHandleKey_, maxDamage_, game_, 0, FPS*2) {
-			layer = 100;	
+			layer = 100;
 			// overBuffer = overBufferMax;
 		}
 
 		bool draw() {
-			if (isToJump) {
-				DrawExtendGraph(left() - 50, top() - rect.height - 50, right() + 50, bottom() - rect.height, imgHandles["s_game_balloon"], true);
-				int commentX = left() - 10;
-				int commentY = top() - rect.height - 20;
+			if (isToJump && !isDrowned && damage <= (maxDamage-2) && game.timer >= 300) {
 
 				if (frameCount <= FPS * 2) {
-					message = "I want to\njump!!";
-					commentY = top() - rect.height - 40;
-				}
-				else if (frameCount <= FPS * 2 + FPS) {
-					message = "3";
-				}
-				else if (frameCount <= FPS * 2 + FPS*2) {
-					message = "2";
-				}
-				else if (frameCount <= FPS * 2 + FPS*3) {
-					message = "1";
+					if (game.timer >= 2600) {
+						DrawExtendGraph(left() - 100, top() - rect.height - 50, right(), bottom() - rect.height, imgHandles["s_game_fighting"], true);
+					}
+					else if (game.timer >= 1600) {
+						DrawExtendGraph(left() - 100, top() - rect.height - 50, right(), bottom() - rect.height, imgHandles["s_game_handsome"], true);
+					}
+					else {
+						DrawExtendGraph(left() - 100, top() - rect.height - 50, right(), bottom() - rect.height, imgHandles["s_game_cake"], true);
+					}
 				}
 
-				DrawString(commentX, commentY, message.c_str(), GetColor(0, 0, 0));
+				else if (frameCount <= FPS * 2 + FPS*5 && frameCount >= FPS * 2 + FPS * 4) {
+					DrawExtendGraph(left() - 50, top() - rect.height - 50, right() + 50, bottom() - rect.height, imgHandles["s_game_jump"], true);
+				}
+				else if (frameCount <= FPS * 2 + FPS*6 && frameCount >= FPS * 2 + FPS * 5) {
+					DrawExtendGraph(left() - 50, top() - rect.height - 50, right() + 50, bottom() - rect.height, imgHandles["s_game_3"], true);
+				}
+				else if (frameCount <= FPS * 2 + FPS*7 && frameCount >= FPS * 2 + FPS * 6) {
+					DrawExtendGraph(left() - 50, top() - rect.height - 50, right() + 50, bottom() - rect.height, imgHandles["s_game_2"], true);
+				}
+				else if (frameCount <= FPS * 2 + FPS*8 && frameCount >= FPS * 2 + FPS * 7) {
+					DrawExtendGraph(left() - 50, top() - rect.height - 50, right() + 50, bottom() - rect.height, imgHandles["s_game_1"], true);
+				}		
 			}
+
+			
 			for (int heart = 0; heart <= (maxDamage - damage - 1); heart++) {
 				DrawExtendGraph(50 + 50 * heart, 50, 100 + 50 * heart, 100, imgHandles["s_game_heart"], true);
 			}
+			if (damage > (maxDamage - 2) && !isDrowned && game.timer >= 300) {
+				DrawExtendGraph(left() - 50, top() - rect.height - 50, right() + 50, bottom() - rect.height, imgHandles["s_game_help"], true);
+			}
 
-			if (isDrowned) { imgHandle[DAMAGE] = imgHandles["s_game_player_drowned"]; }
+			if (isDrowned) { 
+				DrawExtendGraph(left() - 100, top() - rect.height - 50, right(), bottom() - rect.height, imgHandles["s_game_dangerous"], true);
+				imgHandle[DAMAGE] = imgHandles["s_game_player_drowned"]; }
 			else { imgHandle[DAMAGE] = imgHandles["s_game_player_damage"]; }
+
+			if (game.timer < 300 && !isDrowned) {
+				DrawExtendGraph(left() - 50, top() - rect.height - 50, right() + 50, bottom() - rect.height, imgHandles["s_game_beforefinish"], true);
+			}
 
 			Character::draw();
 
@@ -1477,7 +1496,7 @@ class SinglePlayerGame : public Game {
 			}
 
 			if (isToJump) {
-				if (frameCount >= FPS*2 + FPS*3) {
+				if (frameCount >= FPS*2 + FPS*8) {
 					acY = -30;
 					PlaySoundMem(soundHandles["s_game_jump"], DX_PLAYTYPE_BACK, true);
 					isJumping = true;
@@ -1660,7 +1679,7 @@ class SinglePlayerGame : public Game {
 			setAc(acX, acY, key);
 			updateCoordinate(acX, acY);
 			moveBecauseBlockCollision(game.blockList);
-			moveBecauseMarkerCollision(game.markerList);
+		//	moveBecauseMarkerCollision(game.markerList);
 		}
 
 		void updateCoordinate(double& acX, double& acY) {
@@ -1877,7 +1896,7 @@ class SinglePlayerGame : public Game {
 	
 	}
 	std::shared_ptr<BGM> bgm;
-	const int maxTime = FPS * 60;
+	const int maxTime = FPS * 60 * 2;
 
 	int maxPlayerDamage;
 

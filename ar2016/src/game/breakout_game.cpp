@@ -182,12 +182,16 @@ void BreakoutGame::updateGameState()
 	case Selecting:
 	{
 		static int initilized_cnt = 0;
-		if (initilized_cnt < 10) {
+		if (initilized_cnt < 10 && !m_is_mode_selected) {
 			initilized_cnt++;
 			return;
 		}
+		else {
+			m_is_mode_selected = true;
+			initilized_cnt = 0;
+		}
 
-		if (m_components->info->isTimeOver() || m_components->select->selected()) {
+		if (m_components->select->selected()) {
 			const auto game_mode = m_components->select->getMode();
 			switch (game_mode) {
 			case Breakout::Mode::Easy:
@@ -374,8 +378,19 @@ void BreakoutGame::updateTown() {
 }
 
 void BreakoutGame::shipVSEnemy() {
-
-
+	for (auto& enemy : m_components->enemy_manager->getEnemyList()) {
+		//右で衝突されたら
+		if (!enemy->isAlive()) continue;
+		auto ship_realm = m_components->ship->getRealm();
+		auto enemy_realm = enemy->getRealm();
+		if (enemy_realm.isContacted(ship_realm)) {
+			enemy->damageEnemy(2);
+			//このダメージで死んだら
+			if (!enemy->isAlive()) {
+				enemy->setDeadEffect("b_crawl", 5);
+			}
+		}
+	}
 }
 
 void BreakoutGame::EnemyVSTown() {
