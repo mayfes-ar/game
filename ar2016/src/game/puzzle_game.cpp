@@ -22,6 +22,8 @@ bool PuzzleGame::onStart() {
 	mode.setMode([this]() {
 		makeStageBase();
 		drawList.push_back(std::make_shared<CurtainObject>(true));
+		timer->startPlayingBGM();
+
 		setPlayer(100, -100);
 		setGoal(1080, 555);
 
@@ -49,9 +51,9 @@ bool PuzzleGame::onStart() {
 		setCoin(260, 420);
 		setCoin(340, 420);
 
-		setWarp(50, 620, 100, 100, 1150, 0);
+		setWarp(50, 620, 100, 100, 1150, 0, true);
 
-		for (int i = 0; i < 80; i++){
+		for (int i = 0; i < 40; i++){
 			setSmog();
 		}
 
@@ -150,8 +152,8 @@ bool PuzzleGame::onStart() {
 		setBlock(700, 400, 24, 240);
 		setBlock(464, 400, 236, 24);
 		setBlock(464, 616, 236, 24);
-		setWarp(620, 424, 60, 60, 600, 300);
-		setWarp(1200, 650, 60, 60, 520, 500);
+		setWarp(620, 424, 60, 60, 600, 300, true);
+		setWarp(1200, 650, 60, 60, 520, 500, true);
 		setCoin(40, 240);
 		setCoin(120, 240);
 		setCoin(200, 240);
@@ -209,12 +211,12 @@ bool PuzzleGame::onStart() {
 	mode.setMode([this]() {
 		drawList.clear();
 		gimmicks.clear();
-
+		timer->stopPlayingBGM();
 		score->setResultDraw();
 
 		drawList.push_back(std::make_shared<CurtainObject>(true));
 		drawList.push_back(score);
-		drawList.push_back(std::make_shared<ResultObject>());
+		drawList.push_back(std::make_shared<ResultObject>(*this));
 
 	}, -1);
 
@@ -356,6 +358,7 @@ void PuzzleGame::Player::update() {
 
 	if (game.key[KEY_INPUT_UP] && !isJumping) {
 		acY = -25;
+		PlaySoundMem(soundHandles["ps_jump"], DX_PLAYTYPE_BACK);
 	}
 	isJumping = true;
 
@@ -375,40 +378,59 @@ void PuzzleGame::Player::update() {
 	const double tempY = y;
 	y += diffY + acY + exForceY;
 	prevY = tempY;
+	const double tempNextX = x;
+	const double tempNextY = y;
 
-	for (auto block : game.allBlocks) {
-		if (block->canHit && isContacted(block)) {
+	bool isSecond = false;
+	while (true) {
 
-			if (prevY < block->bottomHit() && prevY + height > block->topHit()) {
-				if (prevX >= block->rightHit()) {
-					x = prevX = block->right();
-					onLeft = true;
-				} else if (prevX + width <= block->leftHit()) {
-					x = prevX = block->left() - width;
-					onRight = true;
+		for (auto block : game.allBlocks) {
+			if (block->canHit && isContacted(block)) {
+
+				if (prevY < block->bottomHit() && prevY + height > block->topHit()) {
+					if (prevX >= block->rightHit()) {
+						x = prevX = block->right();
+						onLeft = true;
+					} else if(prevX + width <= block-> leftHit()) {
+						x = prevX = block->left() - width;
+						onRight = true;
+					} else {
+						init();
+					}
 				} else {
-					// TODO
-					init();
-					break;
-				}
-			} else {
-				if (prevY >= block->bottomHit()) {
-					y = prevY = block->bottom();
-					onTop = true;
-				} else if (prevY + height <= block->topHit()) {
-					y = prevY = block->top() - height;
-					isJumping = false;
-					onBottom = true;
-				} else {
-					// TODO
-					init();
-					break;
+					if (prevY >= block->bottomHit()) {
+						y = prevY = block->bottom();
+						onTop = true;
+					} else if(prevY + height <= block->topHit()) {
+						y = prevY = block->top() - height;
+						isJumping = false;
+						onBottom = true;
+					} else {
+						init();
+					}
 				}
 			}
 		}
+
+		if (isSecond) { break; }
+
+		bool isFailure = false;
+		for (auto block : game.stageBlocks) {
+			if (isContacted(block) && block->canHit) { isFailure = true; }
+		}
+
+		if ((onTop && onBottom) || (onLeft && onRight) || isFailure) {
+			isSecond = true;
+			game.markerBlock->canHit = false;
+			prevX = tempX; prevY = tempY;
+			x = tempNextX; y = tempNextY;
+			onTop = false; onBottom = false; onLeft = false; onRight = false;
+		} else {
+			break;
+		}
 	}
 
-	if ((onTop && onBottom) || (onLeft && onRight)) {
+	if (y > 2000) {
 		init();
 	}
 }

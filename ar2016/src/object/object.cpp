@@ -83,6 +83,17 @@ bool Object::load() {
 	isSuccess &= loadImage("s_game_op_title", "s_game/s_game_op_title");
 	isSuccess &= loadImage("s_game_op", "s_game/s_game_op");
 
+	//チュートリアル文字列
+	isSuccess &= loadImage("s_game_tuto0", "s_game/tuto0");
+	isSuccess &= loadImage("s_game_tuto1", "s_game/tuto1");
+	isSuccess &= loadImage("s_game_tuto2", "s_game/tuto2");
+	isSuccess &= loadImage("s_game_tuto3", "s_game/tuto3");
+	isSuccess &= loadImage("s_game_tuto4", "s_game/tuto4");
+	isSuccess &= loadImage("s_game_tuto5", "s_game/tuto5");
+	isSuccess &= loadImage("s_game_tuto6", "s_game/tuto6");
+	isSuccess &= loadImage("s_game_tuto7", "s_game/tuto7");
+
+
 	//　ゲーム本編
 	isSuccess &= loadImage("background", "s_game/background1");
 
@@ -113,7 +124,18 @@ bool Object::load() {
 	isSuccess &= loadImage("s_game_fire_damage", "s_game/fire2");
 	isSuccess &= loadImage("s_game_fire_over", "s_game/fire2");
 
-	isSuccess &= loadImage("s_game_balloon", "s_game/balloon");
+	//isSuccess &= loadImage("s_game_balloon", "s_game/balloon");
+	isSuccess &= loadImage("s_game_dangerous", "s_game/dangerous");
+	//isSuccess &= loadImage("s_game_letsplay", "s_game/letsplay");
+	isSuccess &= loadImage("s_game_handsome", "s_game/handsome");
+	isSuccess &= loadImage("s_game_fighting", "s_game/fighting");
+	isSuccess &= loadImage("s_game_cake", "s_game/cake");
+	isSuccess &= loadImage("s_game_3", "s_game/three");
+	isSuccess &= loadImage("s_game_2", "s_game/two");
+	isSuccess &= loadImage("s_game_1", "s_game/one");
+	isSuccess &= loadImage("s_game_jump", "s_game/jump");
+	isSuccess &= loadImage("s_game_beforefinish", "s_game/beforefinish");
+	isSuccess &= loadImage("s_game_help", "s_game/help");
 
 	isSuccess &= loadImage("s_game_drop", "s_game/drop");
 	isSuccess &= loadImage("s_game_drop_damage", "s_game/drop");
@@ -175,9 +197,19 @@ bool Object::load() {
 	isSuccess &= loadImage("s_game_result_clear", "s_game/s_game_clear");
 	isSuccess &= loadImage("s_game_result_dead", "s_game/s_game_result");
 	isSuccess &= loadImage("s_game_dead", "s_game/dead_sample");
+	isSuccess &= loadImage("s_game_result_frame_star", "s_game/result_frame_star");
+	isSuccess &= loadImage("s_game_result_frame_blackstar", "s_game/result_frame_blackstar");
+	isSuccess &= loadImage("s_game_result_rainbow", "s_game/result_rainbow");
+	isSuccess &= loadImage("s_game_result_castle", "s_game/result_castle");
+	isSuccess &= loadImage("s_game_result_castle2", "s_game/result_castle2");
+	isSuccess &= loadImage("s_game_result_castle3", "s_game/result_castle3");
+	isSuccess &= loadImage("s_game_result_stage1", "s_game/result_stage1");
+	isSuccess &= loadImage("s_game_result_stage2", "s_game/result_stage2");
+	isSuccess &= loadImage("s_game_result_sketch", "s_game/result_sketch");
+
 	isSuccess &= loadSound("s_game_over", "s_game/game_over.wav");
+	
 	isSuccess &= loadEffect("s_game_over_hanabi", "s_game/hanabi", 14, 15, 7168, 7680);
-	//isSuccess &= loadMovie("s_game_over_hanabi", "s_game/hanabi");
 	isSuccess &= loadEffect("s_game_curtain_close", "s_game/curtain_close", 1, 18, 640, 8640);
 	isSuccess &= loadEffect("s_game_curtain_open", "s_game/curtain_open", 1, 10, 640, 4800);
 
@@ -185,17 +217,11 @@ bool Object::load() {
 	isSuccess &= loadImage("p_block", "puzzle/block");
 	isSuccess &= loadImage("p_block_x", "puzzle/block_x");
 	isSuccess &= loadImage("s_block", "Brick02");
-	isSuccess &= loadImage("p_man", "man");
 	isSuccess &= loadImage("p_needle", "puzzle/needle");
 	isSuccess &= loadImage("p_hime", "puzzle/hime_normal");
 	isSuccess &= loadImage("p_hime_damaged", "puzzle/hime_gameover");
 	isSuccess &= loadImage("p_explain1", "puzzle/explanation1");
 	isSuccess &= loadImage("p_explain2", "puzzle/explanation2");
-	isSuccess &= loadImage("p_goal", "goal");
-	isSuccess &= loadImage("p_on", "switch_on");
-	isSuccess &= loadImage("p_off", "switch_off");
-
-	isSuccess &= loadImage("p_arrow", "arrow");
 	isSuccess &= loadImage("p_castle", "puzzle/castle");
 	isSuccess &= loadImage("p_saihu", "puzzle/saihu_kari");
 	isSuccess &= loadImage("p_timer", "puzzle/clock_kari");
@@ -211,10 +237,22 @@ bool Object::load() {
 	isSuccess &= loadEffect("p_crystal2", "puzzle/crystal2", 5, 4, 600, 480);
 	isSuccess &= loadEffect("p_warp", "puzzle/warp", 2, 8, 1600, 4800);
 	isSuccess &= loadEffect("p_num", "puzzle/number", 10, 1, 390, 54);
+	isSuccess &= loadEffect("p_num_2", "puzzle/number_2", 10, 1, 1840, 223);
 	isSuccess &= loadEffect("p_init", "puzzle/init", 14, 1, 1680, 120);
+	isSuccess &= loadEffect("p_push_switch", "puzzle/snow", 3,10, 1920, 4800);
 	isSuccess &= loadSound("p_bgm1", "puzzle/otenbahime.mp3");
 	isSuccess &= loadSound("p_bgm2", "puzzle/hajimetenootsukai.mp3");
+	isSuccess &= loadSound("p_bgm3", "puzzle/kibou.mp3");
 
+	isSuccess &= loadSound("ps_needle", "puzzle/needle.mp3");
+	isSuccess &= loadSound("ps_jump", "puzzle/jump.mp3");
+	isSuccess &= loadSound("ps_coin", "puzzle/coin.mp3");
+	isSuccess &= loadSound("ps_warp", "puzzle/warp.mp3");
+	isSuccess &= loadSound("ps_crystal", "puzzle/crystal.mp3");
+	isSuccess &= loadSound("ps_ball", "puzzle/ball.mp3");
+
+	isSuccess &= loadImage("p_score", "puzzle/score");
+	isSuccess &= loadImage("p_perfect", "puzzle/perfect");
 	isSuccess &= loadMovie("p_flower", "puzzle/flower");
 
 	// breakout game
@@ -229,7 +267,7 @@ bool Object::load() {
 	isSuccess &= loadImage("b_donald", "breakout/donald");
 	isSuccess &= loadImage("b_right_hand", "breakout/right_hand");
 	isSuccess &= loadImage("b_left_hand", "breakout/left_hand");
-	isSuccess &= loadImage("b_snake_weak", "breakout/snake_weak");
+	isSuccess &= loadImage("b_snake_weak", "breakout/tokage");
 
 	isSuccess &= loadImage("b_block_blue", "block_blue");
 	isSuccess &= loadImage("b_block_red", "block_red");
@@ -258,6 +296,12 @@ bool Object::load() {
 	isSuccess &= loadEffect("b_muteki", "breakout/muteki", 1, 6, 320, 1440);
 	isSuccess &= loadEffect("b_burning", "breakout/burning", 1, 5, 240, 900);
 	isSuccess &= loadEffect("b_explosion", "breakout/explosion", 7, 1, 840, 120);
+	isSuccess &= loadEffect("b_fireball", "breakout/fireball", 5, 5, 500, 500);
+	isSuccess &= loadEffect("b_fireball_reflect", "breakout/fireball_reflect", 14, 1, 1680, 120);
+	isSuccess &= loadEffect("b_green_fireball", "breakout/green_fireball", 5, 5, 500, 500);
+	isSuccess &= loadEffect("b_green_fireball_reflect", "breakout/green_fireball_reflect", 14, 1, 1680, 120);
+	isSuccess &= loadEffect("b_crawl", "breakout/crawl", 5, 2, 1200, 480);
+	
 
 	for (int num = 0; num <= 9; ++num) {
 		for (const auto& color : { "red", "blue", "yellow", "green" }) {
