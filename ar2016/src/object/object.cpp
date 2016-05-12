@@ -184,14 +184,14 @@ bool Object::load() {
 	isSuccess &= loadImage("s_game_result_background2", "s_game/result_background2");
 	isSuccess &= loadImage("s_game_result_background_gameover2", "s_game/result_background_gameover2");
 
-	isSuccess &= loadImage("s_game_start2", "s_game/start2");
-
 	isSuccess &= loadSound("s_game_over", "s_game/game_over.wav");
 	
 	isSuccess &= loadEffect("s_game_result_hanabi", "s_game/hanabi", 14, 15, 7168, 7680);
 	isSuccess &= loadEffect("s_game_result_kirakira", "s_game/kirakira", 10, 12, 5120, 6144);
 	isSuccess &= loadEffect("s_game_curtain_close", "s_game/curtain_close", 1, 18, 640, 8640);
 	isSuccess &= loadEffect("s_game_curtain_open", "s_game/curtain_open", 1, 10, 640, 4800);
+	isSuccess &= loadEffect("s_game_start", "s_game/start3", 8, 9, 8000, 2304);
+	isSuccess &= loadEffect("s_game_line", "s_game/line", 9, 10, 9000, 2560);
 
 	// puzzle game
 	isSuccess &= loadImage("p_block", "puzzle/block");

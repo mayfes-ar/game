@@ -209,30 +209,7 @@ class SinglePlayerGame : public Game {
 	};
 
 
-	//カーテンクラス
-	class CurtainObject : public Object {
-		const bool isOpen;
-		int counter = 0;
-		const int openCountMax = effectHandles["p_curtain_open"].size();
-		const int closeCountMax = effectHandles["p_curtain_close"].size();
-	public:
-		CurtainObject(bool isOpen_) : isOpen(isOpen_) {
-			layer = 300;
-		}
-		bool draw() {
-			const int handle = isOpen ? effectHandles["p_curtain_open"][counter] : effectHandles["p_curtain_close"][counter];
-			DrawExtendGraph(0, 0, 1280, 720, handle, true);
-
-			if (isOpen) {
-				counter++;
-				return !(counter == openCountMax);
-			}
-			else {
-				if (counter < closeCountMax - 1) { counter++; }
-				return true;
-			}
-		}
-	};
+	
 	// エフェクトクラス
 	// 実際のエフェクトの作成はmakeEffect関数から行う
 	// effectHandleKey:ハンドルキー, x, y, width, height, willStay:持続するか, layer, framePerCount:エフェクトの速度, counter:何カウント目からエフェクトを始めるか
@@ -1241,33 +1218,7 @@ class SinglePlayerGame : public Game {
 		}
 	};
 
-	////
-	class Startsign : public Enemy {
-	public:
-		static const int width = 280 / 3;
-		static const int height = 194 / 3;
-		Startsign(int x_, int y_, SinglePlayerGame& game_, double size, int maxDamage_ = 1, std::string imgHandleKey_ = "s_game_start2") : Enemy(x_, y_, width * size, height * size, imgHandleKey_, maxDamage_, game_, 0, 0) {
-			moveDirection = LEFT;
-			layer = 155;
-			imageSize = 1;
-		}
-
-		void update() {
-			if (characterState == OVER) { return; }
-			double acX = -0.3;
-			double acY = 0;
-			setAc(acX, acY);
-			updateCoordinate(acX, acY);
-			imageSize += imageSize >= defaultImageSize ? 0 : 1;
-		}
-
-		void setAc(double& acX, double& acY) {
-			
-			acY = 0;
-			acX = -0.3;
-		}
-	};
-
+	
 	enum Tutorial {
 		START,BEATFIRE,BEATHEIHO,END
 	};
@@ -1921,7 +1872,6 @@ class SinglePlayerGame : public Game {
 	std::shared_ptr<Eagle> makeEagle(int x, int y, double size);
 	std::shared_ptr<Heiho> makeHeiho(int x, int y, double size);
 	std::shared_ptr<Fire> makeFire(int x, int y, double size);
-	std::shared_ptr<Startsign> makeStartsign(int x, int y, double size);
 	std::shared_ptr<tutoHeiho> maketutoHeiho(int x, int y, double size);
 	std::shared_ptr<tutoFire> maketutoFire(int x, int y, double size);
 

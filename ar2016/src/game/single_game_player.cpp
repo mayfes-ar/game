@@ -103,14 +103,6 @@ std::shared_ptr<SinglePlayerGame::Fire> SinglePlayerGame::makeFire(int x, int y,
 	return enemy;
 }
 
-std::shared_ptr<SinglePlayerGame::Startsign> SinglePlayerGame::makeStartsign(int x, int y, double size = 5.0) {
-	auto enemy = std::make_shared<Startsign>(x, y, *this, size);
-
-	enemySubList.push_back(enemy);
-	drawList.push_back(enemy);
-	return enemy;
-}
-
 
 std::shared_ptr<SinglePlayerGame::tutoHeiho> SinglePlayerGame::maketutoHeiho(int x, int y, double size = 1.0) {
 	auto enemy = std::make_shared<tutoHeiho>(x, y, *this, size);
@@ -172,8 +164,6 @@ bool SinglePlayerGame::onStart() {
 		maxPlayerDamage = difficulty == EASY ? 5 : difficulty == HARD ? 10 : 20;
 		tutoplayer = std::make_shared<tutoPlayer>(WIDTH / 2 - 100 / 2, HEIGHT / 2 - 150 / 2, tutoPlayer::width, tutoPlayer::height, "s_game_player", maxPlayerDamage, *this);
 
-		drawList.clear();
-		drawList.push_back(std::make_shared<CurtainObject>(true));
 
 		auto makeBlock = [this](int x, int y, int width, int height) {
 			auto block = make_shared<SingleGameBlockObject>(x, y, width, height, true);
@@ -283,7 +273,8 @@ bool SinglePlayerGame::onStart() {
 
 		};
 		if (tutorial == END) {
-			drawList.push_back(std::make_shared<CurtainObject>(false));
+			makeEffect("s_game_curtain_close", 0, 0, WIDTH, HEIGHT, false, 160, 2, 1);
+
 		}
 		tutoenemy = maketutoHeiho(WIDTH, 300, 1);
 		drawList.push_back(make_shared<Title>(tutoenemy, *this));
@@ -294,12 +285,13 @@ bool SinglePlayerGame::onStart() {
 	// GAME
 	mode.setMode([this]() {
 		
-		
 		drawList.clear();
-		drawList.push_back(std::make_shared<CurtainObject>(true));
-		
+		makeEffect("s_game_curtain_open", 0, 0, WIDTH, HEIGHT, false, 160, 2, 0);
+
 		maxPlayerDamage = difficulty == EASY ? 5 : difficulty == HARD ? 10 : 20;
 		player = std::make_shared<Player>(WIDTH / 2 - 100 / 2, HEIGHT / 2 - 150 / 2, Player::width, Player::height, "s_game_player", maxPlayerDamage, *this);
+
+
 
 
 		auto makeBlock = [this](int x, int y, int width, int height) {
@@ -357,7 +349,7 @@ bool SinglePlayerGame::onStart() {
 		
 	
 		drawList.clear();	
-		drawList.push_back(std::make_shared<CurtainObject>(true));
+		makeEffect("s_game_curtain_open", 0, 0, WIDTH, HEIGHT, false, 150, 2, 0);
 
 
 		class Title : public Object {
@@ -376,22 +368,22 @@ bool SinglePlayerGame::onStart() {
 			}
 
 			//クリアの文
-			const std::string clear1 = "お姫様を守りぬくことができたあなた。";
-			const std::string clear2 = "彼女は守られていたことに気付きもしないまま。";
-			const std::string clear3 = "褒められはしない。言葉も交わせない。";
-			const std::string clear4 = "けれども、それでいいのです。";
-			const std::string clear5 = "その先に本当の幸せがあるのかも知れません。";
-			const std::string clear6 = "あなたの美しい愛が、ずっと正しくありますように。";
+			const std::string clear1 = "おめでとうございます。";
+			const std::string clear2 = "見事お姫様を守り抜くことができました。";
+			const std::string clear3 = "彼女はあなたのことを「好き」と言っています。";
+			const std::string clear4 = "あなたはどうですか。";
+			const std::string clear5 = "姫を守るために振った「剣」の重さ";
+			const std::string clear6 = "どうか覚えていてくださいね。";
 			const std::string clear7 = "遊んでくれてありがとうございました。";
 
 			//ゲームオーバーの文
-			const std::string dead1 = "あなたはお姫様を守ることができませんでした。";
-			const std::string dead2 = "どうか気づいてください。";
-			const std::string dead3 = "あなたが本当に守れなかったのは姫の命ではなく、";
-			const std::string dead4 = "「姫」という物語の命だということ。";
-			const std::string dead5 = "彼女は、僕らと同じようには死なないかもしれない。";
-			const std::string dead6 = "しかし、本当に失うものは何もないのでしょうか。";
-			const std::string dead7 = "聞こえますか。物語の儚い鼓動の音が。";
+			const std::string dead1 = "「今日のおやつは何かしら」";
+			const std::string dead2 = "お姫様は最後の一瞬まで無邪気でした。";
+			const std::string dead3 = "ゲームのデータが消えてしまっても";
+			const std::string dead4 = "まだ物語は息づいています。";
+			const std::string dead5 = "あなただけは、「お姫様」のこと";
+			const std::string dead6 = "忘れないでいてくださいね。";
+			const std::string dead7 = "遊んでくれてありがとうございました。";
 
 
 			bool draw() {
@@ -498,7 +490,8 @@ bool SinglePlayerGame::onUpdate() {
 			counterForWait = 5;
 			if (key[KEY_INPUT_RETURN]) {
 				willFinishMode = true;
-				drawList.push_back(std::make_shared<CurtainObject>(false));
+				drawList.clear();
+				makeEffect("s_game_curtain_close", 0, 0, WIDTH, HEIGHT, false, 400, 2, 1);
 			}
 			else if (key[KEY_INPUT_1]) {
 				difficulty = EASY;
@@ -516,6 +509,7 @@ bool SinglePlayerGame::onUpdate() {
 			}
 			else {
 				counterForWait = 0;
+				
 			}
 		}
 		else if (counterForWait > 0) {
@@ -534,14 +528,19 @@ bool SinglePlayerGame::onUpdate() {
 				marker->setRect(share.rects[marker->getIndex()]);
 			}
 			share.rectMutex.unlock();
+			
 		}
-
+		
 		switch (tutorial) {
 		case START: {
 			if (heihoFreezeTimeRemain >= 0) {					
 				heihoFreezeTimeRemain--;
-				drawList.push_back(std::make_shared<CurtainObject>(true));
+				
 			}
+			if(heihoFreezeTimeRemain == FPS*4 - 25){
+				makeEffect("s_game_curtain_open", 0, 0, WIDTH, HEIGHT, false, 400, 2, 0);
+			}
+
 			if (heihoFreezeTimeRemain == 0) {
 				tutoenemy->freeze();
 				tutoenemy->childfire->freeze();
@@ -563,7 +562,7 @@ bool SinglePlayerGame::onUpdate() {
 		}
 		case END: {//Titleクラス
 			willFinishMode = true;
-			drawList.push_back(std::make_shared<CurtainObject>(false));
+			//makeEffect("s_game_curtain_close", 0, 0, WIDTH, HEIGHT, false, 150, 2, 1);
 			break;
 		}
 		}
@@ -596,11 +595,14 @@ bool SinglePlayerGame::onUpdate() {
 			hasPlayerWon = false;
 		}
 
+
 		timer -= 1;
 		
 		if (timer <= 0) {
 			willFinishMode = true;
-			drawList.push_back(std::make_shared<CurtainObject>(false));
+			makeEffect("s_game_curtain_close", 0, 0, WIDTH, HEIGHT, false, 300, 2, 0);
+			//////////////////////////////////////////////////////////////////////////////////////////////////
+			//デバッグ時、クリアしたとき挙動がおかしかったら（途中で消えてしまうなど）このカーテンはやめる
 		}
 
 		// 認識したマーカーを描画
@@ -638,11 +640,7 @@ bool SinglePlayerGame::onUpdate() {
 		switch (difficulty) {
 		case EASY: {
 			switch (maxTime - timer) {
-			
-			case 10:{
-				makeStartsign(WIDTH, HEIGHT / 2, 1.0);
-				break;
-			}
+		
 			case 100: {
 				makeRocketWanwan(-RocketWanwan::width/2, HEIGHT / 2 + 50);
 				break;
