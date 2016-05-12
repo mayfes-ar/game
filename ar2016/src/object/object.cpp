@@ -83,6 +83,17 @@ bool Object::load() {
 	isSuccess &= loadImage("s_game_op_title", "s_game/s_game_op_title");
 	isSuccess &= loadImage("s_game_op", "s_game/s_game_op");
 
+	//チュートリアル文字列
+	isSuccess &= loadImage("s_game_tuto0", "s_game/tuto0");
+	isSuccess &= loadImage("s_game_tuto1", "s_game/tuto1");
+	isSuccess &= loadImage("s_game_tuto2", "s_game/tuto2");
+	isSuccess &= loadImage("s_game_tuto3", "s_game/tuto3");
+	isSuccess &= loadImage("s_game_tuto4", "s_game/tuto4");
+	isSuccess &= loadImage("s_game_tuto5", "s_game/tuto5");
+	isSuccess &= loadImage("s_game_tuto6", "s_game/tuto6");
+	isSuccess &= loadImage("s_game_tuto7", "s_game/tuto7");
+
+
 	//　ゲーム本編
 	isSuccess &= loadImage("background", "s_game/background1");
 
