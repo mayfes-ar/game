@@ -188,6 +188,8 @@ bool Object::load() {
 	isSuccess &= loadEffect("s_game_water", "s_game/water", 5, 6, 2560, 1536);
 
 	isSuccess &= loadEffect("s_game_coin", "s_game/coin", 5, 2, 1000, 400);
+	isSuccess &= loadEffect("s_game_num", "s_game/number_2", 10, 1, 1840, 223);
+
 	// マーカー
 	isSuccess &= loadImage("s_game_piyo", "s_game/piyo");
 	isSuccess &= loadImage("s_game_sword", "s_game/sword");

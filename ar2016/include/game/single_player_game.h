@@ -1431,6 +1431,13 @@ class SinglePlayerGame : public Game {
 				DrawExtendGraph(left() - 50, top() - rect.height - 50, right() + 50, bottom() - rect.height, imgHandles["s_game_beforefinish"], true);
 			}
 
+			SetFontSize(64);
+			SetFontThickness(12);
+			DrawString(850, 50, "あと", GetColor(200, 100, 100));
+			drawNumber(980, 30, 100, game.timer/FPS ,effectHandles["s_game_num"]);
+			SetFontSize(24);
+			SetFontThickness(6);
+
 			Character::draw();
 
 			return true;
