@@ -1426,7 +1426,7 @@ class SinglePlayerGame : public Game {
 			}
 
 			if (isDrowned) { 
-				DrawExtendGraph(left() - 100, top() - rect.height - 50, right(), bottom() - rect.height, imgHandles["s_game_dangerous"], true);
+				DrawExtendGraph(left() - 50, top() - rect.height - 50, right() + 50, bottom() - rect.height, imgHandles["s_game_dangerous"], true);
 				imgHandle[DAMAGE] = imgHandles["s_game_player_drowned"]; }
 			else { imgHandle[DAMAGE] = imgHandles["s_game_player_damage"]; }
 
