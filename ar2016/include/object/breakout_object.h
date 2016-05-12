@@ -1250,8 +1250,8 @@ public:
 		: m_start_point(start_point), m_life(life), m_pot(pot), m_info(info)
 	{
 		Object::layer = PRIORITY_DYNAMIC_OBJECT;
-		for (int i = 0; i < m_life.getLifeNum(); i++) {
-			m_blocks.push_back(Shape::Rectangle(start_point + Eigen::Vector2i{ BLOCK_WIDTH, 0 } *i, BLOCK_WIDTH, BLOCK_HEIGHT));
+		for (int i = 0; i < m_life.getLifeNum() * 2; i++) {
+			m_blocks.push_back(Shape::Rectangle(start_point + Eigen::Vector2i{ SHIP_BLOCK_WIDTH, 0 } *i, SHIP_BLOCK_WIDTH, SHIP_BLOCK_HEIGHT));
 		}
 	}
 
@@ -1274,23 +1274,37 @@ public:
 	bool restoreShip(int amount) {
 		if (!m_life.restore(amount)) return false;
 		if (m_blocks.empty()) {
-			m_blocks.push_back(Shape::Rectangle(m_start_point, BLOCK_WIDTH, BLOCK_HEIGHT));
+			m_blocks.push_back(Shape::Rectangle(m_start_point, SHIP_BLOCK_WIDTH, SHIP_BLOCK_HEIGHT));
+			m_blocks.push_back(Shape::Rectangle(m_start_point + Eigen::Vector2i(SHIP_BLOCK_WIDTH, 0), SHIP_BLOCK_WIDTH, SHIP_BLOCK_HEIGHT));
 			return true;
 		}
 		for (int i = 0; i < amount; i++) {
-			if (m_blocks[m_blocks.size() - 1].getRightBottomPoint().x() + BLOCK_WIDTH > FIELD_START_POS.x() + FIELD_WIDTH) {
-				m_blocks.insert(m_blocks.begin(), Shape::Rectangle(m_blocks[0].getLeftTopPoint() - Eigen::Vector2i(BLOCK_WIDTH, 0), BLOCK_WIDTH, BLOCK_HEIGHT));
+			//もし右にぶつかっていたら
+			if (m_blocks[m_blocks.size() - 1].right() + SHIP_BLOCK_WIDTH > FIELD_START_POS.x() + FIELD_WIDTH) {
+				m_blocks.insert(m_blocks.begin(), Shape::Rectangle(m_blocks[0].getLeftTopPoint() - Eigen::Vector2i(SHIP_BLOCK_WIDTH, 0), SHIP_BLOCK_WIDTH, SHIP_BLOCK_HEIGHT));
+				m_blocks.insert(m_blocks.begin(), Shape::Rectangle(m_blocks[0].getLeftTopPoint() - Eigen::Vector2i(2 * SHIP_BLOCK_WIDTH, 0), SHIP_BLOCK_WIDTH, SHIP_BLOCK_HEIGHT));
 			}
-			else
-				m_blocks.push_back(Shape::Rectangle(m_blocks[m_blocks.size() - 1].getRightTopPoint(), BLOCK_WIDTH, BLOCK_HEIGHT));
+			//もし左にぶつかっていたら
+			else if (m_blocks[0].left() - SHIP_BLOCK_WIDTH < FIELD_START_POS.x()) {
+				m_blocks.push_back(Shape::Rectangle(m_blocks[m_blocks.size() - 1].getRightTopPoint(), SHIP_BLOCK_WIDTH, SHIP_BLOCK_HEIGHT));
+				m_blocks.push_back(Shape::Rectangle(m_blocks[m_blocks.size() - 1].getRightTopPoint() + Eigen::Vector2i(SHIP_BLOCK_WIDTH, 0), SHIP_BLOCK_WIDTH, SHIP_BLOCK_HEIGHT));
+			}
+			//どちらでもなかったら
+			else {
+				m_blocks.push_back(Shape::Rectangle(m_blocks[m_blocks.size() - 1].getRightTopPoint(), SHIP_BLOCK_WIDTH, SHIP_BLOCK_HEIGHT));
+				m_blocks.insert(m_blocks.begin(), Shape::Rectangle(m_blocks[0].getLeftTopPoint() - Eigen::Vector2i(SHIP_BLOCK_WIDTH, 0), SHIP_BLOCK_WIDTH, SHIP_BLOCK_HEIGHT));
+			}
 		}
+		m_start_point = m_blocks[0].getLeftTopPoint();
 		return true;
 	}
 
 	bool damageShip(int amount) {
 		if (!m_life.damage(amount)) return false;
 		for (int i = 0; i < amount; i++) {
+			//両側から一個ずつへらす
 			m_blocks.pop_back();
+			m_blocks.erase(m_blocks.begin());
 		}
 		return true;
 	}
@@ -1299,7 +1313,7 @@ public:
 		m_blocks.clear();
 		m_life.resetLife();
 		for (int i = 0; i < m_life.getLifeNum(); i++) {
-			m_blocks.push_back(Shape::Rectangle(m_start_point + Eigen::Vector2i{ BLOCK_WIDTH, 0 } *i, BLOCK_WIDTH, BLOCK_HEIGHT));
+			m_blocks.push_back(Shape::Rectangle(m_start_point + Eigen::Vector2i{ SHIP_BLOCK_WIDTH, 0 } *i, SHIP_BLOCK_WIDTH, SHIP_BLOCK_HEIGHT));
 		}
 	}
 
@@ -1334,7 +1348,7 @@ public:
 	}
 
 	const Shape::Rectangle getRealm() override {
-		return Shape::Rectangle(m_start_point, m_blocks.size() * BLOCK_WIDTH, BLOCK_HEIGHT);
+		return Shape::Rectangle(m_start_point, m_blocks.size() * SHIP_BLOCK_WIDTH, SHIP_BLOCK_HEIGHT);
 	}
 
 	bool isEnhanced() {

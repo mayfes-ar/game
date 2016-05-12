@@ -73,6 +73,8 @@ namespace Breakout {
 	// Shipのパラメータ
 	const int SHIP_OFFSET_X = FIELD_START_POS.x() + WIDTH / 4;
 	const int SHIP_OFFSET_Y = HEIGHT * 4 / 5;
+	const int SHIP_BLOCK_HEIGHT = (HEIGHT / 4) / BLOCK_HEIGHT_NUM;
+	const int SHIP_BLOCK_WIDTH = SHIP_BLOCK_HEIGHT;
 	const Eigen::Vector2i SHIP_START_POS = Eigen::Vector2i{ SHIP_OFFSET_X, SHIP_OFFSET_Y };
 	constexpr int SHIP_LIFE_NUM = 4;
 
