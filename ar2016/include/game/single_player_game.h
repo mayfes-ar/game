@@ -310,8 +310,12 @@ class SinglePlayerGame : public Game {
 
 		void modifyRect() {
 			if (rect.width > 0 || rect.height > 0) {
+				double prevWidth = rect.width;
+				double prevHeight = rect.height;
 				rect.width = markerType == PIYO ? 1920/14 : markerType == SWORD ? 765/4 : 256*0.8;
 				rect.height = markerType == PIYO ? 1409/14 : markerType == SWORD ? 765/4 : 256*0.8;
+				rect.x = rect.x + (prevWidth - rect.width) / 2;
+				rect.y = rect.y + (prevHeight- rect.height) / 2;
 			}
 			else {
 				rect.x = rect.y = -300;
