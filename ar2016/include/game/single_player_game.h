@@ -241,10 +241,6 @@ class SinglePlayerGame : public Game {
 				}
 			}
 
-	
-			//if (!Inundation::getIsAlive()) {
-				//isEnable = false;
-			//}
 
 			drawWithRect(effectHandle[counter/framePerCount]);
 			counter++;
@@ -693,7 +689,7 @@ class SinglePlayerGame : public Game {
 		virtual void die() {
 			changeCharacterState(OVER);
 			if (overBuffer <= 0) {
-				game.makeEffect(overEffectKey, left(), top(), rect.width, rect.height, false, layer+1);
+				game.makeEffect(overEffectKey, left() - 20, top()-30, 150, 150, false, layer+1);
 				isAlive = false;
 			}
 			overBuffer--;
@@ -770,26 +766,45 @@ class SinglePlayerGame : public Game {
 		}
 	};
 
-	class Switch : public Enemy {
-		static const int width = 150;
-		static const int height = 150;
+	class Ghorst : public Enemy
+	{
+		static const int width = 100;
+		static const int height = 100;
 
 	public:
-		std::shared_ptr<Effect> faucet = std::make_shared<Effect>("s_game_water", left() + 60, top() + 90, rect.width, 200, true, 150, 1, 0);
-		
-		Switch(int x_, int y_, SinglePlayerGame& game_, double size, int maxDamage_ = 2, std::string imgHandleKey_ = "s_game_switch") : Enemy(x_, y_, width * size, height * size, imgHandleKey_, maxDamage_, game_) {
-			layer = 130;
-			moveDirection = RIGHT;
-
-			
-			game_.drawList.push_back(faucet);
-			//game.makeEffect("s_game_water", left() + 60, top() + 90, rect.width, 200, true);
+		Ghorst(int x_, int y_, SinglePlayerGame& game_, double size, int maxDamage_ = 2, std::string imgHandleKey_ = "s_game_ghorst2") : Enemy(x_, y_, width * size, height * size, imgHandleKey_, maxDamage_, game_) {
+			layer = 120;
 		}
-		
 
 
 		void update() {}
+	};
 
+	class Switch : public Enemy {
+		static const int width = 200;
+		static const int height = 250;
+
+	public:
+		std::shared_ptr<Effect> faucet = std::make_shared<Effect>("s_game_water", left() + 39, top() + 150, rect.width + 100, 600, true, 150, 1, 0);
+
+		std::shared_ptr<Ghorst> obake;
+
+		Switch(int x_, int y_, SinglePlayerGame& game_, double size, int maxDamage_ = -1, std::string imgHandleKey_ = "s_game_switch") : Enemy(x_, y_, width * size, height * size, imgHandleKey_, maxDamage_, game_) {
+			layer = 130;
+			moveDirection = RIGHT;
+			game_.drawList.push_back(faucet);
+			obake = game_.makeGhorst(40, 120, 1);
+
+		}
+		
+
+		void update() {
+			if (!obake->getIsAlive()) {
+				isAlive = false;
+			}
+		}
+		
+		
 	};
 
 	class Inundation : public Enemy {
@@ -1459,7 +1474,7 @@ class SinglePlayerGame : public Game {
 
 		void damageControl() {
 			damage++;
-			game.makeEffect("s_game_hit", left(), top(), rect.width, rect.width, false, layer + 1, 2);
+			game.makeEffect("s_game_hit", left() - 75, top() - 110, 250, 250, false, layer - 1, 2, 5);
 
 			if (damage < maxDamage) {
 				// HP残ってる
@@ -1498,6 +1513,7 @@ class SinglePlayerGame : public Game {
 	std::shared_ptr<RocketWanwan> makeRocketWanwan(int x, int y, double size);
 	std::shared_ptr<Inundation> makeInundation();
 	std::shared_ptr<Switch> makeSwitch(int x, int y, double size);
+	std::shared_ptr<Ghorst> makeGhorst(int x, int y, double size);
 	std::shared_ptr<Ufo> makeUfo(int x, int y, double size);
 	std::shared_ptr<Ray> makeRay(int x, int y, double size);
 	std::shared_ptr<Cloud> makeCloud(int x, int y, double size);

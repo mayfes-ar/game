@@ -32,6 +32,14 @@ std::shared_ptr<SinglePlayerGame::Inundation> SinglePlayerGame::makeInundation()
 	return enemy;
 }
 
+std::shared_ptr<SinglePlayerGame::Ghorst> SinglePlayerGame::makeGhorst(int x, int y, double size = 1.0) {
+	auto enemy = std::make_shared<Ghorst>(x, y, *this, size);
+
+	enemySubList.push_back(enemy);
+	drawList.push_back(enemy);
+	return enemy;
+}
+
 std::shared_ptr<SinglePlayerGame::Switch> SinglePlayerGame::makeSwitch(int x, int y, double size = 1.0) {
 	auto enemy = std::make_shared<Switch>(x, y, *this, size);
 	if (player->isContacted(enemy)) {
