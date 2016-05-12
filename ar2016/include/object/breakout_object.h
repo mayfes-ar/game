@@ -819,10 +819,12 @@ public:
 			realm.start_point = hit_point + Eigen::Vector2i(-width / 2, - height / 2);
 		}
 		switch (kind) {
+		case PlayerStrong:
 		case EnemyStrong:
+			setReflectEffect("b_strong_fireball_reflect");
+			break;
 		case EnemyWeak:
 			break;
-		case PlayerStrong:
 		case PlayerWeak:
 			setReflectEffect("b_green_fireball_reflect");
 			break;
@@ -896,7 +898,7 @@ public:
 			
 			break;
 		case EnemyStrong:
-			DrawCircle(x, y, r, Color::BLACK, true);
+			m_enemy_strong_fireball_effect.incrementCounterWhenDrawWithRealm(m_bounding_box);
 			break;
 		case PlayerWeak:
 			m_green_fireball_effect.incrementCounterWhenDrawWithRealm(m_bounding_box);
@@ -910,8 +912,32 @@ public:
 	}
 
 	void updatePosition() {
+		switch (m_mode) {
+		case EnemyStrong:
+			// 十分大きくなるまではぶるぶる動かす
+			if (m_realm.radius < 40) {
+				std::shared_ptr<MovingBehavior> rnd_behavior = std::make_shared<RandomBehavior>(m_bounding_box.left(), m_bounding_box.right(), m_bounding_box.top(), m_bounding_box.bottom());
+				m_moving->setBehavior(rnd_behavior);
+				increaseRadius(1);
+			}
+			// 十分大きくなったら下に向けて発射
+			else {
+				std::shared_ptr<MovingBehavior> nwt_behavior = std::make_shared<NewtonBehavior>();
+				m_moving->setBehavior(nwt_behavior);
+				m_moving->setVelocity(Eigen::Vector2f(0, 5.0f));
+			}
+		}
 		m_moving->updatePoistion(m_realm.center);
+		//fireball描画に使うため
 		m_bounding_box = Shape::Rectangle(m_realm.center - Eigen::Vector2i(m_realm.radius, m_realm.radius), m_realm.radius * 2, m_realm.radius * 2);
+	}
+
+	void increaseRadius(int amount) {
+		m_realm.radius += amount;
+	}
+
+	void setRadius(int radius) {
+		m_realm.radius = radius;
 	}
 
 	void setPosition(const Eigen::Vector2i& pos) {
@@ -995,7 +1021,7 @@ public:
 		switch (m_mode) {
 		case PlayerStrong:
 		case EnemyStrong:
-			return 2;
+			return 3;
 		case PlayerWeak:
 		case EnemyWeak:
 			return 1;
@@ -1011,6 +1037,8 @@ private:
 	FireballKind m_mode = EnemyWeak;
 	Effect m_fireball_effect = Effect(effectHandles["b_fireball"], 3, PRIORITY_DYNAMIC_OBJECT);
 	Effect m_green_fireball_effect = Effect(effectHandles["b_green_fireball"], PRIORITY_DYNAMIC_OBJECT);
+	Effect m_enemy_strong_fireball_effect = Effect(effectHandles["b_enemy_strong_fireball"], PRIORITY_DYNAMIC_OBJECT);
+	Effect m_player_strong_fireball_effect = Effect(effectHandles["b_player_strong_fireball"], PRIORITY_DYNAMIC_OBJECT);
 };
 
 class FireballManager : public Object {

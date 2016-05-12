@@ -52,6 +52,12 @@ namespace Breakout
 		std::shared_ptr<Fireball> makeFireball(Eigen::Vector2f velocity, FireballKind kind) {
 			auto moving = std::make_shared<Moving>(1.0f, std::make_shared<NewtonBehavior>(), velocity, Eigen::Vector2f::Zero());
 			auto fireball = std::make_shared<Fireball>(Shape::Circle(m_realm.getLeftBottomPoint(), FIREBALL_RADIUS), moving, kind);
+			// 顔の真下から出す
+			if (kind == EnemyStrong) {
+				fireball->setPosition(m_realm.getCenterPoint() + Eigen::Vector2i(0, m_realm.height));
+				fireball->setVelocity(Eigen::Vector2f::Zero());
+				fireball->setRadius(2);
+			}
 			return fireball;
 		};
 
@@ -251,11 +257,7 @@ namespace Breakout
 		}
 		std::shared_ptr<Fireball> makeFireball() override {
 			Eigen::Vector2f base_vel(velocity_generator(mt), velocity_generator(mt));
-			FireballKind kind;
-			float fireball_kind_prob = 0.8;
-
-			if (fireball_mode_generator(mt) > fireball_kind_prob) kind = FireballKind::EnemyStrong;
-			else kind = FireballKind::EnemyWeak;
+			FireballKind kind = FireballKind::EnemyWeak;
 
 			return EnemyBase::makeFireball(base_vel, kind);
 		}
@@ -295,11 +297,7 @@ namespace Breakout
 		}
 		std::shared_ptr<Fireball> makeFireball() override {
 			Eigen::Vector2f base_vel(velocity_generator(mt), velocity_generator(mt));
-			FireballKind kind;
-			float fireball_kind_prob = 0.8;
-
-			if (fireball_mode_generator(mt) > fireball_kind_prob) kind = FireballKind::EnemyStrong;
-			else kind = FireballKind::EnemyWeak;
+			FireballKind kind = FireballKind::EnemyWeak;
 
 			return EnemyBase::makeFireball(base_vel, kind);
 		}
@@ -410,6 +408,7 @@ namespace Breakout
 		bool draw() override {
 			if (!isAlive()) {
 				EnemyBase::draw();
+				return true;
 			}
 			if (hasLeft()) m_left_hand->draw();
 			if (hasRight()) m_right_hand->draw();

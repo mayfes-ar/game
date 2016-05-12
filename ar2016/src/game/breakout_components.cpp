@@ -83,7 +83,7 @@ void BreakoutComponents::setup()
 	// fireballの初期化
 	{
 		fireball_manager = std::make_shared<Breakout::FireballManager>(MAX_FIREBALL_NUM);
-		std::uniform_real_distribution<> velocity_generator(FIREBALL_STARTVEL.x(), FIREBALL_STARTVEL.y());
+		/*std::uniform_real_distribution<> velocity_generator(FIREBALL_STARTVEL.x(), FIREBALL_STARTVEL.y());
 		std::uniform_int<> position_generator(-10, 10);
 		std::uniform_real_distribution<> fireball_mode_generator(0.0, 1.0);
 
@@ -101,7 +101,7 @@ void BreakoutComponents::setup()
 			else {
 				fireball_manager->add(std::make_shared<Breakout::Fireball>(circle, moving, EnemyWeak));
 			}
-		}
+		}*/
 	}
 
 

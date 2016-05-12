@@ -253,8 +253,11 @@ bool Object::load() {
 	isSuccess &= loadEffect("b_fireball_reflect", "breakout/fireball_reflect", 14, 1, 1680, 120);
 	isSuccess &= loadEffect("b_green_fireball", "breakout/green_fireball", 5, 5, 500, 500);
 	isSuccess &= loadEffect("b_green_fireball_reflect", "breakout/green_fireball_reflect", 14, 1, 1680, 120);
+	isSuccess &= loadEffect("b_strong_fireball_reflect", "breakout/strong_fireball_reflect", 14, 1, 1680, 120);
 	isSuccess &= loadEffect("b_crawl", "breakout/crawl", 5, 2, 1200, 480);
 	isSuccess &= loadEffect("b_enemy_vanish", "breakout/enemy_vanish", 5, 1, 1280, 256);
+	isSuccess &= loadEffect("b_enemy_strong_fireball", "breakout/enemy_strong_fireball", 9, 3, 1800, 600);
+	isSuccess &= loadEffect("b_player_strong_fireball", "breakout/player_strong_fireball", 10, 3, 2000, 600);
 
 	for (int num = 0; num <= 9; ++num) {
 		for (const auto& color : { "red", "blue", "yellow", "green" }) {
