@@ -37,6 +37,7 @@ namespace Breakout {
 	constexpr int PRIORITY_DYNAMIC_OBJECT = 30; // 動的オブジェクト(Ship, Fireball)
 	constexpr int PRIORITY_CHARACTER = 40; // キャラクター(マリオ)
 	constexpr int PRIORITY_INFO = 50; // インフォメーション
+	constexpr int PRIORITY_FUKIDASHI = 60; //吹出し用
 
 	// 方向をあらわすenum
 	enum Direction { Top, Left, Bottom, Right };
@@ -50,6 +51,62 @@ namespace Breakout {
 		PlayerWeak,
 		PlayerStrong
 	};
+
+	class Fukidashi : public Object
+	{
+	public:
+		Fukidashi(Eigen::Vector2i right_bottom_point, std::string sentences, int appear_time, unsigned int color = GetColor(0, 0, 0))
+			: m_sentences(sentences), m_appear_time(appear_time), m_color(color)
+		{
+			int width, height, line_count;
+			GetDrawStringSize(&width, &height, &line_count, sentences.c_str(), sentences.size());
+			m_realm.width = width;
+			m_realm.height = height;
+			m_realm.start_point = right_bottom_point + Eigen::Vector2i(0, -height);
+			
+			Object::layer = PRIORITY_FUKIDASHI;
+		}
+
+		Fukidashi(Eigen::Vector2i right_bottom_point, std::string sentences, int appear_time, std::string fukidashi_name, unsigned int color = GetColor(0, 0, 0))
+			: m_sentences(sentences), m_appear_time(appear_time), m_color(color)
+		{
+			int width, height, line_count;
+			GetDrawStringSize(&width, &height, &line_count, sentences.c_str(), sentences.size());
+			m_realm.width = width;
+			m_realm.height = height;
+			m_realm.start_point = right_bottom_point + Eigen::Vector2i(0, -height);
+			m_fukidashi_handle = imgHandles[fukidashi_name];
+			Object::layer = PRIORITY_FUKIDASHI;
+		}
+
+		void decrementTime() {
+			m_appear_time--;
+		}
+
+		bool isAvailable() {
+			return m_appear_time >= 0;
+		}
+
+		bool draw() override {
+			if (isAvailable() && m_sentences.size() != 0) {
+				DrawExtendGraph(m_realm.left(), m_realm.top(), m_realm.right(), m_realm.bottom(), m_fukidashi_handle, TRUE);
+				
+				DrawFormatString(m_realm.left(), m_realm.top(), m_color, m_sentences.c_str());
+				decrementTime();
+				return true;
+			} else {
+				return false;
+			}
+		}
+
+	private:
+		Shape::Rectangle m_realm = Shape::Rectangle();
+		std::string m_sentences = "";
+		int m_appear_time;
+		int m_fukidashi_handle = imgHandles["b_normal_fukidashi"];
+		unsigned int m_color = GetColor(0, 0, 0);
+		std::vector<int> sentence_widths;
+ 	};
 
 	class Effect : public Object {
 	public:
@@ -1509,6 +1566,20 @@ public:
 		if (dead_count == 0) dead_count = m_dead_effect.getCountMax() * m_dead_effect.getFramesPerScene();
 		m_dead_count = dead_count;
 	}
+
+	void setPosition(Eigen::Vector2i pos) {
+		m_realm.start_point = pos;
+	}
+
+	void setMovingBehavior(std::shared_ptr<MovingBehavior>& behavior) {
+		m_moving->setBehavior(behavior);
+	}
+	void setVelocity(Eigen::Vector2f vel) {
+		m_moving->setVelocity(vel);
+	}
+	void setAccel(Eigen::Vector2f accel) {
+		m_moving->setAccel(accel);
+	}
 	
 protected:
 	Shape::Rectangle m_realm = Shape::Rectangle();
@@ -1518,6 +1589,90 @@ protected:
 private:
 	Effect m_dead_effect = Effect(effectHandles["b_burning"], 5, PRIORITY_DYNAMIC_OBJECT);
 	int m_dead_count = 60;
+};
+
+class Resident : public Town
+{
+public:
+	Resident(Shape::Rectangle realm, Life life, std::shared_ptr<MovingBehavior>& behavior, std::shared_ptr<Fukidashi> fukidashi = nullptr) 
+	{
+		m_realm = realm;
+		m_life = life;
+		m_moving->setBehavior(behavior);
+		m_fukidashi = fukidashi;
+		Object::layer = PRIORITY_DYNAMIC_OBJECT;
+	}
+	Resident(Shape::Rectangle realm, Life life, std::shared_ptr<MovingBehavior>& behavior, int img_handle, std::shared_ptr<Fukidashi> fukidashi = nullptr) 
+	{	
+		m_realm = realm;
+		m_life = life;
+		m_moving->setBehavior(behavior);
+		m_img_handle = img_handle;
+		m_fukidashi = fukidashi;
+		Object::layer = PRIORITY_DYNAMIC_OBJECT;
+	}
+	Resident(Shape::Rectangle realm, Life life, std::shared_ptr<MovingBehavior>& behavior, int img_handle, int img_handle_damaged, std::shared_ptr<Fukidashi> fukidashi = nullptr) {
+		m_realm = realm;
+		m_life = life;
+		m_moving->setBehavior(behavior);
+		m_img_handle = img_handle;
+		m_img_handle_damaged = img_handle_damaged;
+		m_fukidashi = fukidashi;
+		Object::layer = PRIORITY_DYNAMIC_OBJECT;
+	}
+
+	void appear() { m_is_disappeared = false; }
+	void disappear() { m_is_disappeared = true; }
+
+	bool isDisappeared() {
+		return m_is_disappeared;
+	}
+
+	bool hasFukidashi() {
+		return m_fukidashi != nullptr;
+	}
+
+	void setFukidashi(std::shared_ptr<Fukidashi>& fukidashi) {
+		m_fukidashi = fukidashi;
+	}
+
+	void setImageHandle(std::string image_name) {
+		m_img_handle = imgHandles[image_name];
+	}
+
+	void setImageHandleDamaged(std::string image_name_damaged) {
+		m_img_handle_damaged = imgHandles[image_name_damaged];
+	}
+
+	void updatePosition() override {
+		if (m_realm.bottom() > HEIGHT + 5) {
+			m_moving->setAccel(Eigen::Vector2f(0.0f, 0.0f));
+			m_moving->setVelocity(Eigen::Vector2f(m_moving->getVelocity().x(), 0.0f));
+			//床よりちょっと高くしておく
+			m_realm.start_point = Eigen::Vector2i(m_realm.left(), FIELD_HEIGHT - 2 - m_realm.height);
+		}
+		m_moving->updatePoistion(m_realm.start_point);
+	}
+
+	bool draw() override {
+		if (m_is_disappeared) return true;
+		if (m_life.isAlive()) {
+			DrawExtendGraph(m_realm.left(), m_realm.top(), m_realm.right(), m_realm.bottom(), m_img_handle, TRUE);
+		}
+		else {
+			if (isEffectContinuing()) {
+				DrawExtendGraph(m_realm.left(), m_realm.top(), m_realm.right(), m_realm.bottom(), m_img_handle_damaged, TRUE);
+			}
+		}
+		Town::draw();
+		if(hasFukidashi()) m_fukidashi->draw();
+		return true;
+	}
+private:
+	int m_img_handle = imgHandles["b_hime"];
+	int m_img_handle_damaged = imgHandles["b_hime_damaged"];
+	bool m_is_disappeared = false;
+	std::shared_ptr<Fukidashi> m_fukidashi;
 };
 
 class House : public Town
@@ -1534,6 +1689,20 @@ public:
 		m_img_handle = img_handle;
 		Object::layer = PRIORITY_STATIC_OBJECT;
 	}
+	House(Shape::Rectangle realm, Life life, std::shared_ptr<Resident>& resident) {
+		m_realm = realm;
+		m_life = life;
+		m_resident = resident;
+		Object::layer = PRIORITY_STATIC_OBJECT;
+	}
+	House(Shape::Rectangle realm, Life life, int img_handle, std::shared_ptr<Resident>& resident) {
+		m_realm = realm;
+		m_life = life;
+		m_img_handle = img_handle;
+		m_resident = resident;
+		Object::layer = PRIORITY_STATIC_OBJECT;
+	}
+
 	bool draw() override {
 		if (m_life.isAlive() || isEffectContinuing()) {
 			DrawExtendGraph(m_realm.left(), m_realm.top(), m_realm.right(), m_realm.bottom(), m_img_handle, TRUE);
@@ -1541,50 +1710,39 @@ public:
 		Town::draw();
 		return true;
 	}
-private:
-	int m_img_handle = imgHandles["b_house01"];
-};
 
-class Resident : public Town
-{
-public:
-	Resident(Shape::Rectangle realm, Life life, std::shared_ptr<MovingBehavior>& behavior) {
-		m_realm = realm;
-		m_life = life;
-		m_moving->setBehavior(behavior);
-		Object::layer = PRIORITY_DYNAMIC_OBJECT;
-	}
-	Resident(Shape::Rectangle realm, Life life, std::shared_ptr<MovingBehavior>& behavior, int img_handle) {
-		m_realm = realm;
-		m_life = life;
-		m_moving->setBehavior(behavior);
-		m_img_handle = img_handle;
-		Object::layer = PRIORITY_DYNAMIC_OBJECT;
-	}
-	Resident(Shape::Rectangle realm, Life life, std::shared_ptr<MovingBehavior>& behavior, int img_handle, int img_handle_damaged) {
-		m_realm = realm;
-		m_life = life;
-		m_moving->setBehavior(behavior);
-		m_img_handle = img_handle;
-		m_img_handle_damaged = img_handle_damaged;
-		Object::layer = PRIORITY_DYNAMIC_OBJECT;
+	bool isResidentIn() {
+		return m_resident != nullptr;
 	}
 
-	bool draw() override {
-		if (m_life.isAlive()) {
-			DrawExtendGraph(m_realm.left(), m_realm.top(), m_realm.right(), m_realm.bottom(), m_img_handle, TRUE);
-		}
-		else {
-			if (isEffectContinuing()) {
-				DrawExtendGraph(m_realm.left(), m_realm.top(), m_realm.right(), m_realm.bottom(), m_img_handle_damaged, TRUE);
-			}
-		}
-		Town::draw();
+	void exhareResident() {
+		if (m_resident == nullptr) return;
+		std::shared_ptr<Resident> resident = m_resident;
+		resident->appear();
+		resident->setVelocity(Eigen::Vector2f((m_realm.left() > FIELD_START_POS.x() + FIELD_WIDTH / 2 ? 80.0f : -80.0f), 20.0f));
+		resident->setAccel(Eigen::Vector2f(0.0f, 30.0f));
+		resident->setImageHandle("b_hime_damaged");
+		std::shared_ptr<Fukidashi> fukidashi = std::make_shared<Fukidashi>(resident->getRealm().getRightTopPoint(), "  daaaa", 60, GetColor(0, 0, 0));
+		resident->setFukidashi(fukidashi);
+		m_resident = nullptr;
+	}
+
+	//空きがあったら格納する。
+	bool ifNullThenSetResident(std::shared_ptr<Resident>& resident) {
+		if (m_resident != nullptr) return false;
+		m_resident = resident;
+		m_resident->disappear();
+		m_resident->setPosition(m_realm.start_point + Eigen::Vector2i(10, 10));
+		std::shared_ptr<MovingBehavior> behavior = std::make_shared<NewtonBehavior>();
+		m_resident->setMovingBehavior(behavior);
+		m_resident->setVelocity(Eigen::Vector2f(0.0, 0.0));
 		return true;
 	}
 private:
-	int m_img_handle = imgHandles["b_hime"];
-	int m_img_handle_damaged = imgHandles["b_hime_damaged"];
+	int m_img_handle = imgHandles["b_house01"];
+	std::shared_ptr<Resident> m_resident = nullptr;
 };
+
+
 
 } // namespace Breakout

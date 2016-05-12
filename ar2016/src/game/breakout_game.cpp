@@ -362,12 +362,24 @@ void BreakoutGame::updateTown() {
 			++itr;
 		}
 		else {
+			(*itr)->exhareResident();
 			itr = m_components->house_list.erase(itr);
 		}
 	}
 
 	for (auto& itr = m_components->resident_list.begin(); itr != m_components->resident_list.end();) {
 		if ((*itr)->isEffectContinuing()) {
+			//消えていたら
+			if ((*itr)->isDisappeared()) {
+				++itr;
+				continue;
+			}
+			// fireballがでたら逃げ込む
+			if (m_components->fireball_manager->getFireballList().size() != 0) {
+				for (auto& house : m_components->house_list) {
+					if (house->ifNullThenSetResident((*itr))) break;
+				}
+			}
 			(*itr)->updatePosition();
 			++itr;
 		}
@@ -375,6 +387,7 @@ void BreakoutGame::updateTown() {
 			itr = m_components->resident_list.erase(itr);
 		}
 	}
+	
 }
 
 void BreakoutGame::shipVSEnemy() {
