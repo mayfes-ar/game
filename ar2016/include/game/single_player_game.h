@@ -299,8 +299,8 @@ class SinglePlayerGame : public Game {
 		const MarkerType markerType;
 
 		bool isEnable = true;
-		bool canGuard;
-		bool canAttack;
+		bool canGuard = true;
+		bool canAttack = true;
 
 		double imageSize = 1.2;
 
@@ -308,8 +308,8 @@ class SinglePlayerGame : public Game {
 			if (rect.width > 0 || rect.height > 0) {
 				double prevWidth = rect.width;
 				double prevHeight = rect.height;
-				rect.width = markerType == PIYO ? 1920/14 : markerType == SWORD ? 765/4 : 256*0.8;
-				rect.height = markerType == PIYO ? 1409/14 : markerType == SWORD ? 765/4 : 256*0.8;
+				rect.width = markerType == PIYO ? 1920/10 : markerType == SWORD ? 765/4 : 256*0.8;
+				rect.height = markerType == PIYO ? 1409/10 : markerType == SWORD ? 765/4 : 256*0.8;
 				rect.x = rect.x + (prevWidth - rect.width) / 2;
 				rect.y = rect.y + (prevHeight- rect.height) / 2;
 			}
@@ -319,17 +319,18 @@ class SinglePlayerGame : public Game {
 		}
 
 	public:
-		Marker(Rectan rect_, bool willStay_, int index_, SinglePlayerGame& game_) :index(index_), game(game_), markerType(index_ < 3 ? PIYO : index_ < 6 ? SWORD : SHIELD){
+		Marker(Rectan rect_, bool willStay_, int index_, SinglePlayerGame& game_) :index(index_), game(game_), markerType(index_ < 2 ? PIYO : index_ == 3 ? SWORD : SHIELD){
 			rect = rect_;
 			modifyRect();
 			prevRect = rect;
 			layer = 300;
 			imgHandle = markerType == PIYO ? imgHandles["s_game_piyo"] : markerType == SWORD ? imgHandles["s_game_sword"] : imgHandles["s_game_shield"];
-			canGuard = markerType == SWORD? false : true;
-			canAttack = markerType == SHIELD ? false : true;
+			// canGuard = markerType == SWORD? false : true;
+			// canAttack = markerType == SHIELD ? false : true;
 		}
 
 		bool draw() {
+			/*
 			switch (moveDirection)
 			{
 			case RIGHT: {
@@ -344,7 +345,8 @@ class SinglePlayerGame : public Game {
 			default:
 				break;
 			}
-
+			*/
+			drawWithRotation(imgHandle, rect.rotate, false, imageSize);
 			if (!isEnable) {
 				drawDark([this]() {
 					SetDrawBlendMode(DX_BLENDMODE_ALPHA, 150);
@@ -780,7 +782,7 @@ class SinglePlayerGame : public Game {
 		static const int height = 100;
 
 	public:
-		Ghorst(int x_, int y_, SinglePlayerGame& game_, double size, int maxDamage_ = 2, std::string imgHandleKey_ = "s_game_ghorst2") : Enemy(x_, y_, width * size, height * size, imgHandleKey_, maxDamage_, game_) {
+		Ghorst(int x_, int y_, SinglePlayerGame& game_, double size, int maxDamage_ = 1, std::string imgHandleKey_ = "s_game_ghorst2") : Enemy(x_, y_, width * size, height * size, imgHandleKey_, maxDamage_, game_) {
 			layer = 120;
 		}
 
@@ -851,7 +853,7 @@ class SinglePlayerGame : public Game {
 
 		void setAc(double& acX, double& acY) {
 			acX = 0;
-			acY = isWaterUp ? inundationCounter == 0 ? -0.5*(rect.y-prevY) : -0.005 : 0.02;
+			acY = isWaterUp ? inundationCounter == 0 ? -0.5*(rect.y-prevY) : -0.005 : 0.2;
 		}
 	};
 
@@ -1230,7 +1232,6 @@ class SinglePlayerGame : public Game {
 			acX = -2;
 		}
 	};
-
 
 	enum Tutorial {
 		START,BEATFIRE,BEATHEIHO,END
