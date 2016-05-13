@@ -809,6 +809,14 @@ public:
 		m_fukidashi = std::make_shared<Fukidashi>(realm.getRightTopPoint(), sentences, appear_time);
 		Object::layer = PRIORITY_INFO_HIME;
 	}
+	
+	InfoHime(std::string sentences, int appear_time, std::string img_name = "b_hime")
+		: m_hime_img_handle(imgHandles[img_name])
+	{
+		m_realm = Shape::Rectangle(INFO_HIME_START_POS, INFO_HIME_WIDTH, INFO_HIME_HEIGHT);
+		m_fukidashi = std::make_shared<Fukidashi>(m_realm.getRightTopPoint(), sentences, appear_time);
+		Object::layer = PRIORITY_INFO_HIME;
+	}
 
 	void setSentences(std::string sentences, int appear_time, unsigned int color) {
 		m_fukidashi = std::make_shared<Fukidashi>(m_realm.getRightBottomPoint(), sentences, appear_time, color);
@@ -836,22 +844,30 @@ public:
 		m_moving->setVelocity(vel);
 	}
 
+	void finishDraw() {
+		m_is_finish_draw = true;
+	}
+
 	bool draw() override {
+		if (m_is_finish_draw) return false;
 		DrawExtendGraph(m_realm.left(), m_realm.top(), m_realm.right(), m_realm.bottom(), m_hime_img_handle, TRUE);
 		if (hasFukidashi()) {
 			if (!m_fukidashi->draw()) {
-				m_fukidashi == nullptr;
+				m_fukidashi = nullptr;
 			}
 			return true;
 		}
-		return true;
+		return false;
 	}
+
+	
 
 private:
 	Shape::Rectangle m_realm = Shape::Rectangle(INFO_HIME_START_POS, INFO_HIME_WIDTH, INFO_HIME_HEIGHT);
-	std::shared_ptr<Moving> m_moving = std::make_shared<Moving>(0.03, std::make_shared<NewtonBehavior>());
+	std::shared_ptr<Moving> m_moving = std::make_shared<Moving>(0.03f, std::make_shared<NewtonBehavior>());
 	int m_hime_img_handle = imgHandles["b_hime"];
 	std::shared_ptr<Fukidashi> m_fukidashi = nullptr;
+	bool m_is_finish_draw = false;
 };
 
 class Result : public Object
@@ -1283,12 +1299,12 @@ public:
 				std::shared_ptr<MovingBehavior> rnd_behavior = std::make_shared<RandomBehavior>(m_bounding_box.left(), m_bounding_box.right(), m_bounding_box.top(), m_bounding_box.bottom());
 				m_moving->setBehavior(rnd_behavior);
 				increaseRadius(1);
+				m_moving->setVelocity(Eigen::Vector2f(0, 5.0f));
 			}
 			// 十分大きくなったら下に向けて発射
 			else {
 				std::shared_ptr<MovingBehavior> nwt_behavior = std::make_shared<NewtonBehavior>();
 				m_moving->setBehavior(nwt_behavior);
-				m_moving->setVelocity(Eigen::Vector2f(0, 5.0f));
 			}
 		}
 		m_moving->updatePoistion(m_realm.center);

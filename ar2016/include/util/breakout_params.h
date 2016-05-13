@@ -91,7 +91,8 @@ namespace Breakout {
 
 	// Potのパラメータ
 	const Eigen::Vector2i POT_START_POS = Eigen::Vector2i{ BLOCK_OFFSET_X + FIELD_WIDTH / 2, HEIGHT - 200 };
-
+	const int POT_EXHARE_DEPTH = 300;
+	const int POT_APPEAR_DEPTH = 200;
 
 	// House のパラメータ
 	constexpr int HOUSE_NUM = 6;

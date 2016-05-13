@@ -38,10 +38,21 @@ public:
 	{
 		init();
 
+		//select
 		mode.setMode([&] {
 			drawList.push_back(m_components->background);
 			drawList.push_back(m_components->select);
 			drawList.push_back(m_components->info_hime);
+		}, -1);
+
+		//tutorial_ship
+		mode.setMode([&] {
+			setup_tutorial_ship();
+		}, -1);
+
+		//tutorial_pot
+		mode.setMode([&] {
+			setup_tutorial_pot();
 		}, -1);
 
 		mode.setMode([&] {
@@ -52,6 +63,7 @@ public:
 		}, -1);
 
 		mode.setMode([&]() {
+			m_components->ship->resetShip();
 			drawList.clear();
 			m_components->info->init();
 			drawList.push_back(m_components->background);
@@ -91,22 +103,6 @@ public:
 
 	bool onUpdate() override
 	{
-		switch (mode.getMode()) {
-		case 2:
-			updateCollisionDetection();
-			updateFireballPosition();
-			moveShip();
-			updateBlockStatus();
-			updatePotStatus();
-			updateEnemy();
-			updateTown();
-			shipVSEnemy();
-			EnemyVSTown();
-			updateInfo();
-			break;
-		default:
-			break;
-		}
 		if (key[KEY_INPUT_ESCAPE]) {
 			share.willFinish = true;
 		}
@@ -172,7 +168,13 @@ private:
 	// Infoのupdate
 	void updateInfo();
 
-	void turtolial();
+	// shipのチュートリアル
+	bool tutorial_ship();
+	void setup_tutorial_ship();
+
+	// potのチュートリアル
+	bool tutorial_pot();
+	void setup_tutorial_pot();
 
 	// ゲームをクリアしたかどうか
 	// 現在はBlockが一つもない場合はクリアとみなす
