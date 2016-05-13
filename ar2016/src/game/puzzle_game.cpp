@@ -383,6 +383,7 @@ void PuzzleGame::Player::update() {
 
 	bool isSecond = false;
 	while (true) {
+		bool isFailure = false;
 
 		for (auto block : game.allBlocks) {
 			if (block->canHit && isContacted(block)) {
@@ -395,7 +396,12 @@ void PuzzleGame::Player::update() {
 						x = prevX = block->left() - width;
 						onRight = true;
 					} else {
-						init();
+						if (block == game.markerBlock) {
+							isFailure = true;
+							game.markerBlock->canHit = false;
+						} else {
+							init();
+						}
 					}
 				} else {
 					if (prevY >= block->bottomHit()) {
@@ -406,7 +412,12 @@ void PuzzleGame::Player::update() {
 						isJumping = false;
 						onBottom = true;
 					} else {
-						init();
+						if (block == game.markerBlock) {
+							isFailure = true;
+							game.markerBlock->canHit = false;
+						} else {
+							init();
+						}
 					}
 				}
 			}
@@ -414,7 +425,6 @@ void PuzzleGame::Player::update() {
 
 		if (isSecond) { break; }
 
-		bool isFailure = false;
 		for (auto block : game.stageBlocks) {
 			if (isContacted(block) && block->canHit) { isFailure = true; }
 		}
