@@ -290,7 +290,9 @@ void BreakoutGame::updateBlockStatus() {}
 void BreakoutGame::updatePotStatus() {
 	for (auto& fireball : m_components->fireball_manager->getFireballList()) {
 		// pot が使用済みならもう更新しない。
-		if (!m_components->pot->isAvailable()) return;
+		if (!m_components->pot->isAvailable()) {
+			m_components->pot->resetStatus();
+		}
 
 		if (share.lives[0] > 0) {
 			// potを出現させる

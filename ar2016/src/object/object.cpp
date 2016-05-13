@@ -275,6 +275,8 @@ bool Object::load() {
 	isSuccess &= loadEffect("b_enemy_strong_fireball", "breakout/enemy_strong_fireball", 9, 3, 1800, 600);
 	isSuccess &= loadEffect("b_player_strong_fireball", "breakout/player_strong_fireball", 10, 3, 2000, 600);
 	isSuccess &= loadEffect("b_fire_frame", "breakout/fire_frame", 2, 5, 1280, 2400);
+	isSuccess &= loadEffect("b_pot_light", "breakout/gra_effect_light", 7, 3, 1680, 720);
+
 
 	isSuccess &= loadSound("b_bomb", "breakout/bomb.mp3");
 	isSuccess &= loadSound("b_meramera", "breakout/meramera.mp3");
@@ -287,6 +289,7 @@ bool Object::load() {
 	isSuccess &= loadSound("b_restore_time", "breakout/restore_time.wav");
 	isSuccess &= loadSound("b_start_play", "breakout/start.mp3");
 	isSuccess &= loadSound("b_final_play", "breakout/final.mp3");
+	isSuccess &= loadSound("b_pot_exhare", "breakout/pot_exhare.mp3");
 
 	for (int num = 0; num <= 9; ++num) {
 		for (const auto& color : { "red", "blue", "yellow", "green" }) {

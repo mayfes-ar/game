@@ -278,6 +278,16 @@ namespace Breakout {
 			return false;
 		}
 
+		bool returnFalseWhenFinishDrawWithRotation(Shape::Circle circle, float rotation) {
+			if (m_counter < m_count_max) {
+				DrawRotaGraph2(circle.center.x(), circle.center.y(), m_effect_width / 2, m_effect_height / 2, (double)circle.radius * 2.0 / (double)m_effect_width, rotation,
+					m_effectHandles[m_counter / m_frames_per_scene], TRUE, FALSE);
+				m_counter++;
+				return true;
+			}
+			return false;
+		}
+
 		bool draw() override { return true; };
 
 		void incrementCounter() {
@@ -1476,6 +1486,7 @@ public:
 		m_fireball = nullptr;
 		m_initial_fireball_speed = 0;
 		m_count = 90;
+		m_exhare_effect_start_count = 60;
 	}
 
 	bool draw() override {
@@ -1484,7 +1495,7 @@ public:
 			return true;
 		}
 
-		auto rotatedTopLine = getRealm().getTopLine().getRotatedLine(m_realm.getCenterPoint(), getRotation());
+		/*auto rotatedTopLine = getRealm().getTopLine().getRotatedLine(m_realm.getCenterPoint(), getRotation());
 		auto rotatedLeftLine = getRealm().getLeftLine().getRotatedLine(getRealm().getCenterPoint(), getRotation());
 		auto rotatedRightLine = getRealm().getRightLine().getRotatedLine(getRealm().getCenterPoint(), getRotation());
 		auto rotatedBottomLine = getRealm().getBottomLine().getRotatedLine(getRealm().getCenterPoint(), getRotation());
@@ -1494,7 +1505,7 @@ public:
 		DrawLine(rotatedLeftLine.point.x(), rotatedLeftLine.point.y(), (rotatedLeftLine.point + rotatedLeftLine.dir).x(), (rotatedLeftLine.point + rotatedLeftLine.dir).y(), GetColor(200, 255, 0), 3);
 		DrawLine(rotatedRightLine.point.x(), rotatedRightLine.point.y(), (rotatedRightLine.point + rotatedRightLine.dir).x(), (rotatedRightLine.point + rotatedRightLine.dir).y(), GetColor(0, 255, 200), 3);
 		DrawLine(rotatedBottomLine.point.x(), rotatedBottomLine.point.y(), (rotatedBottomLine.point + rotatedBottomLine.dir).x(), (rotatedBottomLine.point + rotatedBottomLine.dir).y(), GetColor(200, 0, 200), 3);
-
+*/
 		DrawRotaFormatString(m_realm.left(), m_realm.top(),
 			1.0, 1.0,
 			m_realm.width / 2, m_realm.height / 2,
@@ -1503,12 +1514,23 @@ public:
 		DrawRotaGraph(m_realm.getCenterPoint().x(), m_realm.getCenterPoint().y(),
 			(double)m_realm.width / 150.0, m_rotation,
 			imgHandles["b_pot"], TRUE, FALSE);
+		
+		if (m_count < m_exhare_effect_start_count && m_count >= 0) {
+			const int radius = m_fireball->getRealm().radius * 2;
+			auto rotatedTopLine = getRealm().getTopLine().getRotatedLine(m_realm.getCenterPoint(), getRotation());
+			const Eigen::Vector2i center = rotatedTopLine.point + rotatedTopLine.dir / 2;
+			Shape::Circle circle = Shape::Circle(center, radius);
+			m_exhare_effect.returnFalseWhenFinishDrawWithRotation(circle, getRotation());
+		}
 
+		if (m_count == m_exhare_sound_start_count) {
+			m_exhare_sound.start();
+		}
 
-		DrawBox(m_realm.left(), m_realm.top(),
+		/*DrawBox(m_realm.left(), m_realm.top(),
 			m_realm.right(), m_realm.bottom(),
 			GetColor(255, 0, 0), false);
-
+*/
 		return true;
 	}
 
@@ -1526,6 +1548,11 @@ private:
 			m_fireball->setPosition(m_realm.getLeftTopPoint());
 		}
 	}
+	int m_exhare_effect_start_count = 50;
+	//Sound m_inhare_sound = Sound("b_pot_inhare");
+	Sound m_exhare_sound = Sound("b_pot_exhare");
+	int m_exhare_sound_start_count = 30;
+	Effect m_exhare_effect = Effect(effectHandles["b_pot_light"], 2, PRIORITY_DYNAMIC_OBJECT);
 };
 
 // キャラクタがのる船

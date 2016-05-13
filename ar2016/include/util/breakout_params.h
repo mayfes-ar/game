@@ -33,7 +33,7 @@ namespace Breakout {
 
 	// Blockのパラメータ
 	const int BLOCK_OFFSET_X = WIDTH / 4;
-	const int BLOCK_OFFSET_Y = HEIGHT / 8;
+	const int BLOCK_OFFSET_Y = HEIGHT / 7;
 	constexpr int BLOCK_WIDTH_NUM = 15;
 	constexpr int BLOCK_HEIGHT_NUM = 5;
 	const int BLOCK_WIDTH = (FIELD_WIDTH) / BLOCK_WIDTH_NUM;

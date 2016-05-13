@@ -140,7 +140,7 @@ void BreakoutComponents::setup(ShareData& share)
 
 	// potの初期化
 	{
-		const Shape::Rectangle realm(POT_START_POS, FIREBALL_RADIUS * 2, FIREBALL_RADIUS * 2);
+		const Shape::Rectangle realm(POT_START_POS, FIREBALL_RADIUS * 4, FIREBALL_RADIUS * 4);
 		pot = std::make_shared<Breakout::Pot>(realm);
 	}
 
@@ -165,10 +165,9 @@ void BreakoutComponents::setup(ShareData& share)
 				if (ratio > 0.7) {
 					item = std::make_shared<Item>(Breakout::ItemKind::RestoreTime);
 				}
-				else if (ratio > 0.4) {
-					item = std::make_shared<Item>(Breakout::ItemKind::RestorePot);
-				} else {
-					item = std::make_shared<Item>(Breakout::ItemKind::EnhanceShip);
+				else /*if (ratio > 0.4)*/ {
+					item = item = std::make_shared<Item>(Breakout::ItemKind::EnhanceShip);;
+						//std::make_shared<Item>(Breakout::ItemKind::RestorePot);
 				}
 				block->attachItem(item);
 				item_list.push_back(item);
@@ -202,8 +201,8 @@ void BreakoutComponents::setup(ShareData& share)
 		std::shared_ptr<MovingBehavior> behavior_right = std::make_shared<StringBehavior>(Eigen::Vector2f{ 100.0f, 0.0f }, 0.03f);
 		auto life = Life(ENEMY_HEAD_LIFE, ENEMY_HEAD_LIFE);
 
-		auto enemy_left_hand = std::make_shared<Breakout::EnemyLeftHand>(Shape::Rectangle(ENEMY_HEAD_POS - Eigen::Vector2i(100, 0), ENEMY_HEAD_WIDTH, ENEMY_HEAD_WIDTH), behavior_left, life);
-		auto enemy_right_hand = std::make_shared<Breakout::EnemyRightHand>(Shape::Rectangle(ENEMY_HEAD_POS + Eigen::Vector2i(100, 0), ENEMY_HEAD_WIDTH, ENEMY_HEAD_WIDTH), behavior_right, life);
+		auto enemy_left_hand = std::make_shared<Breakout::EnemyLeftHand>(Shape::Rectangle(ENEMY_HEAD_POS + Eigen::Vector2i(-100, 20), ENEMY_HEAD_WIDTH, ENEMY_HEAD_WIDTH), behavior_left, life);
+		auto enemy_right_hand = std::make_shared<Breakout::EnemyRightHand>(Shape::Rectangle(ENEMY_HEAD_POS + Eigen::Vector2i(100, 20), ENEMY_HEAD_WIDTH, ENEMY_HEAD_WIDTH), behavior_right, life);
 		enemy = std::make_shared<Breakout::EnemyHead>(Shape::Rectangle(ENEMY_HEAD_POS, ENEMY_HEAD_WIDTH, ENEMY_HEAD_WIDTH), behavior_head, life, enemy_left_hand, enemy_right_hand);
 		
 		enemy_manager = std::make_shared<EnemyManager>(MAX_ENEMY_NUM);

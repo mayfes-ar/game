@@ -153,6 +153,7 @@ namespace Breakout
 		// ダメージを受けたら30になって、毎フレーム減っていく。draw()に影響を与える
 		int m_is_damaged = 0;
 		bool m_is_on_ship = false;
+		int on_ship_duration = 0;
 		std::shared_ptr<Breakout::Ship> m_ship = nullptr;
 
 		//ダメージを受けた後の効果が継続しているかどうか
@@ -201,6 +202,12 @@ namespace Breakout
 		void updatePosition() override {
 			//もし死んでいたら動かないようにする。
 			if (!isAlive()) return;
+			//船の上に60frameいたら死ぬ
+			if (on_ship_duration > 60) {
+				damageEnemy(3);
+				setDeadEffect("b_burning", 3, 35);
+				on_ship_duration = 0;
+			}
 
 			if (getIsOnShip()) {
 				std::shared_ptr<MovingBehavior> rnd_behavior = std::make_shared<RandomBehavior>(
@@ -224,6 +231,7 @@ namespace Breakout
 					std::shared_ptr<Ship> null_ship = nullptr;
 					setIsOnShip(null_ship, false);
 				}
+				on_ship_duration++;
 			}
 			else if (m_realm.bottom() >= FIELD_START_POS.y() + FIELD_HEIGHT) {
 				std::shared_ptr<MovingBehavior> rnd_behavior = std::make_shared<RandomBehavior>(FIELD_START_POS.x(),
