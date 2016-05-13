@@ -228,6 +228,9 @@ bool PuzzleGame::onUpdate() {
 	if (key[KEY_INPUT_ESCAPE]) {
 		share.willFinish = true;
 	}
+	if (key[KEY_INPUT_L] && key[KEY_INPUT_R]) {
+		mode.goLast();
+	}
 	funcTimer.update();
 	counter++;
 	if (counter == 3600) {
