@@ -100,4 +100,13 @@ namespace Breakout {
 	const Eigen::Vector2i RESIDENT_START_POS = Eigen::Vector2i{ RESIDENT_OFFSET_X, RESIDENT_OFFSET_Y };
 	const int RESIDENT_LIFE = 1;
 
+	// Score
+	constexpr int BLOCK_SCORE = 50;
+	constexpr int ENEMY_SCORE = 100;
+	constexpr int BOSS_HEAD_SCORE = 200;
+	constexpr int BOSS_LEFT_SCORE = 100;
+	constexpr int BOSS_RIGHT_SCORE = 100;
+	constexpr int HOUSE_SCORE = -100;
+	constexpr int SCORE_OFFSET = 1000;
+
 } // namespace Breakout

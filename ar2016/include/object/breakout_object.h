@@ -633,6 +633,7 @@ public:
 		m_timer->increaseStartTime(minute, second);
 	}
 
+
 	bool draw() {
 		SetDrawBright(100, 100, 100);
 		DrawBox(m_realm.left(), m_realm.top(),
@@ -721,15 +722,33 @@ public:
 		return ratio < 0.3f;
 	}
 
+	int getScore() const {
+		return m_score->getPoint();
+	}
+
 	// Scoreをいじるときはこの関数から直接scoreたたいてください
 	void addScore(int score) {
 		m_score->addPoint(score);
+	}
+
+	void addScoreCalc(const std::function<int()>& calc) {
+		m_score_calc.push_back(calc);
+	}
+
+	void addScoreAll() {
+		int score = 0;
+		std::for_each(m_score_calc.begin(), m_score_calc.end(),
+			[&] (std::function<int()> f){
+			score += f();
+		});
+		m_score->setScore(score);
 	}
 
 private:
 	Shape::Rectangle m_realm = Shape::Rectangle();
 	std::shared_ptr<Timer> m_timer = nullptr;
 	std::shared_ptr<Score> m_score = nullptr;
+	std::vector<std::function<int()>> m_score_calc;
 };
 
 class Result : public Object
@@ -745,6 +764,10 @@ public:
 		m_cnt = 40;
 	}
 
+	void setFinalScore(int score) {
+		m_score = score;
+	}
+
 
 	bool draw() override {
 		if (m_cnt >= 255) {
@@ -757,12 +780,34 @@ public:
 			DrawExtendGraph(m_realm.left(), m_realm.top(),
 				m_realm.right(), m_realm.bottom(),
 				imgHandles["b_game_clear"], TRUE);
-			return true;
+		}
+		else {
+			DrawExtendGraph(m_realm.left(), m_realm.top(),
+				m_realm.right(), m_realm.bottom(),
+				imgHandles["b_game_over"], TRUE);
 		}
 
-		DrawExtendGraph(m_realm.left(), m_realm.top(),
-			m_realm.right(), m_realm.bottom(),
-			imgHandles["b_game_over"], TRUE);
+		int score = m_score;
+		std::array<int, 4> score_num;
+		score_num.at(0) = score / 1000;
+		score -= (score / 1000) * 1000;
+		score_num.at(1) = score / 100;
+		score -= (score / 100) * 100;
+		score_num.at(2) = score / 10;
+		score -= (score / 10) * 10;
+		score_num.at(3) = score;
+
+		const int score_width = m_realm.width / 6;
+		const int score_height = m_realm.height / 6;
+		const int score_width_offset = m_realm.width / 4;
+		const int score_height_offset = m_realm.height * 3 / 4;
+		for (int i = 0; i < 4; ++i) {
+			std::ostringstream key;
+			key << "yellow_" << score_num.at(i);
+			DrawExtendGraph(score_width_offset + i * score_width, score_height_offset, 
+						    score_width_offset + (i + 1) * score_width, score_height_offset + score_height,
+				imgHandles[key.str()], TRUE);
+		}
 
 		return true;
 	}
@@ -776,6 +821,7 @@ private:
 	Shape::Rectangle m_realm = Shape::Rectangle();
 	bool m_is_game_clear = false;
 	int m_cnt = 0;
+	int m_score;
 };
 
 // フィールド 

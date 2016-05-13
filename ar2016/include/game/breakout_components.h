@@ -49,6 +49,7 @@ public:
     std::shared_ptr<Breakout::Field> field = nullptr;
 
 	std::vector<std::shared_ptr<Breakout::Block>> block_list;
+	std::size_t m_block_offset = 0;
 
 	std::shared_ptr<Breakout::FireballManager> fireball_manager = nullptr;
 

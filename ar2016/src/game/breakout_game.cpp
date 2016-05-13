@@ -224,12 +224,14 @@ void BreakoutGame::updateGameState()
 		break;
 	}
 	case Playing:
+		m_components->info->addScoreAll();
 		if (m_components->info->isLastPhase()) {
 			m_components->background->turnLastPhase();
 		}
 		if (isGameClear()) {
 			m_components->result->clearGame();
 			mode.goNext();
+			m_components->result->setFinalScore(m_components->info->getScore());
 			return;
 		}
 
@@ -237,11 +239,13 @@ void BreakoutGame::updateGameState()
 			!m_components->ship->isAlive() ||
 			(m_components->house_list.size() == 0 &&
 				m_components->resident_list.size() == 0)) {
+			m_components->result->setFinalScore(m_components->info->getScore());
 			mode.goNext();
 			return;
 		}
 
 		if (key[KEY_INPUT_ESCAPE]) {
+			m_components->result->setFinalScore(m_components->info->getScore());
 			mode.goNext();
 		}
 		break;

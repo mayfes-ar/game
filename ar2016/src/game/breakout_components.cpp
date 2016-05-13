@@ -21,9 +21,40 @@ void BreakoutComponents::setup(ShareData& share)
 	{
 		background = std::make_shared<Background>(share.handle);
 		background->init();
-		const auto info_realm = Shape::Rectangle(INFO_START_POS, INFO_WIDTH, INFO_HEIGHT);
+		auto info_realm = Shape::Rectangle(INFO_START_POS, INFO_WIDTH, INFO_HEIGHT);
 		std::shared_ptr<Timer> timer = std::make_shared<Timer>(TIMER_MAX_MIN, TIMER_MAX_SEC, TIMER_MAX_MSEC);
 		info = std::make_shared<Breakout::Info>(info_realm, timer);
+
+		info->addScoreCalc([&]() -> int {
+			return SCORE_OFFSET;
+		});
+
+		info->addScoreCalc([&]() -> int {
+			std::size_t block_dis_num = std::count_if(block_list.begin(), block_list.end(), 
+				[](const std::shared_ptr<Block>& block) -> bool {
+				return block->isDisappeared();
+			});
+		
+			return BLOCK_SCORE * (block_dis_num - m_block_offset);
+		});
+
+		info->addScoreCalc([&]() -> int {
+			std::size_t house_now_num = house_list.size();
+			return HOUSE_SCORE * (HOUSE_NUM - house_now_num);
+		});
+
+		info->addScoreCalc([&]() -> int {
+			return ENEMY_SCORE * enemy_manager->getGeneratedEnemy();
+		});
+
+		info->addScoreCalc([&]() -> int {
+			int enemy_head = enemy->isAlive() ? 0 : 1;
+			int enemy_left = enemy->hasLeft() ? 0 : 1;
+			int enemy_right = enemy->hasRight() ? 0 : 1;
+
+			return BOSS_HEAD_SCORE * enemy_head + BOSS_RIGHT_SCORE * enemy_right + BOSS_LEFT_SCORE * enemy_left;
+		});
+
 
 		const auto result_realm = Shape::Rectangle(RESULT_START_POS, RESULT_WIDTH, RESULT_HEIGHT);
 		result = std::make_shared<Breakout::Result>(result_realm);
@@ -157,6 +188,9 @@ void BreakoutComponents::setup(ShareData& share)
 				break;
 			}
 		}
+		m_block_offset = std::count_if(block_list.begin(), block_list.end(), 
+			[](const std::shared_ptr<Block>& block) -> bool {
+			return block->isDisappeared(); });
 	}
 
 	// Enemyの初期化
