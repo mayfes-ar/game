@@ -1,4 +1,4 @@
-/*
+﻿/*
  * BreakoutGameで使うオブジェクト一覧
  */
 
@@ -188,8 +188,8 @@ namespace Breakout {
 		bool draw() override {
 			if (isAvailable() && m_sentences.size() != 0) {
 				DrawExtendGraph(m_realm.left(), m_realm.top(), m_realm.right(), m_realm.bottom(), m_fukidashi_handle, TRUE);
-				
-				DrawString(m_realm.left(), m_realm.top(), m_sentences.c_str(), m_color);
+				/*m_sentences.c_str()*/
+				DrawString(m_realm.left(), m_realm.top(), "うんち", m_color);
 				decrementTime();
 				return true;
 			} else {
@@ -200,8 +200,8 @@ namespace Breakout {
 	private:
 		Shape::Rectangle m_realm = Shape::Rectangle();
 		Shape::Rectangle m_sentences_realm = Shape::Rectangle();
-		int top_offset = 5;
-		int left_offset = 10;
+		int top_offset = 10;
+		int left_offset = 20;
 		int right_offset = 5;
 		int bottom_offset = 5;
 		std::string m_sentences = "";
