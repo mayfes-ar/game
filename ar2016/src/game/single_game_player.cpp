@@ -134,6 +134,7 @@ std::shared_ptr<SinglePlayerGame::tutoFire> SinglePlayerGame::maketutoFire(int x
 
 bool willFinishMode = false;
 bool isChangingMode = false;
+int counterForWait = 5;
 
 bool SinglePlayerGame::onStart() {
 	using namespace std;
@@ -719,16 +720,14 @@ bool SinglePlayerGame::onStart() {
 
 bool SinglePlayerGame::onUpdate() {
 	willFinishMode = false;
-	funcTimer.update();
 
 	switch (mode.getMode()) {
 	case INTRO: { // イントロダクション
-		static int counterForWait = 5;
 		if (counterForWait == 0) {
 			counterForWait = 5;
 			if (key[KEY_INPUT_RETURN]) {
 				willFinishMode = true;
-				drawList.clear();
+				//drawList.clear();
 			}
 			else if (key[KEY_INPUT_1]) {
 				difficulty = EASY;
@@ -746,7 +745,6 @@ bool SinglePlayerGame::onUpdate() {
 			}
 			else {
 				counterForWait = 0;
-				
 			}
 		}
 		else if (counterForWait > 0) {
@@ -858,11 +856,7 @@ bool SinglePlayerGame::onUpdate() {
 			
 			hasPlayerWon = false;
 			bgm->stop();
-			funcTimer.set([this]() {
-				willFinishMode = true;
-			}, FPS*3);
-
-
+			willFinishMode = true;
 		}
 
 		
@@ -1105,15 +1099,16 @@ bool SinglePlayerGame::onUpdate() {
 		}
 	}
 
-
 	if (willFinishMode && !isChangingMode) {
 		isChangingMode = true;
 		drawList.push_back(make_shared<CurtainObject>(false));
 		funcTimer.set([this]() {
 			isChangingMode = false;
 			mode.goNext();
-		}, FPS);
+		}, FPS*2);
 	}
+
+	funcTimer.update();
 
 	return Game::onUpdate();
 
