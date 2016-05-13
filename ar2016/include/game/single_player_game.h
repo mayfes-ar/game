@@ -14,7 +14,7 @@ class SinglePlayerGame : public Game {
 			Cloud : 140
 			Drop : 139
 			Ufo :  150
-			Ray :  180
+			Ray :  149
 			Heiho :	152
 			Fire : 153
 		Effect : 周りの描画に影響しそうな大きなエフェクト
@@ -68,7 +68,7 @@ class SinglePlayerGame : public Game {
 			DrawExtendGraph(CAP2IMG_SHIFT_X, CAP2IMG_SHIFT_Y, CAP2IMG_SHIFT_X + CAP2IMG_RATE*CAP_WIDTH, CAP2IMG_SHIFT_Y + CAP2IMG_RATE*CAP_HEIGHT, handle, FALSE);
 			// SetDrawBright(230, 230, 230);
 			SetDrawBlendMode(DX_BLENDMODE_ALPHA, 200);
-			DrawExtendGraph(0, 0, WIDTH, HEIGHT, imgHandles["background"], true);
+			DrawExtendGraph(0, 0, WIDTH, HEIGHT, imgHandles["s_game_background"], true);
 			SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 100);
 			// SetDrawBright(255, 255, 255);
 			return true;
@@ -217,6 +217,7 @@ class SinglePlayerGame : public Game {
 		const int maxCount;
 		const int framePerCount;
 		int counter;
+		bool isRunning;
 
 	public :
 		Effect(std::string effectHandleKey_, int x_ = 0, int y_ = 0, int width_ = WIDTH, int height_ = HEIGHT, bool willStay_ = false, int layer_ = 150, int framePerCount_ = 1, int counter_ = 0) : effectHandle(effectHandles[effectHandleKey_]), willStay(willStay_), maxCount(effectHandles[effectHandleKey_].size()*(framePerCount_ > 0 ? framePerCount_ : 1)), framePerCount((framePerCount_ > 0 ? framePerCount_ : 1)) {
@@ -226,6 +227,11 @@ class SinglePlayerGame : public Game {
 			rect.height = height_;
 			counter = counter_*(framePerCount_ > 0 ? framePerCount_ : 1);
 			layer = layer_;
+			isRunning = true;
+		}
+
+		void changeIsRunning() {
+			isRunning = false;
 		}
 	
 		bool draw() {
@@ -235,10 +241,11 @@ class SinglePlayerGame : public Game {
 				}
 			}
 
+
 			drawWithRect(effectHandle[counter/framePerCount]);
 			counter++;
 
-			return willStay || counter != maxCount;
+			return (willStay || counter != maxCount) && isRunning;
 		}
 	};
 
@@ -292,15 +299,19 @@ class SinglePlayerGame : public Game {
 		const MarkerType markerType;
 
 		bool isEnable = true;
-		bool canGuard;
-		bool canAttack;
+		bool canGuard = true;
+		bool canAttack = true;
 
 		double imageSize = 1.2;
 
 		void modifyRect() {
 			if (rect.width > 0 || rect.height > 0) {
-				rect.width = markerType == PIYO ? 1920/14 : markerType == SWORD ? 765/4 : 256*0.8;
-				rect.height = markerType == PIYO ? 1409/14 : markerType == SWORD ? 765/4 : 256*0.8;
+				double prevWidth = rect.width;
+				double prevHeight = rect.height;
+				rect.width = markerType == PIYO ? 1920/10 : markerType == SWORD ? 765/4 : 256*0.8;
+				rect.height = markerType == PIYO ? 1409/10 : markerType == SWORD ? 765/4 : 256*0.8;
+				rect.x = rect.x + (prevWidth - rect.width) / 2;
+				rect.y = rect.y + (prevHeight- rect.height) / 2;
 			}
 			else {
 				rect.x = rect.y = -300;
@@ -308,32 +319,34 @@ class SinglePlayerGame : public Game {
 		}
 
 	public:
-		Marker(Rectan rect_, bool willStay_, int index_, SinglePlayerGame& game_) :index(index_), game(game_), markerType(index_ < 3 ? PIYO : index_ < 6 ? SWORD : SHIELD){
+		Marker(Rectan rect_, bool willStay_, int index_, SinglePlayerGame& game_) :index(index_), game(game_), markerType(index_ < 2 ? PIYO : index_ == 3 ? SWORD : SHIELD){
 			rect = rect_;
 			modifyRect();
 			prevRect = rect;
 			layer = 300;
 			imgHandle = markerType == PIYO ? imgHandles["s_game_piyo"] : markerType == SWORD ? imgHandles["s_game_sword"] : imgHandles["s_game_shield"];
-			canGuard = markerType == SWORD? false : true;
-			canAttack = markerType == SHIELD ? false : true;
+			// canGuard = markerType == SWORD? false : true;
+			// canAttack = markerType == SHIELD ? false : true;
 		}
 
 		bool draw() {
+			/*
 			switch (moveDirection)
 			{
 			case RIGHT: {
-				drawWithRotation(imgHandle, rect.rotate, true, imageSize);
+				drawWithRotation(imgHandle, 0, true, imageSize);
 				break;
 			}
 
 			case LEFT: {
-				drawWithRotation(imgHandle, rect.rotate, false, imageSize);
+				drawWithRotation(imgHandle, 0, false, imageSize);
 				break;
 			}
 			default:
 				break;
 			}
-
+			*/
+			drawWithRotation(imgHandle, rect.rotate, false, imageSize);
 			if (!isEnable) {
 				drawDark([this]() {
 					SetDrawBlendMode(DX_BLENDMODE_ALPHA, 150);
@@ -384,32 +397,6 @@ class SinglePlayerGame : public Game {
 			return canGuard;
 		}
 	};
-
-	//シーンチェンジのカーテン
-	class CurtainObject : public Object {
-		const bool isOpen;
-		int counter = 0;
-		const int openCountMax = effectHandles["p_curtain_open"].size();
-		const int closeCountMax = effectHandles["p_curtain_close"].size();
-	public:
-		CurtainObject(bool isOpen_) : isOpen(isOpen_) {
-			layer = 300;
-		}
-		bool draw() {
-			const int handle = isOpen ? effectHandles["p_curtain_open"][counter] : effectHandles["p_curtain_close"][counter];
-			DrawExtendGraph(0, 0, 1280, 720, handle, true);
-
-			if (isOpen) {
-				counter++;
-				return !(counter == openCountMax);
-			}
-			else {
-				if (counter < closeCountMax - 1) { counter++; }
-				return true;
-			}
-		}
-	};
-
 
 	//キャラクター一般
 	class Character : public SingleGameObject {
@@ -642,7 +629,6 @@ class SinglePlayerGame : public Game {
 			imageSize = defaultImageSize;
 		}
 
-		
 		std::string overEffectKey = "s_game_enemy_over";
 		std::string damageSoundKey = "s_game_attack";
 		std::string attackEffectKey = "s_game_sword";
@@ -713,7 +699,7 @@ class SinglePlayerGame : public Game {
 		virtual void die() {
 			changeCharacterState(OVER);
 			if (overBuffer <= 0) {
-				game.makeEffect(overEffectKey, left(), top(), rect.width, rect.height, false, layer+1);
+				game.makeEffect(overEffectKey, left() - 20, top()-30, 150, 150, false, layer+1);
 				isAlive = false;
 			}
 			overBuffer--;
@@ -790,18 +776,45 @@ class SinglePlayerGame : public Game {
 		}
 	};
 
-	class Switch : public Enemy {
+	class Ghorst : public Enemy
+	{
 		static const int width = 100;
 		static const int height = 100;
 
 	public:
-		Switch(int x_, int y_, SinglePlayerGame& game_, double size, int maxDamage_ = 1, std::string imgHandleKey_ = "s_game_switch") : Enemy(x_, y_, width * size, height * size, imgHandleKey_, maxDamage_, game_) {
-			layer = 130;
-			moveDirection = RIGHT;
+		Ghorst(int x_, int y_, SinglePlayerGame& game_, double size, int maxDamage_ = 1, std::string imgHandleKey_ = "s_game_ghorst2") : Enemy(x_, y_, width * size, height * size, imgHandleKey_, maxDamage_, game_) {
+			layer = 120;
 		}
 
-		void update() {}
 
+		void update() {}
+	};
+
+	class Switch : public Enemy {
+		static const int width = 200;
+		static const int height = 250;
+
+	public:
+		std::shared_ptr<Effect> faucet = std::make_shared<Effect>("s_game_water", left() + 39, top() + 150, rect.width + 100, 600, true, 150, 1, 0);
+
+		std::shared_ptr<Ghorst> obake;
+
+		Switch(int x_, int y_, SinglePlayerGame& game_, double size, int maxDamage_ = -1, std::string imgHandleKey_ = "s_game_switch") : Enemy(x_, y_, width * size, height * size, imgHandleKey_, maxDamage_, game_) {
+			layer = 130;
+			moveDirection = RIGHT;
+			game_.drawList.push_back(faucet);
+			obake = game_.makeGhorst(40, 120, 1);
+
+		}
+		
+
+		void update() {
+			if (!obake->getIsAlive()) {
+				isAlive = false;
+			}
+		}
+		
+		
 	};
 
 	class Inundation : public Enemy {
@@ -814,10 +827,11 @@ class SinglePlayerGame : public Game {
 		std::shared_ptr<Switch> button;
 		Inundation(int x_, int y_, SinglePlayerGame& game_, double size, int maxDamage_ = -1, std::string imgHandleKey_ = "s_game_water") : Enemy(x_, y_, width * size, height * size, imgHandleKey_, maxDamage_, game_) {
 			layer = 300;
-			button = game_.makeSwitch(100, 100, 1);
+			button = game_.makeSwitch(0, 200, 1);
 		}
 
 		bool draw() {
+			
 			DrawExtendGraph(left(), top() - 150, right(), bottom() + 800, imgHandles["s_game_water"], true);
 			return getIsAlive();
 		}
@@ -825,6 +839,8 @@ class SinglePlayerGame : public Game {
 		void update() {
 			if (!button->getIsAlive()) {
 				isWaterUp = false;
+				button->faucet->changeIsRunning();
+
 			}
 			else if (inundationCounter > 0){
 				inundationCounter--;
@@ -837,7 +853,7 @@ class SinglePlayerGame : public Game {
 
 		void setAc(double& acX, double& acY) {
 			acX = 0;
-			acY = isWaterUp ? inundationCounter == 0 ? -0.5*(rect.y-prevY) : -0.005 : 0.02;
+			acY = isWaterUp ? inundationCounter == 0 ? -0.5*(rect.y-prevY) : -0.005 : 0.2;
 		}
 	};
 
@@ -847,7 +863,7 @@ class SinglePlayerGame : public Game {
 		static const int height = 720;
 
 		Ray(int x_, int y_, SinglePlayerGame& game_, double size, int maxDamage_ = -1, std::string imgHandleKey_ = "s_game_ray") : Enemy(x_, y_, width * size, height * size, imgHandleKey_, maxDamage_, game_, 0) {
-			layer = 180;
+			layer = 149;
 		}
 
 		void update() {}
@@ -874,12 +890,16 @@ class SinglePlayerGame : public Game {
 			if (characterState == OVER) { return; }
 
 			stopCount--;
+			if (stopCount == FPS * 2 - 3) {
+				game.makeEffect("s_game_uforay_start", rect.x + rect.width / 2 - Ray::width / 2, bottom(),  Ray::width, Ray::height, false, layer-1, 2);
+			}
 			if (stopCount == FPS * 2 - 15) {
 				ray = game.makeRay(rect.x + rect.width / 2 - Ray::width / 2, bottom(), 1);
 			}
 			else if (stopCount < FPS * 2) {
 				angle += (0 - angle) / 10;
 				if (stopCount == 0) {
+					game.makeEffect("s_game_uforay_end", rect.x + rect.width / 2 - Ray::width / 2, bottom(), Ray::width, Ray::height, false, layer - 1, 2);
 					ray->die();
 					ray = nullptr;
 
@@ -1102,8 +1122,6 @@ class SinglePlayerGame : public Game {
 		}
 	};
 
-		
-
 	class Heiho : public Enemy {
 		static const int width = 345 / 4;
 		static const int height = 333 / 4;
@@ -1215,7 +1233,6 @@ class SinglePlayerGame : public Game {
 		}
 	};
 
-
 	enum Tutorial {
 		START,BEATFIRE,BEATHEIHO,END
 	};
@@ -1267,7 +1284,6 @@ class SinglePlayerGame : public Game {
 			freezed = true;
 		}
 	};
-
 
 	class tutoHeiho : public Enemy {
 		static const int width = 345 / 4;
@@ -1352,7 +1368,6 @@ class SinglePlayerGame : public Game {
 			acX = -2;
 		}
 	};
-
 	
 	// 姫様
 	class Player : public Character {
@@ -1368,40 +1383,61 @@ class SinglePlayerGame : public Game {
 		static const int height = 1046/8;
 
 		Player(int x_, int y_, int width_, int height_, std::string imgHandleKey_, int maxDamage_, SinglePlayerGame& game_) : Character(x_, y_, width_, height_, imgHandleKey_, maxDamage_, game_, 0, FPS*2) {
+<<<<<<< HEAD
 			layer = 100;	
 			timer = &game_.timer;
 			maxTime = &game_.maxTime;
+=======
+			layer = 100;
+>>>>>>> gaku/master
 			// overBuffer = overBufferMax;
 		}
 
 		bool draw() {
-			if (isToJump) {
-				DrawExtendGraph(left() - 50, top() - rect.height - 50, right() + 50, bottom() - rect.height, imgHandles["s_game_balloon"], true);
-				int commentX = left() - 10;
-				int commentY = top() - rect.height - 20;
+			if (isToJump && !isDrowned && damage <= (maxDamage-2) && game.timer >= 300) {
 
 				if (frameCount <= FPS * 2) {
-					message = "I want to\njump!!";
-					commentY = top() - rect.height - 40;
-				}
-				else if (frameCount <= FPS * 2 + FPS) {
-					message = "3";
-				}
-				else if (frameCount <= FPS * 2 + FPS*2) {
-					message = "2";
-				}
-				else if (frameCount <= FPS * 2 + FPS*3) {
-					message = "1";
+					if (game.timer >= 2600) {
+						DrawExtendGraph(left() - 100, top() - rect.height - 50, right(), bottom() - rect.height, imgHandles["s_game_fighting"], true);
+					}
+					else if (game.timer >= 1600) {
+						DrawExtendGraph(left() - 100, top() - rect.height - 50, right(), bottom() - rect.height, imgHandles["s_game_handsome"], true);
+					}
+					else {
+						DrawExtendGraph(left() - 100, top() - rect.height - 50, right(), bottom() - rect.height, imgHandles["s_game_cake"], true);
+					}
 				}
 
-				DrawString(commentX, commentY, message.c_str(), GetColor(0, 0, 0));
+				else if (frameCount <= FPS * 2 + FPS*5 && frameCount >= FPS * 2 + FPS * 4) {
+					DrawExtendGraph(left() - 50, top() - rect.height - 50, right() + 50, bottom() - rect.height, imgHandles["s_game_jump"], true);
+				}
+				else if (frameCount <= FPS * 2 + FPS*6 && frameCount >= FPS * 2 + FPS * 5) {
+					DrawExtendGraph(left() - 50, top() - rect.height - 50, right() + 50, bottom() - rect.height, imgHandles["s_game_3"], true);
+				}
+				else if (frameCount <= FPS * 2 + FPS*7 && frameCount >= FPS * 2 + FPS * 6) {
+					DrawExtendGraph(left() - 50, top() - rect.height - 50, right() + 50, bottom() - rect.height, imgHandles["s_game_2"], true);
+				}
+				else if (frameCount <= FPS * 2 + FPS*8 && frameCount >= FPS * 2 + FPS * 7) {
+					DrawExtendGraph(left() - 50, top() - rect.height - 50, right() + 50, bottom() - rect.height, imgHandles["s_game_1"], true);
+				}		
 			}
+
+			
 			for (int heart = 0; heart <= (maxDamage - damage - 1); heart++) {
 				DrawExtendGraph(50 + 50 * heart, 50, 100 + 50 * heart, 100, imgHandles["s_game_heart"], true);
 			}
+			if (damage > (maxDamage - 2) && !isDrowned && game.timer >= 300) {
+				DrawExtendGraph(left() - 50, top() - rect.height - 50, right() + 50, bottom() - rect.height, imgHandles["s_game_help"], true);
+			}
 
-			if (isDrowned) { imgHandle[DAMAGE] = imgHandles["s_game_player_drowned"]; }
+			if (isDrowned) { 
+				DrawExtendGraph(left() - 50, top() - rect.height - 50, right() + 50, bottom() - rect.height, imgHandles["s_game_dangerous"], true);
+				imgHandle[DAMAGE] = imgHandles["s_game_player_drowned"]; }
 			else { imgHandle[DAMAGE] = imgHandles["s_game_player_damage"]; }
+
+			if (game.timer < 300 && !isDrowned) {
+				DrawExtendGraph(left() - 50, top() - rect.height - 50, right() + 50, bottom() - rect.height, imgHandles["s_game_beforefinish"], true);
+			}
 
 			Character::draw();
 
@@ -1484,7 +1520,7 @@ class SinglePlayerGame : public Game {
 			}
 
 			if (isToJump) {
-				if (frameCount >= FPS*2 + FPS*3) {
+				if (frameCount >= FPS*2 + FPS*8) {
 					acY = -30;
 					PlaySoundMem(soundHandles["s_game_jump"], DX_PLAYTYPE_BACK, true);
 					isJumping = true;
@@ -1583,7 +1619,7 @@ class SinglePlayerGame : public Game {
 			double& y = rect.y;
 			const int& width = rect.width;
 			const int& height = rect.height;
-
+			
 			for (auto block : objectList) {
 				if (left() < block->right() && top() < block->bottom() &&
 					right() > block->left() && bottom() > block->top()) {
@@ -1613,7 +1649,7 @@ class SinglePlayerGame : public Game {
 
 		void damageControl() {
 			damage++;
-			game.makeEffect("s_game_hit", left(), top(), rect.width, rect.width, false, layer + 1, 2);
+			game.makeEffect("s_game_hit", left() - 75, top() - 110, 250, 250, false, layer - 1, 2, 5);
 
 			if (damage < maxDamage) {
 				// HP残ってる
@@ -1632,7 +1668,6 @@ class SinglePlayerGame : public Game {
 			overBuffer--;
 		}
 	};
-
 
 	class tutoPlayer : public Character {
 		int frameCount;
@@ -1868,6 +1903,7 @@ class SinglePlayerGame : public Game {
 	std::shared_ptr<RocketWanwan> makeRocketWanwan(int x, int y, double size);
 	std::shared_ptr<Inundation> makeInundation();
 	std::shared_ptr<Switch> makeSwitch(int x, int y, double size);
+	std::shared_ptr<Ghorst> makeGhorst(int x, int y, double size);
 	std::shared_ptr<Ufo> makeUfo(int x, int y, double size);
 	std::shared_ptr<Ray> makeRay(int x, int y, double size);
 	std::shared_ptr<Cloud> makeCloud(int x, int y, double size);
@@ -1881,10 +1917,10 @@ class SinglePlayerGame : public Game {
 
 	void makeEffect(std::string effectHandleKey_, int x_ = 0, int y_ = 0, int width_ = WIDTH, int height_ = HEIGHT, bool willStay_ = false, int layer_ = 150, int framePerCount_ = 1, int counter_ = 0) {
 		drawList.push_back(std::make_shared<Effect>(effectHandleKey_, x_, y_, width_, height_, willStay_, layer_, framePerCount_, counter_));
+	
 	}
-
 	std::shared_ptr<BGM> bgm;
-	const int maxTime = FPS * 60;
+	const int maxTime = FPS * 60 * 2;
 
 	int maxPlayerDamage;
 
@@ -1905,8 +1941,6 @@ class SinglePlayerGame : public Game {
 public:
 	SinglePlayerGame() {
 		thread = std::thread::thread(capture, std::ref(share));
-
-
 		hasPlayerWon = true;
 	}
 

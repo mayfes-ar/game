@@ -23,7 +23,7 @@ class Menu : Game {
 			layer = 0;
 		}
 		bool draw() {
-			DrawExtendGraph(0, 0, WIDTH, HEIGHT, effectHandles["effect1"][counter/2], true);
+			//DrawExtendGraph(0, 0, WIDTH, HEIGHT, effectHandles["effect1"][counter/2], true);
 			counter++;
 			if (counter == countMax) { counter = 0; }
 			return true;
@@ -36,9 +36,8 @@ class Menu : Game {
 			layer = 1;
 		}
 		bool draw() {
-			SetDrawBright(40, 40, 40);
+			SetDrawBright(80, 80, 80);
 			DrawExtendGraph(0, 0, WIDTH, HEIGHT, imgHandles["ar2016_logo"], true);
-			DrawExtendGraph(0, 0, WIDTH, HEIGHT, imgHandles["menu"], true);
 			SetDrawBright(255, 255, 255);
 			return true;
 		}
@@ -57,7 +56,7 @@ class Menu : Game {
 			// ChangeFont("メイリオ");
 			// SetFontThickness(9);
 			// DrawString(100, 50, "TITLE", GetColor(255, 255, 255));
-			DrawExtendGraph(640-192, 0, 640+192, 0+180, imgHandles["menu_title"], true);
+			DrawExtendGraph(640-210, 0, 640+210, 0+100, imgHandles["menu_title"], true);
 			return true;
 		}
 	};
@@ -162,6 +161,7 @@ public:
 
 		bgm = make_shared<BGM>();
 		bgm->start();
+		ChangeFont("メイリオ");
 
 		return Game::onStart();
 	}

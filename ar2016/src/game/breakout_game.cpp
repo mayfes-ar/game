@@ -19,13 +19,16 @@ void BreakoutGame::updateCollisionDetection()
 				continue;
 			}
 
-			if (fireball->isCollided(m_components->field->getRealm(), -1)) {
+			auto fireball_effect = fireball->returnFireballReflect(m_components->field->getRealm(), -1);
+			if (fireball_effect->isCollide()) {
+				drawList.push_back(fireball_effect);
 				continue;
 			}
 
 			// Ship衝突判定
 			if (m_components->ship->isAlive()) {
-				if (fireball->isCollided(m_components->ship->getRealm(), 1, m_components->ship->getVelocity())) {
+				auto fireball_effect = fireball->returnFireballReflect(m_components->ship->getRealm(), 1, m_components->ship->getVelocity());
+				if (fireball_effect->isCollide()) {
 					// EnemyStrongであり かつ 無敵状態じゃなかったら
 					if (fireball->getMode() == Breakout::FireballKind::EnemyStrong && !m_components->ship->isEnhanced()) {
 						//fireballを消す
@@ -33,6 +36,8 @@ void BreakoutGame::updateCollisionDetection()
 						m_components->ship->damageShip(1);
 					}
 					else {
+						//跳ね返すときは反射effectを入れる
+						drawList.push_back(fireball_effect);
 						fireball->changeModeToPlayer();
 					}
 					continue;
@@ -44,8 +49,10 @@ void BreakoutGame::updateCollisionDetection()
 			if (!fireball->isEnemy()) {
 				for (int block_id = 0; block_id < Breakout::BLOCK_HEIGHT_NUM * Breakout::BLOCK_WIDTH_NUM; ++block_id) {
 					if (m_components->block_list.at(block_id)->isDisappeared()) continue;
-					if (fireball->isCollided(m_components->block_list.at(block_id)->getRealm())) {
+					auto fireball_effect = fireball->returnFireballReflect(m_components->block_list.at(block_id)->getRealm());
+					if (fireball_effect->isCollide()) {
 						m_components->block_list.at(block_id)->damageBlock(fireball->giveDamage());
+						drawList.push_back(fireball_effect);
 						continue_loop = true;
 						break;
 					}
@@ -75,6 +82,7 @@ void BreakoutGame::updateCollisionDetection()
 						}
 					}
 				}
+
 
 				for (auto& enemy : m_components->enemy_manager->getEnemyList()) {
 					if (enemy->isAlive()) {
@@ -174,12 +182,16 @@ void BreakoutGame::updateGameState()
 	case Selecting:
 	{
 		static int initilized_cnt = 0;
-		if (initilized_cnt < 10) {
+		if (initilized_cnt < 10 && !m_is_mode_selected) {
 			initilized_cnt++;
 			return;
 		}
+		else {
+			m_is_mode_selected = true;
+			initilized_cnt = 0;
+		}
 
-		if (m_components->info->isTimeOver() || m_components->select->selected()) {
+		if (m_components->select->selected()) {
 			const auto game_mode = m_components->select->getMode();
 			switch (game_mode) {
 			case Breakout::Mode::Easy:
@@ -245,14 +257,16 @@ void BreakoutGame::updateGameState()
 bool BreakoutGame::isGameClear() const
 {
 	if (m_components->enemy->isAlive()) return false;
-
-	for (const auto& block : m_components->block_list) {
-		//壊せないブロックだったら勘定に入れない
-		if (block->getBlockKind() == "UnbreakableBlock") continue;
-		if (!block->isDisappeared()) {
-			return false;
-		}
+	for (auto& enemy : m_components->enemy_manager->getEnemyList()) {
+		if (enemy->isAlive()) return false;
 	}
+	//for (const auto& block : m_components->block_list) {
+	//	//壊せないブロックだったら勘定に入れない
+	//	if (block->getBlockKind() == "UnbreakableBlock") continue;
+	//	if (!block->isDisappeared()) {
+	//		return false;
+	//	}
+	//}
 
 	return true;
 }
@@ -359,6 +373,22 @@ void BreakoutGame::updateTown() {
 		}
 		else {
 			itr = m_components->resident_list.erase(itr);
+		}
+	}
+}
+
+void BreakoutGame::shipVSEnemy() {
+	for (auto& enemy : m_components->enemy_manager->getEnemyList()) {
+		//右で衝突されたら
+		if (!enemy->isAlive()) continue;
+		auto ship_realm = m_components->ship->getRealm();
+		auto enemy_realm = enemy->getRealm();
+		if (enemy_realm.isContacted(ship_realm)) {
+			enemy->damageEnemy(2);
+			//このダメージで死んだら
+			if (!enemy->isAlive()) {
+				enemy->setDeadEffect("b_crawl", 5);
+			}
 		}
 	}
 }
