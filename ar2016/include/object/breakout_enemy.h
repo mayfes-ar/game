@@ -469,6 +469,7 @@ namespace Breakout
 			for (int i = 0; i < m_enemy_list.size(); i++) {
 				if (m_enemy_list[i] != enemy) continue;
 				m_enemy_list.erase(m_enemy_list.begin() + i);
+				m_generate_enemy_num++;
 				return true;
 			}
 			return false;
@@ -503,9 +504,13 @@ namespace Breakout
 			}
 			return isSuccess;
 		}
+		int getGeneratedEnemy() const {
+			return m_generate_enemy_num;
+		}
 
 	private:
 		std::vector<std::shared_ptr<EnemyBase>> m_enemy_list = {};
 		int m_max_num = 0;
+		int m_generate_enemy_num = 0;
 	};
 }

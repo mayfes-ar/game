@@ -224,6 +224,7 @@ void BreakoutGame::updateGameState()
 		break;
 	}
 	case Playing:
+		m_components->info->addScoreAll();
 		if (m_components->info->isLastPhase()) {
 			m_components->background->turnLastPhase();
 		}

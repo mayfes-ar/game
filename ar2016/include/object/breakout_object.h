@@ -620,6 +620,7 @@ public:
 		m_timer->increaseStartTime(minute, second);
 	}
 
+
 	bool draw() {
 		SetDrawBright(100, 100, 100);
 		DrawBox(m_realm.left(), m_realm.top(),
@@ -713,10 +714,24 @@ public:
 		m_score->addPoint(score);
 	}
 
+	void addScoreCalc(const std::function<int()>& calc) {
+		m_score_calc.push_back(calc);
+	}
+
+	void addScoreAll() {
+		int score = 0;
+		std::for_each(m_score_calc.begin(), m_score_calc.end(),
+			[&] (std::function<int()> f){
+			score += f();
+		});
+		m_score->setScore(score);
+	}
+
 private:
 	Shape::Rectangle m_realm = Shape::Rectangle();
 	std::shared_ptr<Timer> m_timer = nullptr;
 	std::shared_ptr<Score> m_score = nullptr;
+	std::vector<std::function<int()>> m_score_calc;
 };
 
 class Result : public Object
