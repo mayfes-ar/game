@@ -2042,5 +2042,61 @@ private:
 };
 
 
+class CountDown : public Object
+{
+public:
+	CountDown(const Shape::Rectangle& realm)
+		: m_realm(realm) , m_timer(std::make_shared<Timer>(0, 4, 0)){
+		Object::layer = PRIORITY_INFO;
+	}
+
+	void init() {
+		m_timer->start();
+	}
+
+	bool isCountdowning()  {
+		return !m_timer->isTimerEnd();
+	}
+
+	bool draw() override {
+		const auto time = m_timer->getLeftedTime();
+		m_sec = std::get<1>(time);
+		if (m_sec < 10) {
+			m_sec = m_sec;
+		}
+		else {
+			m_sec = m_sec - (m_sec / 10) * 10;
+		}
+		// draw
+		switch (m_sec) {
+			case 3:
+				DrawExtendGraph(m_realm.left(), m_realm.top(),
+								m_realm.right(), m_realm.bottom(),
+					imgHandles["blue_3"], TRUE);
+				break;
+			case 2:
+				DrawExtendGraph(m_realm.left(), m_realm.top(),
+								m_realm.right(), m_realm.bottom(),
+					imgHandles["blue_2"], TRUE);
+				break;
+			case 1:
+				DrawExtendGraph(m_realm.left(), m_realm.top(),
+								m_realm.right(), m_realm.bottom(),
+					imgHandles["blue_1"], TRUE);
+				break;
+			default:
+				DrawExtendGraph(m_realm.left(), m_realm.top(),
+								m_realm.right(), m_realm.bottom(),
+					imgHandles["b_timer_start_str"], TRUE);
+				break;
+		}
+		return true;
+	}
+
+private:
+	const Shape::Rectangle m_realm = Shape::Rectangle();
+	std::shared_ptr<Timer> m_timer = nullptr;
+	int m_sec;
+};
 
 } // namespace Breakout

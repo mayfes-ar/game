@@ -177,9 +177,11 @@ void BreakoutGame::updateGameState()
 
 	enum Kind {
 		Selecting = 0,
-		Playing = 1, //!< Play画面
-		Result = 2, //!< Result画面
+		CountDown,
+		Playing, //!< Play画面
+		Result, //!< Result画面
 	};
+
 	switch (kind) {
 	case Selecting:
 	{
@@ -207,8 +209,7 @@ void BreakoutGame::updateGameState()
 				m_components->fireball_manager->changeMaximumFireballNum(Breakout::MAX_FIREBALL_NUM_ON_HARD);
 				break;
 			}
-			m_components->info->init();
-			m_components->background->init();
+			// 次の画面の準備
 			mode.goNext();
 			return;
 		}
@@ -231,7 +232,24 @@ void BreakoutGame::updateGameState()
 		}
 		break;
 	}
+	case CountDown: {
+		if (!m_components->count_down->isCountdowning()) {
+			m_components->info->init();
+			m_components->background->init();
+			mode.goNext();
+		}
+		break;
+	}
 	case Playing:
+		updateCollisionDetection();
+		updateFireballPosition();
+		moveShip();
+		updateBlockStatus();
+		updatePotStatus();
+		updateEnemy();
+		updateTown();
+		shipVSEnemy();
+		EnemyVSTown();
 		m_components->info->addScoreAll();
 		if (m_components->info->isLastPhase()) {
 			m_components->background->turnLastPhase();
