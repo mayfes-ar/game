@@ -112,11 +112,11 @@ class PuzzleGame : public Game {
 
 	class Explanation : public Object {
 	public:
-		int volume = 0;
+		int volume = 50;
 		bool isIncreasing = true;
 		Explanation() {
 			PlaySoundMem(soundHandles["p_bgm1"], DX_PLAYTYPE_LOOP, true);
-			ChangeVolumeSoundMem(0, soundHandles["p_bgm1"]);
+			ChangeVolumeSoundMem(volume, soundHandles["p_bgm1"]);
 			layer = 2;
 		}
 		/*~Explanation() {
@@ -163,17 +163,17 @@ class PuzzleGame : public Game {
 			}
 			StopSoundMem(soundHandles["p_bgm2"]);
 			PlaySoundMem(soundHandles["p_bgm3"], DX_PLAYTYPE_LOOP, true);
-			ChangeVolumeSoundMem(50, soundHandles["p_bgm3"]);
+			//ChangeVolumeSoundMem(50, soundHandles["p_bgm3"]);
 		}
 		~ResultObject() {
 			StopSoundMem(soundHandles["p_bgm3"]);
 		}
 		bool draw() {
 			DrawGraph(0, 0, handle, false);
-			if (volume < 252 && isIncreasing == true) {
+			/*if (volume < 252 && isIncreasing == true) {
 				volume = volume + 4;
 				ChangeVolumeSoundMem(volume, soundHandles["p_bgm3"]);
-			}
+			}*/
 			if (GetMovieStateToGraph(handle) == 1) {
 				return true;
 			}
@@ -226,7 +226,7 @@ class PuzzleGame : public Game {
 			StopSoundMem(soundHandles["p_bgm2"]);
 			StopSoundMem(soundHandles["p_bgm3"]);
 		}
-		int volume = 0;
+		int volume = 90;
 		int soundState = 0;  //soundState = 0:constant; 1:increasing; 2:decreasing;
 		bool draw() {
 			const int size = 60;
@@ -270,7 +270,7 @@ class PuzzleGame : public Game {
 			if (n == 2) {
 				StopSoundMem(soundHandles["p_bgm1"]);
 				PlaySoundMem(soundHandles["p_bgm2"], DX_PLAYTYPE_LOOP, true);
-				ChangeVolumeSoundMem(50, soundHandles["p_bgm2"]);
+				ChangeVolumeSoundMem(volume, soundHandles["p_bgm2"]);
 			}
 			/*else if (n == 3) {
 				StopSoundMem(soundHandles["p_bgm2"]);
