@@ -183,6 +183,9 @@ bool Object::load() {
 	isSuccess &= loadImage("s_game_result_background1", "s_game/result_background1");
 	isSuccess &= loadImage("s_game_result_background2", "s_game/result_background2");
 	isSuccess &= loadImage("s_game_result_background_gameover2", "s_game/result_background_gameover2");
+	
+	isSuccess &= loadImage("s_game_result_clear1", "s_game/result_clear1");
+	isSuccess &= loadImage("s_game_result_dead1", "s_game/result_dead1");
 
 	isSuccess &= loadSound("s_game_over", "s_game/game_over.wav");
 	
