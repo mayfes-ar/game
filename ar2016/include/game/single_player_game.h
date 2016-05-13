@@ -1398,10 +1398,10 @@ class SinglePlayerGame : public Game {
 			if (isToJump && !isDrowned && damage <= (maxDamage-2) && game.timer >= 300) {
 
 				if (frameCount <= FPS * 2) {
-					if (game.timer >= 2600) {
+					if (game.timer >= 2400) {
 						DrawExtendGraph(left() - 100, top() - rect.height - 50, right(), bottom() - rect.height, imgHandles["s_game_fighting"], true);
 					}
-					else if (game.timer >= 1600) {
+					else if (game.timer >= 1200) {
 						DrawExtendGraph(left() - 100, top() - rect.height - 50, right(), bottom() - rect.height, imgHandles["s_game_handsome"], true);
 					}
 					else {

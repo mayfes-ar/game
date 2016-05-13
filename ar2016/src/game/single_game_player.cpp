@@ -498,20 +498,24 @@ bool SinglePlayerGame::onStart() {
 
 				}
 				else if (timer <= FPS * 2) {
-					getPngSize("img/s_game/3.png", &w, &h);
-					DrawGraph(WIDTH / 2 - w / 2, HEIGHT / 2 - h / 2, imgHandles["s_game_3"], true);
+					getPngSize("img/s_game/countdown_3.png", &w, &h);
+					DrawGraph(WIDTH / 2 - w / 2, HEIGHT / 2 - h / 2, imgHandles["s_game_countdown3"], true);
 				}
 				else if (timer <= FPS * 2 + FPS * 4/3) {
-					getPngSize("img/s_game/2.png", &w, &h);
-					DrawGraph(WIDTH / 2 - w / 2, HEIGHT / 2 - h / 2, imgHandles["s_game_2"], true);
+					getPngSize("img/s_game/countdown_2.png", &w, &h);
+					DrawGraph(WIDTH / 2 - w / 2, HEIGHT / 2 - h / 2, imgHandles["s_game_countdown2"], true);
 				}
 				else if (timer <= FPS * 2 + FPS * 8/3) {
-					getPngSize("img/s_game/1.png", &w, &h);
-					DrawGraph(WIDTH / 2 - w / 2, HEIGHT / 2 - h / 2, imgHandles["s_game_1"], true);
+					getPngSize("img/s_game/countdown_1.png", &w, &h);
+					DrawGraph(WIDTH / 2 - w / 2, HEIGHT / 2 - h / 2, imgHandles["s_game_countdown1"], true);
 				}
 				else if (timer <= FPS * 6) {
-					getPngSize("img/s_game/start.png", &w, &h);
-					DrawGraph(WIDTH / 2 - w / 2, HEIGHT / 2 - h / 2, imgHandles["s_game_start"], true);
+					getPngSize("img/s_game/s.png", &w, &h);
+					DrawGraph(WIDTH / 2 - 5 * w / 2, HEIGHT / 2 - h / 2, imgHandles["s_game_s"], true);
+					DrawGraph(WIDTH / 2 - 3 * w / 2, HEIGHT / 2 - h / 2, imgHandles["s_game_t"], true);
+					DrawGraph(WIDTH / 2 - w / 2, HEIGHT / 2 - h / 2, imgHandles["s_game_a"], true);
+					DrawGraph(WIDTH / 2 + w / 2, HEIGHT / 2 - h / 2, imgHandles["s_game_r"], true);
+					DrawGraph(WIDTH / 2 + 3 * w / 2, HEIGHT / 2 - h / 2, imgHandles["s_game_t"], true);
 				}
 				return true;
 			}
@@ -567,7 +571,7 @@ bool SinglePlayerGame::onStart() {
 		drawList.push_back(make_shared<Title>(&timer,*this));
 
 
-	}, maxTime);
+	}, -1);
 
 	// RESULT
 	mode.setMode([this]() {
@@ -875,6 +879,10 @@ bool SinglePlayerGame::onUpdate() {
 				makeRocketWanwan(-RocketWanwan::width / 2, HEIGHT / 2 + 50);
 				break;
 			}
+			case 800: {
+				makeCloud(0, 50, 1);
+				break;
+			}
 			case 1000: {
 				makeInundation();
 			}
@@ -899,7 +907,7 @@ bool SinglePlayerGame::onUpdate() {
 			}
 			}
 			// 定期的に実行する場合など
-			if (timer < 150 && (maxTime - timer) % 20 == 0) {
+			if (timer < 2500 && (maxTime - timer) % 50 == 0) {
 				makeTeresa();
 			}
 			break;
