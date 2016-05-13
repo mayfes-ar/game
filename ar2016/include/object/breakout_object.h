@@ -31,6 +31,7 @@ namespace Breakout {
 
 	// 描画の優先順位
 	constexpr int PRIORITY_BACKGROUND = 0; // 背景画像
+	constexpr int PRIORITY_BACKGROUND_EFFECT = 1; //背景画像エフェクト
 	constexpr int PRIORITY_SECTION = 10; // レイアウト（ゲームフィールド、スコア表示、デバッグ表示等）
 	constexpr int PRIORITY_FIREBALL_REFLECT = 15; // ファイアーボールの反射の優先度
 	constexpr int PRIORITY_STATIC_OBJECT = 20; // 静的オブジェクト (Block)
@@ -555,10 +556,12 @@ public:
 			// SetDrawBright(230, 230, 230);
 			SetDrawBlendMode(DX_BLENDMODE_ALPHA, 200); 
 			DrawExtendGraph(0, 0, WIDTH, HEIGHT,
-				imgHandles["b_magma"], true);
+				imgHandles["b_grass"], true);
 			SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 100);
 			
 			SetDrawBright(255, 255, 255);
+
+			m_fire_frame.incrementCounterWhenDrawWithRealm(m_realm);
 			return true;
 		}
 		else {
@@ -571,7 +574,7 @@ public:
 			// SetDrawBright(230, 230, 230);
 			SetDrawBlendMode(DX_BLENDMODE_ALPHA, 200);
 			DrawExtendGraph(0, 0, WIDTH, HEIGHT,
-				imgHandles["b_hill"], true); 
+				imgHandles["b_grass"], true); 
 			SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 100);
 
 			SetDrawBright(255, 255, 255);
@@ -584,11 +587,13 @@ public:
 	}
 
 private:
+	Shape::Rectangle m_realm = Shape::Rectangle(FIELD_START_POS, FIELD_WIDTH, FIELD_HEIGHT);
 	int m_forest_saturation = 50;
 	int m_magma_saturation = 50;
 	bool m_is_last_phase = false;
 	const int m_saturation_max = 100;
 	int& m_handle;
+	Effect m_fire_frame = Effect(effectHandles["b_fire_frame"], 5, PRIORITY_BACKGROUND_EFFECT);
 };
 
 class Explanation : public Object

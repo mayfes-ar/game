@@ -233,6 +233,7 @@ bool Object::load() {
 	isSuccess &= loadImage("b_forest", "breakout/forest");
 	isSuccess &= loadImage("b_magma", "breakout/magma");
 	isSuccess &= loadImage("b_hill", "breakout/hill");
+	isSuccess &= loadImage("b_grass", "breakout/grass");
 
 	isSuccess &= loadImage("b_game_over", "breakout/game_over");
 	isSuccess &= loadImage("b_game_clear", "breakout/game_clear");
@@ -261,6 +262,7 @@ bool Object::load() {
 	isSuccess &= loadEffect("b_enemy_vanish", "breakout/enemy_vanish", 5, 1, 1280, 256);
 	isSuccess &= loadEffect("b_enemy_strong_fireball", "breakout/enemy_strong_fireball", 9, 3, 1800, 600);
 	isSuccess &= loadEffect("b_player_strong_fireball", "breakout/player_strong_fireball", 10, 3, 2000, 600);
+	isSuccess &= loadEffect("b_fire_frame", "breakout/fire_frame", 2, 5, 1280, 2400);
 
 	isSuccess &= loadSound("b_bomb", "breakout/bomb.mp3");
 	isSuccess &= loadSound("b_meramera", "breakout/meramera.mp3");
