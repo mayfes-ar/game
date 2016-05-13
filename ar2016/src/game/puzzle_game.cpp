@@ -211,7 +211,6 @@ bool PuzzleGame::onStart() {
 	mode.setMode([this]() {
 		drawList.clear();
 		gimmicks.clear();
-		timer->stopPlayingBGM();
 		score->setResultDraw();
 
 		drawList.push_back(std::make_shared<CurtainObject>(true));
@@ -291,7 +290,7 @@ bool PuzzleGame::onUpdate() {
 	if (goal->check(player)) {
 		if (mode.getMode() == 0 || mode.getMode() == 6) {
 			drawList.push_back(std::make_shared<CurtainObject>(false));
-			timer->stopPlayingBGM();
+			//timer->stopPlayingBGM();
 		}
 		if (mode.getMode() > 0) {
 			drawList.push_back(goal->goalEffect());
@@ -303,6 +302,7 @@ bool PuzzleGame::onUpdate() {
 		if (timer->update()) {
 			drawList.push_back(std::make_shared<CurtainObject>(false));
 			funcTimer.set([this]() {mode.goLast();}, FPS);
+			//timer->stopPlayingBGM();
 		}
 	}
 	
