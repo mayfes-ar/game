@@ -2060,29 +2060,23 @@ public:
 
 	bool draw() override {
 		const auto time = m_timer->getLeftedTime();
-		m_sec = std::get<1>(time);
-		if (m_sec < 10) {
-			m_sec = m_sec;
-		}
-		else {
-			m_sec = m_sec - (m_sec / 10) * 10;
-		}
+		int sec = std::get<1>(time);
 		// draw
-		switch (m_sec) {
+		switch (sec) {
 			case 3:
 				DrawExtendGraph(m_realm.left(), m_realm.top(),
 								m_realm.right(), m_realm.bottom(),
-					imgHandles["blue_3"], TRUE);
+					imgHandles["yellow_3"], TRUE);
 				break;
 			case 2:
 				DrawExtendGraph(m_realm.left(), m_realm.top(),
 								m_realm.right(), m_realm.bottom(),
-					imgHandles["blue_2"], TRUE);
+					imgHandles["yellow_2"], TRUE);
 				break;
 			case 1:
 				DrawExtendGraph(m_realm.left(), m_realm.top(),
 								m_realm.right(), m_realm.bottom(),
-					imgHandles["blue_1"], TRUE);
+					imgHandles["yellow_1"], TRUE);
 				break;
 			default:
 				DrawExtendGraph(m_realm.left(), m_realm.top(),
@@ -2096,7 +2090,6 @@ public:
 private:
 	const Shape::Rectangle m_realm = Shape::Rectangle();
 	std::shared_ptr<Timer> m_timer = nullptr;
-	int m_sec;
 };
 
 } // namespace Breakout
