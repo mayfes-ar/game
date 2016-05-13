@@ -131,11 +131,6 @@ std::shared_ptr<SinglePlayerGame::tutoFire> SinglePlayerGame::maketutoFire(int x
 }
 
 
-
-bool willFinishMode = false;
-bool isChangingMode = false;
-int counterForWait = 5;
-
 bool SinglePlayerGame::onStart() {
 	using namespace std;
 	fps.isShow = true;
@@ -739,6 +734,7 @@ bool SinglePlayerGame::onUpdate() {
 				difficulty = NIGHTMARE;
 			}
 			else if (key[KEY_INPUT_UP]) {
+				difficulty = difficulty == EASY ? NIGHTMARE : difficulty == HARD ? EASY : HARD;
 			}
 			else if (key[KEY_INPUT_DOWN]) {
 				difficulty = difficulty == EASY ? HARD : difficulty == HARD ? NIGHTMARE : EASY;
@@ -1082,7 +1078,6 @@ bool SinglePlayerGame::onUpdate() {
 	if (key[KEY_INPUT_ESCAPE]) {
 		share.willFinish = true;
 	}
-	static int waitNCounter = FPS / 3;
 	if (key[KEY_INPUT_N] && waitNCounter == 0) {
 		willFinishMode = true;
 		waitNCounter = FPS / 3;
