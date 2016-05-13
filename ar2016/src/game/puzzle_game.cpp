@@ -212,7 +212,6 @@ bool PuzzleGame::onStart() {
 		drawList.clear();
 		gimmicks.clear();
 		score->setResultDraw();
-
 		drawList.push_back(std::make_shared<CurtainObject>(true));
 		drawList.push_back(score);
 		drawList.push_back(std::make_shared<ResultObject>(*this));

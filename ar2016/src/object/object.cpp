@@ -258,7 +258,7 @@ bool Object::load() {
 	isSuccess &= loadEffect("p_push_switch", "puzzle/snow", 3,10, 1920, 4800);
 	isSuccess &= loadSound("p_bgm1", "puzzle/otenbahime.mp3");
 	isSuccess &= loadSound("p_bgm2", "puzzle/hajimetenootsukai.mp3");
-	isSuccess &= loadSound("p_bgm3", "puzzle/kibou.mp3");
+	isSuccess &= loadSound("p_bgm3", "puzzle/kibou_short.mp3");
 
 	isSuccess &= loadSound("ps_needle", "puzzle/needle.mp3");
 	isSuccess &= loadSound("ps_jump", "puzzle/jump.mp3");
