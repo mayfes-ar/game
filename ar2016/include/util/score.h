@@ -1,5 +1,8 @@
 ﻿#pragma once
 
+#include <algorithm>
+#include <cmath>
+
 
 // ４桁に制限している
 class Score {
@@ -7,10 +10,13 @@ public:
 	Score() {}
 
 	void addPoint(int score) {
-		m_score += score;
-		if (m_score >= m_max_score) {
-			m_score = m_max_score;
-		}
+		int now_score = m_score;
+		now_score += score;
+		m_score = std::max<int>(0, std::min<int>(now_score, m_max_score));
+	}
+
+	void setScore(int score) {
+		m_score = std::max<int>(0, std::min<int>(score, m_max_score));
 	}
 
 	int getPoint() {

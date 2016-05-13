@@ -4,26 +4,59 @@
 using namespace Breakout;
 
 
-void BreakoutComponents::setup()
+void BreakoutComponents::setup(ShareData& share)
 {
 	// Select画面
 	{
 		std::unordered_map<Breakout::Mode, std::string, Breakout::ModeEnumHash> mode_image_store;
 		mode_image_store[Breakout::Mode::Easy] = "b_easy";
+		mode_image_store[Breakout::Mode::Normal] = "b_normal";
 		mode_image_store[Breakout::Mode::Hard] = "b_hard";
 		std::list<Breakout::Mode> mode_list;
 		mode_list.push_back(Breakout::Mode::Easy);
+		mode_list.push_back(Breakout::Mode::Normal);
 		mode_list.push_back(Breakout::Mode::Hard);
 		const Shape::Rectangle select_realm = Shape::Rectangle(SELECT_START_POS, SELECT_WIDTH, SELECT_HEIGHT);
 		select = std::make_shared<Breakout::Select<Breakout::Mode, Breakout::ModeEnumHash>>(mode_list, mode_image_store, select_realm);
 	}
 	// Layoutの初期化
 	{
-		background = std::make_shared<Background>();
+		background = std::make_shared<Background>(share.handle);
 		background->init();
-		const auto info_realm = Shape::Rectangle(INFO_START_POS, INFO_WIDTH, INFO_HEIGHT);
+		auto info_realm = Shape::Rectangle(INFO_START_POS, INFO_WIDTH, INFO_HEIGHT);
 		std::shared_ptr<Timer> timer = std::make_shared<Timer>(TIMER_MAX_MIN, TIMER_MAX_SEC, TIMER_MAX_MSEC);
 		info = std::make_shared<Breakout::Info>(info_realm, timer);
+
+		info->addScoreCalc([&]() -> int {
+			return SCORE_OFFSET;
+		});
+
+		info->addScoreCalc([&]() -> int {
+			std::size_t block_dis_num = std::count_if(block_list.begin(), block_list.end(), 
+				[](const std::shared_ptr<Block>& block) -> bool {
+				return block->isDisappeared();
+			});
+		
+			return BLOCK_SCORE * (block_dis_num - m_block_offset);
+		});
+
+		info->addScoreCalc([&]() -> int {
+			std::size_t house_now_num = house_list.size();
+			return HOUSE_SCORE * (HOUSE_NUM - house_now_num);
+		});
+
+		info->addScoreCalc([&]() -> int {
+			return ENEMY_SCORE * enemy_manager->getGeneratedEnemy();
+		});
+
+		info->addScoreCalc([&]() -> int {
+			int enemy_head = enemy->isAlive() ? 0 : 1;
+			int enemy_left = enemy->hasLeft() ? 0 : 1;
+			int enemy_right = enemy->hasRight() ? 0 : 1;
+
+			return BOSS_HEAD_SCORE * enemy_head + BOSS_RIGHT_SCORE * enemy_right + BOSS_LEFT_SCORE * enemy_left;
+		});
+
 
 		const auto result_realm = Shape::Rectangle(RESULT_START_POS, RESULT_WIDTH, RESULT_HEIGHT);
 		result = std::make_shared<Breakout::Result>(result_realm);
@@ -83,7 +116,7 @@ void BreakoutComponents::setup()
 	// fireballの初期化
 	{
 		fireball_manager = std::make_shared<Breakout::FireballManager>(MAX_FIREBALL_NUM);
-		std::uniform_real_distribution<> velocity_generator(FIREBALL_STARTVEL.x(), FIREBALL_STARTVEL.y());
+		/*std::uniform_real_distribution<> velocity_generator(FIREBALL_STARTVEL.x(), FIREBALL_STARTVEL.y());
 		std::uniform_int<> position_generator(-10, 10);
 		std::uniform_real_distribution<> fireball_mode_generator(0.0, 1.0);
 
@@ -101,7 +134,7 @@ void BreakoutComponents::setup()
 			else {
 				fireball_manager->add(std::make_shared<Breakout::Fireball>(circle, moving, EnemyWeak));
 			}
-		}
+		}*/
 	}
 
 
@@ -157,6 +190,9 @@ void BreakoutComponents::setup()
 				break;
 			}
 		}
+		m_block_offset = std::count_if(block_list.begin(), block_list.end(), 
+			[](const std::shared_ptr<Block>& block) -> bool {
+			return block->isDisappeared(); });
 	}
 
 	// Enemyの初期化
@@ -193,4 +229,18 @@ void BreakoutComponents::setup()
 			resident_list.push_back(resident);
 		}
 	}
+
+}
+
+void BreakoutComponents::increaseBlock(double ratio)
+{
+	std::random_device rnd;
+	std::mt19937 mt(rnd());
+	std::uniform_real_distribution<> block_reappear_generator(0.0, 1.0);
+	std::for_each(block_list.begin(), block_list.end(), [&](const std::shared_ptr<Block>& block) {
+		if (block->isDisappeared() && block_reappear_generator(mt) < ratio) {
+			block->appear();
+		}
+
+	});
 }

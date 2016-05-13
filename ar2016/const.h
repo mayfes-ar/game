@@ -17,5 +17,5 @@ extern const double CAP2IMG_RATE;
 extern const int CAP2IMG_SHIFT_X;
 extern const int CAP2IMG_SHIFT_Y;
 
-constexpr int MARKER_NUM = 5;
+constexpr int MARKER_NUM = 4;
 extern const int KEEP_FRAME;

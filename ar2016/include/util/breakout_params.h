@@ -46,7 +46,7 @@ namespace Breakout {
 
 	constexpr double NORMAL_BLOCK_PROB = 0.5;
 	constexpr double HARD_BLOCK_PROB = 0.3;
-	constexpr double UNBREAKABLE_BLOCK_PROB = 0.2;
+	constexpr double UNBREAKABLE_BLOCK_PROB = 0.4;
 
 	constexpr int NORMAL_BLOCK_LIFE_NUM = 1;
 	constexpr int HARD_BLOCK_LIFE_NUM = 2;
@@ -69,10 +69,13 @@ namespace Breakout {
 	const Eigen::Vector2f FIREBALL_STARTVEL = Eigen::Vector2f{ 5.0f, 10.0f };
 	constexpr int FIREBALL_RADIUS = 20;
 	constexpr int MAX_FIREBALL_NUM = 2;
+	constexpr int MAX_FIREBALL_NUM_ON_HARD = 4;
 
 	// Shipのパラメータ
 	const int SHIP_OFFSET_X = FIELD_START_POS.x() + WIDTH / 4;
 	const int SHIP_OFFSET_Y = HEIGHT * 4 / 5;
+	const int SHIP_BLOCK_HEIGHT = (HEIGHT / 4) / BLOCK_HEIGHT_NUM;
+	const int SHIP_BLOCK_WIDTH = SHIP_BLOCK_HEIGHT;
 	const Eigen::Vector2i SHIP_START_POS = Eigen::Vector2i{ SHIP_OFFSET_X, SHIP_OFFSET_Y };
 	constexpr int SHIP_LIFE_NUM = 4;
 
@@ -97,5 +100,14 @@ namespace Breakout {
 	const int RESIDENT_OFFSET_Y = HEIGHT - RESIDENT_HEIGHT;
 	const Eigen::Vector2i RESIDENT_START_POS = Eigen::Vector2i{ RESIDENT_OFFSET_X, RESIDENT_OFFSET_Y };
 	const int RESIDENT_LIFE = 1;
+
+	// Score
+	constexpr int BLOCK_SCORE = 50;
+	constexpr int ENEMY_SCORE = 100;
+	constexpr int BOSS_HEAD_SCORE = 200;
+	constexpr int BOSS_LEFT_SCORE = 100;
+	constexpr int BOSS_RIGHT_SCORE = 100;
+	constexpr int HOUSE_SCORE = -100;
+	constexpr int SCORE_OFFSET = 1000;
 
 } // namespace Breakout

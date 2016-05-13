@@ -63,7 +63,7 @@ void detect(cv::Mat& src, ShareData& share) {
 	aruco::detectMarkers(src, dictionary, corners, ids, detectorParams);
 
 	//array<Rectan, 5> rects;
-	array<bool, MARKER_NUM> isDetected = {false, false, false, false, false};
+	array<bool, MARKER_NUM> isDetected = {false, false, false, false};
 
 	// set results
 	for (int i = 0; i < ids.size(); i++) {

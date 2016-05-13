@@ -96,10 +96,13 @@ bool Object::load() {
 
 	//　ゲーム本編
 	isSuccess &= loadImage("s_game_background", "s_game/background1");
-	isSuccess &= loadImage("s_game_3", "s_game/3");
-	isSuccess &= loadImage("s_game_2", "s_game/2");
-	isSuccess &= loadImage("s_game_1", "s_game/1");
-	isSuccess &= loadImage("s_game_start", "s_game/start");
+	isSuccess &= loadImage("s_game_countdown3", "s_game/countdown_3");
+	isSuccess &= loadImage("s_game_countdown2", "s_game/countdown_2");
+	isSuccess &= loadImage("s_game_countdown1", "s_game/countdown_1");
+	isSuccess &= loadImage("s_game_s", "s_game/s");
+	isSuccess &= loadImage("s_game_t", "s_game/t");
+	isSuccess &= loadImage("s_game_a", "s_game/a");
+	isSuccess &= loadImage("s_game_r", "s_game/r");
 
 	isSuccess &= loadImage("s_game_player", "s_game/hime_normal");
 	isSuccess &= loadImage("s_game_player_damage", "s_game/hime_odoroki");
@@ -293,6 +296,7 @@ bool Object::load() {
 	isSuccess &= loadImage("b_forest", "breakout/forest");
 	isSuccess &= loadImage("b_magma", "breakout/magma");
 	isSuccess &= loadImage("b_hill", "breakout/hill");
+	isSuccess &= loadImage("b_grass", "breakout/grass");
 
 	isSuccess &= loadImage("b_game_over", "breakout/game_over");
 	isSuccess &= loadImage("b_game_clear", "breakout/game_clear");
@@ -306,6 +310,9 @@ bool Object::load() {
 	isSuccess &= loadImage("b_hime", "puzzle/hime_normal");
 	isSuccess &= loadImage("b_hime_damaged", "puzzle/hime_gameover");
 
+	isSuccess &= loadImage("b_normal_fukidashi", "breakout/normal_fukidashi");
+	isSuccess &= loadImage("b_bikkuri_fukidashi", "breakout/bikkuri_fukidashi");
+
 	isSuccess &= loadEffect("b_muteki", "breakout/muteki", 1, 6, 320, 1440);
 	isSuccess &= loadEffect("b_burning", "breakout/burning", 1, 5, 240, 900);
 	isSuccess &= loadEffect("b_explosion", "breakout/explosion", 7, 1, 840, 120);
@@ -313,8 +320,24 @@ bool Object::load() {
 	isSuccess &= loadEffect("b_fireball_reflect", "breakout/fireball_reflect", 14, 1, 1680, 120);
 	isSuccess &= loadEffect("b_green_fireball", "breakout/green_fireball", 5, 5, 500, 500);
 	isSuccess &= loadEffect("b_green_fireball_reflect", "breakout/green_fireball_reflect", 14, 1, 1680, 120);
+	isSuccess &= loadEffect("b_strong_fireball_reflect", "breakout/strong_fireball_reflect", 14, 1, 3360, 240);
 	isSuccess &= loadEffect("b_crawl", "breakout/crawl", 5, 2, 1200, 480);
-	
+	isSuccess &= loadEffect("b_enemy_vanish", "breakout/enemy_vanish", 5, 1, 1280, 256);
+	isSuccess &= loadEffect("b_enemy_strong_fireball", "breakout/enemy_strong_fireball", 9, 3, 1800, 600);
+	isSuccess &= loadEffect("b_player_strong_fireball", "breakout/player_strong_fireball", 10, 3, 2000, 600);
+	isSuccess &= loadEffect("b_fire_frame", "breakout/fire_frame", 2, 5, 1280, 2400);
+
+	isSuccess &= loadSound("b_bomb", "breakout/bomb.mp3");
+	isSuccess &= loadSound("b_meramera", "breakout/meramera.mp3");
+	isSuccess &= loadSound("b_heal", "breakout/heal.mp3");
+	isSuccess &= loadSound("b_boss_damaged", "breakout/boss_damaged.wav");
+	isSuccess &= loadSound("b_enemy_strong_fireball", "breakout/enemy_strong_fireball.mp3");
+	isSuccess &= loadSound("b_fireball_reflect", "breakout/fireball_reflect.wav");
+	isSuccess &= loadSound("b_muteki", "breakout/muteki.mp3");
+	isSuccess &= loadSound("b_restore_pot", "breakout/restore_pot.wav");
+	isSuccess &= loadSound("b_restore_time", "breakout/restore_time.wav");
+	isSuccess &= loadSound("b_start_play", "breakout/start.mp3");
+	isSuccess &= loadSound("b_final_play", "breakout/final.mp3");
 
 	for (int num = 0; num <= 9; ++num) {
 		for (const auto& color : { "red", "blue", "yellow", "green" }) {
