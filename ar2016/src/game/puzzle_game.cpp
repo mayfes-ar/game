@@ -22,7 +22,7 @@ bool PuzzleGame::onStart() {
 	mode.setMode([this]() {
 		makeStageBase();
 		drawList.push_back(std::make_shared<CurtainObject>(true));
-		timer->startPlayingBGM();
+		timer->startPlayingBGM(2);
 
 		setPlayer(100, -100);
 		setGoal(1080, 555);
@@ -291,6 +291,7 @@ bool PuzzleGame::onUpdate() {
 	if (goal->check(player)) {
 		if (mode.getMode() == 0 || mode.getMode() == 6) {
 			drawList.push_back(std::make_shared<CurtainObject>(false));
+			timer->stopPlayingBGM();
 		}
 		if (mode.getMode() > 0) {
 			drawList.push_back(goal->goalEffect());
