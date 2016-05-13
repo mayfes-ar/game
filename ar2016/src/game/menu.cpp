@@ -22,31 +22,34 @@ std::shared_ptr<Game> startMenu() {
 }
 
 // メニュー画面に表示するゲーム情報の登録
-Menu::SelectGame::SelectGame() {
+Menu::SelectGame::SelectGame(Menu& menu_) : menu(menu_) {
 	gameList = std::vector<GameDescription>{
 		GameDescription(
-			imgHandles["p_perfect"],
-			imgHandles["s_game_op"],
-			100,
+			imgHandles["menu_p"],
+			imgHandles["menu_p_d"],
+			imgHandles["menu_blue"],
+			40,
 			120,
-			150,
-			90,
+			421/2,
+			131/2,
 			[]() -> std::shared_ptr<Game> {return std::make_shared<PuzzleGame>(); }),
 		GameDescription(
-			imgHandles["s_game_cake"],
-			imgHandles["s_game_op"],
-			100,
+			imgHandles["menu_s"],
+			imgHandles["menu_s_d"],
+			imgHandles["menu_orange"],
+			40,
 			320,
-			150,
-			90,
+			414/2,
+			134/2,
 			[]() -> std::shared_ptr<Game> {return std::make_shared<SinglePlayerGame>(); }),
 		GameDescription(
-			imgHandles["b_donald"], // サムネイルのハンドル
-			imgHandles["s_game_block"],
-			100,
+			imgHandles["menu_b"], // サムネイルのハンドル
+			imgHandles["menu_b_d"],
+			imgHandles["menu_green"],
+			40,
 			520,
-			150,
-			90,
+			417/2,
+			131/2,
 			[]() -> std::shared_ptr<Game> {return std::make_shared<BreakoutGame>(); })
 	};
 

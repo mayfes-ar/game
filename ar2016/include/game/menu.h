@@ -12,6 +12,21 @@ std::shared_ptr<Game> startMenu();
 // メニュー画面
 // gameType = std::make_shared<起動するGameの子クラス>();
 class Menu : Game {
+
+	class Background : public Object {
+		int& handle;
+
+	public:
+		Background(int& handle_) : handle(handle_) {
+			layer = 0;
+		}
+
+		bool draw() {
+			DrawExtendGraph(CAP2IMG_SHIFT_X, CAP2IMG_SHIFT_Y, CAP2IMG_SHIFT_X + CAP2IMG_RATE*CAP_WIDTH, CAP2IMG_SHIFT_Y + CAP2IMG_RATE*CAP_HEIGHT, handle, FALSE);
+			return true;
+		}
+	};
+
 	class FuncTimer {
 		std::vector<std::function<void()>> funcs;
 		std::vector<int> timers;
@@ -176,11 +191,14 @@ class Menu : Game {
 		public :
 			int imageHandle;
 			int descHandle;
+			int backgroundHandle;
+			shared_ptr<PendulumCounter> p = make_shared<PendulumCounter>(FPS/4);
 			std::function<std::shared_ptr<Game>()> gameFunc;
 
-			GameDescription(int imageHandle_, int descHandle_, int x, int y, int imageWidth_, int imageHeight_,  std::function<std::shared_ptr<Game>()> gameFunc_) :
+			GameDescription(int imageHandle_, int descHandle_, int backgroundHandle_, int x, int y, int imageWidth_, int imageHeight_,  std::function<std::shared_ptr<Game>()> gameFunc_) :
 				imageHandle(imageHandle_),
 				descHandle(descHandle_),
+				backgroundHandle(backgroundHandle_),
 				gameFunc(gameFunc_){
 				rect.x = x;
 				rect.y = y;
@@ -188,7 +206,7 @@ class Menu : Game {
 				rect.height = imageHeight_;
 			}
 
-			bool draw(bool isSelected){
+			bool draw(bool isSelected) {
 				/*
 				ChangeFont("メイリオ");
 				SetFontSize(40);
@@ -198,30 +216,33 @@ class Menu : Game {
 				SetFontThickness(6);
 				DrawString(400, 300, description.c_str(), GetColor(250, 250, 250));
 				*/
-
-				//DrawExtendGraph(350, 50, WIDTH-50, HEIGHT - 50, imgHandles["s_game_op"], true);
-
-				//DrawExtendGraph(100, 120, 250, 210, imgHandles["p_perfect"], true);
-				//DrawExtendGraph(100, 320, 250, 410, imgHandles["s_game_cake"], true);
-				//DrawExtendGraph(100, 520, 250, 610, imgHandles["b_donald"], true);
-				
+				int margin = 25;
 				if (isSelected) {
-					DrawExtendGraph(350, 50, WIDTH - 50, HEIGHT - 50, descHandle, true);
-					drawWithRotation(imgHandles["s_game_block"], 0);
+					DrawExtendGraph(WIDTH - margin - 1276 * (HEIGHT - 2*margin) / 892, margin, WIDTH -margin ,HEIGHT -margin, descHandle, true);
+					
+					drawWithRotation(imgHandles["menu_select"], 0, false, 1.5);
+					drawWithRotation(imageHandle, p->getAngle(), false, 1.2);
 				}
+				else {
+					p->reset();
+					drawWithRotation(imgHandles["menu_select"], 0, false, 1.2);
+					drawWithRotation(imageHandle, 0);
 
-				drawWithRotation(imageHandle, 0);
+				}
 
 				return true;
 			}
 			bool draw() { return true; }
 		};
+
 		int numOfGames;
-		int selectedGameIndex;
+		int selectedGameIndex = 0;
 		std::vector<GameDescription> gameList;
 
+		Menu& menu;
+
 		public :
-		SelectGame();
+			SelectGame(Menu& menu_);
 
 		std::shared_ptr<Game> startSelectedGame() {
 			return gameList[selectedGameIndex].gameFunc();
@@ -234,15 +255,24 @@ class Menu : Game {
 			} else {
 				selectedGameIndex = (selectedGameIndex + numOfGames) % numOfGames;
 			}
+			int x = gameList[selectedGameIndex].left();
+			int y = gameList[selectedGameIndex].top();
+			menu.makeEffect("menu_select", x - 50, y - 120, 200, 200, false, 150, 2);
 		}
 
 		// ゲーム選択の描画
 		bool draw() {
-			DrawExtendGraph(0, 0, WIDTH, HEIGHT, imgHandles["s_game_water"], true);
+			//SetDrawBright(200, 200, 200);
+			DrawExtendGraph(0, 0, WIDTH, HEIGHT, imgHandles["menu_background"], true);
+			SetDrawBlendMode(DX_BLENDMODE_ALPHA, 120);
+			DrawExtendGraph(0, 0, WIDTH, HEIGHT, gameList[selectedGameIndex].backgroundHandle, true);
+			SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 150);
+			//SetDrawBright(255, 255, 255);
 
 			for (int i = 0; i < gameList.size(); i++) {
 				gameList[i].draw(i == selectedGameIndex ? true : false);
 			}
+
 			return true;
 		}
 	};
@@ -260,7 +290,7 @@ class Menu : Game {
 	// Menu クラスのループ処理
 public:
 	Menu(std::shared_ptr<Game>& gameType_) : gameType(gameType_) {
-		games = std::make_shared<SelectGame>();
+		games = std::make_shared<SelectGame>(*this);
 	}
 
 	bool onStart() {
@@ -275,10 +305,13 @@ public:
 		bgm->start();
 		ChangeFont("メイリオ");
 
+		//drawList.push_back(make_shared<Background>(share.handle));
+
 		return Game::onStart();
 	}
 
 	bool onUpdate() {
+		funcTimer.update();
 
 		if (key[KEY_INPUT_RETURN]) {
 			// gameType = std::make_shared<FirstGame>();
@@ -293,11 +326,11 @@ public:
 		if (counterForWaiting > 0){
 			counterForWaiting--;
 		}
-		if (counterForWaiting == 0 && key[KEY_INPUT_RIGHT]) {
+		if (counterForWaiting == 0 && key[KEY_INPUT_DOWN]) {
 			games->setNextGame(1);
 			counterForWaiting = 5;
 		}
-		if (counterForWaiting == 0 && key[KEY_INPUT_LEFT]) {
+		if (counterForWaiting == 0 && key[KEY_INPUT_UP]) {
 			games->setNextGame(-1);
 			counterForWaiting = 5;
 		}

@@ -693,8 +693,8 @@ bool SinglePlayerGame::onStart() {
 		//yu
 		if (hasPlayerWon) {
 			//勝利画面のエフェクト・リザルト
-			makeEffect("s_game_result_hanabi", 400, 100, 500, 500, true, 50, 1, 4);
-			makeEffect("s_game_result_hanabi", 700, 50, 300, 300, true, 50, 1, 3);
+			makeEffect("s_game_result_hanabi", 400, 100, 500, 500, true, 50, 3, 8);
+			makeEffect("s_game_result_hanabi", 700, 50, 300, 300, true, 50, 3, 0);
 
 			}
 		else {

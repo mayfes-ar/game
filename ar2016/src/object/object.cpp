@@ -41,6 +41,8 @@ bool Object::load() {
 		int* handles = new int[allNum];
 
 		bool result;
+
+
 		if (LoadDivGraph(path.c_str(), allNum, xNum, yNum, width / xNum, height / yNum, handles) == -1) {
 			result = false;
 		} else {
@@ -77,6 +79,21 @@ bool Object::load() {
 	isSuccess &= loadImage("menu_title", "menu/menu_title");
 	isSuccess &= loadSound("menu_bgm", "menu/welcome_to_the_Chu-2_byo_world!.mp3");
 	isSuccess &= loadEffect("effect1", "warp", 1, 6, 640, 2880);
+	isSuccess &= loadImage("menu_blue", "menu/blue");
+	isSuccess &= loadImage("menu_orange", "menu/orange");
+	isSuccess &= loadImage("menu_green", "menu/green");
+
+
+	isSuccess &= loadImage("menu_p", "menu/kaseide");
+	isSuccess &= loadImage("menu_p_d", "menu/menu3");
+	isSuccess &= loadImage("menu_s", "menu/mamotte");
+	isSuccess &= loadImage("menu_s_d", "menu/menu1");
+	isSuccess &= loadImage("menu_b", "menu/taoshite");
+	isSuccess &= loadImage("menu_b_d", "menu/menu2");
+	isSuccess &= loadImage("menu_select", "menu/select");
+	isSuccess &= loadImage("menu_background", "menu/menu_background");
+
+	isSuccess &= loadEffect("menu_select", "menu/select", 3, 4, 1536, 2048);
 
 	// Single Player Game
 	// オープニング
@@ -181,10 +198,11 @@ bool Object::load() {
 	isSuccess &= loadImage("s_game_heart", "s_game/heart");
 
 	isSuccess &= loadSound("s_game_bgm", "s_game/bgm.mp3");
-	isSuccess &= loadSound("s_game_dead", "s_game/dead.wav");
+	isSuccess &= loadSound("s_game_dead", "s_game/player_dead.mp3");
+	isSuccess &= loadSound("s_game_clear", "s_game/game_clear.mp3");
+	isSuccess &= loadSound("s_game_over", "s_game/game_over.mp3");
 	isSuccess &= loadSound("s_game_attack", "s_game/bomb.mp3");
 	isSuccess &= loadSound("s_game_jump", "s_game/jump.mp3");
-	isSuccess &= loadSound("s_game_shuzo", "s_game/shuzo.mp3"); 
 	isSuccess &= loadSound("s_game_fireshot", "s_game/fireshot_kurage.mp3");
 
 	isSuccess &= loadEffect("s_game_hit", "s_game/hit3", 3, 4, 1536, 2048);
@@ -222,9 +240,7 @@ bool Object::load() {
 	isSuccess &= loadImage("s_game_result_clear1", "s_game/result_clear1");
 	isSuccess &= loadImage("s_game_result_dead1", "s_game/result_dead1");
 
-	isSuccess &= loadSound("s_game_over", "s_game/game_over.wav");
-	
-	isSuccess &= loadEffect("s_game_result_hanabi", "s_game/hanabi", 14, 15, 7168, 7680);
+	isSuccess &= loadEffect("s_game_result_hanabi", "s_game/hanabi", 8, 9, 4096, 4608);
 	isSuccess &= loadEffect("s_game_result_kirakira", "s_game/kirakira", 10, 12, 5120, 6144);
 	isSuccess &= loadEffect("s_game_curtain_close", "s_game/curtain_close", 1, 18, 640, 8640);
 	isSuccess &= loadEffect("s_game_curtain_open", "s_game/curtain_open", 1, 10, 640, 4800);

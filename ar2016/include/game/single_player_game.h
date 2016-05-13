@@ -104,7 +104,7 @@ class SinglePlayerGame : public Game {
 			}
 			case 2: {
 				if (hasPlayerWon) {
-
+					PlaySoundMem(soundHandles["s_game_clear"], DX_PLAYTYPE_BACK, true);
 				}
 				else {
 					PlaySoundMem(soundHandles["s_game_over"], DX_PLAYTYPE_BACK, true);
@@ -128,6 +128,7 @@ class SinglePlayerGame : public Game {
 			}
 			case 2: {
 				StopSoundMem(soundHandles["s_game_over"]);
+				StopSoundMem(soundHandles["s_game_clear"]);
 				break;
 			}
 			default: {
