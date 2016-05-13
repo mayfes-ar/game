@@ -6,6 +6,12 @@ using namespace Breakout;
 
 void BreakoutComponents::setup(ShareData& share)
 {
+	//InfoHime
+	{
+		Shape::Rectangle realm = Shape::Rectangle(Eigen::Vector2i(WIDTH / 2, HEIGHT / 4), INFO_HIME_WIDTH, INFO_HIME_HEIGHT);
+		info_hime = std::make_shared<InfoHime>(realm, "難易度を選んでね♪", 100000);
+	}
+
 	// Select画面
 	{
 		std::unordered_map<Breakout::Mode, std::string, Breakout::ModeEnumHash> mode_image_store;

@@ -70,4 +70,6 @@ public:
 	std::vector<std::shared_ptr<Breakout::House>> house_list;
 
 	std::vector<std::shared_ptr<Breakout::Resident>> resident_list;
+
+	std::shared_ptr<Breakout::InfoHime> info_hime = nullptr;
 };

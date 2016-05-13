@@ -37,9 +37,11 @@ public:
 	bool onStart() override
 	{
 		init();
+
 		mode.setMode([&] {
 			drawList.push_back(m_components->background);
 			drawList.push_back(m_components->select);
+			drawList.push_back(m_components->info_hime);
 		}, -1);
 
 		mode.setMode([&] {
@@ -90,7 +92,7 @@ public:
 	bool onUpdate() override
 	{
 		switch (mode.getMode()) {
-		case 1:
+		case 2:
 			updateCollisionDetection();
 			updateFireballPosition();
 			moveShip();
@@ -169,6 +171,8 @@ private:
 
 	// Infoのupdate
 	void updateInfo();
+
+	void turtolial();
 
 	// ゲームをクリアしたかどうか
 	// 現在はBlockが一つもない場合はクリアとみなす

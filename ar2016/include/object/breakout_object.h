@@ -38,6 +38,7 @@ namespace Breakout {
 	constexpr int PRIORITY_DYNAMIC_OBJECT = 30; // 動的オブジェクト(Ship, Fireball)
 	constexpr int PRIORITY_CHARACTER = 40; // キャラクター(マリオ)
 	constexpr int PRIORITY_INFO = 50; // インフォメーション
+	constexpr int PRIORITY_INFO_HIME = 55; //インフォの姫よう
 	constexpr int PRIORITY_FUKIDASHI = 60; //吹出し用
 
 	// 方向をあらわすenum
@@ -157,7 +158,7 @@ namespace Breakout {
 			m_sentences_realm.height = height;
 			m_sentences_realm.start_point = right_bottom_point + Eigen::Vector2i(0, -height);
 			m_realm.width =(int) ((float)width / (1.0-left_ratio-right_ratio));
-			m_realm.height =(int) ((float)height / (1.0 - bottom_ratio + top_ratio));
+			m_realm.height =(int) ((float)height / (1.0 - bottom_ratio - top_ratio));
 			m_realm.start_point = right_bottom_point + Eigen::Vector2i(-m_realm.width * left_ratio , -m_realm.height * (1.0 - bottom_ratio));			
 			Object::layer = PRIORITY_FUKIDASHI;
 		}
@@ -750,6 +751,7 @@ public:
 				imgHandles[key.str()], TRUE);
 		}
 		// Score の描画
+
 		return true;
 	}
 
@@ -784,11 +786,72 @@ public:
 		m_score->setScore(score);
 	}
 
+
 private:
 	Shape::Rectangle m_realm = Shape::Rectangle();
 	std::shared_ptr<Timer> m_timer = nullptr;
 	std::shared_ptr<Score> m_score = nullptr;
 	std::vector<std::function<int()>> m_score_calc;
+};
+
+class InfoHime : public Object
+{
+public:
+	InfoHime() {}
+	InfoHime(Shape::Rectangle realm, std::shared_ptr<Fukidashi> fukidashi = nullptr, int img_handle = imgHandles["b_hime"])
+		: m_realm(realm), m_fukidashi(fukidashi), m_hime_img_handle(img_handle)
+	{
+		Object::layer = PRIORITY_INFO_HIME;
+	}
+	InfoHime(Shape::Rectangle realm, std::string sentences, int appear_time, int img_handle = imgHandles["b_hime"])
+		: m_realm(realm), m_hime_img_handle(img_handle)
+	{
+		m_fukidashi = std::make_shared<Fukidashi>(realm.getRightTopPoint(), sentences, appear_time);
+		Object::layer = PRIORITY_INFO_HIME;
+	}
+
+	void setSentences(std::string sentences, int appear_time, unsigned int color) {
+		m_fukidashi = std::make_shared<Fukidashi>(m_realm.getRightBottomPoint(), sentences, appear_time, color);
+	}
+
+	void setHimeImgHandle(int img_handle) {
+		m_hime_img_handle = img_handle;
+	}
+
+	bool hasFukidashi() { return m_fukidashi != nullptr; }
+
+	void updatePosition() {
+		m_moving->updatePoistion(m_realm.start_point);
+	}
+
+	void setMoving(std::shared_ptr<Moving>& moving) {
+		m_moving = moving;
+	}
+
+	void setAccel(Eigen::Vector2f& accel) {
+		m_moving->setAccel(accel);
+	}
+
+	void setVelocity(Eigen::Vector2f& vel) {
+		m_moving->setVelocity(vel);
+	}
+
+	bool draw() override {
+		DrawExtendGraph(m_realm.left(), m_realm.top(), m_realm.right(), m_realm.bottom(), m_hime_img_handle, TRUE);
+		if (hasFukidashi()) {
+			if (!m_fukidashi->draw()) {
+				m_fukidashi == nullptr;
+			}
+			return true;
+		}
+		return true;
+	}
+
+private:
+	Shape::Rectangle m_realm = Shape::Rectangle(INFO_HIME_START_POS, INFO_HIME_WIDTH, INFO_HIME_HEIGHT);
+	std::shared_ptr<Moving> m_moving = std::make_shared<Moving>(0.03, std::make_shared<NewtonBehavior>());
+	int m_hime_img_handle = imgHandles["b_hime"];
+	std::shared_ptr<Fukidashi> m_fukidashi = nullptr;
 };
 
 class Result : public Object
