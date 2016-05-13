@@ -310,8 +310,16 @@ bool Object::load() {
 	isSuccess &= loadImage("b_hime", "puzzle/hime_normal");
 	isSuccess &= loadImage("b_hime_damaged", "puzzle/hime_gameover");
 
+	isSuccess &= loadImage("b_castle", "breakout/castle");
+	isSuccess &= loadImage("b_girl", "breakout/girl");
+	isSuccess &= loadImage("b_boy", "breakout/boy");
+	isSuccess &= loadImage("b_girl_damaged", "breakout/girl_damaged");
+	isSuccess &= loadImage("b_boy_damaged", "breakout/boy_damaged");
+
 	isSuccess &= loadImage("b_normal_fukidashi", "breakout/normal_fukidashi");
 	isSuccess &= loadImage("b_bikkuri_fukidashi", "breakout/bikkuri_fukidashi");
+
+	isSuccess &= loadImage("b_timer_start_str", "breakout/text_start");
 
 	isSuccess &= loadEffect("b_muteki", "breakout/muteki", 1, 6, 320, 1440);
 	isSuccess &= loadEffect("b_burning", "breakout/burning", 1, 5, 240, 900);
@@ -338,6 +346,8 @@ bool Object::load() {
 	isSuccess &= loadSound("b_restore_time", "breakout/restore_time.wav");
 	isSuccess &= loadSound("b_start_play", "breakout/start.mp3");
 	isSuccess &= loadSound("b_final_play", "breakout/final.mp3");
+	isSuccess &= loadSound("b_timer_start", "breakout/timer_start.mp3");
+	isSuccess &= loadSound("b_timer_count", "breakout/timer_count.mp3");
 
 	for (int num = 0; num <= 9; ++num) {
 		for (const auto& color : { "red", "blue", "yellow", "green" }) {
