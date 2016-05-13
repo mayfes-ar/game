@@ -208,6 +208,8 @@ class SinglePlayerGame : public Game {
 		double bottomHit() const { return bottom() - rect.height / 3; }
 	};
 
+
+	
 	// エフェクトクラス
 	// 実際のエフェクトの作成はmakeEffect関数から行う
 	// effectHandleKey:ハンドルキー, x, y, width, height, willStay:持続するか, layer, framePerCount:エフェクトの速度, counter:何カウント目からエフェクトを始めるか
@@ -1194,6 +1196,8 @@ class SinglePlayerGame : public Game {
 		}
 	};
 
+
+
 	class Fire : public Enemy {
 	public:
 		static const int width = 280 / 3;
@@ -1232,6 +1236,7 @@ class SinglePlayerGame : public Game {
 			acX = -2;
 		}
 	};
+
 
 	enum Tutorial {
 		START,BEATFIRE,BEATHEIHO,END
@@ -1435,6 +1440,13 @@ class SinglePlayerGame : public Game {
 				DrawExtendGraph(left() - 50, top() - rect.height - 50, right() + 50, bottom() - rect.height, imgHandles["s_game_beforefinish"], true);
 			}
 
+			SetFontSize(64);
+			SetFontThickness(12);
+			DrawString(850, 50, "あと", GetColor(200, 100, 100));
+			drawNumber(980, 30, 100, game.timer/FPS ,effectHandles["s_game_num"]);
+			SetFontSize(24);
+			SetFontThickness(6);
+
 			Character::draw();
 
 			return true;
@@ -1583,10 +1595,10 @@ class SinglePlayerGame : public Game {
 
 					if (prevY < marker->bottomHit() && prevY + height > marker->topHit()) {
 						if (prevX >= marker->rightHit()) {
-							x = marker->right();
+							// x = marker->right();
 						}
 						else if (prevX + width <= marker->leftHit()) {
-							x = marker->left() - width;
+							// x = marker->left() - width;
 						}
 						else {
 							marker->off();
@@ -1594,18 +1606,18 @@ class SinglePlayerGame : public Game {
 					}
 					else {
 						if (prevY >= marker->bottomHit()) {
-							y = marker->bottom();
+							// y = marker->bottom();
 						}
 						else if (prevY + height <= marker->topHit()) {
-							y = marker->top() - height;
+							// y = marker->top() - height;
 							isJumping = false;
 						}
 						else {
 							marker->off();
 						}
 					}
-					prevX = x;
-					prevY = y;
+					// prevX = x;
+					// prevY = y;
 				}
 			}
 		}
@@ -1918,7 +1930,7 @@ class SinglePlayerGame : public Game {
 	std::shared_ptr<BGM> bgm;
 	const int maxTime = FPS * 60 * 2;
 
-	int maxPlayerDamage;
+	int maxPlayerDamage = 0;
 
 	enum Difficulty {
 		EASY, HARD, NIGHTMARE,

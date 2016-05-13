@@ -95,14 +95,11 @@ bool Object::load() {
 
 
 	//　ゲーム本編
+	isSuccess &= loadImage("s_game_background", "s_game/background1");
 	isSuccess &= loadImage("s_game_3", "s_game/3");
 	isSuccess &= loadImage("s_game_2", "s_game/2");
 	isSuccess &= loadImage("s_game_1", "s_game/1");
 	isSuccess &= loadImage("s_game_start", "s_game/start");
-
-
-
-	isSuccess &= loadImage("s_game_background", "s_game/background1");
 
 	isSuccess &= loadImage("s_game_player", "s_game/hime_normal");
 	isSuccess &= loadImage("s_game_player_damage", "s_game/hime_odoroki");
@@ -195,6 +192,8 @@ bool Object::load() {
 	isSuccess &= loadEffect("s_game_water", "s_game/water", 5, 6, 2560, 1536);
 
 	isSuccess &= loadEffect("s_game_coin", "s_game/coin", 5, 2, 1000, 400);
+	isSuccess &= loadEffect("s_game_num", "s_game/number_2", 10, 1, 1840, 223);
+
 	// マーカー
 	isSuccess &= loadImage("s_game_piyo", "s_game/piyo");
 	isSuccess &= loadImage("s_game_sword", "s_game/sword");
@@ -211,12 +210,19 @@ bool Object::load() {
 	isSuccess &= loadImage("s_game_result_castle2", "s_game/result_castle2");
 	isSuccess &= loadImage("s_game_result_castle3", "s_game/result_castle3");
 	isSuccess &= loadImage("s_game_result_stage1", "s_game/result_stage1");
-	isSuccess &= loadImage("s_game_result_stage2", "s_game/result_stage2");
 	isSuccess &= loadImage("s_game_result_sketch", "s_game/result_sketch");
+	isSuccess &= loadImage("s_game_result_background_gameover1", "s_game/result_background_gameover1");
+	isSuccess &= loadImage("s_game_result_background1", "s_game/result_background1");
+	isSuccess &= loadImage("s_game_result_background2", "s_game/result_background2");
+	isSuccess &= loadImage("s_game_result_background_gameover2", "s_game/result_background_gameover2");
+	
+	isSuccess &= loadImage("s_game_result_clear1", "s_game/result_clear1");
+	isSuccess &= loadImage("s_game_result_dead1", "s_game/result_dead1");
 
 	isSuccess &= loadSound("s_game_over", "s_game/game_over.wav");
 	
-	isSuccess &= loadEffect("s_game_over_hanabi", "s_game/hanabi", 14, 15, 7168, 7680);
+	isSuccess &= loadEffect("s_game_result_hanabi", "s_game/hanabi", 14, 15, 7168, 7680);
+	isSuccess &= loadEffect("s_game_result_kirakira", "s_game/kirakira", 10, 12, 5120, 6144);
 	isSuccess &= loadEffect("s_game_curtain_close", "s_game/curtain_close", 1, 18, 640, 8640);
 	isSuccess &= loadEffect("s_game_curtain_open", "s_game/curtain_open", 1, 10, 640, 4800);
 
