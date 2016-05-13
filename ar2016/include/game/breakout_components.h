@@ -36,6 +36,7 @@ class BreakoutComponents
 {
 public:
 	BreakoutComponents() {}
+	~BreakoutComponents() {}
 
 	void setup();
 

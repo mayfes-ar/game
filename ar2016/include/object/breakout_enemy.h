@@ -405,6 +405,12 @@ namespace Breakout
 			m_life.resetLife();
 		}
 
+		bool damageEnemy(int amount) override {
+			m_boss_damaged_sound.start();
+			m_is_damaged = 30;
+			return m_life.damage(amount);
+		}
+
 		bool draw() override {
 			if (!isAlive()) {
 				EnemyBase::draw();
@@ -433,6 +439,7 @@ namespace Breakout
 	private:
 		std::shared_ptr<EnemyLeftHand> m_left_hand = nullptr;
 		std::shared_ptr<EnemyRightHand> m_right_hand = nullptr;
+		Sound m_boss_damaged_sound = Sound("b_boss_damaged");
 	};
 
 	class EnemyManager : public Object {

@@ -145,8 +145,8 @@ void BreakoutGame::moveShip()
 	// 船のライフが0のときは操作させない（させると落ちる）
 	if (m_components->ship->getLifeNum() == 0) return;
 
-	if (share.lives[1] > 0) {
-		const int diff = (int)(share.rects[1].x - m_components->ship->left());
+	if (share.lives[0] > 0) {
+		const int diff = (int)(share.rects[0].x - m_components->ship->left());
 		m_components->ship->translate(diff / 10);
 	}
 
@@ -161,14 +161,16 @@ void BreakoutGame::moveShip()
 	}
 }
 
-
-
-void BreakoutGame::updateGameState()
+void BreakoutGame::updateFireballPosition()
 {
 	for (auto& fireball : m_components->fireball_manager->getFireballList()) {
 		if (fireball->isDisappeared()) continue;
 		fireball->updatePosition();
 	}
+}
+
+void BreakoutGame::updateGameState()
+{
 
 	// 壁との衝突判定
 	int kind = mode.getMode();
@@ -278,9 +280,9 @@ void BreakoutGame::updatePotStatus() {
 		// pot が使用済みならもう更新しない。
 		if (!m_components->pot->isAvailable()) return;
 
-		if (share.lives[1] > 0) {
+		if (share.lives[0] > 0) {
 			// potを出現させる
-			if (share.rects[1].width < 180) {
+			if (share.rects[0].width < 180) {
 				m_components->pot->appear();
 			}
 			// potが出現していたら
@@ -288,11 +290,11 @@ void BreakoutGame::updatePotStatus() {
 				// Phase: 吸い込んでから吐き出すまで
 
 				// potをマーカーの位置に移動させる
-				const Eigen::Vector2i diff_dist = Eigen::Vector2i((int)share.rects[1].x - m_components->pot->getRealm().left(), (int)share.rects[1].y - m_components->pot->getRealm().top());
+				const Eigen::Vector2i diff_dist = Eigen::Vector2i((int)share.rects[0].x - m_components->pot->getRealm().left(), (int)share.rects[0].y - m_components->pot->getRealm().top());
 				m_components->pot->translate(diff_dist / 10);
 
 				// potをマーカーの回転にあわせる
-				const float diff_rot = (float)share.rects[1].rotate - m_components->pot->getRotation();
+				const float diff_rot = (float)share.rects[0].rotate - m_components->pot->getRotation();
 				m_components->pot->rotate(diff_rot / 10.0);
 
 				// fireball を中に持っていたら
@@ -304,7 +306,7 @@ void BreakoutGame::updatePotStatus() {
 						// 吐き出す
 						m_components->pot->exhareFireball();
 					}
-					else if (share.rects[1].width > 250) {
+					else if (share.rects[0].width > 250) {
 						m_components->pot->exhareFireball();
 					}
 				}
