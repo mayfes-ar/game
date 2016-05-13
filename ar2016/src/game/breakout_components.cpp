@@ -10,9 +10,11 @@ void BreakoutComponents::setup(ShareData& share)
 	{
 		std::unordered_map<Breakout::Mode, std::string, Breakout::ModeEnumHash> mode_image_store;
 		mode_image_store[Breakout::Mode::Easy] = "b_easy";
+		mode_image_store[Breakout::Mode::Normal] = "b_normal";
 		mode_image_store[Breakout::Mode::Hard] = "b_hard";
 		std::list<Breakout::Mode> mode_list;
 		mode_list.push_back(Breakout::Mode::Easy);
+		mode_list.push_back(Breakout::Mode::Normal);
 		mode_list.push_back(Breakout::Mode::Hard);
 		const Shape::Rectangle select_realm = Shape::Rectangle(SELECT_START_POS, SELECT_WIDTH, SELECT_HEIGHT);
 		select = std::make_shared<Breakout::Select<Breakout::Mode, Breakout::ModeEnumHash>>(mode_list, mode_image_store, select_realm);
@@ -227,4 +229,18 @@ void BreakoutComponents::setup(ShareData& share)
 			resident_list.push_back(resident);
 		}
 	}
+
+}
+
+void BreakoutComponents::increaseBlock(double ratio)
+{
+	std::random_device rnd;
+	std::mt19937 mt(rnd());
+	std::uniform_real_distribution<> block_reappear_generator(0.0, 1.0);
+	std::for_each(block_list.begin(), block_list.end(), [&](const std::shared_ptr<Block>& block) {
+		if (block->isDisappeared() && block_reappear_generator(mt) < ratio) {
+			block->appear();
+		}
+
+	});
 }

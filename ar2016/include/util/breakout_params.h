@@ -69,6 +69,7 @@ namespace Breakout {
 	const Eigen::Vector2f FIREBALL_STARTVEL = Eigen::Vector2f{ 5.0f, 10.0f };
 	constexpr int FIREBALL_RADIUS = 20;
 	constexpr int MAX_FIREBALL_NUM = 2;
+	constexpr int MAX_FIREBALL_NUM_ON_HARD = 4;
 
 	// Shipのパラメータ
 	const int SHIP_OFFSET_X = FIELD_START_POS.x() + WIDTH / 4;

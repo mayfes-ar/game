@@ -1316,6 +1316,10 @@ public:
 		Object::layer = PRIORITY_DYNAMIC_OBJECT;
 	}
 
+	void changeMaximumFireballNum(int max_num) {
+		m_max_num = max_num;
+	}
+
 	bool isMax() {
 		return m_fireball_list.size() == m_max_num;
 	}

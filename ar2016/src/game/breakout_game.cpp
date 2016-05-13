@@ -197,8 +197,14 @@ void BreakoutGame::updateGameState()
 			const auto game_mode = m_components->select->getMode();
 			switch (game_mode) {
 			case Breakout::Mode::Easy:
+				m_components->increaseBlock(0.0);
+				break;
+			case Breakout::Mode::Normal:
+				m_components->increaseBlock(0.15);
 				break;
 			case Breakout::Mode::Hard:
+				m_components->increaseBlock(0.3);
+				m_components->fireball_manager->changeMaximumFireballNum(Breakout::MAX_FIREBALL_NUM_ON_HARD);
 				break;
 			}
 			m_components->info->init();
@@ -209,18 +215,19 @@ void BreakoutGame::updateGameState()
 
 		static bool is_chattering = false;
 		if (key[KEY_INPUT_UP] && !is_chattering) {
-			m_components->select->move(Breakout::Move::Down);
 			is_chattering = true;
+			m_components->select->move(Breakout::Move::Down);
 		}
 		else if (key[KEY_INPUT_DOWN] && !is_chattering) {
-			m_components->select->move(Breakout::Move::Up);
 			is_chattering = true;
+			m_components->select->move(Breakout::Move::Up);
 		}
-		else if (key[KEY_INPUT_RETURN]){
-			m_components->select->select();
-		}
-		else {
+		else if(!key[KEY_INPUT_DOWN] && !key[KEY_INPUT_UP]){
 			is_chattering = false;
+		}
+
+		if (key[KEY_INPUT_RETURN]){
+			m_components->select->select();
 		}
 		break;
 	}

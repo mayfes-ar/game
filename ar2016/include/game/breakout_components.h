@@ -21,6 +21,7 @@
 namespace Breakout{
 	enum class Mode : uint8_t {
 		Easy = 0,
+		Normal,
 		Hard
 	};
 
@@ -40,6 +41,8 @@ public:
 	~BreakoutComponents() {}
 
 	void setup(ShareData& share);
+
+	void increaseBlock(double ratio);
 
 	std::shared_ptr<Breakout::Select<Breakout::Mode, Breakout::ModeEnumHash>> select = nullptr;
     std::shared_ptr<Breakout::Background> background = nullptr;
