@@ -156,9 +156,9 @@ namespace Breakout {
 			m_sentences_realm.width = width;
 			m_sentences_realm.height = height;
 			m_sentences_realm.start_point = right_bottom_point + Eigen::Vector2i(0, -height);
-			m_realm.width = width + left_offset + right_offset;
-			m_realm.height = height + bottom_offset + top_offset;
-			m_realm.start_point = right_bottom_point + Eigen::Vector2i(-left_offset ,-height - top_offset);			
+			m_realm.width =(int) ((float)width / (1.0-left_ratio-right_ratio));
+			m_realm.height =(int) ((float)height / (1.0 - bottom_ratio + top_ratio));
+			m_realm.start_point = right_bottom_point + Eigen::Vector2i(-m_realm.width * left_ratio , -m_realm.height * (1.0 - bottom_ratio));			
 			Object::layer = PRIORITY_FUKIDASHI;
 		}
 
@@ -170,9 +170,9 @@ namespace Breakout {
 			m_sentences_realm.width = width;
 			m_sentences_realm.height = height;
 			m_sentences_realm.start_point = right_bottom_point + Eigen::Vector2i(0, -height);
-			m_realm.width = width + left_offset + right_offset;
-			m_realm.height = height + bottom_offset + top_offset;
-			m_realm.start_point = right_bottom_point + Eigen::Vector2i(-left_offset, -height - top_offset);
+			m_realm.width = (int)((float)width / (1.0 - left_ratio - right_ratio));
+			m_realm.height = (int)((float)height / (1.0 - bottom_ratio - top_ratio));
+			m_realm.start_point = right_bottom_point + Eigen::Vector2i(-m_realm.width * left_ratio, -m_realm.height * (1.0 - bottom_ratio));
 			m_fukidashi_handle = imgHandles[fukidashi_name];
 			Object::layer = PRIORITY_FUKIDASHI;
 		}
@@ -188,8 +188,7 @@ namespace Breakout {
 		bool draw() override {
 			if (isAvailable() && m_sentences.size() != 0) {
 				DrawExtendGraph(m_realm.left(), m_realm.top(), m_realm.right(), m_realm.bottom(), m_fukidashi_handle, TRUE);
-				/*m_sentences.c_str()*/
-				DrawFormatString(m_sentences_realm.left(), m_sentences_realm.top(), m_color, "うんち");
+				DrawFormatString(m_sentences_realm.left(), m_sentences_realm.top(), m_color, m_sentences.c_str());
 				decrementTime();
 				return true;
 			} else {
@@ -200,10 +199,10 @@ namespace Breakout {
 	private:
 		Shape::Rectangle m_realm = Shape::Rectangle();
 		Shape::Rectangle m_sentences_realm = Shape::Rectangle();
-		int top_offset = 15;
-		int left_offset = 25;
-		int right_offset = 5;
-		int bottom_offset = 5;
+		const float top_ratio = 0.15;
+		const float left_ratio = 0.25;
+		const float right_ratio = 0.08;
+		const float bottom_ratio = 0.15;
 		std::string m_sentences = "";
 		int m_appear_time;
 		int m_fukidashi_handle = imgHandles["b_normal_fukidashi"];
@@ -2042,7 +2041,7 @@ public:
 			resident->setImageHandle("b_girl_damaged");
 			break;
 		}
-		std::shared_ptr<Fukidashi> fukidashi = std::make_shared<Fukidashi>(resident->getRealm().getRightTopPoint(), "  だから", 60, GetColor(0, 0, 0));
+		std::shared_ptr<Fukidashi> fukidashi = std::make_shared<Fukidashi>(resident->getRealm().getRightTopPoint(), "キャー！\n助けてー！！", 60, GetColor(0, 0, 0));
 		resident->setFukidashi(fukidashi);
 		m_resident = nullptr;
 	}
