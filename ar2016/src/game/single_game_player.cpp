@@ -399,7 +399,7 @@ bool SinglePlayerGame::onStart() {
 					DrawExtendGraph(0, 0, WIDTH, HEIGHT, imgHandles["s_game_result_background1"], true);
 					DrawExtendGraph(650, 450, 650 + 320, 450 + 311, imgHandles["s_game_result_castle"], true);
 					DrawExtendGraph(900, 170, WIDTH-80, 380, imgHandles["s_game_result_frame_star"], true);					
-					DrawExtendGraph(800, 20, WIDTH, 230, imgHandles["s_game_result_rainbow"], true);
+					DrawExtendGraph(820, 20, WIDTH, 230, imgHandles["s_game_result_rainbow"], true);
 					DrawExtendGraph(1100, 1046 / 3 + 100, 1100 + 621 / 3, 1046 / 3 + 1046 / 3 + 100, imgHandles["s_game_player"], true);
 					DrawExtendGraph(10, 20, WIDTH/2-20, HEIGHT-10, imgHandles["s_game_result_background_gameover1"], true);
 					//スクロール文章
@@ -470,7 +470,7 @@ bool SinglePlayerGame::onStart() {
 			}
 		else {
 			//ゲームオーバーのエフェクト・リザルト	
-			makeEffect("s_game_result_kirakira", 150, 250, 500, 500, false, 150, 1, 0);
+			makeEffect("s_game_result_kirakira", 150, 270, 500, 500, false, 150, 1, 0);
 			
 		}
 
