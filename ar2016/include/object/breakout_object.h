@@ -807,6 +807,18 @@ public:
 
 	void setFinalScore(int score) {
 		m_score = score;
+
+		// 動画再生開始
+		if (m_is_game_clear) {
+			m_movie_handle = movieHandles["b_clear_movie"];
+			SeekMovieToGraph(m_movie_handle, 0);
+			if (GetMovieStateToGraph(m_movie_handle) == 0) {
+				PlayMovieToGraph(m_movie_handle);
+			}
+		} else {
+
+		}
+
 	}
 
 
@@ -818,9 +830,11 @@ public:
 		m_cnt += 2;
 
 		if (m_is_game_clear) {
-			DrawExtendGraph(m_realm.left(), m_realm.top(),
+			/*DrawExtendGraph(m_realm.left(), m_realm.top(),
 				m_realm.right(), m_realm.bottom(),
-				imgHandles["b_game_clear"], TRUE);
+				imgHandles["b_game_clear"], TRUE);*/
+			DrawExtendGraph(0, 0, WIDTH, HEIGHT, m_movie_handle, true);
+
 		}
 		else {
 			DrawExtendGraph(m_realm.left(), m_realm.top(),
@@ -863,6 +877,7 @@ private:
 	bool m_is_game_clear = false;
 	int m_cnt = 0;
 	int m_score;
+	int m_movie_handle = -1;
 };
 
 // フィールド 

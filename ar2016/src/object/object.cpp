@@ -237,6 +237,7 @@ bool Object::load() {
 
 	isSuccess &= loadImage("b_game_over", "breakout/game_over");
 	isSuccess &= loadImage("b_game_clear", "breakout/game_clear");
+	isSuccess &= loadMovie("b_clear_movie", "breakout/sky");
 	isSuccess &= loadImage("b_explanation", "breakout/explanation");
 
 	isSuccess &= loadImage("b_easy", "breakout/easy");
