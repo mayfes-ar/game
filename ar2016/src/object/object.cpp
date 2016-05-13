@@ -95,7 +95,11 @@ bool Object::load() {
 
 
 	//　ゲーム本編
-	isSuccess &= loadImage("background", "s_game/background1");
+	isSuccess &= loadImage("s_game_background", "s_game/background1");
+	isSuccess &= loadImage("s_game_3", "s_game/3");
+	isSuccess &= loadImage("s_game_2", "s_game/2");
+	isSuccess &= loadImage("s_game_1", "s_game/1");
+	isSuccess &= loadImage("s_game_start", "s_game/start");
 
 	isSuccess &= loadImage("s_game_player", "s_game/hime_normal");
 	isSuccess &= loadImage("s_game_player_damage", "s_game/hime_odoroki");
@@ -167,6 +171,10 @@ bool Object::load() {
 	isSuccess &= loadImage("s_game_switch_damage", "s_game/jaguti");
 	isSuccess &= loadImage("s_game_switch_over", "s_game/jaguti");
 
+	isSuccess &= loadImage("s_game_ghorst2", "s_game/ghorst2");
+	isSuccess &= loadImage("s_game_ghorst2_damage", "s_game/ghorst2");
+	isSuccess &= loadImage("s_game_ghorst2_over", "s_game/ghorst2");
+
 	isSuccess &= loadImage("s_game_heart", "s_game/heart");
 
 	isSuccess &= loadSound("s_game_bgm", "s_game/bgm.mp3");
@@ -176,14 +184,16 @@ bool Object::load() {
 	isSuccess &= loadSound("s_game_shuzo", "s_game/shuzo.mp3"); 
 	isSuccess &= loadSound("s_game_fireshot", "s_game/fireshot_kurage.mp3");
 
-	isSuccess &= loadEffect("s_game_hit", "s_game/hit", 5, 2, 1200, 400);
-	isSuccess &= loadEffect("s_game_enemy_over", "s_game/enemy", 10, 1, 1200, 200);
+	isSuccess &= loadEffect("s_game_hit", "s_game/hit3", 3, 4, 1536, 2048);
+	isSuccess &= loadEffect("s_game_enemy_over", "s_game/enemy", 10, 1, 2400, 240);
 	isSuccess &= loadEffect("s_game_sword", "s_game/sword", 9, 1, 1080, 120);
 	isSuccess &= loadEffect("s_game_fireshot", "s_game/ghorst_", 10, 1, 2400, 240);
 
 	isSuccess &= loadEffect("s_game_water", "s_game/water", 5, 6, 2560, 1536);
 
 	isSuccess &= loadEffect("s_game_coin", "s_game/coin", 5, 2, 1000, 400);
+	isSuccess &= loadEffect("s_game_num", "s_game/number_2", 10, 1, 1840, 223);
+
 	// マーカー
 	isSuccess &= loadImage("s_game_piyo", "s_game/piyo");
 	isSuccess &= loadImage("s_game_sword", "s_game/sword");
@@ -200,12 +210,19 @@ bool Object::load() {
 	isSuccess &= loadImage("s_game_result_castle2", "s_game/result_castle2");
 	isSuccess &= loadImage("s_game_result_castle3", "s_game/result_castle3");
 	isSuccess &= loadImage("s_game_result_stage1", "s_game/result_stage1");
-	isSuccess &= loadImage("s_game_result_stage2", "s_game/result_stage2");
 	isSuccess &= loadImage("s_game_result_sketch", "s_game/result_sketch");
+	isSuccess &= loadImage("s_game_result_background_gameover1", "s_game/result_background_gameover1");
+	isSuccess &= loadImage("s_game_result_background1", "s_game/result_background1");
+	isSuccess &= loadImage("s_game_result_background2", "s_game/result_background2");
+	isSuccess &= loadImage("s_game_result_background_gameover2", "s_game/result_background_gameover2");
+	
+	isSuccess &= loadImage("s_game_result_clear1", "s_game/result_clear1");
+	isSuccess &= loadImage("s_game_result_dead1", "s_game/result_dead1");
 
 	isSuccess &= loadSound("s_game_over", "s_game/game_over.wav");
 	
-	isSuccess &= loadEffect("s_game_over_hanabi", "s_game/hanabi", 14, 15, 7168, 7680);
+	isSuccess &= loadEffect("s_game_result_hanabi", "s_game/hanabi", 14, 15, 7168, 7680);
+	isSuccess &= loadEffect("s_game_result_kirakira", "s_game/kirakira", 10, 12, 5120, 6144);
 	isSuccess &= loadEffect("s_game_curtain_close", "s_game/curtain_close", 1, 18, 640, 8640);
 	isSuccess &= loadEffect("s_game_curtain_open", "s_game/curtain_open", 1, 10, 640, 4800);
 

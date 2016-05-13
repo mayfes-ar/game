@@ -68,7 +68,7 @@ class SinglePlayerGame : public Game {
 			DrawExtendGraph(CAP2IMG_SHIFT_X, CAP2IMG_SHIFT_Y, CAP2IMG_SHIFT_X + CAP2IMG_RATE*CAP_WIDTH, CAP2IMG_SHIFT_Y + CAP2IMG_RATE*CAP_HEIGHT, handle, FALSE);
 			// SetDrawBright(230, 230, 230);
 			SetDrawBlendMode(DX_BLENDMODE_ALPHA, 200);
-			DrawExtendGraph(0, 0, WIDTH, HEIGHT, imgHandles["background"], true);
+			DrawExtendGraph(0, 0, WIDTH, HEIGHT, imgHandles["s_game_background"], true);
 			SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 100);
 			// SetDrawBright(255, 255, 255);
 			return true;
@@ -208,6 +208,8 @@ class SinglePlayerGame : public Game {
 		double bottomHit() const { return bottom() - rect.height / 3; }
 	};
 
+
+	
 	// エフェクトクラス
 	// 実際のエフェクトの作成はmakeEffect関数から行う
 	// effectHandleKey:ハンドルキー, x, y, width, height, willStay:持続するか, layer, framePerCount:エフェクトの速度, counter:何カウント目からエフェクトを始めるか
@@ -241,10 +243,6 @@ class SinglePlayerGame : public Game {
 				}
 			}
 
-	
-			//if (!Inundation::getIsAlive()) {
-				//isEnable = false;
-			//}
 
 			drawWithRect(effectHandle[counter/framePerCount]);
 			counter++;
@@ -303,8 +301,8 @@ class SinglePlayerGame : public Game {
 		const MarkerType markerType;
 
 		bool isEnable = true;
-		bool canGuard;
-		bool canAttack;
+		bool canGuard = true;
+		bool canAttack = true;
 
 		double imageSize = 1.2;
 
@@ -312,8 +310,8 @@ class SinglePlayerGame : public Game {
 			if (rect.width > 0 || rect.height > 0) {
 				double prevWidth = rect.width;
 				double prevHeight = rect.height;
-				rect.width = markerType == PIYO ? 1920/14 : markerType == SWORD ? 765/4 : 256*0.8;
-				rect.height = markerType == PIYO ? 1409/14 : markerType == SWORD ? 765/4 : 256*0.8;
+				rect.width = markerType == PIYO ? 1920/10 : markerType == SWORD ? 765/4 : 256*0.8;
+				rect.height = markerType == PIYO ? 1409/10 : markerType == SWORD ? 765/4 : 256*0.8;
 				rect.x = rect.x + (prevWidth - rect.width) / 2;
 				rect.y = rect.y + (prevHeight- rect.height) / 2;
 			}
@@ -323,17 +321,18 @@ class SinglePlayerGame : public Game {
 		}
 
 	public:
-		Marker(Rectan rect_, bool willStay_, int index_, SinglePlayerGame& game_) :index(index_), game(game_), markerType(index_ < 3 ? PIYO : index_ < 6 ? SWORD : SHIELD){
+		Marker(Rectan rect_, bool willStay_, int index_, SinglePlayerGame& game_) :index(index_), game(game_), markerType(index_ < 2 ? PIYO : index_ == 3 ? SWORD : SHIELD){
 			rect = rect_;
 			modifyRect();
 			prevRect = rect;
 			layer = 300;
 			imgHandle = markerType == PIYO ? imgHandles["s_game_piyo"] : markerType == SWORD ? imgHandles["s_game_sword"] : imgHandles["s_game_shield"];
-			canGuard = markerType == SWORD? false : true;
-			canAttack = markerType == SHIELD ? false : true;
+			// canGuard = markerType == SWORD? false : true;
+			// canAttack = markerType == SHIELD ? false : true;
 		}
 
 		bool draw() {
+			/*
 			switch (moveDirection)
 			{
 			case RIGHT: {
@@ -348,7 +347,8 @@ class SinglePlayerGame : public Game {
 			default:
 				break;
 			}
-
+			*/
+			drawWithRotation(imgHandle, rect.rotate, false, imageSize);
 			if (!isEnable) {
 				drawDark([this]() {
 					SetDrawBlendMode(DX_BLENDMODE_ALPHA, 150);
@@ -701,7 +701,7 @@ class SinglePlayerGame : public Game {
 		virtual void die() {
 			changeCharacterState(OVER);
 			if (overBuffer <= 0) {
-				game.makeEffect(overEffectKey, left(), top(), rect.width, rect.height, false, layer+1);
+				game.makeEffect(overEffectKey, left() - 20, top()-30, 150, 150, false, layer+1);
 				isAlive = false;
 			}
 			overBuffer--;
@@ -778,26 +778,45 @@ class SinglePlayerGame : public Game {
 		}
 	};
 
-	class Switch : public Enemy {
-		static const int width = 150;
-		static const int height = 150;
+	class Ghorst : public Enemy
+	{
+		static const int width = 100;
+		static const int height = 100;
 
 	public:
-		std::shared_ptr<Effect> faucet = std::make_shared<Effect>("s_game_water", left() + 60, top() + 90, rect.width, 200, true, 150, 1, 0);
-		
-		Switch(int x_, int y_, SinglePlayerGame& game_, double size, int maxDamage_ = 2, std::string imgHandleKey_ = "s_game_switch") : Enemy(x_, y_, width * size, height * size, imgHandleKey_, maxDamage_, game_) {
-			layer = 130;
-			moveDirection = RIGHT;
-
-			
-			game_.drawList.push_back(faucet);
-			//game.makeEffect("s_game_water", left() + 60, top() + 90, rect.width, 200, true);
+		Ghorst(int x_, int y_, SinglePlayerGame& game_, double size, int maxDamage_ = 1, std::string imgHandleKey_ = "s_game_ghorst2") : Enemy(x_, y_, width * size, height * size, imgHandleKey_, maxDamage_, game_) {
+			layer = 120;
 		}
-		
 
 
 		void update() {}
+	};
 
+	class Switch : public Enemy {
+		static const int width = 200;
+		static const int height = 250;
+
+	public:
+		std::shared_ptr<Effect> faucet = std::make_shared<Effect>("s_game_water", left() + 39, top() + 150, rect.width + 100, 600, true, 150, 1, 0);
+
+		std::shared_ptr<Ghorst> obake;
+
+		Switch(int x_, int y_, SinglePlayerGame& game_, double size, int maxDamage_ = -1, std::string imgHandleKey_ = "s_game_switch") : Enemy(x_, y_, width * size, height * size, imgHandleKey_, maxDamage_, game_) {
+			layer = 130;
+			moveDirection = RIGHT;
+			game_.drawList.push_back(faucet);
+			obake = game_.makeGhorst(40, 120, 1);
+
+		}
+		
+
+		void update() {
+			if (!obake->getIsAlive()) {
+				isAlive = false;
+			}
+		}
+		
+		
 	};
 
 	class Inundation : public Enemy {
@@ -836,7 +855,7 @@ class SinglePlayerGame : public Game {
 
 		void setAc(double& acX, double& acY) {
 			acX = 0;
-			acY = isWaterUp ? inundationCounter == 0 ? -0.5*(rect.y-prevY) : -0.005 : 0.02;
+			acY = isWaterUp ? inundationCounter == 0 ? -0.5*(rect.y-prevY) : -0.005 : 0.2;
 		}
 	};
 
@@ -1105,8 +1124,6 @@ class SinglePlayerGame : public Game {
 		}
 	};
 
-		
-
 	class Heiho : public Enemy {
 		static const int width = 345 / 4;
 		static const int height = 333 / 4;
@@ -1178,6 +1195,8 @@ class SinglePlayerGame : public Game {
 			prevY = tempY;
 		}
 	};
+
+
 
 	class Fire : public Enemy {
 	public:
@@ -1271,7 +1290,6 @@ class SinglePlayerGame : public Game {
 		}
 	};
 
-
 	class tutoHeiho : public Enemy {
 		static const int width = 345 / 4;
 		static const int height = 333 / 4;
@@ -1355,7 +1373,6 @@ class SinglePlayerGame : public Game {
 			acX = -2;
 		}
 	};
-
 	
 	// 姫様
 	class Player : public Character {
@@ -1363,13 +1380,17 @@ class SinglePlayerGame : public Game {
 		int frameCount;
 		std::string message;
 		bool isDrowned = false;
-		
+		int *timer;
+		const int *maxTime;
+
 	public:
 		static const int width = 621/8;
 		static const int height = 1046/8;
 
 		Player(int x_, int y_, int width_, int height_, std::string imgHandleKey_, int maxDamage_, SinglePlayerGame& game_) : Character(x_, y_, width_, height_, imgHandleKey_, maxDamage_, game_, 0, FPS*2) {
-			layer = 100;
+			layer = 100;	
+			timer = &game_.timer;
+			maxTime = &game_.maxTime;
 			// overBuffer = overBufferMax;
 		}
 
@@ -1411,13 +1432,20 @@ class SinglePlayerGame : public Game {
 			}
 
 			if (isDrowned) { 
-				DrawExtendGraph(left() - 100, top() - rect.height - 50, right(), bottom() - rect.height, imgHandles["s_game_dangerous"], true);
+				DrawExtendGraph(left() - 50, top() - rect.height - 50, right() + 50, bottom() - rect.height, imgHandles["s_game_dangerous"], true);
 				imgHandle[DAMAGE] = imgHandles["s_game_player_drowned"]; }
 			else { imgHandle[DAMAGE] = imgHandles["s_game_player_damage"]; }
 
 			if (game.timer < 300 && !isDrowned) {
 				DrawExtendGraph(left() - 50, top() - rect.height - 50, right() + 50, bottom() - rect.height, imgHandles["s_game_beforefinish"], true);
 			}
+
+			SetFontSize(64);
+			SetFontThickness(12);
+			DrawString(850, 50, "あと", GetColor(200, 100, 100));
+			drawNumber(980, 30, 100, game.timer/FPS ,effectHandles["s_game_num"]);
+			SetFontSize(24);
+			SetFontThickness(6);
 
 			Character::draw();
 
@@ -1488,7 +1516,7 @@ class SinglePlayerGame : public Game {
 				}
 			}
 			else if (acX == 0 && !isJumping && !isToJump) {
-				if (rand() % 10 == 0) {
+				if (rand() % 10 == 0 && (*timer) != (*maxTime)-1) {
 					frameCount = 0;
 					isToJump = true;
 				}
@@ -1567,10 +1595,10 @@ class SinglePlayerGame : public Game {
 
 					if (prevY < marker->bottomHit() && prevY + height > marker->topHit()) {
 						if (prevX >= marker->rightHit()) {
-							x = marker->right();
+							// x = marker->right();
 						}
 						else if (prevX + width <= marker->leftHit()) {
-							x = marker->left() - width;
+							// x = marker->left() - width;
 						}
 						else {
 							marker->off();
@@ -1578,18 +1606,18 @@ class SinglePlayerGame : public Game {
 					}
 					else {
 						if (prevY >= marker->bottomHit()) {
-							y = marker->bottom();
+							// y = marker->bottom();
 						}
 						else if (prevY + height <= marker->topHit()) {
-							y = marker->top() - height;
+							// y = marker->top() - height;
 							isJumping = false;
 						}
 						else {
 							marker->off();
 						}
 					}
-					prevX = x;
-					prevY = y;
+					// prevX = x;
+					// prevY = y;
 				}
 			}
 		}
@@ -1629,7 +1657,7 @@ class SinglePlayerGame : public Game {
 
 		void damageControl() {
 			damage++;
-			game.makeEffect("s_game_hit", left(), top(), rect.width, rect.width, false, layer + 1, 2);
+			game.makeEffect("s_game_hit", left() - 75, top() - 110, 250, 250, false, layer - 1, 2, 5);
 
 			if (damage < maxDamage) {
 				// HP残ってる
@@ -1648,7 +1676,6 @@ class SinglePlayerGame : public Game {
 			overBuffer--;
 		}
 	};
-
 
 	class tutoPlayer : public Character {
 		int frameCount;
@@ -1884,6 +1911,7 @@ class SinglePlayerGame : public Game {
 	std::shared_ptr<RocketWanwan> makeRocketWanwan(int x, int y, double size);
 	std::shared_ptr<Inundation> makeInundation();
 	std::shared_ptr<Switch> makeSwitch(int x, int y, double size);
+	std::shared_ptr<Ghorst> makeGhorst(int x, int y, double size);
 	std::shared_ptr<Ufo> makeUfo(int x, int y, double size);
 	std::shared_ptr<Ray> makeRay(int x, int y, double size);
 	std::shared_ptr<Cloud> makeCloud(int x, int y, double size);
@@ -1902,7 +1930,7 @@ class SinglePlayerGame : public Game {
 	std::shared_ptr<BGM> bgm;
 	const int maxTime = FPS * 60 * 2;
 
-	int maxPlayerDamage;
+	int maxPlayerDamage = 0;
 
 	enum Difficulty {
 		EASY, HARD, NIGHTMARE,
