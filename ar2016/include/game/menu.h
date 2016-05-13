@@ -277,6 +277,8 @@ class Menu : Game {
 		}
 	};
 
+
+
 	void makeEffect(std::string effectHandleKey_, int x_ = 0, int y_ = 0, int width_ = WIDTH, int height_ = HEIGHT, bool willStay_ = false, int layer_ = 150, int framePerCount_ = 1, int counter_ = 0) {
 		drawList.push_back(std::make_shared<Effect>(effectHandleKey_, x_, y_, width_, height_, willStay_, layer_, framePerCount_, counter_));
 
@@ -341,6 +343,7 @@ public:
 
 	bool onFinish(){
 		bgm->stop();
+
 		return true;
 	}
 

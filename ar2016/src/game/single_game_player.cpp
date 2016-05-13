@@ -133,6 +133,7 @@ std::shared_ptr<SinglePlayerGame::tutoFire> SinglePlayerGame::maketutoFire(int x
 
 
 bool willFinishMode = false;
+bool isChangingMode = false;
 
 bool SinglePlayerGame::onStart() {
 	using namespace std;
@@ -188,6 +189,8 @@ bool SinglePlayerGame::onStart() {
 
 		drawList.clear();
 		drawList.push_back(make_shared<Title>(difficulty));
+		drawList.push_back(make_shared<CurtainObject>(true));
+
 
 		bgm = make_shared<BGM>(0);
 		bgm->start();
@@ -195,6 +198,7 @@ bool SinglePlayerGame::onStart() {
 
 	// TUTORIAL
 	mode.setMode([this]() {
+		drawList.clear();
 		// maxPlayerDamage = difficulty == EASY ? 5 : difficulty == HARD ? 10 : 20;
 		tutoplayer = std::make_shared<tutoPlayer>(WIDTH / 2 - 100 / 2, HEIGHT / 2 - 150 / 2, tutoPlayer::width, tutoPlayer::height, "s_game_player", maxPlayerDamage, *this);
 
@@ -219,6 +223,7 @@ bool SinglePlayerGame::onStart() {
 
 		drawList.push_back(tutoplayer);
 		drawList.push_back(make_shared<Background>(share.handle));
+		drawList.push_back(make_shared<CurtainObject>(true));
 
 
 		share.rectMutex.lock();
@@ -404,7 +409,6 @@ bool SinglePlayerGame::onStart() {
 					
 		};
 		if (tutorial == END) {
-			makeEffect("s_game_curtain_close", 0, 0, WIDTH, HEIGHT, false, 160, 2, 1);
 
 		}
 		tutoenemy = maketutoHeiho(WIDTH, 300, 1);
@@ -416,7 +420,7 @@ bool SinglePlayerGame::onStart() {
 	// GAME
 	mode.setMode([this]() {
 		drawList.clear();
-		makeEffect("s_game_curtain_open", 0, 0, WIDTH, HEIGHT, false, 160, 2, 0);
+		drawList.push_back(make_shared<CurtainObject>(true));
 
 		maxPlayerDamage = difficulty == EASY ? 10 : difficulty == HARD ? 10 : 20;
 		player = std::make_shared<Player>(WIDTH / 2 - 100 / 2, HEIGHT / 2 - 150 / 2, Player::width, Player::height, "s_game_player", maxPlayerDamage, *this);
@@ -578,7 +582,7 @@ bool SinglePlayerGame::onStart() {
 		
 	
 		drawList.clear();	
-		makeEffect("s_game_curtain_open", 0, 0, WIDTH, HEIGHT, false, 150, 2, 0);
+		drawList.push_back(make_shared<CurtainObject>(true));
 
 
 		class Title : public Object {
@@ -725,7 +729,6 @@ bool SinglePlayerGame::onUpdate() {
 			if (key[KEY_INPUT_RETURN]) {
 				willFinishMode = true;
 				drawList.clear();
-				makeEffect("s_game_curtain_close", 0, 0, WIDTH, HEIGHT, false, 400, 2, 1);
 			}
 			else if (key[KEY_INPUT_1]) {
 				difficulty = EASY;
@@ -771,8 +774,7 @@ bool SinglePlayerGame::onUpdate() {
 				heihoFreezeTimeRemain--;
 				
 			}
-			if(heihoFreezeTimeRemain == FPS*4 - 25){
-				makeEffect("s_game_curtain_open", 0, 0, WIDTH, HEIGHT, false, 400, 2, 0);
+			if(heihoFreezeTimeRemain == FPS*4 +5){
 			}
 
 			if (heihoFreezeTimeRemain == 0) {
@@ -830,8 +832,6 @@ bool SinglePlayerGame::onUpdate() {
 		
 		if (timer <= 0) {
 			willFinishMode = true;
-			makeEffect("s_game_curtain_close", 0, 0, WIDTH, HEIGHT, false, 300, 2, 0);
-			
 		}
 
 		// 認識したマーカーを描画
@@ -860,7 +860,7 @@ bool SinglePlayerGame::onUpdate() {
 			bgm->stop();
 			funcTimer.set([this]() {
 				willFinishMode = true;
-			}, FPS*5);
+			}, FPS*3);
 
 
 		}
@@ -1105,8 +1105,14 @@ bool SinglePlayerGame::onUpdate() {
 		}
 	}
 
-	if (willFinishMode) {
+
+	if (willFinishMode && !isChangingMode) {
+		isChangingMode = true;
+		drawList.push_back(make_shared<CurtainObject>(false));
+		funcTimer.set([this]() {
+			isChangingMode = false;
 			mode.goNext();
+		}, FPS);
 	}
 
 	return Game::onUpdate();
