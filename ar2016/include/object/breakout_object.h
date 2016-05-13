@@ -539,14 +539,31 @@ public:
 		Object::layer = PRIORITY_BACKGROUND;
 	}
 
+	~Background() {
+		StopSoundMem(soundHandles["b_start_play"]);
+		StopSoundMem(soundHandles["b_final_play"]);
+	}
+
 	void init() {
+		StopSoundMem(soundHandles["b_start_play"]);
+		StopSoundMem(soundHandles["b_final_play"]);
 		m_is_last_phase = false;
 		m_forest_saturation = 50;
 		m_magma_saturation = 50;
+		PlaySoundMem(soundHandles["b_start_play"], DX_PLAYTYPE_BACK, TRUE);
+	}
+
+	void playLastSong() {
+		StopSoundMem(soundHandles["b_start_play"]);
+		PlaySoundMem(soundHandles["b_final_play"], DX_PLAYTYPE_BACK, TRUE);
 	}
 
 	bool draw() override {
 		if (m_is_last_phase) {
+			if (!m_is_last_singing) {
+				playLastSong();
+				m_is_last_singing = true;;
+			}
 			SetDrawBright(m_forest_saturation, m_forest_saturation, m_forest_saturation);
 			if (m_forest_saturation < m_saturation_max) {
 				m_forest_saturation++;
@@ -591,6 +608,7 @@ private:
 	int m_forest_saturation = 50;
 	int m_magma_saturation = 50;
 	bool m_is_last_phase = false;
+	bool m_is_last_singing = false;
 	const int m_saturation_max = 100;
 	int& m_handle;
 	Effect m_fire_frame = Effect(effectHandles["b_fire_frame"], 5, PRIORITY_BACKGROUND_EFFECT);

@@ -46,7 +46,7 @@ namespace Breakout {
 
 	constexpr double NORMAL_BLOCK_PROB = 0.5;
 	constexpr double HARD_BLOCK_PROB = 0.3;
-	constexpr double UNBREAKABLE_BLOCK_PROB = 0.2;
+	constexpr double UNBREAKABLE_BLOCK_PROB = 0.4;
 
 	constexpr int NORMAL_BLOCK_LIFE_NUM = 1;
 	constexpr int HARD_BLOCK_LIFE_NUM = 2;

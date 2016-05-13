@@ -273,6 +273,8 @@ bool Object::load() {
 	isSuccess &= loadSound("b_muteki", "breakout/muteki.mp3");
 	isSuccess &= loadSound("b_restore_pot", "breakout/restore_pot.wav");
 	isSuccess &= loadSound("b_restore_time", "breakout/restore_time.wav");
+	isSuccess &= loadSound("b_start_play", "breakout/start.mp3");
+	isSuccess &= loadSound("b_final_play", "breakout/final.mp3");
 
 	for (int num = 0; num <= 9; ++num) {
 		for (const auto& color : { "red", "blue", "yellow", "green" }) {

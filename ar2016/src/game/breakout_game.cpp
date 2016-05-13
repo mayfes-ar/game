@@ -202,6 +202,7 @@ void BreakoutGame::updateGameState()
 				break;
 			}
 			m_components->info->init();
+			m_components->background->init();
 			mode.goNext();
 			return;
 		}
