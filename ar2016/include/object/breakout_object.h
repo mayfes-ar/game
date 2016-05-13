@@ -468,6 +468,8 @@ namespace Breakout {
 			int image_width = m_realm.width / 2;
 			int image_height = m_realm.height / (4 * image_num);
 
+			DrawExtendGraph(0, 0, WIDTH, HEIGHT, imgHandles["b_grass"], false);
+
 			int i = 0;
 			for (auto it = m_mode_list.begin(); it != m_mode_list.end(); ++it) {
 				DrawExtendGraph(m_realm.left(), m_realm.top() + image_height * (2 * i + 1),
@@ -2110,6 +2112,8 @@ public:
 	bool draw() override {
 		const auto time = m_timer->getLeftedTime();
 		int sec = std::get<1>(time);
+
+		DrawExtendGraph(0, 0, WIDTH, HEIGHT, imgHandles["b_grass"], false);
 		// draw
 		switch (sec) {
 			case 3:
