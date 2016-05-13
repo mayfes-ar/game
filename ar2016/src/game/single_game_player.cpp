@@ -693,8 +693,8 @@ bool SinglePlayerGame::onStart() {
 		//yu
 		if (hasPlayerWon) {
 			//勝利画面のエフェクト・リザルト
-			makeEffect("s_game_result_hanabi", 400, 100, 500, 500, true, 50, 1, 4);
-			makeEffect("s_game_result_hanabi", 700, 50, 300, 300, true, 50, 1, 3);
+			makeEffect("s_game_result_hanabi", 400, 100, 500, 500, true, 50, 3, 8);
+			makeEffect("s_game_result_hanabi", 700, 50, 300, 300, true, 50, 3, 0);
 
 			}
 		else {
@@ -915,7 +915,7 @@ bool SinglePlayerGame::onUpdate() {
 		case HARD: {
 			switch (maxTime - timer) {
 			case 100: {
-				makeRocketWanwan(-RocketWanwan::width, HEIGHT / 2 + 50);
+				makeRocketWanwan(-RocketWanwan::width / 2, HEIGHT / 2 + 50);
 				break;
 			}
 			case 200: {
@@ -928,13 +928,10 @@ bool SinglePlayerGame::onUpdate() {
 			}
 			case 300: {
 				makeUfo(0, 50, 1);
-				makeRocketWanwan(WIDTH + RocketWanwan::width, HEIGHT / 2 + 50);
-				makeRocketWanwan(WIDTH + RocketWanwan::width, HEIGHT / 2 + 50 + RocketWanwan::height);
-				makeRocketWanwan(WIDTH + RocketWanwan::width, HEIGHT / 2 + 50 - RocketWanwan::height);
-				makeRocketWanwan(WIDTH+RocketWanwan::width, HEIGHT / 2 + 50 - RocketWanwan::height);
+				makeRocketWanwan(WIDTH - RocketWanwan::width / 2, HEIGHT / 2 + 50);
+				makeRocketWanwan(WIDTH - RocketWanwan::width / 2, HEIGHT / 2 + 50 + RocketWanwan::height);
 				break;
-			}
-					  
+			}				  
 			case 600: {
 				makeEagle(0, 0, 1);
 				makeEagle(200, 0, 1);
@@ -947,25 +944,66 @@ bool SinglePlayerGame::onUpdate() {
 			}
 			case 900: {
 				makeInundation();
+				makeUfo(0, 50, 1);
+				makeRocketWanwan(-RocketWanwan::width / 2, HEIGHT / 2 + 50);
+				makeRocketWanwan(-RocketWanwan::width / 2, HEIGHT / 2 + 50 + RocketWanwan::height);
+				break;
 			}
-			case 1410:
-				makeRocketWanwan(-RocketWanwan::width, HEIGHT / 2 + 50);
-			case 1420:
-			case 1430:
-			case 1440:
-			case 1200:
-			case 1230:
-			case 1260:
-			case 1400: {
+			case 1200: {
+				makeEagle(0, 0, 1);
+				makeEagle(200, 0, 1);
 				makeHeiho(WIDTH, 300, 1);
 				break;
 			}
 			case 1500: {
-				makeRocketWanwan(WIDTH + RocketWanwan::width, HEIGHT / 2 + 50);
-				makeRocketWanwan(-RocketWanwan::width, HEIGHT / 2 + 50);
+				makeCloud(0, 50, 1);
+				makeCloud(200, 50, 1);
+				makeCloud(800, 50, 1);
+				makeRocketWanwan(WIDTH - RocketWanwan::width / 2, HEIGHT / 2 + 50);
+				makeHeiho(WIDTH, 300, 1);
+				break;
+			}	
+			case 1600: {
+				makeUfo(0, 50, 1);
 				break;
 			}
-
+			case 1800: {
+				makeInundation();
+				makeEagle(0, 0, 1);
+				makeEagle(200, 0, 1);
+				makeEagle(400, 0, 1);
+				makeEagle(600, 0, 1);
+				break;
+			}
+			case 2100: {
+				makeUfo(0, 50, 1);
+				makeRocketWanwan(-RocketWanwan::width, HEIGHT / 2 + 50);
+				makeEagle(0, 0, 1);
+				makeCloud(200, 50, 1);
+				break;
+			}
+			case 2400: {
+				makeHeiho(WIDTH, 300, 1);
+				break;
+			}
+			case 2700: {
+				makeCloud(0, 50, 1);
+				makeCloud(200, 50, 1);
+				makeCloud(800, 50, 1);
+				break;
+			}
+			case 3000: {
+				makeInundation();
+				makeEagle(0, 0, 1);
+				makeEagle(200, 0, 1);
+				break;
+			}
+			case 3300: {
+				makeUfo(0, 50, 1);
+				makeRocketWanwan(WIDTH - RocketWanwan::width / 2, HEIGHT / 2 + 50);
+				makeRocketWanwan(WIDTH - RocketWanwan::width / 2, HEIGHT / 2 + 50 + RocketWanwan::height);
+				break;
+			}
 			default: {
 			}
 			}
