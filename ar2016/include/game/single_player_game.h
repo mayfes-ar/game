@@ -1586,10 +1586,10 @@ class SinglePlayerGame : public Game {
 
 					if (prevY < marker->bottomHit() && prevY + height > marker->topHit()) {
 						if (prevX >= marker->rightHit()) {
-							x = marker->right();
+							// x = marker->right();
 						}
 						else if (prevX + width <= marker->leftHit()) {
-							x = marker->left() - width;
+							// x = marker->left() - width;
 						}
 						else {
 							marker->off();
@@ -1597,18 +1597,18 @@ class SinglePlayerGame : public Game {
 					}
 					else {
 						if (prevY >= marker->bottomHit()) {
-							y = marker->bottom();
+							// y = marker->bottom();
 						}
 						else if (prevY + height <= marker->topHit()) {
-							y = marker->top() - height;
+							// y = marker->top() - height;
 							isJumping = false;
 						}
 						else {
 							marker->off();
 						}
 					}
-					prevX = x;
-					prevY = y;
+					// prevX = x;
+					// prevY = y;
 				}
 			}
 		}
@@ -1921,7 +1921,7 @@ class SinglePlayerGame : public Game {
 	std::shared_ptr<BGM> bgm;
 	const int maxTime = FPS * 60 * 2;
 
-	int maxPlayerDamage;
+	int maxPlayerDamage = 0;
 
 	enum Difficulty {
 		EASY, HARD, NIGHTMARE,

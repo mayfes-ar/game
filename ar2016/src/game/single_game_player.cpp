@@ -191,7 +191,7 @@ bool SinglePlayerGame::onStart() {
 
 	// TUTORIAL
 	mode.setMode([this]() {
-		maxPlayerDamage = difficulty == EASY ? 5 : difficulty == HARD ? 10 : 20;
+		// maxPlayerDamage = difficulty == EASY ? 5 : difficulty == HARD ? 10 : 20;
 		tutoplayer = std::make_shared<tutoPlayer>(WIDTH / 2 - 100 / 2, HEIGHT / 2 - 150 / 2, tutoPlayer::width, tutoPlayer::height, "s_game_player", maxPlayerDamage, *this);
 
 		drawList.clear();
