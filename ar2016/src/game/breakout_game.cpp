@@ -242,10 +242,10 @@ void BreakoutGame::updateGameState()
 		break;
 	}
 	case TutorialPot: {
-		if (key[KEY_INPUT_R] || (key[KEY_INPUT_S] && key[KEY_INPUT_2])) {
+		if (key[KEY_INPUT_R]) {
 			setup_tutorial_pot();
 		}
-		if (!tutorial_pot()) {
+		if (!tutorial_pot() || (key[KEY_INPUT_S] && key[KEY_INPUT_2])) {
 			mode.goNext();
 			drawList.clear();
 		}
@@ -283,8 +283,8 @@ void BreakoutGame::updateGameState()
 
 		if (m_components->info->isTimeOver() ||
 			!m_components->ship->isAlive() ||
-			(m_components->house_list.size() == 0 &&
-				m_components->resident_list.size() == 0)) {
+			(m_components->house_list.size() == 0 /*&&
+				m_components->resident_list.size() == 0*/)) {
 			m_components->result->setFinalScore(m_components->info->getScore());
 			mode.goNext();
 			return;
@@ -471,9 +471,9 @@ void BreakoutGame::EnemyVSTown() {
 		for (auto& house : m_components->house_list) {
 			enemy->attackOnTown(house);
 		}
-		for (auto& resident : m_components->resident_list) {
+		/*for (auto& resident : m_components->resident_list) {
 			enemy->attackOnTown(resident);
-		}
+		}*/
 	}
 }
 

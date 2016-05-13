@@ -1712,8 +1712,12 @@ public:
 		if (!m_life.damage(amount)) return false;
 		for (int i = 0; i < amount; i++) {
 			//両側から一個ずつへらす
-			m_blocks.pop_back();
-			m_blocks.erase(m_blocks.begin());
+			if (!m_blocks.empty()) {
+				m_blocks.pop_back();
+			}
+			if (!m_blocks.empty()) {
+				m_blocks.erase(m_blocks.begin());
+			}
 		}
 		return true;
 	}
@@ -1721,7 +1725,7 @@ public:
 	void resetShip() {
 		m_blocks.clear();
 		m_life.resetLife();
-		for (int i = 0; i < m_life.getLifeNum(); i++) {
+		for (int i = 0; i < m_life.getLifeNum()*2; i++) {
 			m_blocks.push_back(Shape::Rectangle(m_start_point + Eigen::Vector2i{ SHIP_BLOCK_WIDTH, 0 } *i, SHIP_BLOCK_WIDTH, SHIP_BLOCK_HEIGHT));
 		}
 	}
@@ -1777,6 +1781,8 @@ public:
 				i--;
 				break;
 			case DamageShip:
+				//強化されていたらなにもしない
+				if (isEnhanced()) break;
 				m_bomb_sound.start();
 				damageShip(1);
 				deleteItem(m_items[i]);

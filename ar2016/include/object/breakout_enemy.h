@@ -210,6 +210,12 @@ namespace Breakout
 			}
 
 			if (getIsOnShip()) {
+				//もし船が強化されていたら
+				if (m_ship->isEnhanced()) {
+					damageEnemy(3);
+					setDeadEffect("b_burning", 3, 35);
+					on_ship_duration = 0;
+				}
 				std::shared_ptr<MovingBehavior> rnd_behavior = std::make_shared<RandomBehavior>(
 					m_ship->getRealm().left(),
 					m_ship->getRealm().right() - SNAKE_WIDTH,
