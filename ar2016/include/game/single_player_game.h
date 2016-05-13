@@ -1380,13 +1380,17 @@ class SinglePlayerGame : public Game {
 		int frameCount;
 		std::string message;
 		bool isDrowned = false;
-		
+		int *timer;
+		const int *maxTime;
+
 	public:
 		static const int width = 621/8;
 		static const int height = 1046/8;
 
 		Player(int x_, int y_, int width_, int height_, std::string imgHandleKey_, int maxDamage_, SinglePlayerGame& game_) : Character(x_, y_, width_, height_, imgHandleKey_, maxDamage_, game_, 0, FPS*2) {
-			layer = 100;
+			layer = 100;	
+			timer = &game_.timer;
+			maxTime = &game_.maxTime;
 			// overBuffer = overBufferMax;
 		}
 
@@ -1512,7 +1516,7 @@ class SinglePlayerGame : public Game {
 				}
 			}
 			else if (acX == 0 && !isJumping && !isToJump) {
-				if (rand() % 10 == 0) {
+				if (rand() % 10 == 0 && (*timer) != (*maxTime)-1) {
 					frameCount = 0;
 					isToJump = true;
 				}

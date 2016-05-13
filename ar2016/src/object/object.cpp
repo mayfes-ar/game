@@ -96,6 +96,10 @@ bool Object::load() {
 
 	//　ゲーム本編
 	isSuccess &= loadImage("s_game_background", "s_game/background1");
+	isSuccess &= loadImage("s_game_3", "s_game/3");
+	isSuccess &= loadImage("s_game_2", "s_game/2");
+	isSuccess &= loadImage("s_game_1", "s_game/1");
+	isSuccess &= loadImage("s_game_start", "s_game/start");
 
 	isSuccess &= loadImage("s_game_player", "s_game/hime_normal");
 	isSuccess &= loadImage("s_game_player_damage", "s_game/hime_odoroki");
