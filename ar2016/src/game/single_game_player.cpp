@@ -572,7 +572,7 @@ bool SinglePlayerGame::onStart() {
 		drawList.push_back(make_shared<Title>(&timer,*this));
 
 
-	}, maxTime);
+	}, -1);
 
 	// RESULT
 	mode.setMode([this]() {
