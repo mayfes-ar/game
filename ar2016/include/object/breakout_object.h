@@ -1823,6 +1823,8 @@ private:
 	int m_dead_count = 60;
 };
 
+enum ResidentKind { Hime, Boy, Girl };
+
 class Resident : public Town
 {
 public:
@@ -1834,21 +1836,31 @@ public:
 		m_fukidashi = fukidashi;
 		Object::layer = PRIORITY_DYNAMIC_OBJECT;
 	}
-	Resident(Shape::Rectangle realm, Life life, std::shared_ptr<MovingBehavior>& behavior, int img_handle, std::shared_ptr<Fukidashi> fukidashi = nullptr) 
+	Resident(Shape::Rectangle realm, Life life, std::shared_ptr<MovingBehavior>& behavior, ResidentKind resident_kind, std::shared_ptr<Fukidashi> fukidashi = nullptr) 
 	{	
 		m_realm = realm;
 		m_life = life;
 		m_moving->setBehavior(behavior);
-		m_img_handle = img_handle;
-		m_fukidashi = fukidashi;
-		Object::layer = PRIORITY_DYNAMIC_OBJECT;
-	}
-	Resident(Shape::Rectangle realm, Life life, std::shared_ptr<MovingBehavior>& behavior, int img_handle, int img_handle_damaged, std::shared_ptr<Fukidashi> fukidashi = nullptr) {
-		m_realm = realm;
-		m_life = life;
-		m_moving->setBehavior(behavior);
-		m_img_handle = img_handle;
-		m_img_handle_damaged = img_handle_damaged;
+		m_resident_kind = resident_kind;
+		switch (resident_kind) {
+		case Hime:
+			m_img_handle = imgHandles["b_hime"];
+			m_img_handle_damaged = imgHandles["b_hime_damaged"];
+			break;
+		case Boy:
+			m_img_handle = imgHandles["b_boy"];
+			m_img_handle_damaged = imgHandles["b_boy_damaged"];
+			break;
+		case Girl:
+			m_img_handle = imgHandles["b_girl"];
+			m_img_handle_damaged = imgHandles["b_girl_damaged"];
+			break;
+		default:
+			m_img_handle = imgHandles["b_hime"];
+			m_img_handle_damaged = imgHandles["b_hime_damaged"];
+			break;
+		}
+		
 		m_fukidashi = fukidashi;
 		Object::layer = PRIORITY_DYNAMIC_OBJECT;
 	}
@@ -1900,12 +1912,17 @@ public:
 		if(hasFukidashi()) m_fukidashi->draw();
 		return true;
 	}
+
+	ResidentKind getResidentKind() { return m_resident_kind; }
 private:
 	int m_img_handle = imgHandles["b_hime"];
 	int m_img_handle_damaged = imgHandles["b_hime_damaged"];
 	bool m_is_disappeared = false;
 	std::shared_ptr<Fukidashi> m_fukidashi;
+	ResidentKind m_resident_kind = Hime;
 };
+
+enum HouseKind { Castle, Normal };
 
 class House : public Town
 {
@@ -1915,10 +1932,21 @@ public:
 		m_life = life;
 		Object::layer = PRIORITY_STATIC_OBJECT;
 	}
-	House(Shape::Rectangle realm, Life life, int img_handle) {
+	House(Shape::Rectangle realm, Life life, HouseKind house_kind) {
 		m_realm = realm;
 		m_life = life;
-		m_img_handle = img_handle;
+		m_house_kind = house_kind;
+		switch (house_kind) {
+		case Castle:
+			m_img_handle = imgHandles["b_castle"];
+			break;
+		case Normal:
+			m_img_handle = imgHandles["b_house01"];
+			break;
+		default:
+			m_img_handle = imgHandles["b_house01"];
+			break;
+		}
 		Object::layer = PRIORITY_STATIC_OBJECT;
 	}
 	House(Shape::Rectangle realm, Life life, std::shared_ptr<Resident>& resident) {
@@ -1927,10 +1955,21 @@ public:
 		m_resident = resident;
 		Object::layer = PRIORITY_STATIC_OBJECT;
 	}
-	House(Shape::Rectangle realm, Life life, int img_handle, std::shared_ptr<Resident>& resident) {
+	House(Shape::Rectangle realm, Life life, HouseKind house_kind, std::shared_ptr<Resident>& resident) {
 		m_realm = realm;
 		m_life = life;
-		m_img_handle = img_handle;
+		m_house_kind = house_kind;
+		switch (house_kind) {
+		case Castle:
+			m_img_handle = imgHandles["b_castle"];
+			break;
+		case Normal:
+			m_img_handle = imgHandles["b_house01"];
+			break;
+		default:
+			m_img_handle = imgHandles["b_house01"];
+			break;
+		}
 		m_resident = resident;
 		Object::layer = PRIORITY_STATIC_OBJECT;
 	}
@@ -1953,7 +1992,17 @@ public:
 		resident->appear();
 		resident->setVelocity(Eigen::Vector2f((m_realm.left() > FIELD_START_POS.x() + FIELD_WIDTH / 2 ? 80.0f : -80.0f), 20.0f));
 		resident->setAccel(Eigen::Vector2f(0.0f, 30.0f));
-		resident->setImageHandle("b_hime_damaged");
+		switch (resident->getResidentKind()) {
+		case Hime:
+			resident->setImageHandle("b_hime_damaged");
+			break;
+		case Boy:
+			resident->setImageHandle("b_boy_damaged");
+			break;
+		case Girl:
+			resident->setImageHandle("b_girl_damaged");
+			break;
+		}
 		std::shared_ptr<Fukidashi> fukidashi = std::make_shared<Fukidashi>(resident->getRealm().getRightTopPoint(), "  だから", 60, GetColor(0, 0, 0));
 		resident->setFukidashi(fukidashi);
 		m_resident = nullptr;
@@ -1962,6 +2011,16 @@ public:
 	//空きがあったら格納する。
 	bool ifNullThenSetResident(std::shared_ptr<Resident>& resident) {
 		if (m_resident != nullptr) return false;
+		switch (m_house_kind) {
+			// Normalは姫をいれない
+		case Normal:
+			if (resident->getResidentKind() == Hime) return false;
+			break;
+			// castleは一般人を入れない
+		case Castle:
+			if (resident->getResidentKind() != Hime) return false;
+			break;
+		}
 		m_resident = resident;
 		m_resident->disappear();
 		m_resident->setPosition(m_realm.start_point + Eigen::Vector2i(10, 10));
@@ -1970,9 +2029,12 @@ public:
 		m_resident->setVelocity(Eigen::Vector2f(0.0, 0.0));
 		return true;
 	}
+
+	HouseKind getHouseKind() { return m_house_kind; };
 private:
 	int m_img_handle = imgHandles["b_house01"];
 	std::shared_ptr<Resident> m_resident = nullptr;
+	HouseKind m_house_kind = Normal;
 };
 
 

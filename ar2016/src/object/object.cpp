@@ -247,6 +247,12 @@ bool Object::load() {
 	isSuccess &= loadImage("b_hime", "puzzle/hime_normal");
 	isSuccess &= loadImage("b_hime_damaged", "puzzle/hime_gameover");
 
+	isSuccess &= loadImage("b_castle", "breakout/castle");
+	isSuccess &= loadImage("b_girl", "breakout/girl");
+	isSuccess &= loadImage("b_boy", "breakout/boy");
+	isSuccess &= loadImage("b_girl_damaged", "breakout/girl_damaged");
+	isSuccess &= loadImage("b_boy_damaged", "breakout/boy_damaged");
+
 	isSuccess &= loadImage("b_normal_fukidashi", "breakout/normal_fukidashi");
 	isSuccess &= loadImage("b_bikkuri_fukidashi", "breakout/bikkuri_fukidashi");
 
