@@ -737,6 +737,7 @@ bool SinglePlayerGame::onUpdate() {
 				difficulty = NIGHTMARE;
 			}
 			else if (key[KEY_INPUT_UP]) {
+				difficulty = difficulty == NIGHTMARE ? HARD : difficulty == HARD ? EASY : NIGHTMARE;
 			}
 			else if (key[KEY_INPUT_DOWN]) {
 				difficulty = difficulty == EASY ? HARD : difficulty == HARD ? NIGHTMARE : EASY;
