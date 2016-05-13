@@ -19,13 +19,16 @@ void BreakoutGame::updateCollisionDetection()
 				continue;
 			}
 
-			if (fireball->isCollided(m_components->field->getRealm(), -1)) {
+			auto fireball_effect = fireball->returnFireballReflect(m_components->field->getRealm(), -1);
+			if (fireball_effect->isCollide()) {
+				drawList.push_back(fireball_effect);
 				continue;
 			}
 
 			// Ship衝突判定
 			if (m_components->ship->isAlive()) {
-				if (fireball->isCollided(m_components->ship->getRealm(), 1, m_components->ship->getVelocity())) {
+				auto fireball_effect = fireball->returnFireballReflect(m_components->ship->getRealm(), 1, m_components->ship->getVelocity());
+				if (fireball_effect->isCollide()) {
 					// EnemyStrongであり かつ 無敵状態じゃなかったら
 					if (fireball->getMode() == Breakout::FireballKind::EnemyStrong && !m_components->ship->isEnhanced()) {
 						//fireballを消す
@@ -33,6 +36,8 @@ void BreakoutGame::updateCollisionDetection()
 						m_components->ship->damageShip(1);
 					}
 					else {
+						//跳ね返すときは反射effectを入れる
+						drawList.push_back(fireball_effect);
 						fireball->changeModeToPlayer();
 					}
 					continue;
@@ -44,8 +49,10 @@ void BreakoutGame::updateCollisionDetection()
 			if (!fireball->isEnemy()) {
 				for (int block_id = 0; block_id < Breakout::BLOCK_HEIGHT_NUM * Breakout::BLOCK_WIDTH_NUM; ++block_id) {
 					if (m_components->block_list.at(block_id)->isDisappeared()) continue;
-					if (fireball->isCollided(m_components->block_list.at(block_id)->getRealm())) {
+					auto fireball_effect = fireball->returnFireballReflect(m_components->block_list.at(block_id)->getRealm());
+					if (fireball_effect->isCollide()) {
 						m_components->block_list.at(block_id)->damageBlock(fireball->giveDamage());
+						drawList.push_back(fireball_effect);
 						continue_loop = true;
 						break;
 					}
@@ -75,6 +82,7 @@ void BreakoutGame::updateCollisionDetection()
 						}
 					}
 				}
+
 
 				for (auto& enemy : m_components->enemy_manager->getEnemyList()) {
 					if (enemy->isAlive()) {
@@ -137,8 +145,8 @@ void BreakoutGame::moveShip()
 	// 船のライフが0のときは操作させない（させると落ちる）
 	if (m_components->ship->getLifeNum() == 0) return;
 
-	if (share.lives[1] > 0) {
-		const int diff = (int)(share.rects[1].x - m_components->ship->left());
+	if (share.lives[0] > 0) {
+		const int diff = (int)(share.rects[0].x - m_components->ship->left());
 		m_components->ship->translate(diff / 10);
 	}
 
@@ -153,69 +161,103 @@ void BreakoutGame::moveShip()
 	}
 }
 
-
-
-void BreakoutGame::updateGameState()
+void BreakoutGame::updateFireballPosition()
 {
 	for (auto& fireball : m_components->fireball_manager->getFireballList()) {
 		if (fireball->isDisappeared()) continue;
 		fireball->updatePosition();
 	}
+}
+
+void BreakoutGame::updateGameState()
+{
 
 	// 壁との衝突判定
 	int kind = mode.getMode();
 
 	enum Kind {
 		Selecting = 0,
-		Playing = 1, //!< Play画面
-		Result = 2, //!< Result画面
+		CountDown,
+		Playing, //!< Play画面
+		Result, //!< Result画面
 	};
+
 	switch (kind) {
 	case Selecting:
 	{
 		static int initilized_cnt = 0;
-		if (initilized_cnt < 10) {
+		if (initilized_cnt < 10 && !m_is_mode_selected) {
 			initilized_cnt++;
 			return;
 		}
+		else {
+			m_is_mode_selected = true;
+			initilized_cnt = 0;
+		}
 
-		if (m_components->info->isTimeOver() || m_components->select->selected()) {
+		if (m_components->select->selected()) {
 			const auto game_mode = m_components->select->getMode();
 			switch (game_mode) {
 			case Breakout::Mode::Easy:
+				m_components->increaseBlock(0.0);
+				break;
+			case Breakout::Mode::Normal:
+				m_components->increaseBlock(0.15);
 				break;
 			case Breakout::Mode::Hard:
+				m_components->increaseBlock(0.3);
+				m_components->fireball_manager->changeMaximumFireballNum(Breakout::MAX_FIREBALL_NUM_ON_HARD);
 				break;
 			}
-			m_components->info->init();
+			// 次の画面の準備
 			mode.goNext();
 			return;
 		}
 
 		static bool is_chattering = false;
 		if (key[KEY_INPUT_UP] && !is_chattering) {
-			m_components->select->move(Breakout::Move::Down);
 			is_chattering = true;
+			m_components->select->move(Breakout::Move::Down);
 		}
 		else if (key[KEY_INPUT_DOWN] && !is_chattering) {
-			m_components->select->move(Breakout::Move::Up);
 			is_chattering = true;
+			m_components->select->move(Breakout::Move::Up);
 		}
-		else if (key[KEY_INPUT_RETURN]){
+		else if(!key[KEY_INPUT_DOWN] && !key[KEY_INPUT_UP]){
+			is_chattering = false;
+		}
+
+		if (key[KEY_INPUT_RETURN]){
 			m_components->select->select();
 		}
-		else {
-			is_chattering = false;
+		break;
+	}
+	case CountDown: {
+		if (!m_components->count_down->isCountdowning()) {
+			m_components->info->init();
+			m_components->background->init();
+			mode.goNext();
 		}
 		break;
 	}
 	case Playing:
+		updateCollisionDetection();
+		updateFireballPosition();
+		moveShip();
+		updateBlockStatus();
+		updatePotStatus();
+		updateEnemy();
+		updateTown();
+		shipVSEnemy();
+		EnemyVSTown();
+		m_components->info->addScoreAll();
 		if (m_components->info->isLastPhase()) {
 			m_components->background->turnLastPhase();
 		}
 		if (isGameClear()) {
 			m_components->result->clearGame();
 			mode.goNext();
+			m_components->result->setFinalScore(m_components->info->getScore());
 			return;
 		}
 
@@ -223,11 +265,13 @@ void BreakoutGame::updateGameState()
 			!m_components->ship->isAlive() ||
 			(m_components->house_list.size() == 0 &&
 				m_components->resident_list.size() == 0)) {
+			m_components->result->setFinalScore(m_components->info->getScore());
 			mode.goNext();
 			return;
 		}
 
 		if (key[KEY_INPUT_ESCAPE]) {
+			m_components->result->setFinalScore(m_components->info->getScore());
 			mode.goNext();
 		}
 		break;
@@ -245,14 +289,16 @@ void BreakoutGame::updateGameState()
 bool BreakoutGame::isGameClear() const
 {
 	if (m_components->enemy->isAlive()) return false;
-
-	for (const auto& block : m_components->block_list) {
-		//壊せないブロックだったら勘定に入れない
-		if (block->getBlockKind() == "UnbreakableBlock") continue;
-		if (!block->isDisappeared()) {
-			return false;
-		}
+	for (auto& enemy : m_components->enemy_manager->getEnemyList()) {
+		if (enemy->isAlive()) return false;
 	}
+	//for (const auto& block : m_components->block_list) {
+	//	//壊せないブロックだったら勘定に入れない
+	//	if (block->getBlockKind() == "UnbreakableBlock") continue;
+	//	if (!block->isDisappeared()) {
+	//		return false;
+	//	}
+	//}
 
 	return true;
 }
@@ -264,9 +310,9 @@ void BreakoutGame::updatePotStatus() {
 		// pot が使用済みならもう更新しない。
 		if (!m_components->pot->isAvailable()) return;
 
-		if (share.lives[1] > 0) {
+		if (share.lives[0] > 0) {
 			// potを出現させる
-			if (share.rects[1].width < 180) {
+			if (share.rects[0].width < 180) {
 				m_components->pot->appear();
 			}
 			// potが出現していたら
@@ -274,11 +320,11 @@ void BreakoutGame::updatePotStatus() {
 				// Phase: 吸い込んでから吐き出すまで
 
 				// potをマーカーの位置に移動させる
-				const Eigen::Vector2i diff_dist = Eigen::Vector2i((int)share.rects[1].x - m_components->pot->getRealm().left(), (int)share.rects[1].y - m_components->pot->getRealm().top());
+				const Eigen::Vector2i diff_dist = Eigen::Vector2i((int)share.rects[0].x + share.rects[0].width/2 - m_components->pot->getRealm().left(), (int)share.rects[0].y + share.rects[0].height/2 - m_components->pot->getRealm().top());
 				m_components->pot->translate(diff_dist / 10);
 
 				// potをマーカーの回転にあわせる
-				const float diff_rot = (float)share.rects[1].rotate - m_components->pot->getRotation();
+				const float diff_rot = (float)share.rects[0].rotate - m_components->pot->getRotation();
 				m_components->pot->rotate(diff_rot / 10.0);
 
 				// fireball を中に持っていたら
@@ -290,7 +336,7 @@ void BreakoutGame::updatePotStatus() {
 						// 吐き出す
 						m_components->pot->exhareFireball();
 					}
-					else if (share.rects[1].width > 250) {
+					else if (share.rects[0].width > 250) {
 						m_components->pot->exhareFireball();
 					}
 				}
@@ -348,17 +394,52 @@ void BreakoutGame::updateTown() {
 			++itr;
 		}
 		else {
+			(*itr)->exhareResident();
 			itr = m_components->house_list.erase(itr);
 		}
 	}
 
 	for (auto& itr = m_components->resident_list.begin(); itr != m_components->resident_list.end();) {
 		if ((*itr)->isEffectContinuing()) {
+			//消えていたら
+			if ((*itr)->isDisappeared()) {
+				++itr;
+				continue;
+			}
+			// fireballがでたら逃げ込む
+			if (m_components->fireball_manager->getFireballList().size() != 0) {
+				for (auto& house : m_components->house_list) {
+					if (house->ifNullThenSetResident((*itr))) break;
+				}
+			}
 			(*itr)->updatePosition();
 			++itr;
 		}
 		else {
 			itr = m_components->resident_list.erase(itr);
+		}
+	}
+	
+}
+
+void BreakoutGame::shipVSEnemy() {
+	for (auto& enemy : m_components->enemy_manager->getEnemyList()) {
+		if (!enemy->isAlive()) continue;
+		auto ship_realm = m_components->ship->getRealm();
+		auto enemy_realm = enemy->getRealm();
+		if (enemy_realm.isContacted(ship_realm)) {
+			// もしエネミーの下がshipの上から1/3よりも上にあったら
+			if (enemy_realm.bottom() < ship_realm.top() + ship_realm.height / 3) {
+				//shipの上に乗っていると判断
+				enemy->setIsOnShip(m_components->ship, true);
+			}
+			else {
+				enemy->damageEnemy(2);
+				//このダメージで死んだら
+				if (!enemy->isAlive()) {
+					enemy->setDeadEffect("b_enemy_vanish", 5);
+				}
+			}
 		}
 	}
 }

@@ -13,55 +13,6 @@ std::shared_ptr<Game> startMenu();
 // gameType = std::make_shared<起動するGameの子クラス>();
 class Menu : Game {
 
-	// 背景処理
-	class BackEffect : public Object {
-		int counter = 0;
-		const int countMax = 2 * effectHandles["effect1"].size();
-
-	public:
-		BackEffect(){
-			layer = 0;
-		}
-		bool draw() {
-			DrawExtendGraph(0, 0, WIDTH, HEIGHT, effectHandles["effect1"][counter/2], true);
-			counter++;
-			if (counter == countMax) { counter = 0; }
-			return true;
-		}
-	};
-
-	class BackGround : public Object {
-	public:
-		BackGround(){
-			layer = 1;
-		}
-		bool draw() {
-			SetDrawBright(40, 40, 40);
-			DrawExtendGraph(0, 0, WIDTH, HEIGHT, imgHandles["ar2016_logo"], true);
-			DrawExtendGraph(0, 0, WIDTH, HEIGHT, imgHandles["menu"], true);
-			SetDrawBright(255, 255, 255);
-			return true;
-		}
-	};
-
-	// タイトルなど静的オブジェクトの処理
-	class Title : public Object {
-	public:
-		Title() {
-			layer = 50;
-
-		}
-
-		bool draw() {
-			// SetFontSize(80);
-			// ChangeFont("メイリオ");
-			// SetFontThickness(9);
-			// DrawString(100, 50, "TITLE", GetColor(255, 255, 255));
-			DrawExtendGraph(640-192, 0, 640+192, 0+180, imgHandles["menu_title"], true);
-			return true;
-		}
-	};
-
 	// BGM の処理
 	class BGM : public Object {
 	public:
@@ -100,6 +51,7 @@ class Menu : Game {
 				gameFunc(gameFunc_){}
 
 			bool draw(){
+				/*
 				ChangeFont("メイリオ");
 				SetFontSize(40);
 				SetFontThickness(9);
@@ -107,7 +59,18 @@ class Menu : Game {
 				SetFontSize(24);
 				SetFontThickness(6);
 				DrawString(400, 300, description.c_str(), GetColor(250, 250, 250));
-				DrawExtendGraph(350-imageWidth, 500-imageHeight, 350, 500, imageHandle, true);
+				*/
+				// DrawExtendGraph(0, 0, 410, HEIGHT, imgHandles["s_game_block"], true);
+				DrawExtendGraph(0, 0, WIDTH, HEIGHT, imgHandles["s_game_water"], true);
+
+				// DrawExtendGraph(500, 100, WIDTH - 90, HEIGHT - 100, imageHandle, true);
+				DrawExtendGraph(350, 50, WIDTH-50, HEIGHT - 50, imgHandles["s_game_op"], true);
+
+				DrawExtendGraph(100, 120, 250, 210, imgHandles["p_perfect"], true);
+				DrawExtendGraph(100, 320, 250, 410, imgHandles["s_game_cake"], true);
+				DrawExtendGraph(100, 520, 250, 610, imgHandles["b_donald"], true);
+				
+
 				return true;
 			}
 		};
@@ -154,14 +117,12 @@ public:
 		fps.isShow = true;
 
 		mode.setMode([this]() {
-			drawList.push_back(make_shared<Title>());
-			drawList.push_back(make_shared<BackEffect>());
-			drawList.push_back(make_shared<BackGround>());
 			drawList.push_back(games);
 		}, -1);
 
 		bgm = make_shared<BGM>();
 		bgm->start();
+		ChangeFont("メイリオ");
 
 		return Game::onStart();
 	}

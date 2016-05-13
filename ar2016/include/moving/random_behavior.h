@@ -18,11 +18,16 @@ public:
 	{
 		auto diff = dest_pos - pos;
 		// 目的地との差が小さかったら新たな目的地を決める
-		if (diff.norm() < 50) {
+		if (diff.norm() < 30) {
 			dest_pos = Eigen::Vector2f((float)dest_x(m_mt), (float)dest_y(m_mt));
 		}
 		// 違いとtime_stepをかけたものを足す。つまり追従する
-		pos += time_step * diff;
+		if (diff.norm() > 70) {
+			pos += time_step * 0.5f * diff;	
+		}
+		else {
+			pos += time_step * diff;
+		}
 	}
 private:
 	std::random_device m_rnd;

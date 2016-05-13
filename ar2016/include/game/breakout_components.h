@@ -15,11 +15,13 @@
 #include "moving/random_behavior.h"
 #include "game/fps.h"
 #include "util/breakout_params.h"
+#include "game/image_process.h"
 
 
 namespace Breakout{
 	enum class Mode : uint8_t {
 		Easy = 0,
+		Normal,
 		Hard
 	};
 
@@ -36,9 +38,13 @@ class BreakoutComponents
 {
 public:
 	BreakoutComponents() {}
+	~BreakoutComponents() {}
 
-	void setup();
+	void setup(ShareData& share);
 
+	void increaseBlock(double ratio);
+
+	std::shared_ptr<Breakout::CountDown> count_down = nullptr;
 	std::shared_ptr<Breakout::Select<Breakout::Mode, Breakout::ModeEnumHash>> select = nullptr;
     std::shared_ptr<Breakout::Background> background = nullptr;
     std::shared_ptr<Breakout::Info> info = nullptr;
@@ -47,6 +53,7 @@ public:
     std::shared_ptr<Breakout::Field> field = nullptr;
 
 	std::vector<std::shared_ptr<Breakout::Block>> block_list;
+	std::size_t m_block_offset = 0;
 
 	std::shared_ptr<Breakout::FireballManager> fireball_manager = nullptr;
 
