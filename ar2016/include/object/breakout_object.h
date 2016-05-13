@@ -31,12 +31,14 @@ namespace Breakout {
 
 	// 描画の優先順位
 	constexpr int PRIORITY_BACKGROUND = 0; // 背景画像
+	constexpr int PRIORITY_BACKGROUND_EFFECT = 1; //背景画像エフェクト
 	constexpr int PRIORITY_SECTION = 10; // レイアウト（ゲームフィールド、スコア表示、デバッグ表示等）
 	constexpr int PRIORITY_FIREBALL_REFLECT = 15; // ファイアーボールの反射の優先度
 	constexpr int PRIORITY_STATIC_OBJECT = 20; // 静的オブジェクト (Block)
 	constexpr int PRIORITY_DYNAMIC_OBJECT = 30; // 動的オブジェクト(Ship, Fireball)
 	constexpr int PRIORITY_CHARACTER = 40; // キャラクター(マリオ)
 	constexpr int PRIORITY_INFO = 50; // インフォメーション
+	constexpr int PRIORITY_FUKIDASHI = 60; //吹出し用
 
 	// 方向をあらわすenum
 	enum Direction { Top, Left, Bottom, Right };
@@ -50,6 +52,164 @@ namespace Breakout {
 		PlayerWeak,
 		PlayerStrong
 	};
+
+	class BGM : public Object {
+	public:
+		BGM(int mode) : m_mode(mode) {}
+		BGM(int mode, bool has_player_won) : m_mode(mode), m_has_player_won(has_player_won) {}
+		BGM(int mode, int max_time) : m_mode(mode), m_timer(std::make_shared<Timer>(max_time)) {}
+		BGM(int mode, bool has_player_won, int max_time) : m_mode(mode), m_has_player_won(has_player_won), m_timer(std::make_shared<Timer>(max_time)) {}
+
+		void startBGM() {
+			switch (m_mode) {
+				// チュートリアル
+			case 0:
+				PlaySoundMem(soundHandles[""], DX_PLAYTYPE_LOOP, TRUE);
+				break;
+				// ゲームスタート
+			case 1:
+				PlaySoundMem(soundHandles[""], DX_PLAYTYPE_LOOP, TRUE);
+				break;
+				// リザルト
+			case 2:
+				if(m_has_player_won) PlaySoundMem(soundHandles[""], DX_PLAYTYPE_LOOP, TRUE);
+				else PlaySoundMem(soundHandles[""], DX_PLAYTYPE_LOOP, TRUE);
+				break;
+			}
+		}
+
+		void updateBGM() {
+			//m_timerがセットされていなかったら飛ばす
+			if (m_timer == nullptr) return;
+			switch (m_mode) {
+			case 1:
+				if (m_phase == 0 && m_timer->getRatio() <= 0.3) {
+					StopSoundMem(soundHandles[""]);
+					PlaySoundMem(soundHandles[""], DX_PLAYTYPE_LOOP, TRUE);
+					m_phase++;
+				}
+				break;
+			default:
+				break;
+			}
+		}
+
+		void stopBGM() {
+			switch (m_mode) {
+			case 0:
+				StopSoundMem(soundHandles[""]);
+				m_phase = 0;
+				break;
+			case 1:
+				StopSoundMem(soundHandles[""]);
+				m_phase = 0;
+				break;
+			case 2:
+				if(m_has_player_won) StopSoundMem(soundHandles[""]);
+				else StopSoundMem(soundHandles[""]);
+				m_phase = 0;
+				break;
+			}
+		}
+	private:
+		int m_mode;
+		bool m_has_player_won = true;
+		std::shared_ptr<Timer> m_timer = nullptr;
+		int m_phase = 0;
+	};
+
+	class Sound : public Object
+	{
+	public:
+		~Sound() {
+			stop();
+		}
+		//DX_PLAYTYPE_LOOP, DX_PLAYTYPE_BACKBIT
+		Sound(std::string sound_name, int play_type = DX_PLAYTYPE_BACK, bool top_position_flag = true) {
+			m_sound_handle = soundHandles[sound_name];
+			m_play_type = play_type;
+			m_top_position_flag = top_position_flag;
+		}
+		bool draw() override { return true; }
+		
+		void start() {
+			PlaySoundMem(m_sound_handle, m_play_type, m_top_position_flag);
+		}
+		
+		void stop() {
+			StopSoundMem(m_sound_handle);
+		}
+	private:
+		int m_sound_handle;
+		int m_play_type;
+		bool m_top_position_flag;
+	};
+
+	class Fukidashi : public Object
+	{
+	public:
+		Fukidashi(Eigen::Vector2i right_bottom_point, std::string sentences, int appear_time, unsigned int color = GetColor(0, 0, 0))
+			: m_sentences(sentences), m_appear_time(appear_time), m_color(color)
+		{
+			int width, height, line_count;
+			GetDrawStringSize(&width, &height, &line_count, sentences.c_str(), sentences.size());
+			m_sentences_realm.width = width;
+			m_sentences_realm.height = height;
+			m_sentences_realm.start_point = right_bottom_point + Eigen::Vector2i(0, -height);
+			m_realm.width = width + left_offset + right_offset;
+			m_realm.height = height + bottom_offset + top_offset;
+			m_realm.start_point = right_bottom_point + Eigen::Vector2i(-left_offset ,-height - top_offset);			
+			Object::layer = PRIORITY_FUKIDASHI;
+		}
+
+		Fukidashi(Eigen::Vector2i right_bottom_point, std::string sentences, int appear_time, std::string fukidashi_name, unsigned int color = GetColor(0, 0, 0))
+			: m_sentences(sentences), m_appear_time(appear_time), m_color(color)
+		{
+			int width, height, line_count;
+			GetDrawStringSize(&width, &height, &line_count, sentences.c_str(), sentences.size());
+			m_sentences_realm.width = width;
+			m_sentences_realm.height = height;
+			m_sentences_realm.start_point = right_bottom_point + Eigen::Vector2i(0, -height);
+			m_realm.width = width + left_offset + right_offset;
+			m_realm.height = height + bottom_offset + top_offset;
+			m_realm.start_point = right_bottom_point + Eigen::Vector2i(-left_offset, -height - top_offset);
+			m_fukidashi_handle = imgHandles[fukidashi_name];
+			Object::layer = PRIORITY_FUKIDASHI;
+		}
+
+		void decrementTime() {
+			m_appear_time--;
+		}
+
+		bool isAvailable() {
+			return m_appear_time >= 0;
+		}
+
+		bool draw() override {
+			if (isAvailable() && m_sentences.size() != 0) {
+				DrawExtendGraph(m_realm.left(), m_realm.top(), m_realm.right(), m_realm.bottom(), m_fukidashi_handle, TRUE);
+				
+				DrawString(m_realm.left(), m_realm.top(), m_sentences.c_str(), m_color);
+				decrementTime();
+				return true;
+			} else {
+				return false;
+			}
+		}
+
+	private:
+		Shape::Rectangle m_realm = Shape::Rectangle();
+		Shape::Rectangle m_sentences_realm = Shape::Rectangle();
+		int top_offset = 5;
+		int left_offset = 10;
+		int right_offset = 5;
+		int bottom_offset = 5;
+		std::string m_sentences = "";
+		int m_appear_time;
+		int m_fukidashi_handle = imgHandles["b_normal_fukidashi"];
+		unsigned int m_color = GetColor(0, 0, 0);
+		std::vector<int> sentence_widths;
+ 	};
 
 	class Effect : public Object {
 	public:
@@ -75,6 +235,10 @@ namespace Breakout {
 
 		int getCounter() {
 			return m_counter;
+		}
+
+		int getCountMax() {
+			return m_count_max;
 		}
 
 		void setCounter(int counter) {
@@ -369,27 +533,52 @@ namespace Breakout {
 class Background : public Object
 {
 public:
-	Background()
+	Background(int& handle) :
+		m_handle(handle)
 	{
 		Object::layer = PRIORITY_BACKGROUND;
 	}
 
+	~Background() {
+		StopSoundMem(soundHandles["b_start_play"]);
+		StopSoundMem(soundHandles["b_final_play"]);
+	}
+
 	void init() {
+		StopSoundMem(soundHandles["b_start_play"]);
+		StopSoundMem(soundHandles["b_final_play"]);
 		m_is_last_phase = false;
 		m_forest_saturation = 50;
 		m_magma_saturation = 50;
+		PlaySoundMem(soundHandles["b_start_play"], DX_PLAYTYPE_BACK, TRUE);
+	}
+
+	void playLastSong() {
+		StopSoundMem(soundHandles["b_start_play"]);
+		PlaySoundMem(soundHandles["b_final_play"], DX_PLAYTYPE_BACK, TRUE);
 	}
 
 	bool draw() override {
 		if (m_is_last_phase) {
+			if (!m_is_last_singing) {
+				playLastSong();
+				m_is_last_singing = true;;
+			}
 			SetDrawBright(m_forest_saturation, m_forest_saturation, m_forest_saturation);
 			if (m_forest_saturation < m_saturation_max) {
 				m_forest_saturation++;
 			}
 
+			DrawExtendGraph(CAP2IMG_SHIFT_X, CAP2IMG_SHIFT_Y, CAP2IMG_SHIFT_X + CAP2IMG_RATE*CAP_WIDTH, CAP2IMG_SHIFT_Y + CAP2IMG_RATE*CAP_HEIGHT, m_handle, FALSE);
+			// SetDrawBright(230, 230, 230);
+			SetDrawBlendMode(DX_BLENDMODE_ALPHA, 200); 
 			DrawExtendGraph(0, 0, WIDTH, HEIGHT,
-				imgHandles["b_magma"], true);
+				imgHandles["b_grass"], true);
+			SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 100);
+			
 			SetDrawBright(255, 255, 255);
+
+			m_fire_frame.incrementCounterWhenDrawWithRealm(m_realm);
 			return true;
 		}
 		else {
@@ -397,8 +586,14 @@ public:
 				m_magma_saturation++;
 			}
 			SetDrawBright(m_magma_saturation, m_magma_saturation, m_magma_saturation);
+			
+			DrawExtendGraph(CAP2IMG_SHIFT_X, CAP2IMG_SHIFT_Y, CAP2IMG_SHIFT_X + CAP2IMG_RATE*CAP_WIDTH, CAP2IMG_SHIFT_Y + CAP2IMG_RATE*CAP_HEIGHT, m_handle, FALSE);
+			// SetDrawBright(230, 230, 230);
+			SetDrawBlendMode(DX_BLENDMODE_ALPHA, 200);
 			DrawExtendGraph(0, 0, WIDTH, HEIGHT,
-				imgHandles["b_hill"], true);
+				imgHandles["b_grass"], true); 
+			SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 100);
+
 			SetDrawBright(255, 255, 255);
 			return true;
 		}
@@ -409,10 +604,14 @@ public:
 	}
 
 private:
+	Shape::Rectangle m_realm = Shape::Rectangle(FIELD_START_POS, FIELD_WIDTH, FIELD_HEIGHT);
 	int m_forest_saturation = 50;
 	int m_magma_saturation = 50;
 	bool m_is_last_phase = false;
+	bool m_is_last_singing = false;
 	const int m_saturation_max = 100;
+	int& m_handle;
+	Effect m_fire_frame = Effect(effectHandles["b_fire_frame"], 5, PRIORITY_BACKGROUND_EFFECT);
 };
 
 class Explanation : public Object
@@ -456,6 +655,7 @@ public:
 	void restoreTimer(int minute, int second) {
 		m_timer->increaseStartTime(minute, second);
 	}
+
 
 	bool draw() {
 		SetDrawBright(100, 100, 100);
@@ -545,15 +745,33 @@ public:
 		return ratio < 0.3f;
 	}
 
+	int getScore() const {
+		return m_score->getPoint();
+	}
+
 	// Scoreをいじるときはこの関数から直接scoreたたいてください
 	void addScore(int score) {
 		m_score->addPoint(score);
+	}
+
+	void addScoreCalc(const std::function<int()>& calc) {
+		m_score_calc.push_back(calc);
+	}
+
+	void addScoreAll() {
+		int score = 0;
+		std::for_each(m_score_calc.begin(), m_score_calc.end(),
+			[&] (std::function<int()> f){
+			score += f();
+		});
+		m_score->setScore(score);
 	}
 
 private:
 	Shape::Rectangle m_realm = Shape::Rectangle();
 	std::shared_ptr<Timer> m_timer = nullptr;
 	std::shared_ptr<Score> m_score = nullptr;
+	std::vector<std::function<int()>> m_score_calc;
 };
 
 class Result : public Object
@@ -569,6 +787,10 @@ public:
 		m_cnt = 40;
 	}
 
+	void setFinalScore(int score) {
+		m_score = score;
+	}
+
 
 	bool draw() override {
 		if (m_cnt >= 255) {
@@ -581,12 +803,34 @@ public:
 			DrawExtendGraph(m_realm.left(), m_realm.top(),
 				m_realm.right(), m_realm.bottom(),
 				imgHandles["b_game_clear"], TRUE);
-			return true;
+		}
+		else {
+			DrawExtendGraph(m_realm.left(), m_realm.top(),
+				m_realm.right(), m_realm.bottom(),
+				imgHandles["b_game_over"], TRUE);
 		}
 
-		DrawExtendGraph(m_realm.left(), m_realm.top(),
-			m_realm.right(), m_realm.bottom(),
-			imgHandles["b_game_over"], TRUE);
+		int score = m_score;
+		std::array<int, 4> score_num;
+		score_num.at(0) = score / 1000;
+		score -= (score / 1000) * 1000;
+		score_num.at(1) = score / 100;
+		score -= (score / 100) * 100;
+		score_num.at(2) = score / 10;
+		score -= (score / 10) * 10;
+		score_num.at(3) = score;
+
+		const int score_width = m_realm.width / 6;
+		const int score_height = m_realm.height / 6;
+		const int score_width_offset = m_realm.width / 4;
+		const int score_height_offset = m_realm.height * 3 / 4;
+		for (int i = 0; i < 4; ++i) {
+			std::ostringstream key;
+			key << "yellow_" << score_num.at(i);
+			DrawExtendGraph(score_width_offset + i * score_width, score_height_offset, 
+						    score_width_offset + (i + 1) * score_width, score_height_offset + score_height,
+				imgHandles[key.str()], TRUE);
+		}
 
 		return true;
 	}
@@ -600,6 +844,7 @@ private:
 	Shape::Rectangle m_realm = Shape::Rectangle();
 	bool m_is_game_clear = false;
 	int m_cnt = 0;
+	int m_score;
 };
 
 // フィールド 
@@ -815,10 +1060,13 @@ public:
 			realm.start_point = hit_point + Eigen::Vector2i(-width / 2, - height / 2);
 		}
 		switch (kind) {
+		case PlayerStrong:
 		case EnemyStrong:
+			setReflectEffect("b_strong_fireball_reflect");
+			
+			break;
 		case EnemyWeak:
 			break;
-		case PlayerStrong:
 		case PlayerWeak:
 			setReflectEffect("b_green_fireball_reflect");
 			break;
@@ -827,11 +1075,23 @@ public:
 	}
 
 	bool draw() override {
-		return reflect_effect.returnFalseWhenFinishDrawWithDirection(realm, direction);
+		if (reflect_effect.returnFalseWhenFinishDrawWithDirection(realm, direction)) {
+			if (!has_played) {
+				reflect_sound.start();
+				has_played = true;
+			}
+			return true;
+		} else {
+			return false;
+		}
 	}
 
 	void setReflectEffect(std::string effect_name) {
 		reflect_effect = Effect(effectHandles[effect_name], PRIORITY_FIREBALL_REFLECT);
+	}
+
+	void setReflectSound(std::string sound_name) {
+		reflect_sound = Sound(sound_name);
 	}
 
 	bool isCollide() {
@@ -844,8 +1104,11 @@ private:
 	Shape::Rectangle realm = Shape::Rectangle();
 	int width = 40;
 	int height = 40;
+	bool has_played = false;
 	Effect reflect_effect = Effect(effectHandles["b_fireball_reflect"], PRIORITY_FIREBALL_REFLECT);
+	Sound reflect_sound = Sound("b_fireball_reflect", DX_PLAYTYPE_BACK, true);
 };
+
 
 // Block崩しに使われるBlock
 // Firebollにぶつかると消える
@@ -855,6 +1118,14 @@ private:
 class Fireball : public Object
 {
 public:
+	Sound m_strong_fireball_sound = Sound("b_enemy_strong_fireball", DX_PLAYTYPE_LOOP, false);
+
+	~Fireball() {
+		if (m_mode == EnemyStrong) {
+			m_strong_fireball_sound.stop();
+		}
+	}
+
 	Fireball() {}
 
 	Fireball(const Shape::Circle& realm, const std::shared_ptr<Moving>& moving)
@@ -866,6 +1137,10 @@ public:
 	Fireball(const Shape::Circle& realm, const std::shared_ptr<Moving>& moving, FireballKind mode)
 		: m_realm(realm), m_moving(moving), m_mode(mode)
 	{
+		//enemystrong なら音を流す
+		if (m_mode == EnemyStrong) {
+			m_strong_fireball_sound.start();
+		}
 		m_bounding_box = Shape::Rectangle(m_realm.center - Eigen::Vector2i(m_realm.radius, m_realm.radius), m_realm.radius * 2, m_realm.radius * 2);
 		Object::layer = PRIORITY_DYNAMIC_OBJECT;
 	}
@@ -892,13 +1167,13 @@ public:
 			
 			break;
 		case EnemyStrong:
-			DrawCircle(x, y, r, Color::BLACK, true);
+			m_enemy_strong_fireball_effect.incrementCounterWhenDrawWithRealm(m_bounding_box);
 			break;
 		case PlayerWeak:
 			m_green_fireball_effect.incrementCounterWhenDrawWithRealm(m_bounding_box);
 			break;
 		case PlayerStrong:
-			DrawCircle(x, y, r, Color::GREEN, true);
+			m_player_strong_fireball_effect.incrementCounterWhenDrawWithRealm(m_bounding_box);
 			break;
 		}
 
@@ -906,8 +1181,32 @@ public:
 	}
 
 	void updatePosition() {
+		switch (m_mode) {
+		case EnemyStrong:
+			// 十分大きくなるまではぶるぶる動かす
+			if (m_realm.radius < 40) {
+				std::shared_ptr<MovingBehavior> rnd_behavior = std::make_shared<RandomBehavior>(m_bounding_box.left(), m_bounding_box.right(), m_bounding_box.top(), m_bounding_box.bottom());
+				m_moving->setBehavior(rnd_behavior);
+				increaseRadius(1);
+			}
+			// 十分大きくなったら下に向けて発射
+			else {
+				std::shared_ptr<MovingBehavior> nwt_behavior = std::make_shared<NewtonBehavior>();
+				m_moving->setBehavior(nwt_behavior);
+				m_moving->setVelocity(Eigen::Vector2f(0, 5.0f));
+			}
+		}
 		m_moving->updatePoistion(m_realm.center);
+		//fireball描画に使うため
 		m_bounding_box = Shape::Rectangle(m_realm.center - Eigen::Vector2i(m_realm.radius, m_realm.radius), m_realm.radius * 2, m_realm.radius * 2);
+	}
+
+	void increaseRadius(int amount) {
+		m_realm.radius += amount;
+	}
+
+	void setRadius(int radius) {
+		m_realm.radius = radius;
 	}
 
 	void setPosition(const Eigen::Vector2i& pos) {
@@ -991,7 +1290,7 @@ public:
 		switch (m_mode) {
 		case PlayerStrong:
 		case EnemyStrong:
-			return 2;
+			return 3;
 		case PlayerWeak:
 		case EnemyWeak:
 			return 1;
@@ -1007,12 +1306,18 @@ private:
 	FireballKind m_mode = EnemyWeak;
 	Effect m_fireball_effect = Effect(effectHandles["b_fireball"], 3, PRIORITY_DYNAMIC_OBJECT);
 	Effect m_green_fireball_effect = Effect(effectHandles["b_green_fireball"], PRIORITY_DYNAMIC_OBJECT);
+	Effect m_enemy_strong_fireball_effect = Effect(effectHandles["b_enemy_strong_fireball"], PRIORITY_DYNAMIC_OBJECT);
+	Effect m_player_strong_fireball_effect = Effect(effectHandles["b_player_strong_fireball"], PRIORITY_DYNAMIC_OBJECT);
 };
 
 class FireballManager : public Object {
 public:
 	FireballManager(int max_num) : m_max_num(max_num) {
 		Object::layer = PRIORITY_DYNAMIC_OBJECT;
+	}
+
+	void changeMaximumFireballNum(int max_num) {
+		m_max_num = max_num;
 	}
 
 	bool isMax() {
@@ -1095,6 +1400,9 @@ public:
 		m_fireball->setPosition(m_realm.getLeftTopPoint());
 		m_initial_fireball_speed = m_fireball->getVelocity().norm();
 		m_fireball->setVelocity(Eigen::Vector2f::Zero());
+		if (m_fireball->getMode() == EnemyStrong) {
+			m_fireball->m_strong_fireball_sound.stop();
+		}
 		m_fireball->changeModeToPlayer();
 	}
 
@@ -1102,6 +1410,9 @@ public:
 	void exhareFireball() {
 		m_fireball->setVelocity(Eigen::Vector2f(-m_initial_fireball_speed * (float)cos(m_rotation + M_PI / 2.0), -m_initial_fireball_speed * (float)sin(m_rotation + M_PI / 2.0)));
 		m_fireball->appear();
+		if (m_fireball->getMode() == EnemyStrong) {
+			m_fireball->m_strong_fireball_sound.start();
+		}
 		m_fireball = nullptr;
 		m_count = -1;
 	}
@@ -1218,8 +1529,8 @@ public:
 		: m_start_point(start_point), m_life(life), m_pot(pot), m_info(info)
 	{
 		Object::layer = PRIORITY_DYNAMIC_OBJECT;
-		for (int i = 0; i < m_life.getLifeNum(); i++) {
-			m_blocks.push_back(Shape::Rectangle(start_point + Eigen::Vector2i{ BLOCK_WIDTH, 0 } *i, BLOCK_WIDTH, BLOCK_HEIGHT));
+		for (int i = 0; i < m_life.getLifeNum() * 2; i++) {
+			m_blocks.push_back(Shape::Rectangle(start_point + Eigen::Vector2i{ SHIP_BLOCK_WIDTH, 0 } *i, SHIP_BLOCK_WIDTH, SHIP_BLOCK_HEIGHT));
 		}
 	}
 
@@ -1242,23 +1553,37 @@ public:
 	bool restoreShip(int amount) {
 		if (!m_life.restore(amount)) return false;
 		if (m_blocks.empty()) {
-			m_blocks.push_back(Shape::Rectangle(m_start_point, BLOCK_WIDTH, BLOCK_HEIGHT));
+			m_blocks.push_back(Shape::Rectangle(m_start_point, SHIP_BLOCK_WIDTH, SHIP_BLOCK_HEIGHT));
+			m_blocks.push_back(Shape::Rectangle(m_start_point + Eigen::Vector2i(SHIP_BLOCK_WIDTH, 0), SHIP_BLOCK_WIDTH, SHIP_BLOCK_HEIGHT));
 			return true;
 		}
 		for (int i = 0; i < amount; i++) {
-			if (m_blocks[m_blocks.size() - 1].getRightBottomPoint().x() + BLOCK_WIDTH > FIELD_START_POS.x() + FIELD_WIDTH) {
-				m_blocks.insert(m_blocks.begin(), Shape::Rectangle(m_blocks[0].getLeftTopPoint() - Eigen::Vector2i(BLOCK_WIDTH, 0), BLOCK_WIDTH, BLOCK_HEIGHT));
+			//もし右にぶつかっていたら
+			if (m_blocks[m_blocks.size() - 1].right() + SHIP_BLOCK_WIDTH > FIELD_START_POS.x() + FIELD_WIDTH) {
+				m_blocks.insert(m_blocks.begin(), Shape::Rectangle(m_blocks[0].getLeftTopPoint() - Eigen::Vector2i(SHIP_BLOCK_WIDTH, 0), SHIP_BLOCK_WIDTH, SHIP_BLOCK_HEIGHT));
+				m_blocks.insert(m_blocks.begin(), Shape::Rectangle(m_blocks[0].getLeftTopPoint() - Eigen::Vector2i(2 * SHIP_BLOCK_WIDTH, 0), SHIP_BLOCK_WIDTH, SHIP_BLOCK_HEIGHT));
 			}
-			else
-				m_blocks.push_back(Shape::Rectangle(m_blocks[m_blocks.size() - 1].getRightTopPoint(), BLOCK_WIDTH, BLOCK_HEIGHT));
+			//もし左にぶつかっていたら
+			else if (m_blocks[0].left() - SHIP_BLOCK_WIDTH < FIELD_START_POS.x()) {
+				m_blocks.push_back(Shape::Rectangle(m_blocks[m_blocks.size() - 1].getRightTopPoint(), SHIP_BLOCK_WIDTH, SHIP_BLOCK_HEIGHT));
+				m_blocks.push_back(Shape::Rectangle(m_blocks[m_blocks.size() - 1].getRightTopPoint() + Eigen::Vector2i(SHIP_BLOCK_WIDTH, 0), SHIP_BLOCK_WIDTH, SHIP_BLOCK_HEIGHT));
+			}
+			//どちらでもなかったら
+			else {
+				m_blocks.push_back(Shape::Rectangle(m_blocks[m_blocks.size() - 1].getRightTopPoint(), SHIP_BLOCK_WIDTH, SHIP_BLOCK_HEIGHT));
+				m_blocks.insert(m_blocks.begin(), Shape::Rectangle(m_blocks[0].getLeftTopPoint() - Eigen::Vector2i(SHIP_BLOCK_WIDTH, 0), SHIP_BLOCK_WIDTH, SHIP_BLOCK_HEIGHT));
+			}
 		}
+		m_start_point = m_blocks[0].getLeftTopPoint();
 		return true;
 	}
 
 	bool damageShip(int amount) {
 		if (!m_life.damage(amount)) return false;
 		for (int i = 0; i < amount; i++) {
+			//両側から一個ずつへらす
 			m_blocks.pop_back();
+			m_blocks.erase(m_blocks.begin());
 		}
 		return true;
 	}
@@ -1267,7 +1592,7 @@ public:
 		m_blocks.clear();
 		m_life.resetLife();
 		for (int i = 0; i < m_life.getLifeNum(); i++) {
-			m_blocks.push_back(Shape::Rectangle(m_start_point + Eigen::Vector2i{ BLOCK_WIDTH, 0 } *i, BLOCK_WIDTH, BLOCK_HEIGHT));
+			m_blocks.push_back(Shape::Rectangle(m_start_point + Eigen::Vector2i{ SHIP_BLOCK_WIDTH, 0 } *i, SHIP_BLOCK_WIDTH, SHIP_BLOCK_HEIGHT));
 		}
 	}
 
@@ -1302,7 +1627,7 @@ public:
 	}
 
 	const Shape::Rectangle getRealm() override {
-		return Shape::Rectangle(m_start_point, m_blocks.size() * BLOCK_WIDTH, BLOCK_HEIGHT);
+		return Shape::Rectangle(m_start_point, m_blocks.size() * SHIP_BLOCK_WIDTH, SHIP_BLOCK_HEIGHT);
 	}
 
 	bool isEnhanced() {
@@ -1315,24 +1640,30 @@ public:
 			switch (m_items[i]->getItemKind()) {
 				//継続的な効果を持たないものは適用したら消す
 			case RestoreShip:
+				m_restore_sound.start();
 				restoreShip(1);
 				deleteItem(m_items[i]);
 				//消したのでその分indexを減らす
 				i--;
 				break;
 			case DamageShip:
+				m_bomb_sound.start();
 				damageShip(1);
 				deleteItem(m_items[i]);
 				i--;
 				break;
 			case EnhanceShip:
-				if (!m_is_enhanced) m_is_enhanced = true;
+				if (!m_is_enhanced) {
+					m_is_enhanced = true;
+					m_muteki_sound.start();
+				}
 				else {
 					m_enhanced_count--;
 				}
 
 				// 強化時間を越えたら
 				if (m_enhanced_count < 0) {
+					m_muteki_sound.stop();
 					m_is_enhanced = false;
 					m_enhanced_count = 150;
 					deleteItem(m_items[i]);
@@ -1342,12 +1673,14 @@ public:
 			case RestorePot:
 				// available じゃなかったら適用せず保持しておく。
 				if (!m_pot->isAvailable()) {
+					m_restore_pot_sound.start();
 					m_pot->resetStatus();
 					deleteItem(m_items[i]);
 					i--;
 				}
 				break;
 			case RestoreTime:
+				m_restore_time_sound.start();
 				m_info->restoreTimer(0, 10);
 				deleteItem(m_items[i]);
 				i--;
@@ -1401,6 +1734,12 @@ private:
 	std::shared_ptr<Pot> m_pot = nullptr;
 	// item を　info に適用させるため
 	std::shared_ptr<Info> m_info = nullptr;
+
+	Sound m_muteki_sound = Sound("b_muteki", DX_PLAYTYPE_LOOP);
+	Sound m_restore_sound = Sound("b_heal");
+	Sound m_bomb_sound = Sound("b_bomb");
+	Sound m_restore_pot_sound = Sound("b_restore_pot");
+	Sound m_restore_time_sound = Sound("b_restore_time");
 };
 
 
@@ -1458,9 +1797,24 @@ public:
 		return m_dead_count >= 0;
 	}
 
-	void setDeadEffect(std::string effect_name, int frames_per_scene, int dead_effect = 0) {
+	void setDeadEffect(std::string effect_name, int frames_per_scene, int dead_count = 0) {
 		m_dead_effect = Effect(effectHandles[effect_name], frames_per_scene, PRIORITY_DYNAMIC_OBJECT);
-		if (dead_effect == 0) dead_effect = m_dead_effect.getCounter() * m_dead_effect.getFramesPerScene();
+		if (dead_count == 0) dead_count = m_dead_effect.getCountMax() * m_dead_effect.getFramesPerScene();
+		m_dead_count = dead_count;
+	}
+
+	void setPosition(Eigen::Vector2i pos) {
+		m_realm.start_point = pos;
+	}
+
+	void setMovingBehavior(std::shared_ptr<MovingBehavior>& behavior) {
+		m_moving->setBehavior(behavior);
+	}
+	void setVelocity(Eigen::Vector2f vel) {
+		m_moving->setVelocity(vel);
+	}
+	void setAccel(Eigen::Vector2f accel) {
+		m_moving->setAccel(accel);
 	}
 	
 protected:
@@ -1471,6 +1825,90 @@ protected:
 private:
 	Effect m_dead_effect = Effect(effectHandles["b_burning"], 5, PRIORITY_DYNAMIC_OBJECT);
 	int m_dead_count = 60;
+};
+
+class Resident : public Town
+{
+public:
+	Resident(Shape::Rectangle realm, Life life, std::shared_ptr<MovingBehavior>& behavior, std::shared_ptr<Fukidashi> fukidashi = nullptr) 
+	{
+		m_realm = realm;
+		m_life = life;
+		m_moving->setBehavior(behavior);
+		m_fukidashi = fukidashi;
+		Object::layer = PRIORITY_DYNAMIC_OBJECT;
+	}
+	Resident(Shape::Rectangle realm, Life life, std::shared_ptr<MovingBehavior>& behavior, int img_handle, std::shared_ptr<Fukidashi> fukidashi = nullptr) 
+	{	
+		m_realm = realm;
+		m_life = life;
+		m_moving->setBehavior(behavior);
+		m_img_handle = img_handle;
+		m_fukidashi = fukidashi;
+		Object::layer = PRIORITY_DYNAMIC_OBJECT;
+	}
+	Resident(Shape::Rectangle realm, Life life, std::shared_ptr<MovingBehavior>& behavior, int img_handle, int img_handle_damaged, std::shared_ptr<Fukidashi> fukidashi = nullptr) {
+		m_realm = realm;
+		m_life = life;
+		m_moving->setBehavior(behavior);
+		m_img_handle = img_handle;
+		m_img_handle_damaged = img_handle_damaged;
+		m_fukidashi = fukidashi;
+		Object::layer = PRIORITY_DYNAMIC_OBJECT;
+	}
+
+	void appear() { m_is_disappeared = false; }
+	void disappear() { m_is_disappeared = true; }
+
+	bool isDisappeared() {
+		return m_is_disappeared;
+	}
+
+	bool hasFukidashi() {
+		return m_fukidashi != nullptr;
+	}
+
+	void setFukidashi(std::shared_ptr<Fukidashi>& fukidashi) {
+		m_fukidashi = fukidashi;
+	}
+
+	void setImageHandle(std::string image_name) {
+		m_img_handle = imgHandles[image_name];
+	}
+
+	void setImageHandleDamaged(std::string image_name_damaged) {
+		m_img_handle_damaged = imgHandles[image_name_damaged];
+	}
+
+	void updatePosition() override {
+		if (m_realm.bottom() > HEIGHT + 5) {
+			m_moving->setAccel(Eigen::Vector2f(0.0f, 0.0f));
+			m_moving->setVelocity(Eigen::Vector2f(m_moving->getVelocity().x(), 0.0f));
+			//床よりちょっと高くしておく
+			m_realm.start_point = Eigen::Vector2i(m_realm.left(), FIELD_HEIGHT - 2 - m_realm.height);
+		}
+		m_moving->updatePoistion(m_realm.start_point);
+	}
+
+	bool draw() override {
+		if (m_is_disappeared) return true;
+		if (m_life.isAlive()) {
+			DrawExtendGraph(m_realm.left(), m_realm.top(), m_realm.right(), m_realm.bottom(), m_img_handle, TRUE);
+		}
+		else {
+			if (isEffectContinuing()) {
+				DrawExtendGraph(m_realm.left(), m_realm.top(), m_realm.right(), m_realm.bottom(), m_img_handle_damaged, TRUE);
+			}
+		}
+		Town::draw();
+		if(hasFukidashi()) m_fukidashi->draw();
+		return true;
+	}
+private:
+	int m_img_handle = imgHandles["b_hime"];
+	int m_img_handle_damaged = imgHandles["b_hime_damaged"];
+	bool m_is_disappeared = false;
+	std::shared_ptr<Fukidashi> m_fukidashi;
 };
 
 class House : public Town
@@ -1487,6 +1925,20 @@ public:
 		m_img_handle = img_handle;
 		Object::layer = PRIORITY_STATIC_OBJECT;
 	}
+	House(Shape::Rectangle realm, Life life, std::shared_ptr<Resident>& resident) {
+		m_realm = realm;
+		m_life = life;
+		m_resident = resident;
+		Object::layer = PRIORITY_STATIC_OBJECT;
+	}
+	House(Shape::Rectangle realm, Life life, int img_handle, std::shared_ptr<Resident>& resident) {
+		m_realm = realm;
+		m_life = life;
+		m_img_handle = img_handle;
+		m_resident = resident;
+		Object::layer = PRIORITY_STATIC_OBJECT;
+	}
+
 	bool draw() override {
 		if (m_life.isAlive() || isEffectContinuing()) {
 			DrawExtendGraph(m_realm.left(), m_realm.top(), m_realm.right(), m_realm.bottom(), m_img_handle, TRUE);
@@ -1494,50 +1946,39 @@ public:
 		Town::draw();
 		return true;
 	}
-private:
-	int m_img_handle = imgHandles["b_house01"];
-};
 
-class Resident : public Town
-{
-public:
-	Resident(Shape::Rectangle realm, Life life, std::shared_ptr<MovingBehavior>& behavior) {
-		m_realm = realm;
-		m_life = life;
-		m_moving->setBehavior(behavior);
-		Object::layer = PRIORITY_DYNAMIC_OBJECT;
-	}
-	Resident(Shape::Rectangle realm, Life life, std::shared_ptr<MovingBehavior>& behavior, int img_handle) {
-		m_realm = realm;
-		m_life = life;
-		m_moving->setBehavior(behavior);
-		m_img_handle = img_handle;
-		Object::layer = PRIORITY_DYNAMIC_OBJECT;
-	}
-	Resident(Shape::Rectangle realm, Life life, std::shared_ptr<MovingBehavior>& behavior, int img_handle, int img_handle_damaged) {
-		m_realm = realm;
-		m_life = life;
-		m_moving->setBehavior(behavior);
-		m_img_handle = img_handle;
-		m_img_handle_damaged = img_handle_damaged;
-		Object::layer = PRIORITY_DYNAMIC_OBJECT;
+	bool isResidentIn() {
+		return m_resident != nullptr;
 	}
 
-	bool draw() override {
-		if (m_life.isAlive()) {
-			DrawExtendGraph(m_realm.left(), m_realm.top(), m_realm.right(), m_realm.bottom(), m_img_handle, TRUE);
-		}
-		else {
-			if (isEffectContinuing()) {
-				DrawExtendGraph(m_realm.left(), m_realm.top(), m_realm.right(), m_realm.bottom(), m_img_handle_damaged, TRUE);
-			}
-		}
-		Town::draw();
+	void exhareResident() {
+		if (m_resident == nullptr) return;
+		std::shared_ptr<Resident> resident = m_resident;
+		resident->appear();
+		resident->setVelocity(Eigen::Vector2f((m_realm.left() > FIELD_START_POS.x() + FIELD_WIDTH / 2 ? 80.0f : -80.0f), 20.0f));
+		resident->setAccel(Eigen::Vector2f(0.0f, 30.0f));
+		resident->setImageHandle("b_hime_damaged");
+		std::shared_ptr<Fukidashi> fukidashi = std::make_shared<Fukidashi>(resident->getRealm().getRightTopPoint(), "  だから", 60, GetColor(0, 0, 0));
+		resident->setFukidashi(fukidashi);
+		m_resident = nullptr;
+	}
+
+	//空きがあったら格納する。
+	bool ifNullThenSetResident(std::shared_ptr<Resident>& resident) {
+		if (m_resident != nullptr) return false;
+		m_resident = resident;
+		m_resident->disappear();
+		m_resident->setPosition(m_realm.start_point + Eigen::Vector2i(10, 10));
+		std::shared_ptr<MovingBehavior> behavior = std::make_shared<NewtonBehavior>();
+		m_resident->setMovingBehavior(behavior);
+		m_resident->setVelocity(Eigen::Vector2f(0.0, 0.0));
 		return true;
 	}
 private:
-	int m_img_handle = imgHandles["b_hime"];
-	int m_img_handle_damaged = imgHandles["b_hime_damaged"];
+	int m_img_handle = imgHandles["b_house01"];
+	std::shared_ptr<Resident> m_resident = nullptr;
 };
+
+
 
 } // namespace Breakout
