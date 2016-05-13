@@ -1561,12 +1561,12 @@ public:
 			//もし右にぶつかっていたら
 			if (m_blocks[m_blocks.size() - 1].right() + SHIP_BLOCK_WIDTH > FIELD_START_POS.x() + FIELD_WIDTH) {
 				m_blocks.insert(m_blocks.begin(), Shape::Rectangle(m_blocks[0].getLeftTopPoint() - Eigen::Vector2i(SHIP_BLOCK_WIDTH, 0), SHIP_BLOCK_WIDTH, SHIP_BLOCK_HEIGHT));
-				m_blocks.insert(m_blocks.begin(), Shape::Rectangle(m_blocks[0].getLeftTopPoint() - Eigen::Vector2i(2 * SHIP_BLOCK_WIDTH, 0), SHIP_BLOCK_WIDTH, SHIP_BLOCK_HEIGHT));
+				m_blocks.insert(m_blocks.begin(), Shape::Rectangle(m_blocks[0].getLeftTopPoint() - Eigen::Vector2i(SHIP_BLOCK_WIDTH, 0), SHIP_BLOCK_WIDTH, SHIP_BLOCK_HEIGHT));
 			}
 			//もし左にぶつかっていたら
 			else if (m_blocks[0].left() - SHIP_BLOCK_WIDTH < FIELD_START_POS.x()) {
 				m_blocks.push_back(Shape::Rectangle(m_blocks[m_blocks.size() - 1].getRightTopPoint(), SHIP_BLOCK_WIDTH, SHIP_BLOCK_HEIGHT));
-				m_blocks.push_back(Shape::Rectangle(m_blocks[m_blocks.size() - 1].getRightTopPoint() + Eigen::Vector2i(SHIP_BLOCK_WIDTH, 0), SHIP_BLOCK_WIDTH, SHIP_BLOCK_HEIGHT));
+				m_blocks.push_back(Shape::Rectangle(m_blocks[m_blocks.size() - 1].getRightTopPoint(), SHIP_BLOCK_WIDTH, SHIP_BLOCK_HEIGHT));
 			}
 			//どちらでもなかったら
 			else {
