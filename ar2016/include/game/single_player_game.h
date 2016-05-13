@@ -1979,6 +1979,12 @@ class SinglePlayerGame : public Game {
 
 	Difficulty difficulty = EASY;
 
+
+	bool willFinishMode = false;
+	bool isChangingMode = false;
+	int counterForWait = 5;
+	int waitNCounter = FPS / 3;
+
 public:
 	SinglePlayerGame() {
 		thread = std::thread::thread(capture, std::ref(share));
