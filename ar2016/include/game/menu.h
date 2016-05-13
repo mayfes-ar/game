@@ -313,7 +313,6 @@ public:
 	}
 
 	bool onUpdate() {
-		funcTimer.update();
 
 		if (key[KEY_INPUT_RETURN]) {
 			// gameType = std::make_shared<FirstGame>();
@@ -337,6 +336,7 @@ public:
 			counterForWaiting = 5;
 		}
 
+		funcTimer.update();
 
 		return Game::onUpdate();
 	}
