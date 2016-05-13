@@ -104,7 +104,7 @@ class SinglePlayerGame : public Game {
 			}
 			case 2: {
 				if (hasPlayerWon) {
-
+					PlaySoundMem(soundHandles["s_game_clear"], DX_PLAYTYPE_BACK, true);
 				}
 				else {
 					PlaySoundMem(soundHandles["s_game_over"], DX_PLAYTYPE_BACK, true);
@@ -128,6 +128,7 @@ class SinglePlayerGame : public Game {
 			}
 			case 2: {
 				StopSoundMem(soundHandles["s_game_over"]);
+				StopSoundMem(soundHandles["s_game_clear"]);
 				break;
 			}
 			default: {
@@ -248,6 +249,38 @@ class SinglePlayerGame : public Game {
 			counter++;
 
 			return (willStay || counter != maxCount) && isRunning;
+		}
+	};
+
+	class CurtainObject : public Object {
+		const bool isOpen;
+		int counter = 0;
+		const int openCountMax = effectHandles["p_curtain_open"].size();
+		const int closeCountMax = effectHandles["p_curtain_close"].size();
+	public:
+		CurtainObject(bool isOpen_) : isOpen(isOpen_) {
+			layer = 300;
+		}
+		int volume = 255;
+		bool draw() {
+			const int handle = isOpen ? effectHandles["p_curtain_open"][counter] : effectHandles["p_curtain_close"][counter];
+			DrawExtendGraph(0, 0, 1280, 720, handle, true);
+
+			if (isOpen) {
+				counter++;
+				return !(counter == openCountMax);
+			}
+			else {
+				if (counter < closeCountMax - 1) { counter++; }
+				volume = volume - 4;
+				if (CheckSoundMem(soundHandles["p_bgm1"]) == 1) {
+					ChangeVolumeSoundMem(volume, soundHandles["p_bgm1"]);
+				}
+				else if (CheckSoundMem(soundHandles["p_bgm2"]) == 1) {
+					ChangeVolumeSoundMem(volume, soundHandles["p_bgm2"]);
+				}
+				return true;
+			}
 		}
 	};
 

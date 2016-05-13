@@ -26,6 +26,11 @@ namespace Breakout {
 	const int RESULT_WIDTH = WIDTH;
 	const int RESULT_HEIGHT = HEIGHT;
 
+	// CountDown
+	const Eigen::Vector2i COUNT_DOWN_START_POS = Eigen::Vector2i(WIDTH / 3, HEIGHT / 5);
+	const int COUNT_DOWN_WIDTH = WIDTH / 4;
+	const int COUNT_DOWN_HEIGHT = WIDTH / 4;
+
 	// Timerのパラメータ
 	constexpr int TIMER_MAX_MIN = 1;
 	constexpr int TIMER_MAX_SEC = 5;
@@ -85,12 +90,17 @@ namespace Breakout {
 
 	// House のパラメータ
 	constexpr int HOUSE_NUM = 6;
-	constexpr int HOUSE_HEIGHT = 100;
-	constexpr int HOUSE_WIDTH = 100;
+	constexpr int CASTLE_NUM = 1;
+	constexpr int NORMAL_HOUSE_NUM = HOUSE_NUM - CASTLE_NUM;
+	constexpr int NORMAL_HOUSE_HEIGHT = 100;
+	constexpr int NORMAL_HOUSE_WIDTH = 100;
+	constexpr int CASTLE_HOUSE_WIDTH = 120;
+	constexpr int CASTLE_HOUSE_HEIGHT = 120;
 	const int HOUSE_OFFSET_X = WIDTH / 4;
-	const int HOUSE_OFFSET_Y = HEIGHT - HOUSE_HEIGHT;
+	const int HOUSE_OFFSET_Y = HEIGHT - NORMAL_HOUSE_HEIGHT;
 	const Eigen::Vector2i HOUSE_START_POS = Eigen::Vector2i{ HOUSE_OFFSET_X, HOUSE_OFFSET_Y };
-	const int HOUSE_LIFE = 1;
+	const int NORMAL_HOUSE_LIFE = 1;
+	const int CASTLE_HOUSE_LIFE = 5;
 
 	// Resident のパラメータ
 	constexpr int RESIDENT_NUM = 4;

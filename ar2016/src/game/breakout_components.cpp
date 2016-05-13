@@ -211,24 +211,62 @@ void BreakoutComponents::setup(ShareData& share)
 
 	// Townの初期化　
 	{
-		for (int i = 0; i < HOUSE_NUM; i++) {
-			auto realm = Shape::Rectangle(HOUSE_START_POS + Eigen::Vector2i(FIELD_WIDTH * i / HOUSE_NUM, 0), HOUSE_WIDTH, HOUSE_HEIGHT);
-			auto life = Life(HOUSE_LIFE, HOUSE_LIFE);
+		for (int i = 0; i < NORMAL_HOUSE_NUM; i++) {
+			if (i >= (int)NORMAL_HOUSE_NUM / 2) {
+				auto realm = Shape::Rectangle(HOUSE_START_POS + Eigen::Vector2i(FIELD_WIDTH * (i+1) / HOUSE_NUM, 0), NORMAL_HOUSE_WIDTH, NORMAL_HOUSE_HEIGHT);
+				auto life = Life(NORMAL_HOUSE_LIFE, NORMAL_HOUSE_LIFE);
+				auto house = std::make_shared<Breakout::House>(realm, life);
+				house_list.push_back(house);
+				continue;
+			}
+			auto realm = Shape::Rectangle(HOUSE_START_POS + Eigen::Vector2i(FIELD_WIDTH * i / HOUSE_NUM, 0), NORMAL_HOUSE_WIDTH, NORMAL_HOUSE_HEIGHT);
+			auto life = Life(NORMAL_HOUSE_LIFE, NORMAL_HOUSE_LIFE);
 			auto house = std::make_shared<Breakout::House>(realm, life);
 			house_list.push_back(house);
 		}
 
+		auto realm = Shape::Rectangle(HOUSE_START_POS + Eigen::Vector2i(FIELD_WIDTH * (int)(NORMAL_HOUSE_NUM / 2) / HOUSE_NUM, 0), CASTLE_HOUSE_WIDTH, CASTLE_HOUSE_HEIGHT);
+		auto life = Life(CASTLE_HOUSE_LIFE, CASTLE_HOUSE_LIFE);
+		auto house = std::make_shared<Breakout::House>(realm, life, Castle);
+		house_list.push_back(house);
+
 		for (int i = 0; i < RESIDENT_NUM; i++) {
-			auto realm = Shape::Rectangle(RESIDENT_START_POS + Eigen::Vector2i(FIELD_WIDTH * i / RESIDENT_NUM, 0), RESIDENT_WIDTH, RESIDENT_HEIGHT);
-			auto life = Life(RESIDENT_LIFE, RESIDENT_LIFE);
-			std::shared_ptr<MovingBehavior> rnd_behavior = std::make_shared<RandomBehavior>(FIELD_START_POS.x(),
-				FIELD_START_POS.x() + FIELD_WIDTH - RESIDENT_WIDTH,
-				FIELD_START_POS.y() + FIELD_HEIGHT - RESIDENT_HEIGHT,
-				FIELD_START_POS.y() + FIELD_HEIGHT - RESIDENT_HEIGHT);
-			auto resident = std::make_shared<Breakout::Resident>(realm, life, rnd_behavior);
-			resident_list.push_back(resident);
+			if (i <= 1 ) {
+				auto realm = Shape::Rectangle(RESIDENT_START_POS + Eigen::Vector2i(FIELD_WIDTH * i / RESIDENT_NUM, 0), RESIDENT_WIDTH, RESIDENT_HEIGHT);
+				auto life = Life(RESIDENT_LIFE, RESIDENT_LIFE);
+				std::shared_ptr<MovingBehavior> rnd_behavior = std::make_shared<RandomBehavior>(FIELD_START_POS.x(),
+					FIELD_START_POS.x() + FIELD_WIDTH - RESIDENT_WIDTH,
+					FIELD_START_POS.y() + FIELD_HEIGHT - RESIDENT_HEIGHT,
+					FIELD_START_POS.y() + FIELD_HEIGHT - RESIDENT_HEIGHT);
+				auto resident = std::make_shared<Breakout::Resident>(realm, life, rnd_behavior, Boy);
+				resident_list.push_back(resident);
+				continue;
+			} else if (i >= 3) {
+				auto realm = Shape::Rectangle(RESIDENT_START_POS + Eigen::Vector2i(FIELD_WIDTH * i / RESIDENT_NUM, 0), RESIDENT_WIDTH, RESIDENT_HEIGHT);
+				auto life = Life(RESIDENT_LIFE, RESIDENT_LIFE);
+				std::shared_ptr<MovingBehavior> rnd_behavior = std::make_shared<RandomBehavior>(FIELD_START_POS.x(),
+					FIELD_START_POS.x() + FIELD_WIDTH - RESIDENT_WIDTH,
+					FIELD_START_POS.y() + FIELD_HEIGHT - RESIDENT_HEIGHT,
+					FIELD_START_POS.y() + FIELD_HEIGHT - RESIDENT_HEIGHT);
+				auto resident = std::make_shared<Breakout::Resident>(realm, life, rnd_behavior, Girl);
+				resident_list.push_back(resident);
+				continue;
+			} else {
+				auto realm = Shape::Rectangle(RESIDENT_START_POS + Eigen::Vector2i(FIELD_WIDTH * i / RESIDENT_NUM, 0), RESIDENT_WIDTH, RESIDENT_HEIGHT);
+				auto life = Life(RESIDENT_LIFE, RESIDENT_LIFE);
+				std::shared_ptr<MovingBehavior> rnd_behavior = std::make_shared<RandomBehavior>(FIELD_START_POS.x(),
+					FIELD_START_POS.x() + FIELD_WIDTH - RESIDENT_WIDTH,
+					FIELD_START_POS.y() + FIELD_HEIGHT - RESIDENT_HEIGHT,
+					FIELD_START_POS.y() + FIELD_HEIGHT - RESIDENT_HEIGHT);
+				auto resident = std::make_shared<Breakout::Resident>(realm, life, rnd_behavior, Hime);
+				resident_list.push_back(resident);
+				continue;
+			}
 		}
 	}
+
+	const auto count_down_realm = Shape::Rectangle(COUNT_DOWN_START_POS, COUNT_DOWN_WIDTH, COUNT_DOWN_HEIGHT);
+	count_down = std::make_shared<CountDown>(count_down_realm);
 
 }
 

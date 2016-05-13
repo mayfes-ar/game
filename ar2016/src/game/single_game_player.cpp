@@ -133,6 +133,8 @@ std::shared_ptr<SinglePlayerGame::tutoFire> SinglePlayerGame::maketutoFire(int x
 
 
 bool willFinishMode = false;
+bool isChangingMode = false;
+int counterForWait = 5;
 
 bool SinglePlayerGame::onStart() {
 	using namespace std;
@@ -188,6 +190,8 @@ bool SinglePlayerGame::onStart() {
 
 		drawList.clear();
 		drawList.push_back(make_shared<Title>(difficulty));
+		drawList.push_back(make_shared<CurtainObject>(true));
+
 
 		bgm = make_shared<BGM>(0);
 		bgm->start();
@@ -195,6 +199,7 @@ bool SinglePlayerGame::onStart() {
 
 	// TUTORIAL
 	mode.setMode([this]() {
+		drawList.clear();
 		// maxPlayerDamage = difficulty == EASY ? 5 : difficulty == HARD ? 10 : 20;
 		tutoplayer = std::make_shared<tutoPlayer>(WIDTH / 2 - 100 / 2, HEIGHT / 2 - 150 / 2, tutoPlayer::width, tutoPlayer::height, "s_game_player", maxPlayerDamage, *this);
 
@@ -219,6 +224,7 @@ bool SinglePlayerGame::onStart() {
 
 		drawList.push_back(tutoplayer);
 		drawList.push_back(make_shared<Background>(share.handle));
+		drawList.push_back(make_shared<CurtainObject>(true));
 
 
 		share.rectMutex.lock();
@@ -404,7 +410,6 @@ bool SinglePlayerGame::onStart() {
 					
 		};
 		if (tutorial == END) {
-			makeEffect("s_game_curtain_close", 0, 0, WIDTH, HEIGHT, false, 160, 2, 1);
 
 		}
 		tutoenemy = maketutoHeiho(WIDTH, 300, 1);
@@ -416,7 +421,7 @@ bool SinglePlayerGame::onStart() {
 	// GAME
 	mode.setMode([this]() {
 		drawList.clear();
-		makeEffect("s_game_curtain_open", 0, 0, WIDTH, HEIGHT, false, 160, 2, 0);
+		drawList.push_back(make_shared<CurtainObject>(true));
 
 		maxPlayerDamage = difficulty == EASY ? 10 : difficulty == HARD ? 10 : 20;
 		player = std::make_shared<Player>(WIDTH / 2 - 100 / 2, HEIGHT / 2 - 150 / 2, Player::width, Player::height, "s_game_player", maxPlayerDamage, *this);
@@ -578,7 +583,7 @@ bool SinglePlayerGame::onStart() {
 		
 	
 		drawList.clear();	
-		makeEffect("s_game_curtain_open", 0, 0, WIDTH, HEIGHT, false, 150, 2, 0);
+		drawList.push_back(make_shared<CurtainObject>(true));
 
 
 		class Title : public Object {
@@ -691,8 +696,8 @@ bool SinglePlayerGame::onStart() {
 		//yu
 		if (hasPlayerWon) {
 			//勝利画面のエフェクト・リザルト
-			makeEffect("s_game_result_hanabi", 400, 100, 500, 500, true, 50, 1, 4);
-			makeEffect("s_game_result_hanabi", 700, 50, 300, 300, true, 50, 1, 3);
+			makeEffect("s_game_result_hanabi", 400, 100, 500, 500, true, 50, 3, 8);
+			makeEffect("s_game_result_hanabi", 700, 50, 300, 300, true, 50, 3, 0);
 
 			}
 		else {
@@ -713,17 +718,14 @@ bool SinglePlayerGame::onStart() {
 
 bool SinglePlayerGame::onUpdate() {
 	willFinishMode = false;
-	funcTimer.update();
 
 	switch (mode.getMode()) {
 	case INTRO: { // イントロダクション
-		static int counterForWait = 5;
 		if (counterForWait == 0) {
 			counterForWait = 5;
 			if (key[KEY_INPUT_RETURN]) {
 				willFinishMode = true;
-				drawList.clear();
-				makeEffect("s_game_curtain_close", 0, 0, WIDTH, HEIGHT, false, 400, 2, 1);
+				//drawList.clear();
 			}
 			else if (key[KEY_INPUT_1]) {
 				difficulty = EASY;
@@ -741,7 +743,6 @@ bool SinglePlayerGame::onUpdate() {
 			}
 			else {
 				counterForWait = 0;
-				
 			}
 		}
 		else if (counterForWait > 0) {
@@ -769,8 +770,7 @@ bool SinglePlayerGame::onUpdate() {
 				heihoFreezeTimeRemain--;
 				
 			}
-			if(heihoFreezeTimeRemain == FPS*4 - 25){
-				makeEffect("s_game_curtain_open", 0, 0, WIDTH, HEIGHT, false, 400, 2, 0);
+			if(heihoFreezeTimeRemain == FPS*4 +5){
 			}
 
 			if (heihoFreezeTimeRemain == 0) {
@@ -828,8 +828,6 @@ bool SinglePlayerGame::onUpdate() {
 		
 		if (timer <= 0) {
 			willFinishMode = true;
-			makeEffect("s_game_curtain_close", 0, 0, WIDTH, HEIGHT, false, 300, 2, 0);
-			
 		}
 
 		// 認識したマーカーを描画
@@ -856,11 +854,7 @@ bool SinglePlayerGame::onUpdate() {
 			
 			hasPlayerWon = false;
 			bgm->stop();
-			funcTimer.set([this]() {
-				willFinishMode = true;
-			}, FPS*5);
-
-
+			willFinishMode = true;
 		}
 
 		
@@ -913,7 +907,7 @@ bool SinglePlayerGame::onUpdate() {
 		case HARD: {
 			switch (maxTime - timer) {
 			case 100: {
-				makeRocketWanwan(-RocketWanwan::width, HEIGHT / 2 + 50);
+				makeRocketWanwan(-RocketWanwan::width / 2, HEIGHT / 2 + 50);
 				break;
 			}
 			case 200: {
@@ -926,13 +920,10 @@ bool SinglePlayerGame::onUpdate() {
 			}
 			case 300: {
 				makeUfo(0, 50, 1);
-				makeRocketWanwan(WIDTH + RocketWanwan::width, HEIGHT / 2 + 50);
-				makeRocketWanwan(WIDTH + RocketWanwan::width, HEIGHT / 2 + 50 + RocketWanwan::height);
-				makeRocketWanwan(WIDTH + RocketWanwan::width, HEIGHT / 2 + 50 - RocketWanwan::height);
-				makeRocketWanwan(WIDTH+RocketWanwan::width, HEIGHT / 2 + 50 - RocketWanwan::height);
+				makeRocketWanwan(WIDTH - RocketWanwan::width / 2, HEIGHT / 2 + 50);
+				makeRocketWanwan(WIDTH - RocketWanwan::width / 2, HEIGHT / 2 + 50 + RocketWanwan::height);
 				break;
-			}
-					  
+			}				  
 			case 600: {
 				makeEagle(0, 0, 1);
 				makeEagle(200, 0, 1);
@@ -945,25 +936,66 @@ bool SinglePlayerGame::onUpdate() {
 			}
 			case 900: {
 				makeInundation();
+				makeUfo(0, 50, 1);
+				makeRocketWanwan(-RocketWanwan::width / 2, HEIGHT / 2 + 50);
+				makeRocketWanwan(-RocketWanwan::width / 2, HEIGHT / 2 + 50 + RocketWanwan::height);
+				break;
 			}
-			case 1410:
-				makeRocketWanwan(-RocketWanwan::width, HEIGHT / 2 + 50);
-			case 1420:
-			case 1430:
-			case 1440:
-			case 1200:
-			case 1230:
-			case 1260:
-			case 1400: {
+			case 1200: {
+				makeEagle(0, 0, 1);
+				makeEagle(200, 0, 1);
 				makeHeiho(WIDTH, 300, 1);
 				break;
 			}
 			case 1500: {
-				makeRocketWanwan(WIDTH + RocketWanwan::width, HEIGHT / 2 + 50);
-				makeRocketWanwan(-RocketWanwan::width, HEIGHT / 2 + 50);
+				makeCloud(0, 50, 1);
+				makeCloud(200, 50, 1);
+				makeCloud(800, 50, 1);
+				makeRocketWanwan(WIDTH - RocketWanwan::width / 2, HEIGHT / 2 + 50);
+				makeHeiho(WIDTH, 300, 1);
+				break;
+			}	
+			case 1600: {
+				makeUfo(0, 50, 1);
 				break;
 			}
-
+			case 1800: {
+				makeInundation();
+				makeEagle(0, 0, 1);
+				makeEagle(200, 0, 1);
+				makeEagle(400, 0, 1);
+				makeEagle(600, 0, 1);
+				break;
+			}
+			case 2100: {
+				makeUfo(0, 50, 1);
+				makeRocketWanwan(-RocketWanwan::width, HEIGHT / 2 + 50);
+				makeEagle(0, 0, 1);
+				makeCloud(200, 50, 1);
+				break;
+			}
+			case 2400: {
+				makeHeiho(WIDTH, 300, 1);
+				break;
+			}
+			case 2700: {
+				makeCloud(0, 50, 1);
+				makeCloud(200, 50, 1);
+				makeCloud(800, 50, 1);
+				break;
+			}
+			case 3000: {
+				makeInundation();
+				makeEagle(0, 0, 1);
+				makeEagle(200, 0, 1);
+				break;
+			}
+			case 3300: {
+				makeUfo(0, 50, 1);
+				makeRocketWanwan(WIDTH - RocketWanwan::width / 2, HEIGHT / 2 + 50);
+				makeRocketWanwan(WIDTH - RocketWanwan::width / 2, HEIGHT / 2 + 50 + RocketWanwan::height);
+				break;
+			}
 			default: {
 			}
 			}
@@ -1064,9 +1096,16 @@ bool SinglePlayerGame::onUpdate() {
 		}
 	}
 
-	if (willFinishMode) {
+	if (willFinishMode && !isChangingMode) {
+		isChangingMode = true;
+		drawList.push_back(make_shared<CurtainObject>(false));
+		funcTimer.set([this]() {
+			isChangingMode = false;
 			mode.goNext();
+		}, FPS*2);
 	}
+
+	funcTimer.update();
 
 	return Game::onUpdate();
 
