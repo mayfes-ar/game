@@ -885,6 +885,10 @@ bool SinglePlayerGame::onUpdate() {
 				makeRocketWanwan(-RocketWanwan::width / 2, HEIGHT / 2 + 50);
 				break;
 			}
+			case 800: {
+				makeCloud(0, 50, 1);
+				break;
+			}
 			case 1000: {
 				makeInundation();
 			}
@@ -909,7 +913,7 @@ bool SinglePlayerGame::onUpdate() {
 			}
 			}
 			// 定期的に実行する場合など
-			if (timer < 150 && (maxTime - timer) % 20 == 0) {
+			if (timer < 2500 && (maxTime - timer) % 50 == 0) {
 				makeTeresa();
 			}
 			break;
