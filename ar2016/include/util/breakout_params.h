@@ -26,6 +26,11 @@ namespace Breakout {
 	const int RESULT_WIDTH = WIDTH;
 	const int RESULT_HEIGHT = HEIGHT;
 
+	// CountDown
+	const Eigen::Vector2i COUNT_DOWN_START_POS = Eigen::Vector2i(WIDTH / 3, HEIGHT / 5);
+	const int COUNT_DOWN_WIDTH = WIDTH / 4;
+	const int COUNT_DOWN_HEIGHT = WIDTH / 4;
+
 	// Timerのパラメータ
 	constexpr int TIMER_MAX_MIN = 1;
 	constexpr int TIMER_MAX_SEC = 5;

@@ -64,9 +64,9 @@ Timer::minSecMSec Timer::getLeftedTime()
 	}
 
 	int minute = left_time / (60 * 1000);
-	left_time -= minute * 60 * 1000;
+	left_time = left_time - minute * 60 * 1000;
 	int sec = left_time / 1000;
-	left_time -= sec * 1000;
+	left_time = left_time - sec * 1000;
 	int msec = left_time;
 
 	return minSecMSec{minute, sec, msec};

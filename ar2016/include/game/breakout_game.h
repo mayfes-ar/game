@@ -42,8 +42,16 @@ public:
 			drawList.push_back(m_components->select);
 		}, -1);
 
+		mode.setMode([&] {
+			m_components->count_down->init();
+			drawList.clear();
+			drawList.push_back(m_components->background);
+			drawList.push_back(m_components->count_down);
+		}, -1);
+
 		mode.setMode([&]() {
 			drawList.clear();
+			m_components->info->init();
 			drawList.push_back(m_components->background);
 			drawList.push_back(m_components->info);
 			drawList.push_back(m_components->field);
@@ -97,7 +105,6 @@ public:
 		default:
 			break;
 		}
-
 		if (key[KEY_INPUT_ESCAPE]) {
 			share.willFinish = true;
 		}
@@ -126,7 +133,6 @@ private:
 		m_detect_thread = std::thread(capture, std::ref(share));
 
 		m_components->setup(share);
-		m_components->info->init();
 		m_is_mode_selected = false;
     }
 

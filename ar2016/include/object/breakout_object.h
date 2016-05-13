@@ -1596,12 +1596,12 @@ public:
 			//もし右にぶつかっていたら
 			if (m_blocks[m_blocks.size() - 1].right() + SHIP_BLOCK_WIDTH > FIELD_START_POS.x() + FIELD_WIDTH) {
 				m_blocks.insert(m_blocks.begin(), Shape::Rectangle(m_blocks[0].getLeftTopPoint() - Eigen::Vector2i(SHIP_BLOCK_WIDTH, 0), SHIP_BLOCK_WIDTH, SHIP_BLOCK_HEIGHT));
-				m_blocks.insert(m_blocks.begin(), Shape::Rectangle(m_blocks[0].getLeftTopPoint() - Eigen::Vector2i(2 * SHIP_BLOCK_WIDTH, 0), SHIP_BLOCK_WIDTH, SHIP_BLOCK_HEIGHT));
+				m_blocks.insert(m_blocks.begin(), Shape::Rectangle(m_blocks[0].getLeftTopPoint() - Eigen::Vector2i(SHIP_BLOCK_WIDTH, 0), SHIP_BLOCK_WIDTH, SHIP_BLOCK_HEIGHT));
 			}
 			//もし左にぶつかっていたら
 			else if (m_blocks[0].left() - SHIP_BLOCK_WIDTH < FIELD_START_POS.x()) {
 				m_blocks.push_back(Shape::Rectangle(m_blocks[m_blocks.size() - 1].getRightTopPoint(), SHIP_BLOCK_WIDTH, SHIP_BLOCK_HEIGHT));
-				m_blocks.push_back(Shape::Rectangle(m_blocks[m_blocks.size() - 1].getRightTopPoint() + Eigen::Vector2i(SHIP_BLOCK_WIDTH, 0), SHIP_BLOCK_WIDTH, SHIP_BLOCK_HEIGHT));
+				m_blocks.push_back(Shape::Rectangle(m_blocks[m_blocks.size() - 1].getRightTopPoint(), SHIP_BLOCK_WIDTH, SHIP_BLOCK_HEIGHT));
 			}
 			//どちらでもなかったら
 			else {
@@ -2077,5 +2077,54 @@ private:
 };
 
 
+class CountDown : public Object
+{
+public:
+	CountDown(const Shape::Rectangle& realm)
+		: m_realm(realm) , m_timer(std::make_shared<Timer>(0, 4, 0)){
+		Object::layer = PRIORITY_INFO;
+	}
+
+	void init() {
+		m_timer->start();
+	}
+
+	bool isCountdowning()  {
+		return !m_timer->isTimerEnd();
+	}
+
+	bool draw() override {
+		const auto time = m_timer->getLeftedTime();
+		int sec = std::get<1>(time);
+		// draw
+		switch (sec) {
+			case 3:
+				DrawExtendGraph(m_realm.left(), m_realm.top(),
+								m_realm.right(), m_realm.bottom(),
+					imgHandles["yellow_3"], TRUE);
+				break;
+			case 2:
+				DrawExtendGraph(m_realm.left(), m_realm.top(),
+								m_realm.right(), m_realm.bottom(),
+					imgHandles["yellow_2"], TRUE);
+				break;
+			case 1:
+				DrawExtendGraph(m_realm.left(), m_realm.top(),
+								m_realm.right(), m_realm.bottom(),
+					imgHandles["yellow_1"], TRUE);
+				break;
+			default:
+				DrawExtendGraph(m_realm.left(), m_realm.top(),
+								m_realm.right(), m_realm.bottom(),
+					imgHandles["b_timer_start_str"], TRUE);
+				break;
+		}
+		return true;
+	}
+
+private:
+	const Shape::Rectangle m_realm = Shape::Rectangle();
+	std::shared_ptr<Timer> m_timer = nullptr;
+};
 
 } // namespace Breakout

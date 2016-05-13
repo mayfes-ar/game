@@ -260,6 +260,9 @@ bool Object::load() {
 	//info
 	isSuccess &= loadImage("b_sunadokei", "breakout/sunadokei");
 
+	//timer
+	isSuccess &= loadImage("b_timer_start_str", "breakout/text_start");
+
 	//effect
 
 	isSuccess &= loadEffect("b_muteki", "breakout/muteki", 1, 6, 320, 1440);
@@ -290,6 +293,8 @@ bool Object::load() {
 	isSuccess &= loadSound("b_start_play", "breakout/start.mp3");
 	isSuccess &= loadSound("b_final_play", "breakout/final.mp3");
 	isSuccess &= loadSound("b_pot_exhare", "breakout/pot_exhare.mp3");
+	isSuccess &= loadSound("b_timer_start", "breakout/timer_start.mp3");
+	isSuccess &= loadSound("b_timer_count", "breakout/timer_count.mp3");
 
 	for (int num = 0; num <= 9; ++num) {
 		for (const auto& color : { "red", "blue", "yellow", "green" }) {

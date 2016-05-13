@@ -264,6 +264,9 @@ void BreakoutComponents::setup(ShareData& share)
 		}
 	}
 
+	const auto count_down_realm = Shape::Rectangle(COUNT_DOWN_START_POS, COUNT_DOWN_WIDTH, COUNT_DOWN_HEIGHT);
+	count_down = std::make_shared<CountDown>(count_down_realm);
+
 }
 
 void BreakoutComponents::increaseBlock(double ratio)

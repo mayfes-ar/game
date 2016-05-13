@@ -44,6 +44,7 @@ public:
 
 	void increaseBlock(double ratio);
 
+	std::shared_ptr<Breakout::CountDown> count_down = nullptr;
 	std::shared_ptr<Breakout::Select<Breakout::Mode, Breakout::ModeEnumHash>> select = nullptr;
     std::shared_ptr<Breakout::Background> background = nullptr;
     std::shared_ptr<Breakout::Info> info = nullptr;
