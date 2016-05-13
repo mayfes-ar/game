@@ -33,6 +33,14 @@ std::shared_ptr<SinglePlayerGame::Inundation> SinglePlayerGame::makeInundation()
 	return enemy;
 }
 
+std::shared_ptr<SinglePlayerGame::Ghorst> SinglePlayerGame::makeGhorst(int x, int y, double size = 1.0) {
+	auto enemy = std::make_shared<Ghorst>(x, y, *this, size);
+
+	enemySubList.push_back(enemy);
+	drawList.push_back(enemy);
+	return enemy;
+}
+
 std::shared_ptr<SinglePlayerGame::Switch> SinglePlayerGame::makeSwitch(int x, int y, double size = 1.0) {
 	auto enemy = std::make_shared<Switch>(x, y, *this, size);
 	if (player->isContacted(enemy)) {
@@ -142,12 +150,38 @@ bool SinglePlayerGame::onStart() {
 			}
 
 			bool draw() {
-				DrawExtendGraph(0, 0, WIDTH, HEIGHT, imgHandles["s_game_op"], true);
-				DrawExtendGraph(WIDTH / 2 - 429 / 2, 30, WIDTH / 2 + 429 / 2, 30 + 47, imgHandles["s_game_op_title"], true);
+				DrawExtendGraph(0, 0, WIDTH, HEIGHT, imgHandles["s_game_background"], true);
+				// DrawExtendGraph(WIDTH / 2 - 429 / 2, 30, WIDTH / 2 + 429 / 2, 30 + 47, imgHandles["s_game_op_title"], true);
 				// DrawExtendGraph(WIDTH/2-50, 400, WIDTH/2+50, 400+150, imgHandles["s_game_player"], true);
-				DrawString(50, 50, "EASY", difficulty == EASY ? GetColor(255, 0, 0) : GetColor(255, 255, 255));
-				DrawString(50, 100, "HARD", difficulty == HARD ? GetColor(255, 0, 0) : GetColor(255, 255, 255));
-				DrawString(50, 150, "NIGHTMARE", difficulty == NIGHTMARE ? GetColor(255, 0, 0) : GetColor(255, 255, 255));
+
+				SetFontSize(32);
+				SetFontThickness(9);
+				DrawString(200, 150, "EASY", difficulty == EASY ? GetColor(255,0,0) : GetColor(0, 0, 0));
+				DrawString(200, 250, "HARD", difficulty == HARD ? GetColor(255, 0, 0) : GetColor(0, 0, 0));
+				DrawString(200, 350, "NIGHTMARE", difficulty == NIGHTMARE ? GetColor(255, 0, 0) : GetColor(0, 0, 0));
+				SetFontSize(24);
+				SetFontThickness(6);
+
+				switch (difficulty)
+				{
+				case EASY: {
+					DrawString(450, 150, "←おすすめ", GetColor(255, 0, 0));
+					break;
+				}
+				case HARD: {
+					DrawString(450, 250, "←べてらん向け", GetColor(255, 0, 0));
+					break;
+				}
+				case NIGHTMARE: {
+					DrawString(450, 350, "←じごく", GetColor(255, 0, 0));
+					break;
+				}
+				default:
+					break;
+				}
+
+				DrawExtendGraph(760, 200, 760+Player::width*3, 200+Player::height*3, imgHandles[difficulty == EASY ? "s_game_player" : difficulty == HARD ? "s_game_player_damage" : "s_game_player_over"], true);
+
 				return true;
 			}
 		};
@@ -209,6 +243,7 @@ bool SinglePlayerGame::onStart() {
 			std::string tutosen5 = "剣を使えば敵を倒すこともできます";
 			std::string tutosen6 = "盾と剣を使ってお姫様を敵から守りましょう！！";
 			std::string tutosen7 = "これでチュートリアルを終了します";
+			std::string tutosen0 = "チュートリアルをスキップするにはSを押してください";
 
 
 		public:
@@ -232,37 +267,58 @@ bool SinglePlayerGame::onStart() {
 
 			bool draw() {
 				update();
-				if (timer <= FPS * 2 / 3) {
+
+				UINT w, h;
+				getPngSize("img/s_game/tuto0.png",&w,&h);
+				DrawExtendGraph(WIDTH - w/2, 30, WIDTH, 30 + h/2, imgHandles["s_game_tuto0"], true);
+				//DrawString(WIDTH - 700, 30, std::to_string(w).c_str(), GetColor(0, 0, 0));
+
+				if (timer <= FPS * 2/3) {
+
 
 				}
 				else if (timer <= FPS * 2) {
-					DrawString(550, 350, tutosen1.c_str(), GetColor(0, 0, 0));
+					getPngSize("img/s_game/tuto1.png", &w, &h);
+					//DrawString(550, 350, tutosen1.c_str(), GetColor(0, 0, 0));
+					DrawGraph(WIDTH/2-w/2, HEIGHT/2-h/2, imgHandles["s_game_tuto1"], true);
 				}
 				else if (timer <= FPS * 4) {
-					DrawString(550, 350, tutosen2.c_str(), GetColor(0, 0, 0));
+					getPngSize("img/s_game/tuto2.png", &w, &h);
+					//DrawString(550, 350, tutosen2.c_str(), GetColor(0, 0, 0));
+					DrawGraph(WIDTH / 2 - w / 2, HEIGHT / 2 - h / 2, imgHandles["s_game_tuto2"], true);
 				}
 				else if (timer <= FPS * 6) {
-					DrawString(550, 350, tutosen3.c_str(), GetColor(0, 0, 0));
+					getPngSize("img/s_game/tuto3.png", &w, &h);
+					//DrawString(550, 350, tutosen3.c_str(), GetColor(0, 0, 0));
+					DrawGraph(WIDTH / 2 - w / 2, HEIGHT / 2 - h / 2, imgHandles["s_game_tuto3"], true);
 				}
 				else if (timer <= FPS * 8) {
 					*tutorial = BEATFIRE;
-					DrawString(550, 350, tutosen4.c_str(), GetColor(0, 0, 0));
+					getPngSize("img/s_game/tuto4.png", &w, &h);
+					//DrawString(550, 350, tutosen4.c_str(), GetColor(0, 0, 0));
+					DrawGraph(WIDTH / 2 - w / 2, HEIGHT / 2 - h / 2, imgHandles["s_game_tuto4"], true);
 					if (timer == FPS * 8 && tutoenemy->childfire->getIsAlive()) {
 						timer--;
 					}
 				}
 				else if (timer <= FPS * 10) {
 					*tutorial = BEATHEIHO;
-					DrawString(550, 350, tutosen5.c_str(), GetColor(0, 0, 0));
+					getPngSize("img/s_game/tuto5.png", &w, &h);
+					//DrawString(550, 350, tutosen5.c_str(), GetColor(0, 0, 0));
+					DrawGraph(WIDTH / 2 - w / 2, HEIGHT / 2 - h / 2, imgHandles["s_game_tuto5"], true);
 					if (timer == FPS * 10 && tutoenemy->getIsAlive()) {
 						timer--;
 					}
 				}
 				else if (timer <= FPS * 12) {
-					DrawString(550, 350, tutosen6.c_str(), GetColor(0, 0, 0));
+					getPngSize("img/s_game/tuto6.png", &w, &h);
+					//DrawString(550, 350, tutosen6.c_str(), GetColor(0, 0, 0));
+					DrawGraph(WIDTH / 2 - w / 2, HEIGHT / 2 - h / 2, imgHandles["s_game_tuto6"], true);
 				}
 				else if (timer <= FPS * 14) {
-					DrawString(550, 350, tutosen7.c_str(), GetColor(0, 0, 0));
+					getPngSize("img/s_game/tuto7.png", &w, &h);
+					//DrawString(550, 350, tutosen7.c_str(), GetColor(0, 0, 0));
+					DrawGraph(WIDTH / 2 - w / 2, HEIGHT / 2 - h / 2, imgHandles["s_game_tuto7"], true);
 				}
 				else {
 					*tutorial = END;
@@ -271,6 +327,82 @@ bool SinglePlayerGame::onStart() {
 				return true;
 			}
 
+
+
+			/**
+			*	PNGファイルの画像サイズを取得する
+			*/
+			bool getPngSize(const char* path, UINT* width, UINT* height)
+			{
+				FILE* f;
+				fopen_s(&f, path,"rb");
+				if (!f) return false;
+
+				BYTE header[8];// PNGファイルシグネチャ 
+				if (fread(header, sizeof(BYTE), 8, f) < 8) { fclose(f); return false; }
+
+				const static BYTE png[] = { 0x89, 'P', 'N', 'G', 0x0d, 0x0a, 0x1a, 0x0a };
+				if (memcmp(header, png, 8) != 0) { fclose(f); return false; }
+
+				BYTE ihdr[25];// IHDRチャンク(イメージヘッダ) 
+				if (fread(ihdr, sizeof(BYTE), 25, f) < 25) { fclose(f); return false; }
+
+				// length = 13 (0x0D) 
+				const static BYTE length[] = { 0x00, 0x00, 0x00, 0x0D };
+				if (memcmp(ihdr, length, 4) != 0) { fclose(f); return false; }
+
+				// IHDR 
+				if (memcmp(ihdr + 4, "IHDR", 4) != 0) { fclose(f); return false; }
+
+				BYTE* p;
+
+				DWORD w;
+				p = (BYTE*)&w;
+				p[0] = ihdr[8 + 3];
+				p[1] = ihdr[8 + 2];
+				p[2] = ihdr[8 + 1];
+				p[3] = ihdr[8 + 0];
+
+				DWORD h;
+				p = (BYTE*)&h;
+				p[0] = ihdr[12 + 3];
+				p[1] = ihdr[12 + 2];
+				p[2] = ihdr[12 + 1];
+				p[3] = ihdr[12 + 0];
+
+				*width = (UINT)w;
+				*height = (UINT)h;
+
+				fclose(f);
+				return true;
+			}
+
+
+
+			/*typedef struct { int w, h; } Size;
+
+			Size GetJpegSize(const char *png)
+			{
+				Size ret = { 0, 0 };
+				unsigned char buf[8];
+				FILE *f;
+				fopen_s(&f, png, "rb");
+				while (f && fread(buf, 1, 2, f) == 2 && buf[0] == 0xff)
+				{
+					if (buf[1] == 0xc0 && fread(buf, 1, 7, f) == 7)
+					{
+						ret.h = buf[3] * 256 + buf[4];
+						ret.w = buf[5] * 256 + buf[6];
+					}
+					else if (buf[1] == 0xd8 || (fread(buf, 1, 2, f) == 2 &&
+						!fseek(f, buf[0] * 256 + buf[1] - 2, SEEK_CUR))) continue;
+					break;
+				}
+				if (f) fclose(f);
+				return ret;
+			}*/
+
+					
 		};
 		if (tutorial == END) {
 			makeEffect("s_game_curtain_close", 0, 0, WIDTH, HEIGHT, false, 160, 2, 1);
@@ -284,11 +416,10 @@ bool SinglePlayerGame::onStart() {
 
 	// GAME
 	mode.setMode([this]() {
-		
 		drawList.clear();
 		makeEffect("s_game_curtain_open", 0, 0, WIDTH, HEIGHT, false, 160, 2, 0);
 
-		maxPlayerDamage = difficulty == EASY ? 5 : difficulty == HARD ? 10 : 20;
+		maxPlayerDamage = difficulty == EASY ? 10 : difficulty == HARD ? 10 : 20;
 		player = std::make_shared<Player>(WIDTH / 2 - 100 / 2, HEIGHT / 2 - 150 / 2, Player::width, Player::height, "s_game_player", maxPlayerDamage, *this);
 
 
@@ -573,6 +704,11 @@ bool SinglePlayerGame::onUpdate() {
 		}
 
 
+		if (key[KEY_INPUT_S]) {
+			willFinishMode = true;
+		}
+
+
 		for (auto enemy : enemyList) {
 			enemy->update();
 		}
@@ -591,16 +727,11 @@ bool SinglePlayerGame::onUpdate() {
 	}
 	case GAME: { // playing
 
-		////////////////////デバッグ用チート////////////////////////////////
-		if (key[KEY_INPUT_2]) {
-			timer = 0;
-		}
-		if (key[KEY_INPUT_3]) {
-			willFinishMode = true;
-			hasPlayerWon = false;
-		}
 
-
+		tutoenemy->setIsDead();
+		if (tutoenemy->childfire != NULL) {
+			tutoenemy->childfire->setIsDead();
+		}
 		timer -= 1;
 		
 		if (timer <= 0) {
@@ -647,43 +778,33 @@ bool SinglePlayerGame::onUpdate() {
 			switch (maxTime - timer) {
 		
 			case 100: {
-				makeRocketWanwan(-RocketWanwan::width/2, HEIGHT / 2 + 50);
-				break;
-			}
-			case 200: {
 				makeEagle(0, 0, 1);
-				break;
-			}
-			case 300: {
-				makeUfo(0, 50, 1);
 				break;
 			}
 			case 600: {
-				makeCloud(0, 50, 1);
+				makeRocketWanwan(-RocketWanwan::width / 2, HEIGHT / 2 + 50);
 				break;
 			}
-			case 900: {
+			case 1000: {
 				makeInundation();
 			}
-			case 950: {
-				makeCloud(0, 50, 1);
-				break;
-			}
-			case 1100: {
-				makeUfo(0, 50, 1);
-				break;
-			}
-			case 1260: {
-				makeEagle(0, 0, 1);
-				break;
-			}
-			case 1400: {
-				makeInundation();
-			}
-			case 1600: {
+			case 2000: {
 				makeHeiho(WIDTH, 300, 1);
 				break;
 			}
+			case 2300: {
+				makeUfo(0, 50, 1);
+				break;
+			}
+			case 2800: {
+				makeCloud(0, 50, 1);
+				break;
+			}
+
+			case 3400: {
+				makeHeiho(WIDTH, 300, 1);
+				break;
+		    }
 			default: {
 			}
 			}
