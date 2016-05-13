@@ -219,9 +219,15 @@ class Menu : Game {
 				int margin = 25;
 				if (isSelected) {
 					DrawExtendGraph(WIDTH - margin - 1276 * (HEIGHT - 2*margin) / 892, margin, WIDTH -margin ,HEIGHT -margin, descHandle, true);
+
+					if (imageHandle == imgHandles["menu_b"]) {
+						margin = 100;
+						DrawExtendGraph(WIDTH - margin - 1276 * (HEIGHT - 2 * margin) / 892, margin, WIDTH - margin, HEIGHT - margin, imgHandles["menu_forbidden"], true);
+					}
 					
 					drawWithRotation(imgHandles["menu_select"], 0, false, 1.5);
 					drawWithRotation(imageHandle, p->getAngle(), false, 1.2);
+					
 				}
 				else {
 					p->reset();
@@ -230,19 +236,25 @@ class Menu : Game {
 
 				}
 
+				if (imageHandle == imgHandles["menu_b"]) {
+					drawWithRotation(imgHandles["menu_forbidden"], 0, false, 1);
+				}
+
 				return true;
 			}
 			bool draw() { return true; }
 		};
 
 		int numOfGames;
-		int selectedGameIndex = 0;
 		std::vector<GameDescription> gameList;
 
 		Menu& menu;
 
 		public :
 			SelectGame(Menu& menu_);
+
+		int selectedGameIndex = 0;
+
 
 		std::shared_ptr<Game> startSelectedGame() {
 			return gameList[selectedGameIndex].gameFunc();
@@ -315,9 +327,13 @@ public:
 	bool onUpdate() {
 
 		if (key[KEY_INPUT_RETURN]) {
-			// gameType = std::make_shared<FirstGame>();
-			gameType = games->startSelectedGame();
-			share.willFinish = true;
+			if (games->selectedGameIndex == 2) {
+
+			}
+			else {
+				gameType = games->startSelectedGame();
+				share.willFinish = true;
+			}
 		}
 		if (key[KEY_INPUT_ESCAPE]) {
 			share.willFinish = true;

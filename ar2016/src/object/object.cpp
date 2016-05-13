@@ -95,6 +95,8 @@ bool Object::load() {
 
 	isSuccess &= loadEffect("menu_select", "menu/select", 3, 4, 1536, 2048);
 
+	isSuccess &= loadImage("menu_forbidden", "menu/preparation");
+
 	// Single Player Game
 	// オープニング
 	isSuccess &= loadImage("s_game_op_title", "s_game/s_game_op_title");
