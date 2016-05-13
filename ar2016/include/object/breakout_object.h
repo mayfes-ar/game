@@ -189,7 +189,7 @@ namespace Breakout {
 			if (isAvailable() && m_sentences.size() != 0) {
 				DrawExtendGraph(m_realm.left(), m_realm.top(), m_realm.right(), m_realm.bottom(), m_fukidashi_handle, TRUE);
 				/*m_sentences.c_str()*/
-				DrawString(m_realm.left(), m_realm.top(), "うんち", m_color);
+				DrawFormatString(m_sentences_realm.left(), m_sentences_realm.top(), m_color, "うんち");
 				decrementTime();
 				return true;
 			} else {
@@ -200,8 +200,8 @@ namespace Breakout {
 	private:
 		Shape::Rectangle m_realm = Shape::Rectangle();
 		Shape::Rectangle m_sentences_realm = Shape::Rectangle();
-		int top_offset = 10;
-		int left_offset = 20;
+		int top_offset = 15;
+		int left_offset = 25;
 		int right_offset = 5;
 		int bottom_offset = 5;
 		std::string m_sentences = "";
