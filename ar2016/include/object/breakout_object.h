@@ -1104,7 +1104,7 @@ public:
 			m_green_fireball_effect.incrementCounterWhenDrawWithRealm(m_bounding_box);
 			break;
 		case PlayerStrong:
-			DrawCircle(x, y, r, Color::GREEN, true);
+			m_player_strong_fireball_effect.incrementCounterWhenDrawWithRealm(m_bounding_box);
 			break;
 		}
 
@@ -1239,7 +1239,6 @@ private:
 	Effect m_green_fireball_effect = Effect(effectHandles["b_green_fireball"], PRIORITY_DYNAMIC_OBJECT);
 	Effect m_enemy_strong_fireball_effect = Effect(effectHandles["b_enemy_strong_fireball"], PRIORITY_DYNAMIC_OBJECT);
 	Effect m_player_strong_fireball_effect = Effect(effectHandles["b_player_strong_fireball"], PRIORITY_DYNAMIC_OBJECT);
-
 };
 
 class FireballManager : public Object {
