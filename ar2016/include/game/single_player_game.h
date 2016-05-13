@@ -208,6 +208,8 @@ class SinglePlayerGame : public Game {
 		double bottomHit() const { return bottom() - rect.height / 3; }
 	};
 
+
+	
 	// エフェクトクラス
 	// 実際のエフェクトの作成はmakeEffect関数から行う
 	// effectHandleKey:ハンドルキー, x, y, width, height, willStay:持続するか, layer, framePerCount:エフェクトの速度, counter:何カウント目からエフェクトを始めるか
@@ -1194,6 +1196,8 @@ class SinglePlayerGame : public Game {
 		}
 	};
 
+
+
 	class Fire : public Enemy {
 	public:
 		static const int width = 280 / 3;
@@ -1232,6 +1236,7 @@ class SinglePlayerGame : public Game {
 			acX = -2;
 		}
 	};
+
 
 	enum Tutorial {
 		START,BEATFIRE,BEATHEIHO,END
