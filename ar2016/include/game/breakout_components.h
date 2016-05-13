@@ -15,6 +15,7 @@
 #include "moving/random_behavior.h"
 #include "game/fps.h"
 #include "util/breakout_params.h"
+#include "game/image_process.h"
 
 
 namespace Breakout{
@@ -38,7 +39,7 @@ public:
 	BreakoutComponents() {}
 	~BreakoutComponents() {}
 
-	void setup();
+	void setup(ShareData& share);
 
 	std::shared_ptr<Breakout::Select<Breakout::Mode, Breakout::ModeEnumHash>> select = nullptr;
     std::shared_ptr<Breakout::Background> background = nullptr;

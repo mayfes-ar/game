@@ -532,7 +532,8 @@ namespace Breakout {
 class Background : public Object
 {
 public:
-	Background()
+	Background(int& handle) :
+		m_handle(handle)
 	{
 		Object::layer = PRIORITY_BACKGROUND;
 	}
@@ -550,8 +551,13 @@ public:
 				m_forest_saturation++;
 			}
 
+			DrawExtendGraph(CAP2IMG_SHIFT_X, CAP2IMG_SHIFT_Y, CAP2IMG_SHIFT_X + CAP2IMG_RATE*CAP_WIDTH, CAP2IMG_SHIFT_Y + CAP2IMG_RATE*CAP_HEIGHT, m_handle, FALSE);
+			// SetDrawBright(230, 230, 230);
+			SetDrawBlendMode(DX_BLENDMODE_ALPHA, 200); 
 			DrawExtendGraph(0, 0, WIDTH, HEIGHT,
 				imgHandles["b_magma"], true);
+			SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 100);
+			
 			SetDrawBright(255, 255, 255);
 			return true;
 		}
@@ -560,8 +566,14 @@ public:
 				m_magma_saturation++;
 			}
 			SetDrawBright(m_magma_saturation, m_magma_saturation, m_magma_saturation);
+			
+			DrawExtendGraph(CAP2IMG_SHIFT_X, CAP2IMG_SHIFT_Y, CAP2IMG_SHIFT_X + CAP2IMG_RATE*CAP_WIDTH, CAP2IMG_SHIFT_Y + CAP2IMG_RATE*CAP_HEIGHT, m_handle, FALSE);
+			// SetDrawBright(230, 230, 230);
+			SetDrawBlendMode(DX_BLENDMODE_ALPHA, 200);
 			DrawExtendGraph(0, 0, WIDTH, HEIGHT,
-				imgHandles["b_hill"], true);
+				imgHandles["b_hill"], true); 
+			SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 100);
+
 			SetDrawBright(255, 255, 255);
 			return true;
 		}
@@ -576,6 +588,7 @@ private:
 	int m_magma_saturation = 50;
 	bool m_is_last_phase = false;
 	const int m_saturation_max = 100;
+	int& m_handle;
 };
 
 class Explanation : public Object

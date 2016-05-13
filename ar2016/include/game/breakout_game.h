@@ -124,7 +124,7 @@ private:
 		// 認識スレッドを回す
 		m_detect_thread = std::thread(capture, std::ref(share));
 
-		m_components->setup();
+		m_components->setup(share);
 		m_components->info->init();
 		m_is_mode_selected = false;
     }

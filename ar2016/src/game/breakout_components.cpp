@@ -4,7 +4,7 @@
 using namespace Breakout;
 
 
-void BreakoutComponents::setup()
+void BreakoutComponents::setup(ShareData& share)
 {
 	// Select画面
 	{
@@ -19,7 +19,7 @@ void BreakoutComponents::setup()
 	}
 	// Layoutの初期化
 	{
-		background = std::make_shared<Background>();
+		background = std::make_shared<Background>(share.handle);
 		background->init();
 		const auto info_realm = Shape::Rectangle(INFO_START_POS, INFO_WIDTH, INFO_HEIGHT);
 		std::shared_ptr<Timer> timer = std::make_shared<Timer>(TIMER_MAX_MIN, TIMER_MAX_SEC, TIMER_MAX_MSEC);

@@ -290,7 +290,7 @@ void BreakoutGame::updatePotStatus() {
 				// Phase: 吸い込んでから吐き出すまで
 
 				// potをマーカーの位置に移動させる
-				const Eigen::Vector2i diff_dist = Eigen::Vector2i((int)share.rects[0].x - m_components->pot->getRealm().left(), (int)share.rects[0].y - m_components->pot->getRealm().top());
+				const Eigen::Vector2i diff_dist = Eigen::Vector2i((int)share.rects[0].x + share.rects[0].width/2 - m_components->pot->getRealm().left(), (int)share.rects[0].y + share.rects[0].height/2 - m_components->pot->getRealm().top());
 				m_components->pot->translate(diff_dist / 10);
 
 				// potをマーカーの回転にあわせる
