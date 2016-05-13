@@ -1383,13 +1383,9 @@ class SinglePlayerGame : public Game {
 		static const int height = 1046/8;
 
 		Player(int x_, int y_, int width_, int height_, std::string imgHandleKey_, int maxDamage_, SinglePlayerGame& game_) : Character(x_, y_, width_, height_, imgHandleKey_, maxDamage_, game_, 0, FPS*2) {
-<<<<<<< HEAD
 			layer = 100;	
 			timer = &game_.timer;
 			maxTime = &game_.maxTime;
-=======
-			layer = 100;
->>>>>>> gaku/master
 			// overBuffer = overBufferMax;
 		}
 
