@@ -240,8 +240,10 @@ bool SinglePlayerGame::onStart() {
 		class Title : public Object {
 			bool start = false;
 			int timer = 0;
+			char* key;
 			std::shared_ptr<SinglePlayerGame::tutoHeiho> tutoenemy;
 			Tutorial *tutorial;
+			SinglePlayerGame *game;
 			std::string tutosen1 = "あ、危ない！！";
 			std::string tutosen2 = "お姫様に火の玉が当たりそうです！！";
 			std::string tutosen3 = "お姫様を守るために盾を使ってみましょう";
@@ -257,6 +259,8 @@ bool SinglePlayerGame::onStart() {
 				layer = 50;
 				tutoenemy = tutoenemy_;
 				tutorial = &game_.tutorial;
+				game = &game_;
+				key = game_.key;
 			}
 
 			void update() {
@@ -326,8 +330,18 @@ bool SinglePlayerGame::onStart() {
 					DrawGraph(WIDTH / 2 - w / 2, HEIGHT / 2 - h / 2, imgHandles["s_game_tuto7"], true);
 				}
 				else {
-					*tutorial = END;
-
+					if (key[KEY_INPUT_C]) {
+						*tutorial = END;
+					}
+					else if (key[KEY_INPUT_R]) {
+						timer = 0;
+						start = false;
+						tutoenemy->setIsDead();
+						if (tutoenemy->childfire != NULL) {
+							tutoenemy->childfire->setIsDead();
+						}
+						tutoenemy = game->maketutoHeiho(WIDTH, 300, 1);
+					}
 				}
 				return true;
 			}
