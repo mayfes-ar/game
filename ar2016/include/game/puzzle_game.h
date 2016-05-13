@@ -120,6 +120,7 @@ class PuzzleGame : public Game {
 			layer = 2;
 		}
 		~Explanation() {
+			isIncreasing = false;
 			//StopSoundMem(soundHandles["p_bgm1"]);
 		}
 		bool isFirst = true;
