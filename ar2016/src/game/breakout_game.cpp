@@ -436,3 +436,7 @@ void BreakoutGame::EnemyVSTown() {
 		}
 	}
 }
+
+void BreakoutGame::updateInfo() {
+	
+}

@@ -548,8 +548,8 @@ public:
 		StopSoundMem(soundHandles["b_start_play"]);
 		StopSoundMem(soundHandles["b_final_play"]);
 		m_is_last_phase = false;
-		m_forest_saturation = 50;
-		m_magma_saturation = 50;
+		m_forest_saturation = 255;
+		m_magma_saturation = 255;
 		PlaySoundMem(soundHandles["b_start_play"], DX_PLAYTYPE_BACK, TRUE);
 	}
 
@@ -565,8 +565,8 @@ public:
 				m_is_last_singing = true;;
 			}
 			SetDrawBright(m_forest_saturation, m_forest_saturation, m_forest_saturation);
-			if (m_forest_saturation < m_saturation_max) {
-				m_forest_saturation++;
+			if (m_forest_saturation > m_saturation_min) {
+				m_forest_saturation--;
 			}
 
 			DrawExtendGraph(CAP2IMG_SHIFT_X, CAP2IMG_SHIFT_Y, CAP2IMG_SHIFT_X + CAP2IMG_RATE*CAP_WIDTH, CAP2IMG_SHIFT_Y + CAP2IMG_RATE*CAP_HEIGHT, m_handle, FALSE);
@@ -582,7 +582,7 @@ public:
 			return true;
 		}
 		else {
-			if (m_magma_saturation < m_saturation_max) {
+			if (m_magma_saturation < m_saturation_min) {
 				m_magma_saturation++;
 			}
 			SetDrawBright(m_magma_saturation, m_magma_saturation, m_magma_saturation);
@@ -591,7 +591,7 @@ public:
 			// SetDrawBright(230, 230, 230);
 			SetDrawBlendMode(DX_BLENDMODE_ALPHA, 200);
 			DrawExtendGraph(0, 0, WIDTH, HEIGHT,
-				imgHandles["b_grass"], true); 
+				imgHandles["b_grass"], false); 
 			SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 100);
 
 			SetDrawBright(255, 255, 255);
@@ -605,11 +605,12 @@ public:
 
 private:
 	Shape::Rectangle m_realm = Shape::Rectangle(FIELD_START_POS, FIELD_WIDTH, FIELD_HEIGHT);
-	int m_forest_saturation = 50;
-	int m_magma_saturation = 50;
+	int m_forest_saturation = 255;
+	int m_magma_saturation = 255;
 	bool m_is_last_phase = false;
 	bool m_is_last_singing = false;
-	const int m_saturation_max = 100;
+	const int m_saturation_max = 255;
+	const int m_saturation_min = 100;
 	int& m_handle;
 	Effect m_fire_frame = Effect(effectHandles["b_fire_frame"], 5, PRIORITY_BACKGROUND_EFFECT);
 };
@@ -663,6 +664,7 @@ public:
 			m_realm.right(), m_realm.bottom(),
 			GetColor(50, 50, 50), TRUE);
 		SetDrawBright(255, 255, 255);
+
 		// Timer の描画
 		const auto time = m_timer->getLeftedTime();
 		std::array<int, 6> time_num;
@@ -710,10 +712,16 @@ public:
 				key << "green_" << time_num.at(i);
 			}
 
-			DrawExtendGraph((i + 1) * num_width, num_height, (i + 2)* num_width, 2 * num_height,
+			DrawExtendGraph((i + 2) * num_width, num_height, (i + 3)* num_width, 2 * num_height,
 				imgHandles[key.str()], TRUE);
 		}
+		// 砂時計の描画
+		
+		DrawExtendGraph(10, num_height, num_width, num_height * 2, imgHandles["b_sunadokei"], TRUE);
 
+
+
+		// Scoreの描画
 		auto score = m_score->getPoint();
 		std::array<int, 4> score_num;
 		score_num.at(0) = score / 1000;

@@ -246,6 +246,7 @@ bool Object::load() {
 	isSuccess &= loadImage("b_house01", "breakout/house01");
 	isSuccess &= loadImage("b_hime", "puzzle/hime_normal");
 	isSuccess &= loadImage("b_hime_damaged", "puzzle/hime_gameover");
+	isSuccess &= loadImage("b_hime_odoroki", "s_game/hime_odoroki");
 
 	isSuccess &= loadImage("b_castle", "breakout/castle");
 	isSuccess &= loadImage("b_girl", "breakout/girl");
@@ -255,6 +256,11 @@ bool Object::load() {
 
 	isSuccess &= loadImage("b_normal_fukidashi", "breakout/normal_fukidashi");
 	isSuccess &= loadImage("b_bikkuri_fukidashi", "breakout/bikkuri_fukidashi");
+
+	//info
+	isSuccess &= loadImage("b_sunadokei", "breakout/sunadokei");
+
+	//effect
 
 	isSuccess &= loadEffect("b_muteki", "breakout/muteki", 1, 6, 320, 1440);
 	isSuccess &= loadEffect("b_burning", "breakout/burning", 1, 5, 240, 900);

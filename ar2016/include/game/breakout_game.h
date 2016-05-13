@@ -92,6 +92,7 @@ public:
 			updateTown();
 			shipVSEnemy();
 			EnemyVSTown();
+			updateInfo();
 			break;
 		default:
 			break;
@@ -159,6 +160,9 @@ private:
 
 	// firebalのupdate
 	void updateFireballPosition();
+
+	// Infoのupdate
+	void updateInfo();
 
 	// ゲームをクリアしたかどうか
 	// 現在はBlockが一つもない場合はクリアとみなす
