@@ -61,13 +61,36 @@ bool PuzzleGame::onStart() {
 	
 	// mode 3
 	mode.setMode([this]() {
+		makeStageBase(false);
+		setPlayer(100, -100);
+		setGoal(1100, 100);
+
+		setWarp(-500, 800, 2500, 600, 100, -100);
+		setWind(100, 200, 100, 400, 0, -3);
+		setWind(400, 200, 100, 400, 0, -3);
+		setWind(650, -200, 200, 1000, 0, 3);
+		setWind(1000, 200, 100, 400, 0, -3);
+
+		setCoin(420, 500);
+		setCoin(1020, 450);
+		setCoin(1020, 370);
+		setCoin(1020, 290);
+		setCoin(670, 550);
+		setCoin(770, 550);
+		setCoin(670, 50);
+		setCoin(770, 50);
+
+	}, -1);
+
+	// mode 4
+	mode.setMode([this]() {
 		makeStageBase();
 
 		setPlayer(50, 580);
 		setGoal(100, 80);
 		
-		setWind(0, 240, 840, 80, 3, 0);
-		setWind(440, 560, 540, 120, -3, 0);
+		setWind(260, 240, 380, 80, 3, 0);
+		setWind(440, 560, 400, 120, -3, 0);
 		setBlock(0, 300, 1100, 40);
 		setBlock(200, 560, 290, 220);
 
@@ -94,29 +117,6 @@ bool PuzzleGame::onStart() {
 
 		setWind(1040, 150, 140, 51, -2, 0);
 		setCoin(1120, 10);
-
-	}, -1);
-	
-	// mode 4
-	mode.setMode([this]() {
-		makeStageBase(false);
-		setPlayer(100, -100);
-		setGoal(1100, 100);
-
-		setWarp(-500, 800, 2500, 600, 100, -100);
-		setWind(100, 200, 100, 400, 0, -3);
-		setWind(400, 200, 100, 400, 0, -3);
-		setWind(650, -200, 200, 1000, 0, 3);
-		setWind(1000, 200, 100, 400, 0, -3);
-
-		setCoin(420, 500);
-		setCoin(1020, 450);
-		setCoin(1020, 370);
-		setCoin(1020, 290);
-		setCoin(670, 550);
-		setCoin(770, 550);
-		setCoin(670, 50);
-		setCoin(770, 50);
 
 	}, -1);
 
@@ -146,6 +146,8 @@ bool PuzzleGame::onStart() {
 		setDamage(1150, 600, 30);
 		setDamage(1150, 650, 30);
 		setDamage(1150, 700, 30);
+		setDamage(900, -5, 30);
+		setDamage(1150, -5, 30);
 		setBlock(20, 200, 400, 20);
 		setBlock(200, 150, 70, 70);
 		setBlock(440, 400, 24, 240);
@@ -153,7 +155,7 @@ bool PuzzleGame::onStart() {
 		setBlock(464, 400, 236, 24);
 		setBlock(464, 616, 236, 24);
 		setWarp(620, 424, 60, 60, 600, 300, true);
-		setWarp(1200, 650, 60, 60, 520, 500, true);
+		setWarp(1200, 640, 80, 80, 520, 500, true);
 		setCoin(40, 240);
 		setCoin(120, 240);
 		setCoin(200, 240);
@@ -251,12 +253,7 @@ bool PuzzleGame::onUpdate() {
 		break;
 	}
 	case 3: {
-		/*if (counter % (FPS * 3) == 0) {
-			setDamage(300, -100, 50, 5, 14);
-		}
-		if (2 * counter % (FPS * 6) == FPS * 3) {
-			setDamage(400, -100, 50, -5, 14);
-		}*/
+		
 		break;
 	}
 	case 4: {
