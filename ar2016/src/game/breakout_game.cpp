@@ -346,7 +346,7 @@ void BreakoutGame::updatePotStatus() {
 
 		if (share.lives[0] > 0) {
 			// potを出現させる
-			if (share.rects[0].width < (180 / 2)) {
+			if (share.rects[0].width < (Breakout::POT_APPEAR_DEPTH)) {
 				m_components->pot->appear();
 			}
 			// potが出現していたら
@@ -370,7 +370,7 @@ void BreakoutGame::updatePotStatus() {
 						// 吐き出す
 						m_components->pot->exhareFireball();
 					}
-					else if (share.rects[0].width > (250 / 2)) {
+					else if (share.rects[0].width > (Breakout::POT_EXHARE_DEPTH)) {
 						m_components->pot->exhareFireball();
 					}
 				}
@@ -736,6 +736,9 @@ void BreakoutGame::setup_tutorial_pot() {
 
 	drawList.clear();
 	m_components->himes.clear();
+	m_components->pot->resetStatus();
+	m_components->ship->resetShip();
+
 
 	m_components->himes.push_back(std::make_shared<Breakout::InfoHime>("  空から\nより大きな\nファイアボール、\nいや、サンダーボール\nが落ちてくるわ！", 1000, "b_hime_odoroki"));
 	m_components->himes.push_back(std::make_shared<Breakout::InfoHime>("  あぁ、Shipが\n削られてしまったわ", 60));
