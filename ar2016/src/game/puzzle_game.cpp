@@ -263,8 +263,8 @@ bool PuzzleGame::onUpdate() {
 		break;
 	}
 	case 5: {
-		if (counter % (FPS * 2) == 0) {//Stage 5のギミック
-			setDamage(800, -100, 50, 0, 10);
+		if (counter % (FPS * 4) == 0) {//Stage 5のギミック
+			setDamage(800, -100, 50, 0, 7.5);
 		}
 		break;
 	}
