@@ -15,6 +15,11 @@ namespace Breakout {
 	const Eigen::Vector2i INFO_START_POS = Eigen::Vector2i::Zero();
 	const int INFO_WIDTH = WIDTH / 4;
 	const int INFO_HEIGHT = HEIGHT;
+
+	const Eigen::Vector2i INFO_HIME_START_POS = Eigen::Vector2i(INFO_WIDTH/4, HEIGHT/2);
+	const int INFO_HIME_WIDTH = INFO_WIDTH/2;
+	const int INFO_HIME_HEIGHT = INFO_HIME_WIDTH * 1046 / 621;
+
 	const Eigen::Vector2i FIELD_START_POS = Eigen::Vector2i(INFO_WIDTH, 0);
 	const int FIELD_WIDTH = 3 * WIDTH / 4;
 	const int FIELD_HEIGHT = HEIGHT;
@@ -38,7 +43,7 @@ namespace Breakout {
 
 	// Blockのパラメータ
 	const int BLOCK_OFFSET_X = WIDTH / 4;
-	const int BLOCK_OFFSET_Y = HEIGHT / 8;
+	const int BLOCK_OFFSET_Y = HEIGHT / 7;
 	constexpr int BLOCK_WIDTH_NUM = 15;
 	constexpr int BLOCK_HEIGHT_NUM = 5;
 	const int BLOCK_WIDTH = (FIELD_WIDTH) / BLOCK_WIDTH_NUM;
@@ -86,7 +91,8 @@ namespace Breakout {
 
 	// Potのパラメータ
 	const Eigen::Vector2i POT_START_POS = Eigen::Vector2i{ BLOCK_OFFSET_X + FIELD_WIDTH / 2, HEIGHT - 200 };
-
+	const int POT_EXHARE_DEPTH = 300;
+	const int POT_APPEAR_DEPTH = 200;
 
 	// House のパラメータ
 	constexpr int HOUSE_NUM = 6;
