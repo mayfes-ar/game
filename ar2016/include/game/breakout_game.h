@@ -62,6 +62,7 @@ public:
 			drawList.push_back(m_components->count_down);
 		}, -1);
 
+
 		mode.setMode([&]() {
 			m_components->ship->resetShip();
 			drawList.clear();

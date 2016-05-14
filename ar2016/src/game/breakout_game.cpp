@@ -236,8 +236,9 @@ void BreakoutGame::updateGameState()
 	}
 	case TutorialShip: {
 		if (!tutorial_ship() || (key[KEY_INPUT_S] && key[KEY_INPUT_1])) {
-			mode.goNext();
 			drawList.clear();
+			mode.goNext();
+			
 		}
 		break;
 	}
@@ -246,8 +247,9 @@ void BreakoutGame::updateGameState()
 			setup_tutorial_pot();
 		}
 		if (!tutorial_pot() || (key[KEY_INPUT_S] && key[KEY_INPUT_2])) {
-			mode.goNext();
 			drawList.clear();
+			mode.goNext();
+			
 		}
 		break;
 	}
@@ -499,7 +501,7 @@ bool BreakoutGame::tutorial_ship() {
 	}
 
 	auto fireball_effect = m_components->fireball->returnFireballReflect(m_components->ship->getRealm(), 1, m_components->ship->getVelocity());
-	if (fireball_effect->isCollide()) {
+	if (fireball_effect->isCollide() && m_components->himes.size() == 5) {
 		//跳ね返すときは反射effectを入れる
 		drawList.push_back(fireball_effect);
 		m_components->fireball->changeModeToPlayer();

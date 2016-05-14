@@ -2132,18 +2132,22 @@ public:
 		resident->appear();
 		resident->setVelocity(Eigen::Vector2f((m_realm.left() > FIELD_START_POS.x() + FIELD_WIDTH / 2 ? 80.0f : -80.0f), 20.0f));
 		resident->setAccel(Eigen::Vector2f(0.0f, 30.0f));
+		std::shared_ptr<Fukidashi> fukidashi;
 		switch (resident->getResidentKind()) {
 		case Hime:
 			resident->setImageHandle("b_hime_damaged");
+			fukidashi = std::make_shared<Fukidashi>(resident->getRealm().getRightTopPoint(), "あきらめませんわ！", 60, GetColor(0, 0, 0));
 			break;
 		case Boy:
 			resident->setImageHandle("b_boy_damaged");
+			fukidashi = std::make_shared<Fukidashi>(resident->getRealm().getRightTopPoint(), "逃げろー！！", 60, GetColor(0, 0, 0));
 			break;
 		case Girl:
 			resident->setImageHandle("b_girl_damaged");
+			fukidashi = std::make_shared<Fukidashi>(resident->getRealm().getRightTopPoint(), "キャー！\n助けてー！！", 60, GetColor(0, 0, 0));
 			break;
 		}
-		std::shared_ptr<Fukidashi> fukidashi = std::make_shared<Fukidashi>(resident->getRealm().getRightTopPoint(), "キャー！\n助けてー！！", 60, GetColor(0, 0, 0));
+
 		resident->setFukidashi(fukidashi);
 		m_resident = nullptr;
 	}
@@ -2198,7 +2202,8 @@ public:
 		const auto time = m_timer->getLeftedTime();
 		int sec = std::get<1>(time);
 
-		DrawExtendGraph(0, 0, WIDTH, HEIGHT, imgHandles["b_grass"], false);
+		//DrawExtendGraph(0, 0, WIDTH, HEIGHT, imgHandles["b_grass"], false);
+
 		// draw
 		switch (sec) {
 			case 3:

@@ -112,15 +112,34 @@ class PuzzleGame : public Game {
 
 	class Explanation : public Object {
 	public:
+		int volume = 50;
+		bool isIncreasing = true;
 		Explanation() {
 			PlaySoundMem(soundHandles["p_bgm1"], DX_PLAYTYPE_LOOP, true);
+			ChangeVolumeSoundMem(volume, soundHandles["p_bgm1"]);
 			layer = 2;
 		}
-		~Explanation() {
-			StopSoundMem(soundHandles["p_bgm1"]);
-		}
+		/*~Explanation() {
+			isIncreasing = false;
+			//StopSoundMem(soundHandles["p_bgm1"]);
+		}*/
 		bool isFirst = true;
 		bool draw() {
+			if (volume < 252 && isIncreasing == true) {
+				volume = volume + 4;
+				ChangeVolumeSoundMem(volume, soundHandles["p_bgm1"]);
+			}
+
+			/*if (isIncreasing == false) {
+				if (volume - 4 >= 0) {
+					volume = volume - 4;
+				}
+				else {
+					volume = 0;
+				}
+				ChangeVolumeSoundMem(volume, soundHandles["p_bgm1"]);
+			}
+			*/
 			if (isFirst) {
 				DrawGraph(0, 0, imgHandles["p_explain1"], false);
 			} else {
@@ -133,6 +152,8 @@ class PuzzleGame : public Game {
 	class ResultObject : public Object {
 		PuzzleGame& game;
 		const int handle = movieHandles["p_flower"];
+		int volume = 0;
+		bool isIncreasing = true;
 	public:
 		ResultObject(PuzzleGame& game_) : game(game_){
 			layer = 0;
@@ -140,13 +161,19 @@ class PuzzleGame : public Game {
 			if (GetMovieStateToGraph(handle) == 0) {
 				PlayMovieToGraph(handle);
 			}
+			StopSoundMem(soundHandles["p_bgm2"]);
 			PlaySoundMem(soundHandles["p_bgm3"], DX_PLAYTYPE_LOOP, true);
+			//ChangeVolumeSoundMem(50, soundHandles["p_bgm3"]);
 		}
 		~ResultObject() {
 			StopSoundMem(soundHandles["p_bgm3"]);
 		}
 		bool draw() {
 			DrawGraph(0, 0, handle, false);
+			/*if (volume < 252 && isIncreasing == true) {
+				volume = volume + 4;
+				ChangeVolumeSoundMem(volume, soundHandles["p_bgm3"]);
+			}*/
 			if (GetMovieStateToGraph(handle) == 1) {
 				return true;
 			}
@@ -194,8 +221,37 @@ class PuzzleGame : public Game {
 		TimerObject() {
 			layer = 200;
 		}
+		~TimerObject() {
+			StopSoundMem(soundHandles["p_bgm1"]);
+			StopSoundMem(soundHandles["p_bgm2"]);
+			StopSoundMem(soundHandles["p_bgm3"]);
+		}
+		int volume = 90;
+		int soundState = 0;  //soundState = 0:constant; 1:increasing; 2:decreasing;
 		bool draw() {
 			const int size = 60;
+
+			if (volume < 252 && soundState == 1) {
+				volume = volume + 4;
+			}
+			if (volume >= 0 && soundState == 2) {
+				if (volume - 4 >= 0) {
+					volume = volume - 4;
+				}
+				else {
+					volume = 0;
+				}
+			}
+			/*if (CheckSoundMem(soundHandles["p_bgm1"]) == 1) {
+				ChangeVolumeSoundMem(volume, soundHandles["p_bgm1"]);
+			}*/
+			if (CheckSoundMem(soundHandles["p_bgm2"]) == 1) {
+				ChangeVolumeSoundMem(volume, soundHandles["p_bgm2"]);
+			}
+			/*else if (CheckSoundMem(soundHandles["p_bgm3"]) == 1) {
+				ChangeVolumeSoundMem(volume, soundHandles["p_bgm3"]);
+			}*/
+
 			DrawExtendGraph(800, 2, 800 + size, 2 + size, imgHandles["p_timer"], true);
 			drawNumber(800 + size, 2, size, time/FPS, effectHandles["p_num"]);
 			//DrawFormatString(800, 0, GetColor(165, 205, 163), "TIME: %d", time/FPS);
@@ -205,12 +261,36 @@ class PuzzleGame : public Game {
 			time--;
 			return time == 0;
 		}
+		void startPlayingBGM(int n) {
+			/*if (n == 1) {
+				PlaySoundMem(soundHandles["p_bgm1"], DX_PLAYTYPE_LOOP, true);
+				ChangeVolumeSoundMem(50, soundHandles["p_bgm1"]);
+			}
+			*/
+			if (n == 2) {
+				StopSoundMem(soundHandles["p_bgm1"]);
+				PlaySoundMem(soundHandles["p_bgm2"], DX_PLAYTYPE_LOOP, true);
+				ChangeVolumeSoundMem(volume, soundHandles["p_bgm2"]);
+			}
+			/*else if (n == 3) {
+				StopSoundMem(soundHandles["p_bgm2"]);
+				PlaySoundMem(soundHandles["p_bgm3"], DX_PLAYTYPE_LOOP, true);
+				ChangeVolumeSoundMem(50, soundHandles["p_bgm3"]);
+			}*/
+			soundState = 1;
+		}
+		/*void stopPlayingBGM() {
+			soundState = 2;
+		}*/
+		/*
 		void startPlayingBGM() {
 			PlaySoundMem(soundHandles["p_bgm2"], DX_PLAYTYPE_LOOP, true);
 		}
 		void stopPlayingBGM() {
 			StopSoundMem(soundHandles["p_bgm2"]);
 		}
+		*/
+
 	};
 
 	class CurtainObject : public Object {
@@ -222,6 +302,7 @@ class PuzzleGame : public Game {
 		CurtainObject(bool isOpen_) : isOpen(isOpen_) {
 			layer = 300;
 		}
+		int volume = 255;
 		bool draw() {
 			const int handle = isOpen ? effectHandles["p_curtain_open"][counter] : effectHandles["p_curtain_close"][counter];
 			DrawExtendGraph(0, 0, 1280, 720, handle, true);
@@ -231,6 +312,13 @@ class PuzzleGame : public Game {
 				return !(counter == openCountMax);
 			} else {
 				if (counter < closeCountMax - 1) { counter++; }
+				volume = volume - 4;
+				if (CheckSoundMem(soundHandles["p_bgm1"]) == 1) {
+					ChangeVolumeSoundMem(volume,soundHandles["p_bgm1"]);
+				}
+				else if(CheckSoundMem(soundHandles["p_bgm2"]) == 1) {
+				ChangeVolumeSoundMem(volume, soundHandles["p_bgm2"]);
+				}
 				return true;
 			}
 		}
@@ -310,9 +398,22 @@ class PuzzleGame : public Game {
 				exForceX = exForceY = 0;
 			};
 		}
-		void init() {
+		void init(int soundNum=0) {
 			if (!isMovable) { return; }
 			game.drawList.push_back(std::make_shared<InitEffect>(rect.x - 62, rect.y - 50, 200));
+			switch (soundNum)
+			{
+			case 1: {
+				PlaySoundMem(soundHandles["ps_needle"], DX_PLAYTYPE_BACK);
+				break;
+			}
+			case 2: {
+				PlaySoundMem(soundHandles["ps_ball"], DX_PLAYTYPE_BACK);
+				break;
+			}
+			default:
+				break;
+			}
 
 			updateFunc = [this]() {
 				isDamaged = true;
@@ -348,6 +449,9 @@ class PuzzleGame : public Game {
 				layer = 101;
 			}
 			bool draw() {
+				if (counter % 2 == 0) {
+					PlaySoundMem(soundHandles["ps_coin"], DX_PLAYTYPE_BACK);
+				}
 				drawWithRect(effectHandles["p_coins"][counter], 50);
 				counter++;
 				return counter < countMax;
@@ -418,7 +522,7 @@ class PuzzleGame : public Game {
 			}
 
 			if (isContacted(game.player)) {
-				game.player->init();
+				game.player->init(canVanish ? 2 : 1);
 			}
 			return willExist;
 		}
@@ -467,6 +571,7 @@ class PuzzleGame : public Game {
 			if (isContacted(game.player)) {
 				game.score->score += value;
 				willExist = false;
+				PlaySoundMem(soundHandles["ps_coin"], DX_PLAYTYPE_BACK);
 			}
 			return willExist;
 		}
@@ -483,6 +588,7 @@ class PuzzleGame : public Game {
 		void setSwitch(bool isOn_) {
 			if (isOn == false && isOn_ == true) {
 				pusheffect = 1;
+				PlaySoundMem(soundHandles["ps_crystal"], DX_PLAYTYPE_BACK);
 			}
 			isOn = isOn_;
 			if (isReverse) {
@@ -539,6 +645,7 @@ class PuzzleGame : public Game {
 		void setSwitch(bool isOn_) {
 			if (isOn == false && isOn_ == true) {
 				pusheffect = 1;
+				PlaySoundMem(soundHandles["ps_crystal"], DX_PLAYTYPE_BACK);
 			}
 			if (isOn_ && !isOn) {
 				func();
@@ -585,9 +692,10 @@ class PuzzleGame : public Game {
 		const double posY;
 		int counter = 0;
 		const int countMax = effectHandles["p_warp"].size();
+		const bool hasSound;
 
 	public:
-		WarpGimmick(Rectan rect_, double posX_, double posY_, PuzzleGame& game_) : posX(posX_), posY(posY_), Gimmick(game_) {
+		WarpGimmick(Rectan rect_, double posX_, double posY_, PuzzleGame& game_, bool hasSound_) : posX(posX_), posY(posY_), Gimmick(game_), hasSound(hasSound_) {
 			rect = rect_;
 			layer = 70;
 		}
@@ -604,6 +712,9 @@ class PuzzleGame : public Game {
 		bool update() {
 			if (isContacted(game.player)) {
 				game.player->warp(posX, posY);
+				if (hasSound) {
+					PlaySoundMem(soundHandles["ps_warp"], DX_PLAYTYPE_BACK);
+				}
 			}
 			return willExist;
 		}
@@ -717,8 +828,8 @@ class PuzzleGame : public Game {
 		gimmicks.push_back(switch_);
 		drawList.push_back(switch_);
 	}
-	void setWarp(int x, int y, int width, int height, int posX, int posY) {
-		auto warp = std::make_shared<WarpGimmick>(Rectan(x, y, width, height), posX, posY, *this);
+	void setWarp(int x, int y, int width, int height, int posX, int posY, bool hasSound=false) {
+		auto warp = std::make_shared<WarpGimmick>(Rectan(x, y, width, height), posX, posY, *this, hasSound);
 		gimmicks.push_back(warp);
 		drawList.push_back(warp);
 	}
@@ -769,9 +880,9 @@ public:
 		score = std::make_shared<ScoreObject>();
 		timer = std::make_shared<TimerObject>();
 	}
-	~PuzzleGame() {
+	/*~PuzzleGame() {
 		timer->stopPlayingBGM();
-	}
+	}*/
 
 	bool onStart();
 	bool onUpdate();
