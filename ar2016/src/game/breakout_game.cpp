@@ -211,11 +211,12 @@ void BreakoutGame::updateGameState()
 				m_components->enemy_manager->setGenerateEnemyRatio(0.002);
 				break;
 			case Breakout::Mode::Normal:
-				m_components->increaseBlock(0.15);
+				m_components->increaseBlock(0.10);
 				m_components->enemy_manager->setGenerateEnemyRatio(0.008);
+				m_components->fireball_manager->changeMaximumFireballNum(Breakout::MAX_FIREBALL_NUM_ON_NORMAL);
 				break;
 			case Breakout::Mode::Hard:
-				m_components->increaseBlock(0.3);
+				m_components->increaseBlock(0.2);
 				m_components->fireball_manager->changeMaximumFireballNum(Breakout::MAX_FIREBALL_NUM_ON_HARD);
 				m_components->enemy_manager->setGenerateEnemyRatio(1.0);
 				break;
