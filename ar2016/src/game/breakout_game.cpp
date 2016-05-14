@@ -321,9 +321,9 @@ void BreakoutGame::updateGameState()
 bool BreakoutGame::isGameClear() const
 {
 	if (m_components->enemy->isAlive()) return false;
-	for (auto& enemy : m_components->enemy_manager->getEnemyList()) {
-		if (enemy->isAlive()) return false;
-	}
+	//for (auto& enemy : m_components->enemy_manager->getEnemyList()) {
+	//	if (enemy->isAlive()) return false;
+	//}
 	//for (const auto& block : m_components->block_list) {
 	//	//壊せないブロックだったら勘定に入れない
 	//	if (block->getBlockKind() == "UnbreakableBlock") continue;
