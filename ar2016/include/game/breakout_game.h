@@ -173,7 +173,7 @@ private:
 	void updateFireballPosition();
 
 	// Infoのupdate
-	void updateInfo();
+	void updateInfoHime();
 
 	// shipのチュートリアル
 	bool tutorial_ship();

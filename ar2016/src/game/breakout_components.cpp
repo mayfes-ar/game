@@ -9,7 +9,7 @@ void BreakoutComponents::setup(ShareData& share)
 	//InfoHime
 	{
 		Shape::Rectangle realm = Shape::Rectangle(Eigen::Vector2i(WIDTH / 2, HEIGHT / 4), INFO_HIME_WIDTH, INFO_HIME_HEIGHT);
-		info_hime = std::make_shared<InfoHime>(realm, "難易度を選んでね♪", 100000);
+		info_hime = std::make_shared<InfoHime>("難易度を選んでね♪", 100000);
 	}
 
 	// Select画面
@@ -210,7 +210,7 @@ void BreakoutComponents::setup(ShareData& share)
 		auto enemy_left_hand = std::make_shared<Breakout::EnemyLeftHand>(Shape::Rectangle(ENEMY_HEAD_POS + Eigen::Vector2i(-100, 20), ENEMY_HEAD_WIDTH, ENEMY_HEAD_WIDTH), behavior_left, life);
 		auto enemy_right_hand = std::make_shared<Breakout::EnemyRightHand>(Shape::Rectangle(ENEMY_HEAD_POS + Eigen::Vector2i(100, 20), ENEMY_HEAD_WIDTH, ENEMY_HEAD_WIDTH), behavior_right, life);
 		enemy = std::make_shared<Breakout::EnemyHead>(Shape::Rectangle(ENEMY_HEAD_POS, ENEMY_HEAD_WIDTH, ENEMY_HEAD_WIDTH), behavior_head, life, enemy_left_hand, enemy_right_hand);
-		
+		enemy->setDeadEffect("b_boss_dead_effect", 4);
 		enemy_manager = std::make_shared<EnemyManager>(MAX_ENEMY_NUM);
 	}
 

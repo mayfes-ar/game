@@ -367,6 +367,7 @@ bool Object::load() {
 	isSuccess &= loadEffect("b_player_strong_fireball", "breakout/player_strong_fireball", 10, 3, 2000, 600);
 	isSuccess &= loadEffect("b_fire_frame", "breakout/fire_frame", 2, 5, 1280, 2400);
 	isSuccess &= loadEffect("b_pot_light", "breakout/gra_effect_light", 7, 3, 1680, 720);
+	isSuccess &= loadEffect("b_boss_dead_effect", "breakout/boss_dead_effect", 10, 1, 2400, 240);
 
 
 	isSuccess &= loadSound("b_bomb", "breakout/bomb.mp3");

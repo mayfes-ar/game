@@ -16,7 +16,7 @@ namespace Breakout {
 	const int INFO_WIDTH = WIDTH / 4;
 	const int INFO_HEIGHT = HEIGHT;
 
-	const Eigen::Vector2i INFO_HIME_START_POS = Eigen::Vector2i(INFO_WIDTH/4, HEIGHT/2);
+	const Eigen::Vector2i INFO_HIME_START_POS = Eigen::Vector2i(INFO_WIDTH/8, HEIGHT/2);
 	const int INFO_HIME_WIDTH = INFO_WIDTH/2;
 	const int INFO_HIME_HEIGHT = INFO_HIME_WIDTH * 1046 / 621;
 

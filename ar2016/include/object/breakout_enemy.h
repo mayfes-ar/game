@@ -68,12 +68,14 @@ namespace Breakout
 		// mode が enemy じゃない fireball にあたったらLifeを減らすようなメソッド
 		virtual bool damageEnemy(int amount) {
 			m_is_damaged = 30;
+			m_damaged.start();
 			return m_life.damage(amount);
 		}
 
 		// もしplayerのfireballにあたったら
 		virtual void damageByPlayerFireball(std::shared_ptr<Fireball>& fireball, std::shared_ptr<FireballManager>& manager) {
 			m_life.damage(fireball->giveDamage());
+			m_damaged.start();
 			//触れたら消える
 			manager->destroy(fireball);
 			m_is_damaged = 30;
@@ -168,6 +170,7 @@ namespace Breakout
 	private:
 		Effect m_dead_effect = Effect(effectHandles["b_explosion"], 5, PRIORITY_DYNAMIC_OBJECT);
 		int m_dead_count = 35;
+		Sound m_damaged = Sound("b_bomb");
 	};
 
 	// 人や住居とぶつかったら爆発して死ぬ。相手にもダメージを与える
@@ -257,6 +260,7 @@ namespace Breakout
 			
 			m_moving->updatePoistion(m_realm.start_point);
 		}
+
 	};
 
 
@@ -427,6 +431,14 @@ namespace Breakout
 			return m_life.damage(amount);
 		}
 
+		void damageByPlayerFireball(std::shared_ptr<Fireball>& fireball, std::shared_ptr<FireballManager>& manager) override {
+			m_boss_damaged_sound.start();
+			m_life.damage(fireball->giveDamage());
+			//触れたら消える
+			manager->destroy(fireball);
+			m_is_damaged = 30;
+		}
+
 		bool draw() override {
 			if (!isAlive()) {
 				EnemyBase::draw();
@@ -532,6 +544,7 @@ namespace Breakout
 
 		double getGenerateEnemyRatio() { return m_generate_enemy_ratio; }
 
+		void setMaxNum(int num) { m_max_num = num; }
 
 	private:
 		std::vector<std::shared_ptr<EnemyBase>> m_enemy_list = {};

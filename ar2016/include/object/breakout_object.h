@@ -824,8 +824,9 @@ public:
 		m_fukidashi = std::make_shared<Fukidashi>(m_realm.getRightBottomPoint(), sentences, appear_time, color);
 	}
 
-	void setHimeImgHandle(int img_handle) {
-		m_hime_img_handle = img_handle;
+	void setHimeImgName(std::string name) {
+		m_hime_img_handle = imgHandles[name];
+		m_is_finish_draw = false;
 	}
 
 	bool hasFukidashi() { return m_fukidashi != nullptr; }
@@ -848,6 +849,7 @@ public:
 
 	void finishDraw() {
 		m_is_finish_draw = true;
+		m_fukidashi = nullptr;
 	}
 
 	bool getIsFinishDraw() {
@@ -1668,11 +1670,11 @@ private:
 			m_fireball->setPosition(m_realm.getLeftTopPoint());
 		}
 	}
-	int m_exhare_effect_start_count = 50;
+	int m_exhare_effect_start_count = 30;
 	//Sound m_inhare_sound = Sound("b_pot_inhare");
 	Sound m_exhare_sound = Sound("b_pot_exhare");
 	int m_exhare_sound_start_count = 30;
-	Effect m_exhare_effect = Effect(effectHandles["b_pot_light"], 2, PRIORITY_DYNAMIC_OBJECT);
+	Effect m_exhare_effect = Effect(effectHandles["b_pot_light"], 3, PRIORITY_DYNAMIC_OBJECT);
 };
 
 // キャラクタがのる船
