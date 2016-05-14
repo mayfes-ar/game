@@ -480,7 +480,7 @@ namespace Breakout {
 				if (it == m_now_mode) {
 					DrawBox(m_realm.left(), m_realm.top() + image_height * (2 * i + 1),
 						m_realm.left() + image_width, m_realm.top() + image_height * (2 * i + 2),
-						Color::WHITE, FALSE);
+						Color::BLACK, FALSE);
 				}
 				i += 1;
 

@@ -146,8 +146,14 @@ void BreakoutGame::moveShip()
 	if (m_components->ship->getLifeNum() == 0) return;
 
 	if (share.lives[0] > 0) {
-		const int diff = (int)(share.rects[0].x - m_components->ship->left());
-		m_components->ship->translate(diff / 10);
+		int diff = (int)(share.rects[0].x - m_components->ship->left());
+		if (std::abs((double)diff) / 5.0 < 1.0) { // チャッタリング対策
+			diff = 0;
+		}
+		else if (std::abs((double)diff) / 5.0 < 2.0) {
+			m_components->ship->translate(diff / 6);
+		}
+		m_components->ship->translate(diff / 3);
 	}
 
 	if (key[KEY_INPUT_LEFT]) {
@@ -345,7 +351,7 @@ void BreakoutGame::updatePotStatus() {
 
 				// potをマーカーの位置に移動させる
 				const Eigen::Vector2i diff_dist = Eigen::Vector2i((int)share.rects[0].x + share.rects[0].width / 2 - m_components->pot->getRealm().left(), (int)share.rects[0].y + share.rects[0].height / 2 - m_components->pot->getRealm().top());
-				m_components->pot->translate(diff_dist / 10);
+				m_components->pot->translate(diff_dist / 5);
 
 				// potをマーカーの回転にあわせる
 				const float diff_rot = (float)share.rects[0].rotate - m_components->pot->getRotation();

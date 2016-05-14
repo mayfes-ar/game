@@ -120,9 +120,9 @@ namespace Breakout {
 	// Score
 	constexpr int BLOCK_SCORE = 50;
 	constexpr int ENEMY_SCORE = 100;
-	constexpr int BOSS_HEAD_SCORE = 200;
-	constexpr int BOSS_LEFT_SCORE = 100;
-	constexpr int BOSS_RIGHT_SCORE = 100;
+	constexpr int BOSS_HEAD_SCORE = 1000;
+	constexpr int BOSS_LEFT_SCORE = 500;
+	constexpr int BOSS_RIGHT_SCORE = 500;
 	constexpr int HOUSE_SCORE = -100;
 	constexpr int SCORE_OFFSET = 1000;
 
