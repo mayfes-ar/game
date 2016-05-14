@@ -163,7 +163,11 @@ class PuzzleGame : public Game {
 			}
 			StopSoundMem(soundHandles["p_bgm2"]);
 			PlaySoundMem(soundHandles["p_bgm3"], DX_PLAYTYPE_LOOP, true);
+
+			
+
 			//ChangeVolumeSoundMem(50, soundHandles["p_bgm3"]);
+
 		}
 		~ResultObject() {
 			StopSoundMem(soundHandles["p_bgm3"]);

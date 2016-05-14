@@ -1,4 +1,4 @@
-/*
+﻿/*
  * BreakoutGameで使うオブジェクト一覧
  */
 
@@ -38,6 +38,7 @@ namespace Breakout {
 	constexpr int PRIORITY_DYNAMIC_OBJECT = 30; // 動的オブジェクト(Ship, Fireball)
 	constexpr int PRIORITY_CHARACTER = 40; // キャラクター(マリオ)
 	constexpr int PRIORITY_INFO = 50; // インフォメーション
+	constexpr int PRIORITY_INFO_HIME = 55; //インフォの姫よう
 	constexpr int PRIORITY_FUKIDASHI = 60; //吹出し用
 
 	// 方向をあらわすenum
@@ -156,9 +157,9 @@ namespace Breakout {
 			m_sentences_realm.width = width;
 			m_sentences_realm.height = height;
 			m_sentences_realm.start_point = right_bottom_point + Eigen::Vector2i(0, -height);
-			m_realm.width = width + left_offset + right_offset;
-			m_realm.height = height + bottom_offset + top_offset;
-			m_realm.start_point = right_bottom_point + Eigen::Vector2i(-left_offset ,-height - top_offset);			
+			m_realm.width =(int) ((float)width / (1.0-left_ratio-right_ratio));
+			m_realm.height =(int) ((float)height / (1.0 - bottom_ratio - top_ratio));
+			m_realm.start_point = right_bottom_point + Eigen::Vector2i(-m_realm.width * left_ratio , -m_realm.height * (1.0 - bottom_ratio));			
 			Object::layer = PRIORITY_FUKIDASHI;
 		}
 
@@ -170,9 +171,9 @@ namespace Breakout {
 			m_sentences_realm.width = width;
 			m_sentences_realm.height = height;
 			m_sentences_realm.start_point = right_bottom_point + Eigen::Vector2i(0, -height);
-			m_realm.width = width + left_offset + right_offset;
-			m_realm.height = height + bottom_offset + top_offset;
-			m_realm.start_point = right_bottom_point + Eigen::Vector2i(-left_offset, -height - top_offset);
+			m_realm.width = (int)((float)width / (1.0 - left_ratio - right_ratio));
+			m_realm.height = (int)((float)height / (1.0 - bottom_ratio - top_ratio));
+			m_realm.start_point = right_bottom_point + Eigen::Vector2i(-m_realm.width * left_ratio, -m_realm.height * (1.0 - bottom_ratio));
 			m_fukidashi_handle = imgHandles[fukidashi_name];
 			Object::layer = PRIORITY_FUKIDASHI;
 		}
@@ -188,8 +189,7 @@ namespace Breakout {
 		bool draw() override {
 			if (isAvailable() && m_sentences.size() != 0) {
 				DrawExtendGraph(m_realm.left(), m_realm.top(), m_realm.right(), m_realm.bottom(), m_fukidashi_handle, TRUE);
-				
-				DrawString(m_realm.left(), m_realm.top(), m_sentences.c_str(), m_color);
+				DrawFormatString(m_sentences_realm.left(), m_sentences_realm.top(), m_color, m_sentences.c_str());
 				decrementTime();
 				return true;
 			} else {
@@ -200,10 +200,10 @@ namespace Breakout {
 	private:
 		Shape::Rectangle m_realm = Shape::Rectangle();
 		Shape::Rectangle m_sentences_realm = Shape::Rectangle();
-		int top_offset = 5;
-		int left_offset = 10;
-		int right_offset = 5;
-		int bottom_offset = 5;
+		const float top_ratio = 0.15;
+		const float left_ratio = 0.25;
+		const float right_ratio = 0.08;
+		const float bottom_ratio = 0.15;
 		std::string m_sentences = "";
 		int m_appear_time;
 		int m_fukidashi_handle = imgHandles["b_normal_fukidashi"];
@@ -271,6 +271,16 @@ namespace Breakout {
 			if (m_counter < m_count_max) {
 				DrawRotaGraph(realm.getCenterPoint().x(), realm.getCenterPoint().y(),
 					(double)realm.width / (double)m_effect_width, degree,
+					m_effectHandles[m_counter / m_frames_per_scene], TRUE, FALSE);
+				m_counter++;
+				return true;
+			}
+			return false;
+		}
+
+		bool returnFalseWhenFinishDrawWithRotation(Shape::Circle circle, float rotation) {
+			if (m_counter < m_count_max) {
+				DrawRotaGraph2(circle.center.x(), circle.center.y(), m_effect_width / 2, m_effect_height / 2, (double)circle.radius * 2.0 / (double)m_effect_width, rotation,
 					m_effectHandles[m_counter / m_frames_per_scene], TRUE, FALSE);
 				m_counter++;
 				return true;
@@ -459,6 +469,8 @@ namespace Breakout {
 			int image_width = m_realm.width / 2;
 			int image_height = m_realm.height / (4 * image_num);
 
+			DrawExtendGraph(0, 0, WIDTH, HEIGHT, imgHandles["b_grass"], false);
+
 			int i = 0;
 			for (auto it = m_mode_list.begin(); it != m_mode_list.end(); ++it) {
 				DrawExtendGraph(m_realm.left(), m_realm.top() + image_height * (2 * i + 1),
@@ -468,7 +480,7 @@ namespace Breakout {
 				if (it == m_now_mode) {
 					DrawBox(m_realm.left(), m_realm.top() + image_height * (2 * i + 1),
 						m_realm.left() + image_width, m_realm.top() + image_height * (2 * i + 2),
-						Color::WHITE, FALSE);
+						Color::BLACK, FALSE);
 				}
 				i += 1;
 
@@ -548,8 +560,8 @@ public:
 		StopSoundMem(soundHandles["b_start_play"]);
 		StopSoundMem(soundHandles["b_final_play"]);
 		m_is_last_phase = false;
-		m_forest_saturation = 50;
-		m_magma_saturation = 50;
+		m_forest_saturation = 255;
+		m_magma_saturation = 255;
 		PlaySoundMem(soundHandles["b_start_play"], DX_PLAYTYPE_BACK, TRUE);
 	}
 
@@ -565,8 +577,8 @@ public:
 				m_is_last_singing = true;;
 			}
 			SetDrawBright(m_forest_saturation, m_forest_saturation, m_forest_saturation);
-			if (m_forest_saturation < m_saturation_max) {
-				m_forest_saturation++;
+			if (m_forest_saturation > m_saturation_min) {
+				m_forest_saturation--;
 			}
 
 			DrawExtendGraph(CAP2IMG_SHIFT_X, CAP2IMG_SHIFT_Y, CAP2IMG_SHIFT_X + CAP2IMG_RATE*CAP_WIDTH, CAP2IMG_SHIFT_Y + CAP2IMG_RATE*CAP_HEIGHT, m_handle, FALSE);
@@ -582,7 +594,7 @@ public:
 			return true;
 		}
 		else {
-			if (m_magma_saturation < m_saturation_max) {
+			if (m_magma_saturation < m_saturation_min) {
 				m_magma_saturation++;
 			}
 			SetDrawBright(m_magma_saturation, m_magma_saturation, m_magma_saturation);
@@ -591,7 +603,7 @@ public:
 			// SetDrawBright(230, 230, 230);
 			SetDrawBlendMode(DX_BLENDMODE_ALPHA, 200);
 			DrawExtendGraph(0, 0, WIDTH, HEIGHT,
-				imgHandles["b_grass"], true); 
+				imgHandles["b_grass"], false); 
 			SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 100);
 
 			SetDrawBright(255, 255, 255);
@@ -605,11 +617,12 @@ public:
 
 private:
 	Shape::Rectangle m_realm = Shape::Rectangle(FIELD_START_POS, FIELD_WIDTH, FIELD_HEIGHT);
-	int m_forest_saturation = 50;
-	int m_magma_saturation = 50;
+	int m_forest_saturation = 255;
+	int m_magma_saturation = 255;
 	bool m_is_last_phase = false;
 	bool m_is_last_singing = false;
-	const int m_saturation_max = 100;
+	const int m_saturation_max = 255;
+	const int m_saturation_min = 100;
 	int& m_handle;
 	Effect m_fire_frame = Effect(effectHandles["b_fire_frame"], 5, PRIORITY_BACKGROUND_EFFECT);
 };
@@ -663,6 +676,7 @@ public:
 			m_realm.right(), m_realm.bottom(),
 			GetColor(50, 50, 50), TRUE);
 		SetDrawBright(255, 255, 255);
+
 		// Timer の描画
 		const auto time = m_timer->getLeftedTime();
 		std::array<int, 6> time_num;
@@ -710,10 +724,16 @@ public:
 				key << "green_" << time_num.at(i);
 			}
 
-			DrawExtendGraph((i + 1) * num_width, num_height, (i + 2)* num_width, 2 * num_height,
+			DrawExtendGraph((i + 2) * num_width, num_height, (i + 3)* num_width, 2 * num_height,
 				imgHandles[key.str()], TRUE);
 		}
+		// 砂時計の描画
+		
+		DrawExtendGraph(10, num_height, num_width, num_height * 2, imgHandles["b_sunadokei"], TRUE);
 
+
+
+		// Scoreの描画
 		auto score = m_score->getPoint();
 		std::array<int, 4> score_num;
 		score_num.at(0) = score / 1000;
@@ -733,6 +753,7 @@ public:
 				imgHandles[key.str()], TRUE);
 		}
 		// Score の描画
+
 		return true;
 	}
 
@@ -767,12 +788,114 @@ public:
 		m_score->setScore(score);
 	}
 
+
 private:
 	Shape::Rectangle m_realm = Shape::Rectangle();
 	std::shared_ptr<Timer> m_timer = nullptr;
 	std::shared_ptr<Score> m_score = nullptr;
 	std::vector<std::function<int()>> m_score_calc;
 };
+
+class InfoHime : public Object
+{
+public:
+	InfoHime() {}
+	InfoHime(Shape::Rectangle realm, std::shared_ptr<Fukidashi> fukidashi = nullptr, int img_handle = imgHandles["b_hime"])
+		: m_realm(realm), m_fukidashi(fukidashi), m_hime_img_handle(img_handle)
+	{
+		Object::layer = PRIORITY_INFO_HIME;
+	}
+	InfoHime(Shape::Rectangle realm, std::string sentences, int appear_time, int img_handle = imgHandles["b_hime"])
+		: m_realm(realm), m_hime_img_handle(img_handle)
+	{
+		m_fukidashi = std::make_shared<Fukidashi>(realm.getRightTopPoint(), sentences, appear_time);
+		Object::layer = PRIORITY_INFO_HIME;
+	}
+
+	InfoHime(std::string sentences, int appear_time, std::string img_name = "b_hime")
+		: m_hime_img_handle(imgHandles[img_name])
+	{
+		m_realm = Shape::Rectangle(INFO_HIME_START_POS, INFO_HIME_WIDTH, INFO_HIME_HEIGHT);
+		m_fukidashi = std::make_shared<Fukidashi>(m_realm.getRightTopPoint(), sentences, appear_time);
+		Object::layer = PRIORITY_INFO_HIME;
+	}
+
+	void setSentences(std::string sentences, int appear_time, unsigned int color) {
+		m_fukidashi = std::make_shared<Fukidashi>(m_realm.getRightBottomPoint(), sentences, appear_time, color);
+	}
+
+	void setHimeImgHandle(int img_handle) {
+		m_hime_img_handle = img_handle;
+	}
+
+	bool hasFukidashi() { return m_fukidashi != nullptr; }
+
+	void updatePosition() {
+		m_moving->updatePoistion(m_realm.start_point);
+	}
+
+	void setMoving(std::shared_ptr<Moving>& moving) {
+		m_moving = moving;
+	}
+
+	void setAccel(Eigen::Vector2f& accel) {
+		m_moving->setAccel(accel);
+	}
+
+	void setVelocity(Eigen::Vector2f& vel) {
+		m_moving->setVelocity(vel);
+	}
+
+	void finishDraw() {
+		m_is_finish_draw = true;
+	}
+
+	bool getIsFinishDraw() {
+		return m_is_finish_draw;
+	}
+
+	bool draw() override {
+		if (m_is_finish_draw) return false;
+		DrawExtendGraph(m_realm.left(), m_realm.top(), m_realm.right(), m_realm.bottom(), m_hime_img_handle, TRUE);
+		if (hasFukidashi()) {
+			if (!m_fukidashi->draw()) {
+				m_fukidashi = nullptr;
+			}
+			return true;
+		}
+		m_is_finish_draw = true;
+		return false;
+	}
+
+	
+
+private:
+	Shape::Rectangle m_realm = Shape::Rectangle(INFO_HIME_START_POS, INFO_HIME_WIDTH, INFO_HIME_HEIGHT);
+	std::shared_ptr<Moving> m_moving = std::make_shared<Moving>(0.03f, std::make_shared<NewtonBehavior>());
+	int m_hime_img_handle = imgHandles["b_hime"];
+	std::shared_ptr<Fukidashi> m_fukidashi = nullptr;
+	bool m_is_finish_draw = false;
+};
+
+
+//class InfoHimeManager : public Object
+//{
+//public:
+//	InfoHimeManager();
+//
+//	void addNewSet(std::string key, std::shared_ptr<InfoHime> value) {
+//		m_himes[key] = value;
+//	}
+//
+//	std::shared_ptr goNext() {
+//		
+//	}
+//
+//private:
+//	std::unordered_map<std::string, std::shared_ptr<InfoHime>> m_himes = {};
+//	std::string = m_now_key;
+//};
+
 
 class Result : public Object
 {
@@ -789,6 +912,18 @@ public:
 
 	void setFinalScore(int score) {
 		m_score = score;
+
+		// 動画再生開始
+		if (m_is_game_clear) {
+			m_movie_handle = movieHandles["b_clear_movie"];
+			SeekMovieToGraph(m_movie_handle, 0);
+			if (GetMovieStateToGraph(m_movie_handle) == 0) {
+				PlayMovieToGraph(m_movie_handle);
+			}
+		} else {
+
+		}
+
 	}
 
 
@@ -800,9 +935,11 @@ public:
 		m_cnt += 2;
 
 		if (m_is_game_clear) {
-			DrawExtendGraph(m_realm.left(), m_realm.top(),
+			/*DrawExtendGraph(m_realm.left(), m_realm.top(),
 				m_realm.right(), m_realm.bottom(),
-				imgHandles["b_game_clear"], TRUE);
+				imgHandles["b_game_clear"], TRUE);*/
+			DrawExtendGraph(0, 0, WIDTH, HEIGHT, m_movie_handle, true);
+
 		}
 		else {
 			DrawExtendGraph(m_realm.left(), m_realm.top(),
@@ -845,6 +982,7 @@ private:
 	bool m_is_game_clear = false;
 	int m_cnt = 0;
 	int m_score;
+	int m_movie_handle = -1;
 };
 
 // フィールド 
@@ -1188,12 +1326,12 @@ public:
 				std::shared_ptr<MovingBehavior> rnd_behavior = std::make_shared<RandomBehavior>(m_bounding_box.left(), m_bounding_box.right(), m_bounding_box.top(), m_bounding_box.bottom());
 				m_moving->setBehavior(rnd_behavior);
 				increaseRadius(1);
+				m_moving->setVelocity(Eigen::Vector2f(0, 5.0f));
 			}
 			// 十分大きくなったら下に向けて発射
 			else {
 				std::shared_ptr<MovingBehavior> nwt_behavior = std::make_shared<NewtonBehavior>();
 				m_moving->setBehavior(nwt_behavior);
-				m_moving->setVelocity(Eigen::Vector2f(0, 5.0f));
 			}
 		}
 		m_moving->updatePoistion(m_realm.center);
@@ -1468,6 +1606,7 @@ public:
 		m_fireball = nullptr;
 		m_initial_fireball_speed = 0;
 		m_count = 90;
+		m_exhare_effect_start_count = 60;
 	}
 
 	bool draw() override {
@@ -1476,7 +1615,7 @@ public:
 			return true;
 		}
 
-		auto rotatedTopLine = getRealm().getTopLine().getRotatedLine(m_realm.getCenterPoint(), getRotation());
+		/*auto rotatedTopLine = getRealm().getTopLine().getRotatedLine(m_realm.getCenterPoint(), getRotation());
 		auto rotatedLeftLine = getRealm().getLeftLine().getRotatedLine(getRealm().getCenterPoint(), getRotation());
 		auto rotatedRightLine = getRealm().getRightLine().getRotatedLine(getRealm().getCenterPoint(), getRotation());
 		auto rotatedBottomLine = getRealm().getBottomLine().getRotatedLine(getRealm().getCenterPoint(), getRotation());
@@ -1486,7 +1625,7 @@ public:
 		DrawLine(rotatedLeftLine.point.x(), rotatedLeftLine.point.y(), (rotatedLeftLine.point + rotatedLeftLine.dir).x(), (rotatedLeftLine.point + rotatedLeftLine.dir).y(), GetColor(200, 255, 0), 3);
 		DrawLine(rotatedRightLine.point.x(), rotatedRightLine.point.y(), (rotatedRightLine.point + rotatedRightLine.dir).x(), (rotatedRightLine.point + rotatedRightLine.dir).y(), GetColor(0, 255, 200), 3);
 		DrawLine(rotatedBottomLine.point.x(), rotatedBottomLine.point.y(), (rotatedBottomLine.point + rotatedBottomLine.dir).x(), (rotatedBottomLine.point + rotatedBottomLine.dir).y(), GetColor(200, 0, 200), 3);
-
+*/
 		DrawRotaFormatString(m_realm.left(), m_realm.top(),
 			1.0, 1.0,
 			m_realm.width / 2, m_realm.height / 2,
@@ -1495,12 +1634,23 @@ public:
 		DrawRotaGraph(m_realm.getCenterPoint().x(), m_realm.getCenterPoint().y(),
 			(double)m_realm.width / 150.0, m_rotation,
 			imgHandles["b_pot"], TRUE, FALSE);
+		
+		if (m_count < m_exhare_effect_start_count && m_count >= 0) {
+			const int radius = m_fireball->getRealm().radius * 2;
+			auto rotatedTopLine = getRealm().getTopLine().getRotatedLine(m_realm.getCenterPoint(), getRotation());
+			const Eigen::Vector2i center = rotatedTopLine.point + rotatedTopLine.dir / 2;
+			Shape::Circle circle = Shape::Circle(center, radius);
+			m_exhare_effect.returnFalseWhenFinishDrawWithRotation(circle, getRotation());
+		}
 
+		if (m_count == m_exhare_sound_start_count) {
+			m_exhare_sound.start();
+		}
 
-		DrawBox(m_realm.left(), m_realm.top(),
+		/*DrawBox(m_realm.left(), m_realm.top(),
 			m_realm.right(), m_realm.bottom(),
 			GetColor(255, 0, 0), false);
-
+*/
 		return true;
 	}
 
@@ -1518,6 +1668,11 @@ private:
 			m_fireball->setPosition(m_realm.getLeftTopPoint());
 		}
 	}
+	int m_exhare_effect_start_count = 50;
+	//Sound m_inhare_sound = Sound("b_pot_inhare");
+	Sound m_exhare_sound = Sound("b_pot_exhare");
+	int m_exhare_sound_start_count = 30;
+	Effect m_exhare_effect = Effect(effectHandles["b_pot_light"], 2, PRIORITY_DYNAMIC_OBJECT);
 };
 
 // キャラクタがのる船
@@ -1582,8 +1737,12 @@ public:
 		if (!m_life.damage(amount)) return false;
 		for (int i = 0; i < amount; i++) {
 			//両側から一個ずつへらす
-			m_blocks.pop_back();
-			m_blocks.erase(m_blocks.begin());
+			if (!m_blocks.empty()) {
+				m_blocks.pop_back();
+			}
+			if (!m_blocks.empty()) {
+				m_blocks.erase(m_blocks.begin());
+			}
 		}
 		return true;
 	}
@@ -1591,7 +1750,7 @@ public:
 	void resetShip() {
 		m_blocks.clear();
 		m_life.resetLife();
-		for (int i = 0; i < m_life.getLifeNum(); i++) {
+		for (int i = 0; i < m_life.getLifeNum()*2; i++) {
 			m_blocks.push_back(Shape::Rectangle(m_start_point + Eigen::Vector2i{ SHIP_BLOCK_WIDTH, 0 } *i, SHIP_BLOCK_WIDTH, SHIP_BLOCK_HEIGHT));
 		}
 	}
@@ -1647,8 +1806,11 @@ public:
 				i--;
 				break;
 			case DamageShip:
-				m_bomb_sound.start();
-				damageShip(1);
+				//強化されていたらなにもしない
+				if (!isEnhanced()) {
+					m_bomb_sound.start();
+					damageShip(1);
+				}
 				deleteItem(m_items[i]);
 				i--;
 				break;
@@ -1996,18 +2158,22 @@ public:
 		resident->appear();
 		resident->setVelocity(Eigen::Vector2f((m_realm.left() > FIELD_START_POS.x() + FIELD_WIDTH / 2 ? 80.0f : -80.0f), 20.0f));
 		resident->setAccel(Eigen::Vector2f(0.0f, 30.0f));
+		std::shared_ptr<Fukidashi> fukidashi;
 		switch (resident->getResidentKind()) {
 		case Hime:
 			resident->setImageHandle("b_hime_damaged");
+			fukidashi = std::make_shared<Fukidashi>(resident->getRealm().getRightTopPoint(), "あきらめませんわ！", 60, GetColor(0, 0, 0));
 			break;
 		case Boy:
 			resident->setImageHandle("b_boy_damaged");
+			fukidashi = std::make_shared<Fukidashi>(resident->getRealm().getRightTopPoint(), "逃げろー！！", 60, GetColor(0, 0, 0));
 			break;
 		case Girl:
 			resident->setImageHandle("b_girl_damaged");
+			fukidashi = std::make_shared<Fukidashi>(resident->getRealm().getRightTopPoint(), "キャー！\n助けてー！！", 60, GetColor(0, 0, 0));
 			break;
 		}
-		std::shared_ptr<Fukidashi> fukidashi = std::make_shared<Fukidashi>(resident->getRealm().getRightTopPoint(), "  だから", 60, GetColor(0, 0, 0));
+
 		resident->setFukidashi(fukidashi);
 		m_resident = nullptr;
 	}
@@ -2061,6 +2227,9 @@ public:
 	bool draw() override {
 		const auto time = m_timer->getLeftedTime();
 		int sec = std::get<1>(time);
+
+		//DrawExtendGraph(0, 0, WIDTH, HEIGHT, imgHandles["b_grass"], false);
+
 		// draw
 		switch (sec) {
 			case 3:

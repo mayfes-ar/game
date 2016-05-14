@@ -1979,7 +1979,6 @@ class SinglePlayerGame : public Game {
 
 	Difficulty difficulty = EASY;
 
-
 	bool willFinishMode = false;
 	bool isChangingMode = false;
 	int counterForWait = 5;

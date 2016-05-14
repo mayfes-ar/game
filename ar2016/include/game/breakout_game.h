@@ -37,9 +37,22 @@ public:
 	bool onStart() override
 	{
 		init();
+
+		//select
 		mode.setMode([&] {
 			drawList.push_back(m_components->background);
 			drawList.push_back(m_components->select);
+			drawList.push_back(m_components->info_hime);
+		}, -1);
+
+		//tutorial_ship
+		mode.setMode([&] {
+			setup_tutorial_ship();
+		}, -1);
+
+		//tutorial_pot
+		mode.setMode([&] {
+			setup_tutorial_pot();
 		}, -1);
 
 		mode.setMode([&] {
@@ -49,7 +62,9 @@ public:
 			drawList.push_back(m_components->count_down);
 		}, -1);
 
+
 		mode.setMode([&]() {
+			m_components->ship->resetShip();
 			drawList.clear();
 			m_components->info->init();
 			drawList.push_back(m_components->background);
@@ -79,6 +94,12 @@ public:
 
 		// Result画面
 		mode.setMode([this]() {
+			m_components->ship.~shared_ptr();
+			m_components->fireball_manager.~shared_ptr();
+			//m_components->enemy_manager.~shared_ptr();
+			//m_components->enemy.~shared_ptr();
+			//m_components->resident_list.~vector();
+
 			m_components->result->init();
 			drawList.clear();
 			drawList.push_back(m_components->result);
@@ -150,6 +171,17 @@ private:
 
 	// firebalのupdate
 	void updateFireballPosition();
+
+	// Infoのupdate
+	void updateInfo();
+
+	// shipのチュートリアル
+	bool tutorial_ship();
+	void setup_tutorial_ship();
+
+	// potのチュートリアル
+	bool tutorial_pot();
+	void setup_tutorial_pot();
 
 	// ゲームをクリアしたかどうか
 	// 現在はBlockが一つもない場合はクリアとみなす
