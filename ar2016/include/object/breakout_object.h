@@ -811,7 +811,7 @@ public:
 		m_fukidashi = std::make_shared<Fukidashi>(realm.getRightTopPoint(), sentences, appear_time);
 		Object::layer = PRIORITY_INFO_HIME;
 	}
-	
+
 	InfoHime(std::string sentences, int appear_time, std::string img_name = "b_hime")
 		: m_hime_img_handle(imgHandles[img_name])
 	{
@@ -850,6 +850,10 @@ public:
 		m_is_finish_draw = true;
 	}
 
+	bool getIsFinishDraw() {
+		return m_is_finish_draw;
+	}
+
 	bool draw() override {
 		if (m_is_finish_draw) return false;
 		DrawExtendGraph(m_realm.left(), m_realm.top(), m_realm.right(), m_realm.bottom(), m_hime_img_handle, TRUE);
@@ -859,6 +863,7 @@ public:
 			}
 			return true;
 		}
+		m_is_finish_draw = true;
 		return false;
 	}
 
@@ -871,6 +876,26 @@ private:
 	std::shared_ptr<Fukidashi> m_fukidashi = nullptr;
 	bool m_is_finish_draw = false;
 };
+
+
+//class InfoHimeManager : public Object
+//{
+//public:
+//	InfoHimeManager();
+//
+//	void addNewSet(std::string key, std::shared_ptr<InfoHime> value) {
+//		m_himes[key] = value;
+//	}
+//
+//	std::shared_ptr goNext() {
+//		
+//	}
+//
+//private:
+//	std::unordered_map<std::string, std::shared_ptr<InfoHime>> m_himes = {};
+//	std::string = m_now_key;
+//};
+
 
 class Result : public Object
 {
@@ -1782,9 +1807,10 @@ public:
 				break;
 			case DamageShip:
 				//強化されていたらなにもしない
-				if (isEnhanced()) break;
-				m_bomb_sound.start();
-				damageShip(1);
+				if (!isEnhanced()) {
+					m_bomb_sound.start();
+					damageShip(1);
+				}
 				deleteItem(m_items[i]);
 				i--;
 				break;

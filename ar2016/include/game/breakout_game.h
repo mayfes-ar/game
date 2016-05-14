@@ -94,6 +94,12 @@ public:
 
 		// Result画面
 		mode.setMode([this]() {
+			m_components->ship.~shared_ptr();
+			m_components->fireball_manager.~shared_ptr();
+			//m_components->enemy_manager.~shared_ptr();
+			//m_components->enemy.~shared_ptr();
+			//m_components->resident_list.~vector();
+
 			m_components->result->init();
 			drawList.clear();
 			drawList.push_back(m_components->result);
