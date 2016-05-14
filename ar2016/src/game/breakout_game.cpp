@@ -342,7 +342,7 @@ void BreakoutGame::updatePotStatus() {
 
 		if (share.lives[0] > 0) {
 			// potを出現させる
-			if (share.rects[0].width < 180) {
+			if (share.rects[0].width < (180 / 2)) {
 				m_components->pot->appear();
 			}
 			// potが出現していたら
@@ -366,7 +366,7 @@ void BreakoutGame::updatePotStatus() {
 						// 吐き出す
 						m_components->pot->exhareFireball();
 					}
-					else if (share.rects[0].width > 250) {
+					else if (share.rects[0].width > (250 / 2)) {
 						m_components->pot->exhareFireball();
 					}
 				}
