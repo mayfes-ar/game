@@ -208,13 +208,16 @@ void BreakoutGame::updateGameState()
 			switch (game_mode) {
 			case Breakout::Mode::Easy:
 				m_components->increaseBlock(0.0);
+				m_components->enemy_manager->setGenerateEnemyRatio(0.002);
 				break;
 			case Breakout::Mode::Normal:
 				m_components->increaseBlock(0.15);
+				m_components->enemy_manager->setGenerateEnemyRatio(0.008);
 				break;
 			case Breakout::Mode::Hard:
 				m_components->increaseBlock(0.3);
 				m_components->fireball_manager->changeMaximumFireballNum(Breakout::MAX_FIREBALL_NUM_ON_HARD);
+				m_components->enemy_manager->setGenerateEnemyRatio(1.0);
 				break;
 			}
 			// 次の画面の準備
@@ -306,6 +309,7 @@ void BreakoutGame::updateGameState()
 	case Result: {
 		if (key[KEY_INPUT_RETURN]) {
 			share.willFinish = true;
+			SetDrawBright(255, 255, 255);
 		}
 		break;
 	}
@@ -412,7 +416,14 @@ void BreakoutGame::updateEnemy() {
 		m_components->fireball_manager->add(m_components->enemy->makeFireball());
 	}
 	while (!m_components->enemy_manager->isMax()) {
-		m_components->enemy_manager->add(m_components->enemy->makeEnemy());
+		std::random_device rnd;
+		std::mt19937 mt = std::mt19937(rnd());
+		std::uniform_real_distribution<double> enemy_generator = std::uniform_real_distribution<double>(0.0, 1.0);
+		if (enemy_generator(mt) < m_components->enemy_manager->getGenerateEnemyRatio()) {
+			m_components->enemy_manager->add(m_components->enemy->makeEnemy());
+		} else {
+			break;
+		}
 	}
 
 }

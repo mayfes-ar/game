@@ -2,6 +2,7 @@
 
 std::shared_ptr<Game> startMenu() {
 
+	SetDrawBright(255, 255, 255);
 	std::shared_ptr<Game> gameType;
 	Menu menu(gameType);
 

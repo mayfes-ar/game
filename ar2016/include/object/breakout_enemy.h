@@ -150,6 +150,7 @@ namespace Breakout
 		std::uniform_real_distribution<double> velocity_generator = std::uniform_real_distribution<double>(FIREBALL_STARTVEL.x(), FIREBALL_STARTVEL.y());
 		std::uniform_real_distribution<double> fireball_mode_generator = std::uniform_real_distribution<double>(0.0, 1.0);
 		std::uniform_real_distribution<double> enemy_kind_generator = std::uniform_real_distribution<double>(0.0, 1.0);
+		std::uniform_real_distribution<double> enemy_vel_ratio_generator = std::uniform_real_distribution<double>(0.3, 0.7);
 		// ダメージを受けたら30になって、毎フレーム減っていく。draw()に影響を与える
 		int m_is_damaged = 0;
 		bool m_is_on_ship = false;
@@ -277,8 +278,8 @@ namespace Breakout
 		}
 		std::shared_ptr<EnemyBase> makeEnemy() {
 			// 横下に投げ出す
-			Eigen::Vector2f base_vel(-100.0f, 30.0f);
-			
+			double velocity_ratio = enemy_vel_ratio_generator(mt);
+			Eigen::Vector2f base_vel(-110.0f*velocity_ratio, 110.0f*(1.0-velocity_ratio));
 			//if (enemy_kind_generator(mt) > 0.6) {
 				std::shared_ptr<SnakeEnemy> snake = std::make_shared<SnakeEnemy>(Shape::Rectangle(m_realm.getLeftBottomPoint(), SNAKE_WIDTH, SNAKE_HEIGHT), std::make_shared<NewtonBehavior>(), base_vel, Life(SNAKE_ENEMY_LIFE, SNAKE_ENEMY_LIFE));
 				return snake;
@@ -317,7 +318,8 @@ namespace Breakout
 		}
 		std::shared_ptr<EnemyBase> makeEnemy() {
 			// 横下に投げ出す
-			Eigen::Vector2f base_vel(100.0f, 30.0f);
+			double velocity_ratio = enemy_vel_ratio_generator(mt);
+			Eigen::Vector2f base_vel(110.0f*velocity_ratio, 110.0f*(1.0 - velocity_ratio));
 
 			//if (enemy_kind_generator(mt) > 0.6) {
 				std::shared_ptr<SnakeEnemy> snake = std::make_shared<SnakeEnemy>(Shape::Rectangle(m_realm.getRightBottomPoint(), SNAKE_WIDTH, SNAKE_HEIGHT), std::make_shared<NewtonBehavior>(), base_vel, Life(SNAKE_ENEMY_LIFE, SNAKE_ENEMY_LIFE));
@@ -522,9 +524,20 @@ namespace Breakout
 			return m_generate_enemy_num;
 		}
 
+		
+		void setGenerateEnemyRatio(double ratio)
+		{
+			m_generate_enemy_ratio = ratio;
+		}
+
+		double getGenerateEnemyRatio() { return m_generate_enemy_ratio; }
+
+
 	private:
 		std::vector<std::shared_ptr<EnemyBase>> m_enemy_list = {};
 		int m_max_num = 0;
 		int m_generate_enemy_num = 0;
+
+		double m_generate_enemy_ratio = 0.5;
 	};
 }
