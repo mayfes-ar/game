@@ -37,8 +37,8 @@ namespace Breakout {
 	const int COUNT_DOWN_HEIGHT = WIDTH / 4;
 
 	// Timerのパラメータ
-	constexpr int TIMER_MAX_MIN = 1;
-	constexpr int TIMER_MAX_SEC = 5;
+	constexpr int TIMER_MAX_MIN = 2;
+	constexpr int TIMER_MAX_SEC = 0;
 	constexpr int TIMER_MAX_MSEC = 0;
 
 	// Blockのパラメータ
@@ -78,7 +78,7 @@ namespace Breakout {
 	const Eigen::Vector2i FIREBALL_STARTPOS = ENEMY_HEAD_POS;
 	const Eigen::Vector2f FIREBALL_STARTVEL = Eigen::Vector2f{ 5.0f, 10.0f };
 	constexpr int FIREBALL_RADIUS = 20;
-	constexpr int MAX_FIREBALL_NUM = 1;
+	constexpr int MAX_FIREBALL_NUM = 2;
 	constexpr int MAX_FIREBALL_NUM_ON_NORMAL = 2;
 	constexpr int MAX_FIREBALL_NUM_ON_HARD = 2;
 
