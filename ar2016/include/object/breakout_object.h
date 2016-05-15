@@ -869,7 +869,8 @@ public:
 		return false;
 	}
 
-	
+	bool m_is_clear = false;
+	bool m_is_over = false;
 
 private:
 	Shape::Rectangle m_realm = Shape::Rectangle(INFO_HIME_START_POS, INFO_HIME_WIDTH, INFO_HIME_HEIGHT);
@@ -877,6 +878,7 @@ private:
 	int m_hime_img_handle = imgHandles["b_hime"];
 	std::shared_ptr<Fukidashi> m_fukidashi = nullptr;
 	bool m_is_finish_draw = false;
+	
 };
 
 

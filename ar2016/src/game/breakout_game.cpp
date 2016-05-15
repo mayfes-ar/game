@@ -212,13 +212,14 @@ void BreakoutGame::updateGameState()
 				m_components->enemy_manager->setGenerateEnemyRatio(0.002);
 				break;
 			case Breakout::Mode::Normal:
-				m_components->increaseBlock(0.15);
+				m_components->increaseBlock(0.10);
 				m_components->enemy_manager->setGenerateEnemyRatio(0.008);
+				m_components->fireball_manager->changeMaximumFireballNum(Breakout::MAX_FIREBALL_NUM_ON_NORMAL);
 				break;
 			case Breakout::Mode::Hard:
-				m_components->increaseBlock(0.3);
+				m_components->increaseBlock(0.2);
 				m_components->enemy_manager->setGenerateEnemyRatio(0.03);
-				m_components->enemy_manager->setMaxNum(2);
+				m_components->fireball_manager->changeMaximumFireballNum(Breakout::MAX_FIREBALL_NUM_ON_HARD);
 				break;
 			}
 			// 次の画面の準備
@@ -298,7 +299,8 @@ void BreakoutGame::updateGameState()
 		if (m_components->info->isTimeOver() ||
 			!m_components->ship->isAlive() ||
 			(m_components->house_list.size() == 0 /*&&
-				m_components->resident_list.size() == 0*/)) {
+				m_components->resident_list.size() == 0*/)
+			&& !m_components->info_hime->hasFukidashi()) {
 			m_components->result->setFinalScore(m_components->info->getScore());
 			mode.goNext();
 			return;
@@ -323,7 +325,7 @@ void BreakoutGame::updateGameState()
 
 bool BreakoutGame::isGameClear() const
 {
-	if (m_components->enemy->isEffectContinuing()) return false;
+	if (m_components->enemy->isEffectContinuing() || m_components->info_hime->hasFukidashi()) return false;
 	//for (auto& enemy : m_components->enemy_manager->getEnemyList()) {
 	//	if (enemy->isAlive()) return false;
 	//}
@@ -507,6 +509,26 @@ void BreakoutGame::updateInfoHime() {
 	}
 	//もっていないときに状態をみて初期化する
 	else {
+		if (m_components->info_hime->m_is_clear || m_components->info_hime->m_is_over) { return; }
+
+		if (!m_components->enemy->isAlive()) {
+			m_components->info_hime->setSentences("魔人を\n倒せたわ！\nクリア\nおめでとう！", 200, GetColor(255, 100, 100));
+			m_components->info_hime->setHimeImgName("b_hime");
+			drawList.push_back(m_components->info_hime);
+			m_components->info_hime->m_is_clear = true;
+			return;
+		}
+
+		if (m_components->info->isTimeOver() ||
+			!m_components->ship->isAlive() ||
+			(m_components->house_list.size() == 0)) {
+			m_components->info_hime->setSentences("町が全部\n燃えて\nしまったわ\n....\nゲームオーバーよ", 200, GetColor(255, 100, 100));
+			m_components->info_hime->setHimeImgName("b_hime_odoroki");
+			drawList.push_back(m_components->info_hime);
+			m_components->info_hime->m_is_over = true;
+			return;
+		}
+
 		//bosslife=1のとき
 		if (m_components->enemy->getLifeNum() == 1) {
 			m_components->info_hime->setSentences("あと1撃で\n魔人を\n倒せそう！", 60, GetColor(255, 100, 100));
