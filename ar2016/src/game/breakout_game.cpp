@@ -569,21 +569,21 @@ void BreakoutGame::updateInfoHime() {
 		double ratio = info_hime_generator(mt);
 
 		if (ratio < 0.1) {
-			m_components->info_hime->setSentences("町を魔人\nから守り\nましょう！！", 50, GetColor(0, 0, 0));
+			m_components->info_hime->setSentences("町を魔人\nから守り\nましょう！！", 100, GetColor(0, 0, 0));
 			m_components->info_hime->setHimeImgName("b_hime");
 			drawList.push_back(m_components->info_hime);
 		}
-		if (ratio < 0, 2) {
-			m_components->info_hime->setSentences("Shipで爆弾\nを受け取る\nと削られて\nしまうわ！\n取らないよう\nにしましょう", 60, GetColor(0, 0, 0));
+		else if (ratio < 0, 2) {
+			m_components->info_hime->setSentences("Shipで爆弾\nを受け取る\nと削られて\nしまうわ！\n取らないよう\nにしましょう", 100, GetColor(0, 0, 0));
 			m_components->info_hime->setHimeImgName("b_hime");
 			drawList.push_back(m_components->info_hime);
 		}
-		if (ratio < 0.3) {
-			m_components->info_hime->setSentences("Shipで爆弾\nを受け取る\nと削られて\nしまうわ！\n取らないよう\nにしましょう", 60, GetColor(0, 0, 0));
+		else if (ratio < 0.3) {
+			m_components->info_hime->setSentences("Shipで爆弾\nを受け取る\nと削られて\nしまうわ！\n取らないよう\nにしましょう", 100, GetColor(0, 0, 0));
 			m_components->info_hime->setHimeImgName("b_hime");
 			drawList.push_back(m_components->info_hime);
 		}
-		if (ratio < 0.5) {
+		else if (ratio < 0.5) {
 			m_components->info_hime->setSentences("落ちてくる敵\nは地面に着くと\n建物を攻撃\nするわ！\nその前に\nShipで\nつぶすか、\n受け止めて\n倒しま\nしょう！", 100, GetColor(0, 0, 0));
 			m_components->info_hime->setHimeImgName("b_hime");
 			drawList.push_back(m_components->info_hime);
