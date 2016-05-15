@@ -16,8 +16,8 @@ namespace Breakout {
 	const int INFO_WIDTH = WIDTH / 4;
 	const int INFO_HEIGHT = HEIGHT;
 
-	const Eigen::Vector2i INFO_HIME_START_POS = Eigen::Vector2i(INFO_WIDTH/8, HEIGHT/2);
-	const int INFO_HIME_WIDTH = INFO_WIDTH/2;
+	const Eigen::Vector2i INFO_HIME_START_POS = Eigen::Vector2i(INFO_WIDTH/10, HEIGHT/2);
+	const int INFO_HIME_WIDTH = INFO_WIDTH/3;
 	const int INFO_HIME_HEIGHT = INFO_HIME_WIDTH * 1046 / 621;
 
 	const Eigen::Vector2i FIELD_START_POS = Eigen::Vector2i(INFO_WIDTH, 0);
@@ -76,7 +76,7 @@ namespace Breakout {
 
 	// Fireballのパラメータ
 	const Eigen::Vector2i FIREBALL_STARTPOS = ENEMY_HEAD_POS;
-	const Eigen::Vector2f FIREBALL_STARTVEL = Eigen::Vector2f{ 5.0f, 10.0f };
+	const Eigen::Vector2f FIREBALL_STARTVEL = Eigen::Vector2f{ 5.0f, 5.0f };
 	constexpr int FIREBALL_RADIUS = 20;
 	constexpr int MAX_FIREBALL_NUM = 2;
 	constexpr int MAX_FIREBALL_NUM_ON_NORMAL = 2;
@@ -93,7 +93,7 @@ namespace Breakout {
 	// Potのパラメータ
 	const Eigen::Vector2i POT_START_POS = Eigen::Vector2i{ BLOCK_OFFSET_X + FIELD_WIDTH / 2, HEIGHT - 200 };
 	const int POT_EXHARE_DEPTH = 400;
-	const int POT_APPEAR_DEPTH = 100;
+	const int POT_APPEAR_DEPTH = 150;
 
 	// House のパラメータ
 	constexpr int HOUSE_NUM = 6;

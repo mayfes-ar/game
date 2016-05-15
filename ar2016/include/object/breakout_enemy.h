@@ -367,6 +367,10 @@ namespace Breakout
 			Object::layer = PRIORITY_DYNAMIC_OBJECT;
 		}
 
+		void setMaxLife(int life) {
+			m_life = Life(life, life);
+		}
+
 		EnemyHead(Shape::Rectangle realm, std::shared_ptr<MovingBehavior>& behavior, Life life)
 		{
 			m_life = life;

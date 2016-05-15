@@ -218,6 +218,7 @@ void BreakoutGame::updateGameState()
 				break;
 			case Breakout::Mode::Hard:
 				m_components->increaseBlock(0.2);
+				m_components->enemy->setMaxLife(4);
 				m_components->enemy_manager->setGenerateEnemyRatio(0.03);
 				m_components->fireball_manager->changeMaximumFireballNum(Breakout::MAX_FIREBALL_NUM_ON_HARD);
 				break;
@@ -316,11 +317,28 @@ void BreakoutGame::updateGameState()
 			share.willFinish = true;
 			SetDrawBright(255, 255, 255);
 		}
+		
+		if (!returnResult()) {
+			share.willFinish = true;
+			SetDrawBright(255, 255, 255);
+		}
+
 		break;
 	}
 	default:
 		break;
 	}
+}
+
+bool BreakoutGame::returnResult() {
+	if (!m_components->himes[0]->hasFukidashi()) {
+		m_components->himes.erase(m_components->himes.begin());
+		if (m_components->himes.size() == 0) {
+			return false;
+		}
+		drawList.push_back(m_components->himes[0]);
+	}
+	return true;
 }
 
 bool BreakoutGame::isGameClear() const

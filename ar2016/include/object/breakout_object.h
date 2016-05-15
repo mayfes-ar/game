@@ -984,6 +984,10 @@ public:
 		m_is_game_clear = true;
 	}
 
+	bool isClear() {
+		return m_is_game_clear;
+	}
+
 private:
 	Shape::Rectangle m_realm = Shape::Rectangle();
 	bool m_is_game_clear = false;
