@@ -685,7 +685,7 @@ bool BreakoutGame::tutorial_pot() {
 		drawList.push_back(m_components->himes[0]);
 	}
 
-	if (m_components->himes.size() == 16) {
+	if (m_components->himes.size() == 19) {
 		m_components->fireball->setVelocity(Eigen::Vector2f(0, 100.0f));
 		m_components->fireball->updatePosition();
 		if (m_components->fireball->isCollided(m_components->ship->getRealm(), 1, m_components->ship->getVelocity())) {
@@ -698,7 +698,7 @@ bool BreakoutGame::tutorial_pot() {
 			drawList.push_back(m_components->himes[0]);
 		}
 	}
-	else if (m_components->himes.size() == 12) {
+	else if (m_components->himes.size() == 15) {
 		
 		//potが出現したら
 		if (share.lives[0] > 0) {
@@ -712,7 +712,7 @@ bool BreakoutGame::tutorial_pot() {
 			}
 		}
 	}
-	else if (m_components->himes.size() == 10) {
+	else if (m_components->himes.size() == 13) {
 		m_components->fireball->setPosition(FIREBALL_STARTPOS);
 		m_components->fireball->setVelocity(Eigen::Vector2f(0, 100.0f));
 		m_components->fireball->appear();
@@ -721,7 +721,7 @@ bool BreakoutGame::tutorial_pot() {
 		m_components->himes.erase(m_components->himes.begin());
 		drawList.push_back(m_components->himes[0]);
 	}
-	else if (m_components->himes.size() == 9) {
+	else if (m_components->himes.size() == 12) {
 		m_components->fireball->updatePosition();
 		if (share.lives[0] > 0) {
 			// potを出現させる
@@ -792,7 +792,7 @@ bool BreakoutGame::tutorial_pot() {
 		}
 	}
 	//retry
-	else if (m_components->himes.size() == 8) {
+	else if (m_components->himes.size() == 11) {
 		if (m_components->himes[0]->getIsFinishDraw()) {
 			tutorial_pot();
 			//5こ進める
@@ -803,7 +803,7 @@ bool BreakoutGame::tutorial_pot() {
 			drawList.push_back(m_components->himes[0]);
 		}
 	}
-	else if (m_components->himes.size() == 6) {
+	else if (m_components->himes.size() == 9) {
 		m_components->fireball->updatePosition();
 		if (m_components->pot->hasFireball()) {
 			//カウントを減らす
@@ -826,7 +826,7 @@ bool BreakoutGame::tutorial_pot() {
 			}
 		}
 	}
-	else if(m_components->himes.size() <= 5) {
+	else if(m_components->himes.size() <= 8) {
 		m_components->fireball->updatePosition();
 	}
 
@@ -875,6 +875,12 @@ void BreakoutGame::setup_tutorial_pot() {
 
 	m_components->himes.push_back(std::make_shared<Breakout::InfoHime>("  ほかにも\nブロックからは\nアイテムが落ちたり、\n", 70));
 	m_components->himes.push_back(std::make_shared<Breakout::InfoHime>("  するのだけど、\n時間がもうないから\n実戦で身に\n着けてもらうわ", 80));
+	
+	m_components->himes.push_back(std::make_shared<Breakout::InfoHime>("  空の上に出て\nくる敵を倒す\nとクリアよ！", 80));
+	m_components->himes.push_back(std::make_shared<Breakout::InfoHime>(" 逆にタイムオーバー\nになったり、\n家や城が全部\n燃えると\nゲームオーバーよ", 80));
+	m_components->himes.push_back(std::make_shared<Breakout::InfoHime>("  ゲームオーバーよ!!", 80));
+
+	
 	m_components->himes.push_back(std::make_shared<Breakout::InfoHime>("  それでは防衛開始よ！！", 80));
 
 	const auto circle = Shape::Circle(FIREBALL_STARTPOS, FIREBALL_RADIUS);
