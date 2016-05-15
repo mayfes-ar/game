@@ -924,6 +924,9 @@ public:
 			if (GetMovieStateToGraph(m_movie_handle) == 0) {
 				PlayMovieToGraph(m_movie_handle);
 			}
+			DrawExtendGraph(m_realm.left(), m_realm.top(),
+				m_realm.right(), m_realm.bottom(),
+				imgHandles["b_game_clear"], TRUE);
 		} else {
 
 		}
