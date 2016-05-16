@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include <thread>
 #include "game/game.h"
@@ -37,9 +37,22 @@ public:
 	bool onStart() override
 	{
 		init();
+
+		//select
 		mode.setMode([&] {
 			drawList.push_back(m_components->background);
 			drawList.push_back(m_components->select);
+			drawList.push_back(m_components->info_hime);
+		}, -1);
+
+		//tutorial_ship
+		mode.setMode([&] {
+			setup_tutorial_ship();
+		}, -1);
+
+		//tutorial_pot
+		mode.setMode([&] {
+			setup_tutorial_pot();
 		}, -1);
 
 		mode.setMode([&] {
@@ -49,7 +62,10 @@ public:
 			drawList.push_back(m_components->count_down);
 		}, -1);
 
+
 		mode.setMode([&]() {
+			
+			m_components->ship->resetShip();
 			drawList.clear();
 			m_components->info->init();
 			drawList.push_back(m_components->background);
@@ -79,8 +95,46 @@ public:
 
 		// Result画面
 		mode.setMode([this]() {
-			m_components->result->init();
+			using namespace Breakout;
+			m_components->ship.~shared_ptr();
+			m_components->fireball_manager.~shared_ptr();
 			drawList.clear();
+			if (m_components->result->isClear()) {
+				m_components->resident_list.clear();
+				m_components->himes.clear();
+				m_components->himes.push_back(std::make_shared<Breakout::InfoHime>("  あなたのおかげで\n町の平和は\n取り戻されたわ!!\nありがとう!!", 200, "b_hime"));
+				m_components->himes.push_back(std::make_shared<Breakout::InfoHime>("  あなたの得点は", 200, "b_hime"));
+
+				drawList.push_back(m_components->himes[0]);
+				for (int i = 0; i < RESIDENT_NUM; i++) {
+					if (i <= 2) {
+						auto realm = Shape::Rectangle(RESIDENT_START_POS + Eigen::Vector2i(FIELD_WIDTH * i / RESIDENT_NUM, 0), RESIDENT_WIDTH, RESIDENT_HEIGHT);
+						auto life = Life(RESIDENT_LIFE, RESIDENT_LIFE);
+						std::shared_ptr<MovingBehavior> rnd_behavior = std::make_shared<RandomBehavior>(FIELD_START_POS.x(),
+							FIELD_START_POS.x() + FIELD_WIDTH - RESIDENT_WIDTH,
+							FIELD_START_POS.y() + FIELD_HEIGHT - RESIDENT_HEIGHT,
+							FIELD_START_POS.y() + FIELD_HEIGHT - RESIDENT_HEIGHT);
+						auto resident = std::make_shared<Breakout::Resident>(realm, life, rnd_behavior, Boy);
+						m_components->resident_list.push_back(resident);
+						continue;
+					}
+					else {
+						auto realm = Shape::Rectangle(RESIDENT_START_POS + Eigen::Vector2i(FIELD_WIDTH * i / RESIDENT_NUM, 0), RESIDENT_WIDTH, RESIDENT_HEIGHT);
+						auto life = Life(RESIDENT_LIFE, RESIDENT_LIFE);
+						std::shared_ptr<MovingBehavior> rnd_behavior = std::make_shared<RandomBehavior>(FIELD_START_POS.x(),
+							FIELD_START_POS.x() + FIELD_WIDTH - RESIDENT_WIDTH,
+							FIELD_START_POS.y() + FIELD_HEIGHT - RESIDENT_HEIGHT,
+							FIELD_START_POS.y() + FIELD_HEIGHT - RESIDENT_HEIGHT);
+						auto resident = std::make_shared<Breakout::Resident>(realm, life, rnd_behavior, Girl);
+						m_components->resident_list.push_back(resident);
+						continue;
+					}
+				}
+				m_components->result->init();
+				for (auto& resident : m_components->resident_list) {
+					drawList.push_back(resident);
+				}
+			}
 			drawList.push_back(m_components->result);
 		}, -1);
 
@@ -150,6 +204,19 @@ private:
 
 	// firebalのupdate
 	void updateFireballPosition();
+
+	// Infoのupdate
+	void updateInfoHime();
+
+	// shipのチュートリアル
+	bool tutorial_ship();
+	void setup_tutorial_ship();
+
+	// potのチュートリアル
+	bool tutorial_pot();
+	void setup_tutorial_pot();
+
+	bool returnResult();
 
 	// ゲームをクリアしたかどうか
 	// 現在はBlockが一つもない場合はクリアとみなす

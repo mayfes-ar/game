@@ -68,12 +68,14 @@ namespace Breakout
 		// mode が enemy じゃない fireball にあたったらLifeを減らすようなメソッド
 		virtual bool damageEnemy(int amount) {
 			m_is_damaged = 30;
+			m_damaged.start();
 			return m_life.damage(amount);
 		}
 
 		// もしplayerのfireballにあたったら
 		virtual void damageByPlayerFireball(std::shared_ptr<Fireball>& fireball, std::shared_ptr<FireballManager>& manager) {
 			m_life.damage(fireball->giveDamage());
+			m_damaged.start();
 			//触れたら消える
 			manager->destroy(fireball);
 			m_is_damaged = 30;
@@ -150,9 +152,11 @@ namespace Breakout
 		std::uniform_real_distribution<double> velocity_generator = std::uniform_real_distribution<double>(FIREBALL_STARTVEL.x(), FIREBALL_STARTVEL.y());
 		std::uniform_real_distribution<double> fireball_mode_generator = std::uniform_real_distribution<double>(0.0, 1.0);
 		std::uniform_real_distribution<double> enemy_kind_generator = std::uniform_real_distribution<double>(0.0, 1.0);
+		std::uniform_real_distribution<double> enemy_vel_ratio_generator = std::uniform_real_distribution<double>(0.3, 0.7);
 		// ダメージを受けたら30になって、毎フレーム減っていく。draw()に影響を与える
 		int m_is_damaged = 0;
 		bool m_is_on_ship = false;
+		int on_ship_duration = 0;
 		std::shared_ptr<Breakout::Ship> m_ship = nullptr;
 
 		//ダメージを受けた後の効果が継続しているかどうか
@@ -166,6 +170,7 @@ namespace Breakout
 	private:
 		Effect m_dead_effect = Effect(effectHandles["b_explosion"], 5, PRIORITY_DYNAMIC_OBJECT);
 		int m_dead_count = 35;
+		Sound m_damaged = Sound("b_bomb");
 	};
 
 	// 人や住居とぶつかったら爆発して死ぬ。相手にもダメージを与える
@@ -201,8 +206,20 @@ namespace Breakout
 		void updatePosition() override {
 			//もし死んでいたら動かないようにする。
 			if (!isAlive()) return;
+			//船の上に60frameいたら死ぬ
+			if (on_ship_duration > 60) {
+				damageEnemy(3);
+				setDeadEffect("b_burning", 3, 35);
+				on_ship_duration = 0;
+			}
 
 			if (getIsOnShip()) {
+				//もし船が強化されていたら
+				if (m_ship->isEnhanced()) {
+					damageEnemy(3);
+					setDeadEffect("b_burning", 3, 35);
+					on_ship_duration = 0;
+				}
 				std::shared_ptr<MovingBehavior> rnd_behavior = std::make_shared<RandomBehavior>(
 					m_ship->getRealm().left(),
 					m_ship->getRealm().right() - SNAKE_WIDTH,
@@ -224,6 +241,7 @@ namespace Breakout
 					std::shared_ptr<Ship> null_ship = nullptr;
 					setIsOnShip(null_ship, false);
 				}
+				on_ship_duration++;
 			}
 			else if (m_realm.bottom() >= FIELD_START_POS.y() + FIELD_HEIGHT) {
 				std::shared_ptr<MovingBehavior> rnd_behavior = std::make_shared<RandomBehavior>(FIELD_START_POS.x(),
@@ -242,6 +260,7 @@ namespace Breakout
 			
 			m_moving->updatePoistion(m_realm.start_point);
 		}
+
 	};
 
 
@@ -263,8 +282,8 @@ namespace Breakout
 		}
 		std::shared_ptr<EnemyBase> makeEnemy() {
 			// 横下に投げ出す
-			Eigen::Vector2f base_vel(-100.0f, 30.0f);
-			
+			double velocity_ratio = enemy_vel_ratio_generator(mt);
+			Eigen::Vector2f base_vel(-110.0f*velocity_ratio, 110.0f*(1.0-velocity_ratio));
 			//if (enemy_kind_generator(mt) > 0.6) {
 				std::shared_ptr<SnakeEnemy> snake = std::make_shared<SnakeEnemy>(Shape::Rectangle(m_realm.getLeftBottomPoint(), SNAKE_WIDTH, SNAKE_HEIGHT), std::make_shared<NewtonBehavior>(), base_vel, Life(SNAKE_ENEMY_LIFE, SNAKE_ENEMY_LIFE));
 				return snake;
@@ -303,7 +322,8 @@ namespace Breakout
 		}
 		std::shared_ptr<EnemyBase> makeEnemy() {
 			// 横下に投げ出す
-			Eigen::Vector2f base_vel(100.0f, 30.0f);
+			double velocity_ratio = enemy_vel_ratio_generator(mt);
+			Eigen::Vector2f base_vel(110.0f*velocity_ratio, 110.0f*(1.0 - velocity_ratio));
 
 			//if (enemy_kind_generator(mt) > 0.6) {
 				std::shared_ptr<SnakeEnemy> snake = std::make_shared<SnakeEnemy>(Shape::Rectangle(m_realm.getRightBottomPoint(), SNAKE_WIDTH, SNAKE_HEIGHT), std::make_shared<NewtonBehavior>(), base_vel, Life(SNAKE_ENEMY_LIFE, SNAKE_ENEMY_LIFE));
@@ -345,6 +365,10 @@ namespace Breakout
 			m_moving->setBehavior(behavior);
 			m_enemy_img_name = "b_donald";
 			Object::layer = PRIORITY_DYNAMIC_OBJECT;
+		}
+
+		void setMaxLife(int life) {
+			m_life = Life(life, life);
 		}
 
 		EnemyHead(Shape::Rectangle realm, std::shared_ptr<MovingBehavior>& behavior, Life life)
@@ -409,6 +433,14 @@ namespace Breakout
 			m_boss_damaged_sound.start();
 			m_is_damaged = 30;
 			return m_life.damage(amount);
+		}
+
+		void damageByPlayerFireball(std::shared_ptr<Fireball>& fireball, std::shared_ptr<FireballManager>& manager) override {
+			m_boss_damaged_sound.start();
+			m_life.damage(fireball->giveDamage());
+			//触れたら消える
+			manager->destroy(fireball);
+			m_is_damaged = 30;
 		}
 
 		bool draw() override {
@@ -508,9 +540,21 @@ namespace Breakout
 			return m_generate_enemy_num;
 		}
 
+		
+		void setGenerateEnemyRatio(double ratio)
+		{
+			m_generate_enemy_ratio = ratio;
+		}
+
+		double getGenerateEnemyRatio() { return m_generate_enemy_ratio; }
+
+		void setMaxNum(int num) { m_max_num = num; }
+
 	private:
 		std::vector<std::shared_ptr<EnemyBase>> m_enemy_list = {};
 		int m_max_num = 0;
 		int m_generate_enemy_num = 0;
+
+		double m_generate_enemy_ratio = 0.5;
 	};
 }

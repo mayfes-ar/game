@@ -7,6 +7,7 @@ void BreakoutGame::updateCollisionDetection()
 	// FireBallの衝突判定
 	{
 		for (auto& fireball : m_components->fireball_manager->getFireballList()) {
+			if (fireball->isDisappeared()) continue;
 			bool continue_loop = false;
 
 			// 下壁との衝突判定
@@ -108,7 +109,7 @@ void BreakoutGame::updateCollisionDetection()
 			}
 			if (continue_loop) continue;
 
-			for (auto& resident : m_components->resident_list) {
+			/*for (auto& resident : m_components->resident_list) {
 				if (resident->isAlive()) {
 					if (fireball->isCollided(resident->getRealm())) {
 						resident->damageByFireball(fireball, m_components->fireball_manager);
@@ -117,7 +118,7 @@ void BreakoutGame::updateCollisionDetection()
 					}
 				}
 			}
-			if (continue_loop) continue;
+			if (continue_loop) continue;*/
 
 		}
 	}
@@ -146,8 +147,14 @@ void BreakoutGame::moveShip()
 	if (m_components->ship->getLifeNum() == 0) return;
 
 	if (share.lives[0] > 0) {
-		const int diff = (int)(share.rects[0].x - m_components->ship->left());
-		m_components->ship->translate(diff / 10);
+		int diff = (int)(share.rects[0].x - m_components->ship->left());
+		if (std::abs((double)diff) / 5.0 < 1.0) { // チャッタリング対策
+			diff = 0;
+		}
+		else if (std::abs((double)diff) / 5.0 < 2.0) {
+			m_components->ship->translate(diff / 6);
+		}
+		m_components->ship->translate(diff / 3);
 	}
 
 	if (key[KEY_INPUT_LEFT]) {
@@ -177,6 +184,8 @@ void BreakoutGame::updateGameState()
 
 	enum Kind {
 		Selecting = 0,
+		TutorialShip,
+		TutorialPot,
 		CountDown,
 		Playing, //!< Play画面
 		Result, //!< Result画面
@@ -200,16 +209,22 @@ void BreakoutGame::updateGameState()
 			switch (game_mode) {
 			case Breakout::Mode::Easy:
 				m_components->increaseBlock(0.0);
+				m_components->enemy_manager->setGenerateEnemyRatio(0.002);
 				break;
 			case Breakout::Mode::Normal:
-				m_components->increaseBlock(0.15);
+				m_components->increaseBlock(0.10);
+				m_components->enemy_manager->setGenerateEnemyRatio(0.008);
+				m_components->fireball_manager->changeMaximumFireballNum(Breakout::MAX_FIREBALL_NUM_ON_NORMAL);
 				break;
 			case Breakout::Mode::Hard:
-				m_components->increaseBlock(0.3);
+				m_components->increaseBlock(0.2);
+				m_components->enemy->setMaxLife(4);
+				m_components->enemy_manager->setGenerateEnemyRatio(0.03);
 				m_components->fireball_manager->changeMaximumFireballNum(Breakout::MAX_FIREBALL_NUM_ON_HARD);
 				break;
 			}
 			// 次の画面の準備
+			m_components->info_hime->finishDraw();
 			mode.goNext();
 			return;
 		}
@@ -223,12 +238,31 @@ void BreakoutGame::updateGameState()
 			is_chattering = true;
 			m_components->select->move(Breakout::Move::Up);
 		}
-		else if(!key[KEY_INPUT_DOWN] && !key[KEY_INPUT_UP]){
+		else if (!key[KEY_INPUT_DOWN] && !key[KEY_INPUT_UP]) {
 			is_chattering = false;
 		}
 
-		if (key[KEY_INPUT_RETURN]){
+		if (key[KEY_INPUT_RETURN]) {
 			m_components->select->select();
+		}
+		break;
+	}
+	case TutorialShip: {
+		if (!tutorial_ship() || (key[KEY_INPUT_S] && key[KEY_INPUT_1])) {
+			drawList.clear();
+			mode.goNext();
+			
+		}
+		break;
+	}
+	case TutorialPot: {
+		if (key[KEY_INPUT_R]) {
+			setup_tutorial_pot();
+		}
+		if (!tutorial_pot() || (key[KEY_INPUT_S] && key[KEY_INPUT_2])) {
+			drawList.clear();
+			mode.goNext();
+			
 		}
 		break;
 	}
@@ -250,6 +284,8 @@ void BreakoutGame::updateGameState()
 		updateTown();
 		shipVSEnemy();
 		EnemyVSTown();
+		updateInfoHime();
+
 		m_components->info->addScoreAll();
 		if (m_components->info->isLastPhase()) {
 			m_components->background->turnLastPhase();
@@ -263,8 +299,9 @@ void BreakoutGame::updateGameState()
 
 		if (m_components->info->isTimeOver() ||
 			!m_components->ship->isAlive() ||
-			(m_components->house_list.size() == 0 &&
-				m_components->resident_list.size() == 0)) {
+			(m_components->house_list.size() == 0 /*&&
+				m_components->resident_list.size() == 0*/)
+			&& !m_components->info_hime->hasFukidashi()) {
 			m_components->result->setFinalScore(m_components->info->getScore());
 			mode.goNext();
 			return;
@@ -276,9 +313,16 @@ void BreakoutGame::updateGameState()
 		}
 		break;
 	case Result: {
-		if (key[KEY_INPUT_ESCAPE]) {
+		if (key[KEY_INPUT_RETURN]) {
 			share.willFinish = true;
+			SetDrawBright(255, 255, 255);
 		}
+		
+		if (!returnResult()) {
+			share.willFinish = true;
+			SetDrawBright(255, 255, 255);
+		}
+
 		break;
 	}
 	default:
@@ -286,12 +330,23 @@ void BreakoutGame::updateGameState()
 	}
 }
 
+bool BreakoutGame::returnResult() {
+	if (!m_components->himes[0]->hasFukidashi()) {
+		m_components->himes.erase(m_components->himes.begin());
+		if (m_components->himes.size() == 0) {
+			return false;
+		}
+		drawList.push_back(m_components->himes[0]);
+	}
+	return true;
+}
+
 bool BreakoutGame::isGameClear() const
 {
-	if (m_components->enemy->isAlive()) return false;
-	for (auto& enemy : m_components->enemy_manager->getEnemyList()) {
-		if (enemy->isAlive()) return false;
-	}
+	if (m_components->enemy->isEffectContinuing() || m_components->info_hime->hasFukidashi()) return false;
+	//for (auto& enemy : m_components->enemy_manager->getEnemyList()) {
+	//	if (enemy->isAlive()) return false;
+	//}
 	//for (const auto& block : m_components->block_list) {
 	//	//壊せないブロックだったら勘定に入れない
 	//	if (block->getBlockKind() == "UnbreakableBlock") continue;
@@ -308,11 +363,13 @@ void BreakoutGame::updateBlockStatus() {}
 void BreakoutGame::updatePotStatus() {
 	for (auto& fireball : m_components->fireball_manager->getFireballList()) {
 		// pot が使用済みならもう更新しない。
-		if (!m_components->pot->isAvailable()) return;
+		if (!m_components->pot->isAvailable()) {
+			m_components->pot->resetStatus();
+		}
 
 		if (share.lives[0] > 0) {
 			// potを出現させる
-			if (share.rects[0].width < 180) {
+			if (share.rects[0].width < (Breakout::POT_APPEAR_DEPTH)) {
 				m_components->pot->appear();
 			}
 			// potが出現していたら
@@ -320,8 +377,8 @@ void BreakoutGame::updatePotStatus() {
 				// Phase: 吸い込んでから吐き出すまで
 
 				// potをマーカーの位置に移動させる
-				const Eigen::Vector2i diff_dist = Eigen::Vector2i((int)share.rects[0].x + share.rects[0].width/2 - m_components->pot->getRealm().left(), (int)share.rects[0].y + share.rects[0].height/2 - m_components->pot->getRealm().top());
-				m_components->pot->translate(diff_dist / 10);
+				const Eigen::Vector2i diff_dist = Eigen::Vector2i((int)share.rects[0].x + share.rects[0].width / 2 - m_components->pot->getRealm().left(), (int)share.rects[0].y + share.rects[0].height / 2 - m_components->pot->getRealm().top());
+				m_components->pot->translate(diff_dist / 5);
 
 				// potをマーカーの回転にあわせる
 				const float diff_rot = (float)share.rects[0].rotate - m_components->pot->getRotation();
@@ -336,7 +393,7 @@ void BreakoutGame::updatePotStatus() {
 						// 吐き出す
 						m_components->pot->exhareFireball();
 					}
-					else if (share.rects[0].width > 250) {
+					else if (share.rects[0].width > (Breakout::POT_EXHARE_DEPTH)) {
 						m_components->pot->exhareFireball();
 					}
 				}
@@ -382,7 +439,14 @@ void BreakoutGame::updateEnemy() {
 		m_components->fireball_manager->add(m_components->enemy->makeFireball());
 	}
 	while (!m_components->enemy_manager->isMax()) {
-		m_components->enemy_manager->add(m_components->enemy->makeEnemy());
+		std::random_device rnd;
+		std::mt19937 mt = std::mt19937(rnd());
+		std::uniform_real_distribution<double> enemy_generator = std::uniform_real_distribution<double>(0.0, 1.0);
+		if (enemy_generator(mt) < m_components->enemy_manager->getGenerateEnemyRatio()) {
+			m_components->enemy_manager->add(m_components->enemy->makeEnemy());
+		} else {
+			break;
+		}
 	}
 
 }
@@ -419,7 +483,7 @@ void BreakoutGame::updateTown() {
 			itr = m_components->resident_list.erase(itr);
 		}
 	}
-	
+
 }
 
 void BreakoutGame::shipVSEnemy() {
@@ -439,6 +503,7 @@ void BreakoutGame::shipVSEnemy() {
 				if (!enemy->isAlive()) {
 					enemy->setDeadEffect("b_enemy_vanish", 5);
 				}
+		
 			}
 		}
 	}
@@ -449,8 +514,404 @@ void BreakoutGame::EnemyVSTown() {
 		for (auto& house : m_components->house_list) {
 			enemy->attackOnTown(house);
 		}
-		for (auto& resident : m_components->resident_list) {
+		/*for (auto& resident : m_components->resident_list) {
 			enemy->attackOnTown(resident);
+		}*/
+	}
+}
+
+void BreakoutGame::updateInfoHime() {
+	//もっているときは更新しない
+	if (m_components->info_hime->hasFukidashi()) {
+
+	}
+	//もっていないときに状態をみて初期化する
+	else {
+		if (m_components->info_hime->m_is_clear || m_components->info_hime->m_is_over) { return; }
+
+		if (!m_components->enemy->isAlive()) {
+			m_components->info_hime->setSentences("魔人を\n倒せたわ！\nクリア\nおめでとう！", 200, GetColor(255, 100, 100));
+			m_components->info_hime->setHimeImgName("b_hime");
+			drawList.push_back(m_components->info_hime);
+			m_components->info_hime->m_is_clear = true;
+			return;
+		}
+
+		if (m_components->info->isTimeOver() ||
+			!m_components->ship->isAlive() ||
+			(m_components->house_list.size() == 0)) {
+			m_components->info_hime->setSentences("町が全部\n燃えて\nしまったわ\n....\nゲームオーバーよ", 200, GetColor(255, 100, 100));
+			m_components->info_hime->setHimeImgName("b_hime_odoroki");
+			drawList.push_back(m_components->info_hime);
+			m_components->info_hime->m_is_over = true;
+			return;
+		}
+
+		//bosslife=1のとき
+		if (m_components->enemy->getLifeNum() == 1) {
+			m_components->info_hime->setSentences("あと1撃で\n魔人を\n倒せそう！", 60, GetColor(255, 100, 100));
+			m_components->info_hime->setHimeImgName("b_hime");
+			drawList.push_back(m_components->info_hime);
+			return;
+		}
+
+		//船life=1のとき
+		if (m_components->ship->getLifeNum() == 1) {
+			m_components->info_hime->setSentences("Shipが\nもうすぐ\n壊れて\nしまうわ！\nハートを\nゲットして\n回復よ！", 70, GetColor(0, 100, 100));
+			m_components->info_hime->setHimeImgName("b_hime_odoroki");
+			drawList.push_back(m_components->info_hime);
+			return;
+		}
+
+		//無敵状態のとき
+		if (m_components->ship->isEnhanced()) {
+			m_components->info_hime->setSentences("無敵状態よ！\nどんな球でも\n返せるし、\n落ちてくる敵\nを載せたら\nすぐに倒せるわ！", 80, GetColor(100, 100, 0));
+			m_components->info_hime->setHimeImgName("b_hime");
+			drawList.push_back(m_components->info_hime);
+			return;
+		}
+		
+		for (const auto &fireball : m_components->fireball_manager->getFireballList()) {
+			if (fireball->isEnemy() && fireball->isStrong()) {
+				m_components->info_hime->setSentences("強い攻撃が\n来るわ！！\nPotか、\n強化した船\nで跳ね返すの！", 80, GetColor(255, 100, 0));
+				m_components->info_hime->setHimeImgName("b_hime");
+				drawList.push_back(m_components->info_hime);
+				return;
+			}
+		}
+
+		//上のイベントが何も起こらなかったら
+		std::random_device rnd;
+		std::mt19937 mt = std::mt19937(rnd());
+		std::uniform_real_distribution<double> info_hime_generator = std::uniform_real_distribution<double>(0.0, 1.0);
+		double ratio = info_hime_generator(mt);
+
+		if (ratio < 0.1) {
+			m_components->info_hime->setSentences("町を魔人\nから守り\nましょう！！", 100, GetColor(0, 0, 0));
+			m_components->info_hime->setHimeImgName("b_hime");
+			drawList.push_back(m_components->info_hime);
+		}
+		else if (ratio < 0, 2) {
+			m_components->info_hime->setSentences("Shipで爆弾\nを受け取る\nと削られて\nしまうわ！\n取らないよう\nにしましょう", 100, GetColor(0, 0, 0));
+			m_components->info_hime->setHimeImgName("b_hime");
+			drawList.push_back(m_components->info_hime);
+		}
+		else if (ratio < 0.3) {
+			m_components->info_hime->setSentences("Shipで爆弾\nを受け取る\nと削られて\nしまうわ！\n取らないよう\nにしましょう", 100, GetColor(0, 0, 0));
+			m_components->info_hime->setHimeImgName("b_hime");
+			drawList.push_back(m_components->info_hime);
+		}
+		else if (ratio < 0.5) {
+			m_components->info_hime->setSentences("落ちてくる敵\nは地面に着くと\n建物を攻撃\nするわ！\nその前に\nShipで\nつぶすか、\n受け止めて\n倒しま\nしょう！", 100, GetColor(0, 0, 0));
+			m_components->info_hime->setHimeImgName("b_hime");
+			drawList.push_back(m_components->info_hime);
+		}
+		else {
+			m_components->info_hime->setSentences("頑張って！！", 10, GetColor(0, 0, 0));
+			m_components->info_hime->setHimeImgName("b_hime");
+			drawList.push_back(m_components->info_hime);
 		}
 	}
+}
+
+bool BreakoutGame::tutorial_ship() {
+
+	moveShip();
+
+	
+	if (!m_components->himes[0]->hasFukidashi()) {
+		m_components->himes.erase(m_components->himes.begin());
+		if (m_components->himes.size() == 0) {
+			return false;
+		}
+		drawList.push_back(m_components->himes[0]);
+	}
+
+	if (m_components->himes.size() <= 6) {
+		m_components->fireball->updatePosition();
+	}
+
+	auto fireball_effect = m_components->fireball->returnFireballReflect(m_components->ship->getRealm(), 1, m_components->ship->getVelocity());
+	if (fireball_effect->isCollide() && m_components->himes.size() == 5) {
+		//跳ね返すときは反射effectを入れる
+		drawList.push_back(fireball_effect);
+		m_components->fireball->changeModeToPlayer();
+
+		//跳ね返りを確認したら次の言葉へ
+		m_components->himes[0]->finishDraw();
+		m_components->himes.erase(m_components->himes.begin());
+		drawList.push_back(m_components->himes[0]);
+	}
+
+	//エネミーだったらとおりぬける
+	if (!m_components->fireball->isEnemy()) {
+		if (m_components->fireball->isCollided(m_components->block->getRealm())) {
+			//跳ね返りを確認したら次の言葉へ
+			m_components->himes[0]->finishDraw();
+			m_components->himes.erase(m_components->himes.begin());
+			drawList.push_back(m_components->himes[0]);
+			m_components->block->disappear();
+		}
+	}
+	return true;
+}
+
+void BreakoutGame::setup_tutorial_ship() {
+	using namespace Breakout;
+
+	drawList.clear();
+
+	m_components->himes.push_back(std::make_shared<Breakout::InfoHime>("  空に\nファイアーボール\nが見えるかしら？", 60));
+	m_components->himes.push_back(std::make_shared<Breakout::InfoHime>("  家に当たったら\n燃えてしまう\nから、私たちで\n守らなきゃ！", 80));
+	m_components->himes.push_back(std::make_shared<Breakout::InfoHime>("  町の防衛システム\nである`SHIP`\nを使って、\n跳ね返してみて！", 60));
+	m_components->himes.push_back(std::make_shared<Breakout::InfoHime>("  マーカーを\n左右に動かす\nことで\n操作できるわ！", 100));
+	m_components->himes.push_back(std::make_shared<Breakout::InfoHime>("  ブロックを\nすり抜けたわ", 1000));
+	m_components->himes.push_back(std::make_shared<Breakout::InfoHime>("  跳ね返ったわ！\n色が変わって\n緑になったわね",1000));
+	m_components->himes.push_back(std::make_shared<Breakout::InfoHime>("  今度はブロックに\nあたったわ。", 70));
+	m_components->himes.push_back(std::make_shared<Breakout::InfoHime>("  緑のときは\n敵とブロック\nにもあたる\nようになるの", 70));
+	m_components->himes.push_back(std::make_shared<Breakout::InfoHime>("  それでは次に行きましょう！", 60));
+
+	const auto circle = Shape::Circle(FIREBALL_STARTPOS + Eigen::Vector2i(0, 20), FIREBALL_RADIUS);
+
+	const Eigen::Vector2f start_vel = Eigen::Vector2f(0, 100.0f);
+	const Eigen::Vector2f start_accel = Eigen::Vector2f::Zero();
+	auto moving = std::make_shared<Moving>(0.03f, std::make_shared<NewtonBehavior>());
+	m_components->fireball = std::make_shared<Breakout::Fireball>(circle, moving, EnemyWeak);
+	m_components->fireball->setVelocity(start_vel);
+	m_components->block = std::make_shared<NormalBlock>(Shape::Rectangle(FIREBALL_STARTPOS + Eigen::Vector2i(0, 150), BLOCK_WIDTH, BLOCK_HEIGHT), Breakout::Block::Color::Green);
+	m_components->block->appear();
+
+	drawList.push_back(m_components->himes[0]);
+	drawList.push_back(m_components->fireball);
+	drawList.push_back(m_components->background);
+	drawList.push_back(m_components->ship);
+	drawList.push_back(m_components->block);
+}
+
+bool BreakoutGame::tutorial_pot() {
+	using namespace Breakout;
+
+	//shipを動かす。
+	moveShip();
+
+
+	if (!m_components->himes[0]->hasFukidashi()) {
+		m_components->himes.erase(m_components->himes.begin());
+		if (m_components->himes.size() == 0) {
+			return false;
+		}
+		drawList.push_back(m_components->himes[0]);
+	}
+
+	if (m_components->himes.size() == 19) {
+		m_components->fireball->setVelocity(Eigen::Vector2f(0, 100.0f));
+		m_components->fireball->updatePosition();
+		if (m_components->fireball->isCollided(m_components->ship->getRealm(), 1, m_components->ship->getVelocity())) {
+			
+			m_components->fireball->disappear();
+			m_components->ship->damageShip(1);
+
+			m_components->himes[0]->finishDraw();
+			m_components->himes.erase(m_components->himes.begin());
+			drawList.push_back(m_components->himes[0]);
+		}
+	}
+	else if (m_components->himes.size() == 15) {
+		
+		//potが出現したら
+		if (share.lives[0] > 0) {
+			// potを出現させる
+			if (share.rects[0].width < POT_APPEAR_DEPTH) {
+				m_components->pot->appear();
+
+				m_components->himes[0]->finishDraw();
+				m_components->himes.erase(m_components->himes.begin());
+				drawList.push_back(m_components->himes[0]);
+			}
+		}
+	}
+	else if (m_components->himes.size() == 13) {
+		m_components->fireball->setPosition(FIREBALL_STARTPOS);
+		m_components->fireball->setVelocity(Eigen::Vector2f(0, 100.0f));
+		m_components->fireball->appear();
+
+		m_components->himes[0]->finishDraw();
+		m_components->himes.erase(m_components->himes.begin());
+		drawList.push_back(m_components->himes[0]);
+	}
+	else if (m_components->himes.size() == 12) {
+		m_components->fireball->updatePosition();
+		if (share.lives[0] > 0) {
+			// potを出現させる
+			if (share.rects[0].width < POT_APPEAR_DEPTH) {
+				m_components->pot->appear();
+			}
+			// potが出現していたら
+			else if (!m_components->pot->isDisappeared()) {
+				// Phase: 吸い込んでから吐き出すまで
+
+				// potをマーカーの位置に移動させる
+				const Eigen::Vector2i diff_dist = Eigen::Vector2i((int)share.rects[0].x + share.rects[0].width / 2 - m_components->pot->getRealm().left(), (int)share.rects[0].y + share.rects[0].height / 2 - m_components->pot->getRealm().top());
+				m_components->pot->translate(diff_dist / 10);
+
+				// potをマーカーの回転にあわせる
+				const float diff_rot = (float)share.rects[0].rotate - m_components->pot->getRotation();
+				m_components->pot->rotate(diff_rot / 10.0);
+
+				//// fireball を中に持っていたら
+				//if (m_components->pot->hasFireball()) {
+				//	//カウントを減らす
+				//	m_components->pot->countDown();
+				//	//吐き出すかどうか判断
+				//	if (m_components->pot->isExhared()) {
+				//		// 吐き出す
+				//		m_components->pot->exhareFireball();
+				//	}
+				//	else if (share.rects[0].width > POT_EXHARE_DEPTH) {
+				//		m_components->pot->exhareFireball();
+				//	}
+				//}
+
+				////　すでにfireballを吸い込んでいたら衝突判定はしない
+				//// もしfireballが見えなくなっている(消えている)状態だったら衝突判定はしない
+				//// すでに放出していたら衝突判定はしない
+				//if (m_components->fireball->isDisappeared() ||
+				//	m_components->pot->isExhared() ||
+				//	m_components->pot->hasFireball()) return;
+
+
+				// Phase: 出現してから吸い込むまで
+				auto rotatedTopLine = m_components->pot->getRealm().getTopLine().getRotatedLine(m_components->pot->getRealm().getCenterPoint(), m_components->pot->getRotation());
+				auto rotatedLeftLine = m_components->pot->getRealm().getLeftLine().getRotatedLine(m_components->pot->getRealm().getCenterPoint(), m_components->pot->getRotation());
+				auto rotatedRightLine = m_components->pot->getRealm().getRightLine().getRotatedLine(m_components->pot->getRealm().getCenterPoint(), m_components->pot->getRotation());
+				auto rotatedBottomLine = m_components->pot->getRealm().getBottomLine().getRotatedLine(m_components->pot->getRealm().getCenterPoint(), m_components->pot->getRotation());
+
+				// fireballがpotの口の辺上にあったらそれを吸い込む
+				// 次に進む
+				if (CollisionDetection::isOnLine(m_components->fireball->getRealm(), rotatedTopLine)) {
+					m_components->pot->inhareFireball(m_components->fireball);
+						
+					m_components->himes[0]->finishDraw();
+					//二個進める
+					m_components->himes.erase(m_components->himes.begin());
+					m_components->himes.erase(m_components->himes.begin());
+					drawList.push_back(m_components->himes[0]);
+				}
+				// ほかの辺にぶつかったらfireballを吸い込まずに消す
+				else if ((CollisionDetection::isOnLine(m_components->fireball->getRealm(), rotatedLeftLine)) ||
+					(CollisionDetection::isOnLine(m_components->fireball->getRealm(), rotatedRightLine)) ||
+					(CollisionDetection::isOnLine(m_components->fireball->getRealm(), rotatedBottomLine))) {
+					m_components->himes[0]->finishDraw();
+					//1個進める
+					m_components->himes.erase(m_components->himes.begin());
+					drawList.push_back(m_components->himes[0]);
+				}
+			}
+		}
+	}
+	//retry
+	else if (m_components->himes.size() == 11) {
+		if (m_components->himes[0]->getIsFinishDraw()) {
+			tutorial_pot();
+			//5こ進める
+			//ポットを出現させるところから
+			for (int i = 0; i < 4; i++) {
+				m_components->himes.erase(m_components->himes.begin());
+			}
+			drawList.push_back(m_components->himes[0]);
+		}
+	}
+	else if (m_components->himes.size() == 9) {
+		m_components->fireball->updatePosition();
+		if (m_components->pot->hasFireball()) {
+			//カウントを減らす
+			m_components->pot->countDown();
+			//吐き出すかどうか判断
+			if (m_components->pot->isExhared()) {
+				// 吐き出す
+				m_components->pot->exhareFireball();
+
+				m_components->himes[0]->finishDraw();
+				m_components->himes.erase(m_components->himes.begin());
+				drawList.push_back(m_components->himes[0]);
+			}
+			else if (share.rects[0].width > POT_EXHARE_DEPTH) {
+				m_components->pot->exhareFireball();
+			
+				m_components->himes[0]->finishDraw();
+				m_components->himes.erase(m_components->himes.begin());
+				drawList.push_back(m_components->himes[0]);
+			}
+		}
+	}
+	else if(m_components->himes.size() <= 8) {
+		m_components->fireball->updatePosition();
+	}
+
+	//auto fireball_effect = m_components->fireball->returnFireballReflect(m_components->ship->getRealm(), 1, m_components->ship->getVelocity());
+	//if (fireball_effect->isCollide()) {
+	//	//跳ね返すときは反射effectを入れる
+	//	drawList.push_back(fireball_effect);
+	//	m_components->fireball->changeModeToPlayer();
+
+	//	//跳ね返りを確認したら次の言葉へ
+	//	m_components->himes[0]->finishDraw();
+	//	m_components->himes.erase(m_components->himes.begin());
+	//	drawList.push_back(m_components->himes[0]);
+	//}
+	return true;
+}
+
+void BreakoutGame::setup_tutorial_pot() {
+	using namespace Breakout;
+
+	drawList.clear();
+	m_components->himes.clear();
+	m_components->pot->resetStatus();
+	m_components->ship->resetShip();
+
+	if (m_components->fireball != nullptr) {
+		m_components->fireball = nullptr;
+	}
+
+
+	m_components->himes.push_back(std::make_shared<Breakout::InfoHime>("  空から\nより大きな\nファイアボール、\nいや、サンダーボール\nが落ちてくるわ！", 1000, "b_hime_odoroki"));
+	m_components->himes.push_back(std::make_shared<Breakout::InfoHime>("  あぁ、Shipが\n削られてしまったわ", 60));
+	m_components->himes.push_back(std::make_shared<Breakout::InfoHime>("  サンダーボールは\n通常のShip\nでは跳ね返せないの", 80));
+	m_components->himes.push_back(std::make_shared<Breakout::InfoHime>("  でも安心して！\n私たちには\n`Pot`という\nもうひとつの\n防衛システム\nがあるの", 120));
+	m_components->himes.push_back(std::make_shared<Breakout::InfoHime>("  マーカーを\n後ろに引いてみて", 1000));
+	m_components->himes.push_back(std::make_shared<Breakout::InfoHime>("  その調子よ！もう一度\nサンダーボールが\n来るわ！", 70));
+	m_components->himes.push_back(std::make_shared<Breakout::InfoHime>("あ", 10));
+	//ここの時間は調整する
+	m_components->himes.push_back(std::make_shared<Breakout::InfoHime>("  Potの口を\nサンダーボールに\nあわせることで\n吸い込むこと\nができるわ", 300));
+	m_components->himes.push_back(std::make_shared<Breakout::InfoHime>("  うまく吸い込め|nなかったようね。もう一度挑戦よ", 60));
+
+	m_components->himes.push_back(std::make_shared<Breakout::InfoHime>("  吸い込んだら\n吐き出す！", 70));
+	m_components->himes.push_back(std::make_shared<Breakout::InfoHime>("  マーカーを前に\n押し出すか、\nカウントが0\nになるまで\n待つと、\n吐き出せるの", 1000));
+	m_components->himes.push_back(std::make_shared<Breakout::InfoHime>("  サンダーボール\nを吐き出したものは\n大きなダメージ\nを敵に与えられるわ", 70));
+	m_components->himes.push_back(std::make_shared<Breakout::InfoHime>("  それでは次に行きましょう", 70));
+
+	m_components->himes.push_back(std::make_shared<Breakout::InfoHime>("  ほかにも\nブロックからは\nアイテムが落ちたり、\n", 70));
+	m_components->himes.push_back(std::make_shared<Breakout::InfoHime>("  するのだけど、\n時間がもうないから\n実戦で身に\n着けてもらうわ", 80));
+	
+	m_components->himes.push_back(std::make_shared<Breakout::InfoHime>("  空の上に出て\nくる敵を倒す\nとクリアよ！", 80));
+	m_components->himes.push_back(std::make_shared<Breakout::InfoHime>(" 逆にタイムオーバー\nになったり、\n家や城が全部\n燃えると\nゲームオーバーよ", 80));
+	m_components->himes.push_back(std::make_shared<Breakout::InfoHime>("  ゲームオーバーよ!!", 80));
+
+	
+	m_components->himes.push_back(std::make_shared<Breakout::InfoHime>("  それでは防衛開始よ！！", 80));
+
+	const auto circle = Shape::Circle(FIREBALL_STARTPOS, FIREBALL_RADIUS);
+
+	const Eigen::Vector2f start_vel = Eigen::Vector2f(0, 60.0f);
+	const Eigen::Vector2f start_accel = Eigen::Vector2f::Zero();
+	auto moving = std::make_shared<Moving>(0.03f, std::make_shared<NewtonBehavior>());
+	m_components->fireball = std::make_shared<Breakout::Fireball>(circle, moving, EnemyStrong);
+	m_components->fireball->setVelocity(start_vel);
+
+	drawList.push_back(m_components->himes[0]);
+	drawList.push_back(m_components->fireball);
+	drawList.push_back(m_components->background);
+	drawList.push_back(m_components->ship);
+	drawList.push_back(m_components->pot);
 }

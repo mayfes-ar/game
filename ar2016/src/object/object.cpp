@@ -318,6 +318,7 @@ bool Object::load() {
 
 	isSuccess &= loadImage("b_game_over", "breakout/game_over");
 	isSuccess &= loadImage("b_game_clear", "breakout/game_clear");
+	isSuccess &= loadMovie("b_clear_movie", "breakout/sky");
 	isSuccess &= loadImage("b_explanation", "breakout/explanation");
 
 	isSuccess &= loadImage("b_easy", "breakout/easy");
@@ -327,6 +328,13 @@ bool Object::load() {
 	isSuccess &= loadImage("b_house01", "breakout/house01");
 	isSuccess &= loadImage("b_hime", "puzzle/hime_normal");
 	isSuccess &= loadImage("b_hime_damaged", "puzzle/hime_gameover");
+	isSuccess &= loadImage("b_hime_odoroki", "s_game/hime_odoroki");
+
+	isSuccess &= loadImage("b_castle", "breakout/castle");
+	isSuccess &= loadImage("b_girl", "breakout/girl");
+	isSuccess &= loadImage("b_boy", "breakout/boy");
+	isSuccess &= loadImage("b_girl_damaged", "breakout/girl_damaged");
+	isSuccess &= loadImage("b_boy_damaged", "breakout/boy_damaged");
 
 	isSuccess &= loadImage("b_castle", "breakout/castle");
 	isSuccess &= loadImage("b_girl", "breakout/girl");
@@ -336,6 +344,14 @@ bool Object::load() {
 
 	isSuccess &= loadImage("b_normal_fukidashi", "breakout/normal_fukidashi");
 	isSuccess &= loadImage("b_bikkuri_fukidashi", "breakout/bikkuri_fukidashi");
+
+	//info
+	isSuccess &= loadImage("b_sunadokei", "breakout/sunadokei");
+
+	//timer
+	isSuccess &= loadImage("b_timer_start_str", "breakout/text_start");
+
+	//effect
 
 	isSuccess &= loadImage("b_timer_start_str", "breakout/text_start");
 
@@ -352,6 +368,9 @@ bool Object::load() {
 	isSuccess &= loadEffect("b_enemy_strong_fireball", "breakout/enemy_strong_fireball", 9, 3, 1800, 600);
 	isSuccess &= loadEffect("b_player_strong_fireball", "breakout/player_strong_fireball", 10, 3, 2000, 600);
 	isSuccess &= loadEffect("b_fire_frame", "breakout/fire_frame", 2, 5, 1280, 2400);
+	isSuccess &= loadEffect("b_pot_light", "breakout/gra_effect_light", 7, 3, 1680, 720);
+	isSuccess &= loadEffect("b_boss_dead_effect", "breakout/boss_dead_effect", 10, 1, 2400, 240);
+
 
 	isSuccess &= loadSound("b_bomb", "breakout/bomb.mp3");
 	isSuccess &= loadSound("b_meramera", "breakout/meramera.mp3");
@@ -364,6 +383,7 @@ bool Object::load() {
 	isSuccess &= loadSound("b_restore_time", "breakout/restore_time.wav");
 	isSuccess &= loadSound("b_start_play", "breakout/start.mp3");
 	isSuccess &= loadSound("b_final_play", "breakout/final.mp3");
+	isSuccess &= loadSound("b_pot_exhare", "breakout/pot_exhare.mp3");
 	isSuccess &= loadSound("b_timer_start", "breakout/timer_start.mp3");
 	isSuccess &= loadSound("b_timer_count", "breakout/timer_count.mp3");
 

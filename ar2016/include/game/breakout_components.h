@@ -1,4 +1,4 @@
-
+﻿
 
 #pragma once
 
@@ -70,4 +70,12 @@ public:
 	std::vector<std::shared_ptr<Breakout::House>> house_list;
 
 	std::vector<std::shared_ptr<Breakout::Resident>> resident_list;
+
+	std::shared_ptr<Breakout::InfoHime> info_hime = nullptr;
+
+
+	//チュートリアル用
+	std::vector<std::shared_ptr<Breakout::InfoHime>> himes;
+	std::shared_ptr<Breakout::Fireball> fireball = nullptr;
+	std::shared_ptr<Breakout::Block> block = nullptr;
 };

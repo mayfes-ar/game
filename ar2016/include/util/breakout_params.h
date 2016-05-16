@@ -15,6 +15,11 @@ namespace Breakout {
 	const Eigen::Vector2i INFO_START_POS = Eigen::Vector2i::Zero();
 	const int INFO_WIDTH = WIDTH / 4;
 	const int INFO_HEIGHT = HEIGHT;
+
+	const Eigen::Vector2i INFO_HIME_START_POS = Eigen::Vector2i(INFO_WIDTH/10, HEIGHT/2);
+	const int INFO_HIME_WIDTH = INFO_WIDTH/3;
+	const int INFO_HIME_HEIGHT = INFO_HIME_WIDTH * 1046 / 621;
+
 	const Eigen::Vector2i FIELD_START_POS = Eigen::Vector2i(INFO_WIDTH, 0);
 	const int FIELD_WIDTH = 3 * WIDTH / 4;
 	const int FIELD_HEIGHT = HEIGHT;
@@ -32,13 +37,13 @@ namespace Breakout {
 	const int COUNT_DOWN_HEIGHT = WIDTH / 4;
 
 	// Timerのパラメータ
-	constexpr int TIMER_MAX_MIN = 1;
-	constexpr int TIMER_MAX_SEC = 5;
+	constexpr int TIMER_MAX_MIN = 2;
+	constexpr int TIMER_MAX_SEC = 0;
 	constexpr int TIMER_MAX_MSEC = 0;
 
 	// Blockのパラメータ
 	const int BLOCK_OFFSET_X = WIDTH / 4;
-	const int BLOCK_OFFSET_Y = HEIGHT / 8;
+	const int BLOCK_OFFSET_Y = HEIGHT / 7;
 	constexpr int BLOCK_WIDTH_NUM = 15;
 	constexpr int BLOCK_HEIGHT_NUM = 5;
 	const int BLOCK_WIDTH = (FIELD_WIDTH) / BLOCK_WIDTH_NUM;
@@ -71,10 +76,11 @@ namespace Breakout {
 
 	// Fireballのパラメータ
 	const Eigen::Vector2i FIREBALL_STARTPOS = ENEMY_HEAD_POS;
-	const Eigen::Vector2f FIREBALL_STARTVEL = Eigen::Vector2f{ 5.0f, 10.0f };
+	const Eigen::Vector2f FIREBALL_STARTVEL = Eigen::Vector2f{ 5.0f, 5.0f };
 	constexpr int FIREBALL_RADIUS = 20;
 	constexpr int MAX_FIREBALL_NUM = 2;
-	constexpr int MAX_FIREBALL_NUM_ON_HARD = 4;
+	constexpr int MAX_FIREBALL_NUM_ON_NORMAL = 2;
+	constexpr int MAX_FIREBALL_NUM_ON_HARD = 2;
 
 	// Shipのパラメータ
 	const int SHIP_OFFSET_X = FIELD_START_POS.x() + WIDTH / 4;
@@ -86,7 +92,8 @@ namespace Breakout {
 
 	// Potのパラメータ
 	const Eigen::Vector2i POT_START_POS = Eigen::Vector2i{ BLOCK_OFFSET_X + FIELD_WIDTH / 2, HEIGHT - 200 };
-
+	const int POT_EXHARE_DEPTH = 400;
+	const int POT_APPEAR_DEPTH = 150;
 
 	// House のパラメータ
 	constexpr int HOUSE_NUM = 6;
@@ -114,9 +121,9 @@ namespace Breakout {
 	// Score
 	constexpr int BLOCK_SCORE = 50;
 	constexpr int ENEMY_SCORE = 100;
-	constexpr int BOSS_HEAD_SCORE = 200;
-	constexpr int BOSS_LEFT_SCORE = 100;
-	constexpr int BOSS_RIGHT_SCORE = 100;
+	constexpr int BOSS_HEAD_SCORE = 1000;
+	constexpr int BOSS_LEFT_SCORE = 500;
+	constexpr int BOSS_RIGHT_SCORE = 500;
 	constexpr int HOUSE_SCORE = -100;
 	constexpr int SCORE_OFFSET = 1000;
 
